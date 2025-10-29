@@ -29,6 +29,19 @@ task = "shell.exec"
 args = "python main.py"
 waitForPort = 5000
 
+[[workflows.workflow]]
+name = "Start Frontend"
+author = 49157118
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm install"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run dev"
+
 [[ports]]
 localPort = 5000
 externalPort = 80

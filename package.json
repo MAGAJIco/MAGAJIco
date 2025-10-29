@@ -7,13 +7,18 @@
   "scripts": {
     "build": "tsc",
     "start": "npm run build && node dist/index.js",
-    "dev": "npm run build && node dist/index.js"
+    "dev": "next dev -p 3000",
+    "next:build": "next build",
+    "next:start": "next start -p 3000"
   },
   "keywords": ["sports", "api", "nfl", "nba", "mlb", "soccer", "odds", "live-scores"],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@types/node": "^24.9.2",
+    "next": "^14.2.0",
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0",
     "node-fetch": "^3.3.2",
     "typescript": "^5.9.3"
   }
