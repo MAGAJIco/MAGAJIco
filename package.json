@@ -1,0 +1,20 @@
+{
+  "name": "sports-api-service",
+  "version": "1.0.0",
+  "description": "Sports API Service - Multi-source sports data aggregation library",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "start": "npm run build && node dist/index.js",
+    "dev": "npm run build && node dist/index.js"
+  },
+  "keywords": ["sports", "api", "nfl", "nba", "mlb", "soccer", "odds", "live-scores"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/node": "^24.9.2",
+    "node-fetch": "^3.3.2",
+    "typescript": "^5.9.3"
+  }
+}

@@ -520,7 +520,7 @@ const checks = [
 { name: 'Odds API NFL', test: () => this.fetchOddsData('NFL') }
 ];
 
-const results = [];  
+const results: { service: string; status: string; error?: string }[] = [];  
   
 for (const check of checks) {  
   try {  
