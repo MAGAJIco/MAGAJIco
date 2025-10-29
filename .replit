@@ -4,6 +4,7 @@ expertMode = true
 
 [nix]
 channel = "stable-25_05"
+packages = ["xcodebuild", "zlib"]
 
 [workflows]
 runButton = "Project"
@@ -32,7 +33,3 @@ waitForPort = 5000
 [[ports]]
 localPort = 5000
 externalPort = 80
-
-[[ports]]
-localPort = 45765
-externalPort = 3000
