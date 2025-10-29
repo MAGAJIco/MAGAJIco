@@ -39,6 +39,7 @@ async def root():
             "mlb": "/api/mlb",
             "soccer": "/api/soccer",
             "soccer_predictions": "/api/predictions/soccer",
+            "statarea_predictions": "/api/predictions/statarea",
             "odds": "/api/odds/{sport}",
             "espn_nfl": "/api/espn/nfl",
             "espn_nba": "/api/espn/nba",
@@ -369,6 +370,53 @@ async def get_soccer_predictions(
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to fetch predictions: {str(e)}")
+
+
+@app.get("/api/predictions/statarea")
+async def get_statarea_predictions(
+    min_odds: float = Query(1.5, description="Minimum odds to filter (default 1.5)", ge=1.01, le=10.0),
+    max_odds: Optional[float] = Query(None, description="Maximum odds filter (e.g., 3.0, 5.0)", ge=1.01, le=20.0),
+    prediction_type: Optional[str] = Query(None, description="Filter by prediction type (e.g., '1X2', 'BTTS', 'Over/Under')")
+):
+    """
+    Get soccer predictions from StatArea with flexible filtering
+    
+    Filter options:
+    - min_odds: Minimum odds to include (default 1.5)
+    - max_odds: Maximum odds to include (optional)
+    - prediction_type: Filter by specific prediction type (optional)
+    
+    Examples:
+    - min_odds=1.5&max_odds=3.0 → odds between 1.5 and 3.0
+    - prediction_type=BTTS → only Both Teams To Score predictions
+    - min_odds=2.0 → odds >= 2.0
+    """
+    try:
+        predictions = service.fetch_statarea_predictions(
+            min_odds=min_odds,
+            max_odds=max_odds,
+            prediction_type=prediction_type
+        )
+        
+        return {
+            "source": "StatArea",
+            "description": f"Soccer predictions with odds >= {min_odds}" + (f" and <= {max_odds}" if max_odds else ""),
+            "filter": {
+                "min_odds": min_odds,
+                "max_odds": max_odds,
+                "prediction_type": prediction_type,
+                "total_available": len(predictions)
+            },
+            "count": len(predictions),
+            "predictions": predictions,
+            "odds_summary": {
+                "low_odds": sum(1 for p in predictions if p.get("odds", 0) < 2.0),
+                "medium_odds": sum(1 for p in predictions if 2.0 <= p.get("odds", 0) < 3.0),
+                "high_odds": sum(1 for p in predictions if p.get("odds", 0) >= 3.0)
+            }
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to fetch StatArea predictions: {str(e)}")
 
 
 @app.get("/api/config")

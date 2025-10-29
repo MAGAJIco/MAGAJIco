@@ -532,6 +532,96 @@ class SportsAPIService:
             print(f"MyBetsToday parsing error: {e}")
             raise Exception(f"Failed to parse MyBetsToday predictions: {str(e)}")
 
+    def fetch_statarea_predictions(self, min_odds: float = 1.5, max_odds: Optional[float] = None, prediction_type: Optional[str] = None) -> List[Dict[str, Any]]:
+        """
+        Fetch soccer predictions from statarea.com with flexible filtering
+        Args:
+            min_odds: Minimum odds to filter (default 1.5)
+            max_odds: Optional maximum odds filter
+            prediction_type: Filter by prediction type (e.g., '1X2', 'BTTS', 'Over/Under')
+        """
+        url = "https://www.statarea.com/predictions"
+        
+        try:
+            response = requests.get(
+                url,
+                headers={
+                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+                },
+                timeout=10
+            )
+            response.raise_for_status()
+            
+            soup = BeautifulSoup(response.text, 'lxml')
+            predictions = []
+            
+            # Find prediction rows in the table
+            for row in soup.find_all('tr', class_=['odd', 'even']):
+                try:
+                    cells = row.find_all('td')
+                    if len(cells) < 6:
+                        continue
+                    
+                    # Extract time
+                    time_cell = cells[0].get_text(strip=True)
+                    
+                    # Extract teams
+                    teams_cell = cells[1]
+                    teams_text = teams_cell.get_text(strip=True)
+                    teams_parts = teams_text.split('-')
+                    if len(teams_parts) != 2:
+                        continue
+                    home_team = teams_parts[0].strip()
+                    away_team = teams_parts[1].strip()
+                    
+                    # Extract prediction
+                    pred_cell = cells[2].get_text(strip=True)
+                    
+                    # Extract odds
+                    odds_cell = cells[3].get_text(strip=True)
+                    try:
+                        odds = float(odds_cell)
+                    except ValueError:
+                        continue
+                    
+                    # Apply filters
+                    if odds < min_odds:
+                        continue
+                    if max_odds and odds > max_odds:
+                        continue
+                    if prediction_type and prediction_type.lower() not in pred_cell.lower():
+                        continue
+                    
+                    # Calculate confidence from odds
+                    confidence = int(100 / odds) if odds > 0 else 0
+                    
+                    # Extract league/competition
+                    league = cells[4].get_text(strip=True) if len(cells) > 4 else "Unknown"
+                    
+                    predictions.append({
+                        "home_team": home_team,
+                        "away_team": away_team,
+                        "game_time": time_cell,
+                        "prediction": pred_cell,
+                        "odds": odds,
+                        "confidence": confidence,
+                        "league": league,
+                        "status": "ok"
+                    })
+                    
+                except Exception as e:
+                    # Skip problematic rows
+                    continue
+            
+            return predictions
+            
+        except requests.RequestException as e:
+            print(f"StatArea network error: {e}")
+            raise Exception(f"Failed to fetch predictions from StatArea: {str(e)}")
+        except Exception as e:
+            print(f"StatArea parsing error: {e}")
+            raise Exception(f"Failed to parse StatArea predictions: {str(e)}")
+
 
 def create_sports_api_service() -> SportsAPIService:
     return SportsAPIService(
