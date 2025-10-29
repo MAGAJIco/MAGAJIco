@@ -7,6 +7,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import PredictionsAutoLoader from "./components/PredictionsAutoLoader";
 
 // ============================================
 // TYPES & INTERFACES
@@ -395,6 +396,9 @@ export default function PortalPage() {
 
         {/* Enhanced News Carousel */}
         <EnhancedNewsCarousel news={NEWS_ITEMS} onNewsClick={setSelectedNews} theme={theme}/>
+
+        {/* Auto-Loading Soccer Predictions */}
+        <PredictionsAutoLoader />
 
         {/* Overview Section */}
         <ArchitectureOverview theme={theme}/>
