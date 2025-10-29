@@ -2,6 +2,8 @@ import os
 import requests
 from typing import List, Dict, Optional, Any
 from datetime import datetime
+from bs4 import BeautifulSoup
+import re
 
 
 class LiveMatch:
@@ -395,6 +397,81 @@ class SportsAPIService:
                     away_odds=away_odds
                 ))
         return odds_list
+
+    def fetch_mybetstoday_predictions(self, min_confidence: int = 86) -> List[Dict[str, Any]]:
+        """
+        Fetch soccer predictions from mybets.today
+        Args:
+            min_confidence: Minimum confidence percentage (default 86 for odds <= 1.16)
+        """
+        try:
+            response = requests.get(
+                "https://www.mybets.today/recommended-soccer-predictions/",
+                headers={
+                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+                },
+                timeout=10
+            )
+            response.raise_for_status()
+            
+            soup = BeautifulSoup(response.text, 'lxml')
+            predictions = []
+            
+            for link in soup.find_all('a', href=True):
+                href = link.get('href', '')
+                if href and 'match-prediction-analysis' in href:
+                    text = link.get_text(strip=True)
+                    
+                    confidence_match = re.search(r'\((\d+)%\)', text)
+                    if confidence_match:
+                        confidence = int(confidence_match.group(1))
+                        
+                        if confidence >= min_confidence:
+                            time_match = re.search(r'(\d+:\d+)', text)
+                            game_time = time_match.group(1) if time_match else "Unknown"
+                            
+                            text_no_time = re.sub(r'^\d+:\d+', '', text)
+                            
+                            vs_match = re.search(r'\s*[Vv]s\s*', text_no_time)
+                            if vs_match:
+                                before_vs = text_no_time[:vs_match.start()]
+                                after_vs = text_no_time[vs_match.end():]
+                                
+                                home_team = before_vs.strip()
+                                
+                                desc_start_match = re.search(
+                                    r'(' + re.escape(before_vs.strip()) + r'|' + r'[A-Z][a-z]+\s+(have|won|will|excellent|Despite|Having|We\s+expect))',
+                                    after_vs
+                                )
+                                
+                                if desc_start_match:
+                                    away_team = after_vs[:desc_start_match.start()].strip()
+                                else:
+                                    away_team = after_vs.strip()
+                                
+                                if home_team and away_team:
+                                    implied_odds = round(100 / confidence, 2) if confidence > 0 else 0
+                                    
+                                    prediction_match = re.search(r'([12X])\s*\(', text)
+                                    prediction_type = prediction_match.group(1) if prediction_match else "Unknown"
+                                    
+                                    predictions.append({
+                                        "home_team": home_team,
+                                        "away_team": away_team,
+                                        "game_time": game_time,
+                                        "confidence": confidence,
+                                        "implied_odds": implied_odds,
+                                        "prediction": prediction_type,
+                                        "status": "ok"
+                                    })
+            
+            return predictions
+        except requests.RequestException as e:
+            print(f"MyBetsToday network error: {e}")
+            raise Exception(f"Failed to fetch predictions from MyBetsToday: {str(e)}")
+        except Exception as e:
+            print(f"MyBetsToday parsing error: {e}")
+            raise Exception(f"Failed to parse MyBetsToday predictions: {str(e)}")
 
 
 def create_sports_api_service() -> SportsAPIService:

@@ -38,6 +38,7 @@ async def root():
             "nba": "/api/nba",
             "mlb": "/api/mlb",
             "soccer": "/api/soccer",
+            "soccer_predictions": "/api/predictions/soccer",
             "odds": "/api/odds/{sport}",
             "espn_nfl": "/api/espn/nfl",
             "espn_nba": "/api/espn/nba",
@@ -226,6 +227,34 @@ async def get_odds(sport: str):
         raise HTTPException(status_code=500, detail=f"Failed to fetch odds data: {str(e)}")
 
 
+@app.get("/api/predictions/soccer")
+async def get_soccer_predictions(
+    min_confidence: int = Query(86, description="Minimum confidence percentage (86% = odds 1.16, 77% = odds 1.30)", ge=50, le=100)
+):
+    """
+    Get recommended soccer predictions from mybets.today
+    Default: Filters for predictions with odds <= 1.16 (confidence >= 86%)
+    Adjust min_confidence parameter to change threshold
+    """
+    try:
+        predictions = service.fetch_mybetstoday_predictions(min_confidence=min_confidence)
+        
+        implied_odds = round(100 / min_confidence, 2) if min_confidence > 0 else 0
+        
+        return {
+            "source": "MyBetsToday",
+            "description": f"Soccer predictions with confidence >= {min_confidence}% (odds <= {implied_odds})",
+            "filter": {
+                "min_confidence": min_confidence,
+                "max_implied_odds": implied_odds
+            },
+            "count": len(predictions),
+            "predictions": predictions
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to fetch predictions: {str(e)}")
+
+
 @app.get("/api/config")
 async def get_config():
     return {
@@ -235,7 +264,7 @@ async def get_config():
             "football_data": bool(os.getenv("FOOTBALL_DATA_API_KEY"))
         },
         "available_sources": {
-            "free": ["ESPN NFL", "ESPN NBA", "ESPN MLB"],
+            "free": ["ESPN NFL", "ESPN NBA", "ESPN MLB", "MyBetsToday Soccer Predictions"],
             "premium": [
                 "RapidAPI (NFL, NBA, MLB)" if os.getenv("RAPIDAPI_KEY") else None,
                 "The Odds API" if os.getenv("ODDS_API_KEY") else None,
