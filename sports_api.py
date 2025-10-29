@@ -201,34 +201,55 @@ class SportsAPIService:
             print(f"ESPN MLB API fetch error: {e}")
             raise
 
-    def fetch_odds_data(self, sport: str) -> List[OddsData]:
+    def fetch_odds_data(self, sport: str, bookmaker: Optional[str] = None) -> List[OddsData]:
+        """
+        Fetch betting odds with optional bookmaker filtering
+        Args:
+            sport: Sport type (NFL, NBA, MLB)
+            bookmaker: Optional specific bookmaker to filter (e.g., 'draftkings', 'fanduel')
+        """
         if not self.odds_api_key:
             raise ValueError("The Odds API key required for betting odds")
 
         sport_keys = {
             "NFL": "americanfootball_nfl",
             "NBA": "basketball_nba",
-            "MLB": "baseball_mlb"
+            "MLB": "baseball_mlb",
+            "SOCCER": "soccer_epl"
         }
 
-        sport_key = sport_keys.get(sport)
+        sport_key = sport_keys.get(sport.upper())
         if not sport_key:
             raise ValueError(f"Unsupported sport for odds: {sport}")
 
         try:
+            params = {
+                "apiKey": self.odds_api_key,
+                "regions": "us,uk",
+                "markets": "h2h,spreads,totals",
+                "oddsFormat": "decimal"
+            }
+            
+            if bookmaker:
+                params["bookmakers"] = bookmaker
+            
             response = requests.get(
                 f"https://api.the-odds-api.com/v4/sports/{sport_key}/odds",
-                params={
-                    "apiKey": self.odds_api_key,
-                    "regions": "us",
-                    "markets": "h2h,spreads,totals",
-                    "oddsFormat": "decimal"
-                },
-                timeout=10
+                params=params,
+                timeout=15
             )
             response.raise_for_status()
+            
+            # Check remaining quota
+            remaining = response.headers.get('x-requests-remaining')
+            if remaining:
+                print(f"Odds API requests remaining: {remaining}")
+            
             data = response.json()
             return self._format_odds_data(data)
+        except requests.Timeout:
+            print(f"Odds API timeout for {sport}")
+            raise Exception(f"Timeout fetching odds for {sport}")
         except Exception as e:
             print(f"Odds API fetch error: {e}")
             raise
@@ -382,28 +403,55 @@ class SportsAPIService:
         for game in api_data:
             for bookmaker in game.get("bookmakers", []):
                 h2h_market = next((m for m in bookmaker.get("markets", []) if m["key"] == "h2h"), None)
+                spreads_market = next((m for m in bookmaker.get("markets", []) if m["key"] == "spreads"), None)
+                totals_market = next((m for m in bookmaker.get("markets", []) if m["key"] == "totals"), None)
                 
                 home_odds = 0
                 away_odds = 0
+                draw_odds = None
+                
                 if h2h_market and h2h_market.get("outcomes"):
                     outcomes = h2h_market["outcomes"]
-                    home_odds = outcomes[0].get("price", 0) if len(outcomes) > 0 else 0
-                    away_odds = outcomes[1].get("price", 0) if len(outcomes) > 1 else 0
+                    home_outcome = next((o for o in outcomes if o.get("name") in [game.get("home_team"), "Home"]), None)
+                    away_outcome = next((o for o in outcomes if o.get("name") in [game.get("away_team"), "Away"]), None)
+                    draw_outcome = next((o for o in outcomes if o.get("name") == "Draw"), None)
+                    
+                    home_odds = home_outcome.get("price", 0) if home_outcome else 0
+                    away_odds = away_outcome.get("price", 0) if away_outcome else 0
+                    draw_odds = draw_outcome.get("price") if draw_outcome else None
+                
+                over_under = None
+                if totals_market and totals_market.get("outcomes"):
+                    over_outcome = next((o for o in totals_market["outcomes"] if o.get("name") == "Over"), None)
+                    under_outcome = next((o for o in totals_market["outcomes"] if o.get("name") == "Under"), None)
+                    
+                    if over_outcome and under_outcome:
+                        over_under = {
+                            "total": float(over_outcome.get("point", 0)),
+                            "over_odds": over_outcome.get("price", 0),
+                            "under_odds": under_outcome.get("price", 0)
+                        }
 
                 odds_list.append(OddsData(
                     game_id=game["id"],
                     bookmaker=bookmaker["title"],
                     home_odds=home_odds,
-                    away_odds=away_odds
+                    away_odds=away_odds,
+                    draw_odds=draw_odds,
+                    over_under=over_under
                 ))
         return odds_list
 
-    def fetch_mybetstoday_predictions(self, min_confidence: int = 86) -> List[Dict[str, Any]]:
+    def fetch_mybetstoday_predictions(self, min_confidence: int = 86, max_odds: Optional[float] = None) -> List[Dict[str, Any]]:
         """
-        Fetch soccer predictions from mybets.today
+        Fetch soccer predictions from mybets.today with flexible filtering
         Args:
             min_confidence: Minimum confidence percentage (default 86 for odds <= 1.16)
+            max_odds: Optional maximum odds filter (overrides min_confidence if set)
         """
+        # Convert max_odds to min_confidence if provided
+        if max_odds is not None and max_odds > 0:
+            min_confidence = int(100 / max_odds)
         try:
             response = requests.get(
                 "https://www.mybets.today/recommended-soccer-predictions/",

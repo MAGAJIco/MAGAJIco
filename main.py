@@ -177,6 +177,69 @@ async def get_espn_nfl():
         raise HTTPException(status_code=500, detail=f"Failed to fetch ESPN NFL data: {str(e)}")
 
 
+
+
+@app.get("/api/odds/{sport}/best")
+async def get_best_odds(sport: str):
+    """
+    Get best available odds across all bookmakers for each game
+    Returns the highest odds for each outcome
+    """
+    try:
+        sport_upper = sport.upper()
+        if sport_upper not in ["NFL", "NBA", "MLB", "SOCCER"]:
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Unsupported sport: {sport}. Supported: NFL, NBA, MLB, SOCCER"
+            )
+        
+        odds = service.fetch_odds_data(sport_upper)
+        
+        # Find best odds for each game
+        best_odds = {}
+        for odd in odds:
+            game_id = odd.game_id
+            if game_id not in best_odds:
+                best_odds[game_id] = {
+                    "game_id": game_id,
+                    "best_home_odds": {"odds": 0, "bookmaker": ""},
+                    "best_away_odds": {"odds": 0, "bookmaker": ""},
+                    "best_draw_odds": {"odds": 0, "bookmaker": ""} if odd.draw_odds else None
+                }
+            
+            # Update best home odds
+            if odd.home_odds > best_odds[game_id]["best_home_odds"]["odds"]:
+                best_odds[game_id]["best_home_odds"] = {
+                    "odds": odd.home_odds,
+                    "bookmaker": odd.bookmaker
+                }
+            
+            # Update best away odds
+            if odd.away_odds > best_odds[game_id]["best_away_odds"]["odds"]:
+                best_odds[game_id]["best_away_odds"] = {
+                    "odds": odd.away_odds,
+                    "bookmaker": odd.bookmaker
+                }
+            
+            # Update best draw odds if applicable
+            if odd.draw_odds and best_odds[game_id]["best_draw_odds"]:
+                if odd.draw_odds > best_odds[game_id]["best_draw_odds"]["odds"]:
+                    best_odds[game_id]["best_draw_odds"] = {
+                        "odds": odd.draw_odds,
+                        "bookmaker": odd.bookmaker
+                    }
+        
+        return {
+            "sport": sport_upper,
+            "count": len(best_odds),
+            "best_odds": list(best_odds.values())
+        }
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to fetch best odds: {str(e)}")
+
+
 @app.get("/api/espn/nba")
 async def get_espn_nba():
     try:
@@ -206,20 +269,45 @@ async def get_espn_mlb():
 
 
 @app.get("/api/odds/{sport}")
-async def get_odds(sport: str):
+async def get_odds(
+    sport: str,
+    bookmaker: Optional[str] = Query(None, description="Filter by bookmaker (e.g., 'draftkings', 'fanduel')")
+):
+    """
+    Get betting odds for a specific sport with optional bookmaker filtering
+    
+    Supported sports: NFL, NBA, MLB, SOCCER
+    Popular bookmakers: draftkings, fanduel, betmgm, caesars
+    """
     try:
         sport_upper = sport.upper()
-        if sport_upper not in ["NFL", "NBA", "MLB"]:
+        if sport_upper not in ["NFL", "NBA", "MLB", "SOCCER"]:
             raise HTTPException(
                 status_code=400, 
-                detail=f"Unsupported sport: {sport}. Supported: NFL, NBA, MLB"
+                detail=f"Unsupported sport: {sport}. Supported: NFL, NBA, MLB, SOCCER"
             )
         
-        odds = service.fetch_odds_data(sport_upper)
+        odds = service.fetch_odds_data(sport_upper, bookmaker=bookmaker)
+        
+        # Group odds by game for better readability
+        games_odds = {}
+        for odd in odds:
+            game_id = odd.game_id
+            if game_id not in games_odds:
+                games_odds[game_id] = {
+                    "game_id": game_id,
+                    "bookmakers": []
+                }
+            games_odds[game_id]["bookmakers"].append(odd.to_dict())
+        
         return {
             "sport": sport_upper,
-            "count": len(odds),
-            "odds": [odd.to_dict() for odd in odds]
+            "filter": {
+                "bookmaker": bookmaker if bookmaker else "all"
+            },
+            "total_games": len(games_odds),
+            "total_odds": len(odds),
+            "games": list(games_odds.values())
         }
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -229,27 +317,50 @@ async def get_odds(sport: str):
 
 @app.get("/api/predictions/soccer")
 async def get_soccer_predictions(
-    min_confidence: int = Query(86, description="Minimum confidence percentage (86% = odds 1.16, 77% = odds 1.30)", ge=50, le=100)
+    min_confidence: int = Query(86, description="Minimum confidence percentage (86% = odds 1.16, 77% = odds 1.30)", ge=50, le=100),
+    max_odds: Optional[float] = Query(None, description="Maximum odds filter (e.g., 1.16, 1.30)", ge=1.01, le=10.0)
 ):
     """
-    Get recommended soccer predictions from mybets.today
-    Default: Filters for predictions with odds <= 1.16 (confidence >= 86%)
-    Adjust min_confidence parameter to change threshold
+    Get recommended soccer predictions from mybets.today with flexible filtering
+    
+    Filter options:
+    - min_confidence: Filter by confidence percentage (default 86%)
+    - max_odds: Filter by maximum odds (overrides min_confidence)
+    
+    Examples:
+    - min_confidence=86 → odds <= 1.16 (safe bets)
+    - max_odds=1.30 → confidence >= 77%
+    - min_confidence=75 → odds <= 1.33
     """
     try:
-        predictions = service.fetch_mybetstoday_predictions(min_confidence=min_confidence)
+        predictions = service.fetch_mybetstoday_predictions(
+            min_confidence=min_confidence,
+            max_odds=max_odds
+        )
         
-        implied_odds = round(100 / min_confidence, 2) if min_confidence > 0 else 0
+        # Calculate actual filter values
+        if max_odds:
+            actual_min_conf = int(100 / max_odds)
+            implied_odds = max_odds
+        else:
+            actual_min_conf = min_confidence
+            implied_odds = round(100 / min_confidence, 2) if min_confidence > 0 else 0
         
         return {
             "source": "MyBetsToday",
-            "description": f"Soccer predictions with confidence >= {min_confidence}% (odds <= {implied_odds})",
+            "description": f"Soccer predictions with confidence >= {actual_min_conf}% (odds <= {implied_odds})",
             "filter": {
-                "min_confidence": min_confidence,
-                "max_implied_odds": implied_odds
+                "min_confidence": actual_min_conf,
+                "max_odds_applied": implied_odds,
+                "total_available": len(predictions)
             },
             "count": len(predictions),
-            "predictions": predictions
+            "predictions": predictions,
+            "recommendations": {
+                "very_safe": sum(1 for p in predictions if p.get("confidence", 0) >= 90),
+                "safe": sum(1 for p in predictions if 85 <= p.get("confidence", 0) < 90),
+                "moderate": sum(1 for p in predictions if 75 <= p.get("confidence", 0) < 85)
+            }
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to fetch predictions: {str(e)}")
