@@ -35,17 +35,18 @@ export default function PredictionsAutoLoader() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [minConfidence, setMinConfidence] = useState(86);
+  const [date, setDate] = useState("today");
 
   useEffect(() => {
     fetchPredictions();
-  }, [minConfidence]);
+  }, [minConfidence, date]);
 
   const fetchPredictions = async () => {
     setLoading(true);
     setError(null);
     
     try {
-      const response = await fetch(`http://0.0.0.0:5000/api/predictions/soccer?min_confidence=${minConfidence}`);
+      const response = await fetch(`http://0.0.0.0:5000/api/predictions/soccer?min_confidence=${minConfidence}&date=${date}`);
       
       if (!response.ok) {
         throw new Error(`Failed to fetch: ${response.status}`);
@@ -105,6 +106,16 @@ export default function PredictionsAutoLoader() {
           <p className="text-sm text-gray-600 mt-1">{predictions.description}</p>
         </div>
         <div className="flex items-center gap-3">
+          <label className="text-sm font-medium text-gray-700">Date:</label>
+          <select
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+          >
+            <option value="today">📅 Today</option>
+            <option value="tomorrow">🔜 Tomorrow</option>
+          </select>
+          
           <label className="text-sm font-medium text-gray-700">Min Confidence:</label>
           <select
             value={minConfidence}

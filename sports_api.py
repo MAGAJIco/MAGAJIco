@@ -442,19 +442,30 @@ class SportsAPIService:
                 ))
         return odds_list
 
-    def fetch_mybetstoday_predictions(self, min_confidence: int = 86, max_odds: Optional[float] = None) -> List[Dict[str, Any]]:
+    def fetch_mybetstoday_predictions(self, min_confidence: int = 86, max_odds: Optional[float] = None, date: str = "today") -> List[Dict[str, Any]]:
         """
         Fetch soccer predictions from mybets.today with flexible filtering
         Args:
             min_confidence: Minimum confidence percentage (default 86 for odds <= 1.16)
             max_odds: Optional maximum odds filter (overrides min_confidence if set)
+            date: Date filter - "today", "tomorrow", or specific date format (default "today")
         """
         # Convert max_odds to min_confidence if provided
         if max_odds is not None and max_odds > 0:
             min_confidence = int(100 / max_odds)
+        
+        # Build URL based on date parameter
+        if date.lower() == "today" or date == "":
+            url = "https://www.mybets.today/recommended-soccer-predictions/"
+        elif date.lower() == "tomorrow":
+            url = "https://www.mybets.today/recommended-soccer-predictions/tomorrow/"
+        else:
+            # For specific dates, format as needed (e.g., YYYY-MM-DD)
+            url = f"https://www.mybets.today/recommended-soccer-predictions/{date}/"
+        
         try:
             response = requests.get(
-                "https://www.mybets.today/recommended-soccer-predictions/",
+                url,
                 headers={
                     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
                 },

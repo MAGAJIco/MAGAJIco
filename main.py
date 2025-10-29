@@ -318,7 +318,8 @@ async def get_odds(
 @app.get("/api/predictions/soccer")
 async def get_soccer_predictions(
     min_confidence: int = Query(86, description="Minimum confidence percentage (86% = odds 1.16, 77% = odds 1.30)", ge=50, le=100),
-    max_odds: Optional[float] = Query(None, description="Maximum odds filter (e.g., 1.16, 1.30)", ge=1.01, le=10.0)
+    max_odds: Optional[float] = Query(None, description="Maximum odds filter (e.g., 1.16, 1.30)", ge=1.01, le=10.0),
+    date: str = Query("today", description="Date filter: 'today', 'tomorrow', or specific date")
 ):
     """
     Get recommended soccer predictions from mybets.today with flexible filtering
@@ -326,16 +327,19 @@ async def get_soccer_predictions(
     Filter options:
     - min_confidence: Filter by confidence percentage (default 86%)
     - max_odds: Filter by maximum odds (overrides min_confidence)
+    - date: Date filter - 'today' (default), 'tomorrow', or specific date
     
     Examples:
     - min_confidence=86 → odds <= 1.16 (safe bets)
     - max_odds=1.30 → confidence >= 77%
     - min_confidence=75 → odds <= 1.33
+    - date=tomorrow → get tomorrow's predictions
     """
     try:
         predictions = service.fetch_mybetstoday_predictions(
             min_confidence=min_confidence,
-            max_odds=max_odds
+            max_odds=max_odds,
+            date=date
         )
         
         # Calculate actual filter values
@@ -348,10 +352,11 @@ async def get_soccer_predictions(
         
         return {
             "source": "MyBetsToday",
-            "description": f"Soccer predictions with confidence >= {actual_min_conf}% (odds <= {implied_odds})",
+            "description": f"Soccer predictions for {date} with confidence >= {actual_min_conf}% (odds <= {implied_odds})",
             "filter": {
                 "min_confidence": actual_min_conf,
                 "max_odds_applied": implied_odds,
+                "date": date,
                 "total_available": len(predictions)
             },
             "count": len(predictions),
