@@ -4,7 +4,6 @@ expertMode = true
 
 [nix]
 channel = "stable-25_05"
-packages = ["xcodebuild", "zlib"]
 
 [workflows]
 runButton = "Project"
