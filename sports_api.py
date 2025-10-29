@@ -622,6 +622,116 @@ class SportsAPIService:
             print(f"StatArea parsing error: {e}")
             raise Exception(f"Failed to parse StatArea predictions: {str(e)}")
 
+    def fetch_flashscore_over45_predictions(self, exclude_african: bool = True) -> List[Dict[str, Any]]:
+        """
+        Fetch Over 4.5 goals predictions from FlashScore odds
+        Args:
+            exclude_african: Filter out African leagues/teams (default True)
+        """
+        url = "https://www.flashscore.com/football/"
+        
+        # African leagues/keywords to exclude
+        african_keywords = [
+            'africa', 'african', 'caf', 'egypt', 'nigeria', 'south africa', 'ghana', 
+            'morocco', 'tunisia', 'algeria', 'kenya', 'senegal', 'cameroon', 'ivory coast',
+            'tanzania', 'uganda', 'zimbabwe', 'zambia', 'angola', 'mozambique', 'ethiopia',
+            'premier league', 'division', 'cup' # Common in African leagues
+        ]
+        
+        try:
+            response = requests.get(
+                url,
+                headers={
+                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+                    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+                    "Accept-Language": "en-US,en;q=0.9"
+                },
+                timeout=15
+            )
+            response.raise_for_status()
+            
+            soup = BeautifulSoup(response.text, 'lxml')
+            predictions = []
+            
+            # Look for match containers with odds data
+            for match_div in soup.find_all('div', class_=['event__match', 'event']):
+                try:
+                    # Extract teams
+                    home_team_elem = match_div.find('div', class_='event__participant--home')
+                    away_team_elem = match_div.find('div', class_='event__participant--away')
+                    
+                    if not home_team_elem or not away_team_elem:
+                        continue
+                    
+                    home_team = home_team_elem.get_text(strip=True)
+                    away_team = away_team_elem.get_text(strip=True)
+                    
+                    # Extract league/tournament info
+                    league_elem = match_div.find_parent('div', class_='event__header')
+                    league = ""
+                    if league_elem:
+                        league_title = league_elem.find('span', class_='event__title')
+                        if league_title:
+                            league = league_title.get_text(strip=True)
+                    
+                    # Filter out African leagues if requested
+                    if exclude_african:
+                        league_lower = league.lower()
+                        team_text = f"{home_team} {away_team}".lower()
+                        
+                        is_african = any(keyword in league_lower or keyword in team_text 
+                                       for keyword in african_keywords)
+                        if is_african:
+                            continue
+                    
+                    # Extract odds for Over 4.5 goals
+                    odds_elem = match_div.find('div', attrs={'title': re.compile(r'Over 4\.5', re.I)})
+                    if not odds_elem:
+                        # Try alternative selectors
+                        odds_elem = match_div.find('span', string=re.compile(r'O\s*4\.5', re.I))
+                    
+                    if odds_elem:
+                        odds_text = odds_elem.get_text(strip=True)
+                        odds_match = re.search(r'(\d+\.?\d*)', odds_text)
+                        
+                        if odds_match:
+                            odds = float(odds_match.group(1))
+                            
+                            # Extract match time
+                            time_elem = match_div.find('div', class_='event__time')
+                            game_time = time_elem.get_text(strip=True) if time_elem else "Unknown"
+                            
+                            # Calculate confidence
+                            confidence = int(100 / odds) if odds > 0 else 0
+                            
+                            predictions.append({
+                                "home_team": home_team,
+                                "away_team": away_team,
+                                "game_time": game_time,
+                                "prediction": "Over 4.5 Goals",
+                                "odds": odds,
+                                "confidence": confidence,
+                                "league": league or "Unknown",
+                                "source": "FlashScore",
+                                "status": "ok"
+                            })
+                
+                except Exception as e:
+                    # Skip problematic matches
+                    continue
+            
+            # Sort by odds (lowest/safest first)
+            predictions.sort(key=lambda x: x['odds'])
+            
+            return predictions
+            
+        except requests.RequestException as e:
+            print(f"FlashScore network error: {e}")
+            raise Exception(f"Failed to fetch FlashScore odds: {str(e)}")
+        except Exception as e:
+            print(f"FlashScore parsing error: {e}")
+            raise Exception(f"Failed to parse FlashScore odds: {str(e)}")
+
 
 def create_sports_api_service() -> SportsAPIService:
     return SportsAPIService(

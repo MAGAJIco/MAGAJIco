@@ -40,6 +40,8 @@ async def root():
             "soccer": "/api/soccer",
             "soccer_predictions": "/api/predictions/soccer",
             "statarea_predictions": "/api/predictions/statarea",
+            "flashscore_over45": "/api/predictions/flashscore/over45",
+            "combined_predictions": "/api/predictions/combined",
             "odds": "/api/odds/{sport}",
             "espn_nfl": "/api/espn/nfl",
             "espn_nba": "/api/espn/nba",
@@ -417,6 +419,57 @@ async def get_statarea_predictions(
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to fetch StatArea predictions: {str(e)}")
+
+
+@app.get("/api/predictions/flashscore/over45")
+async def get_flashscore_over45(
+    exclude_african: bool = Query(True, description="Exclude African leagues/teams"),
+    min_odds: float = Query(1.5, description="Minimum odds filter", ge=1.01, le=10.0),
+    max_odds: Optional[float] = Query(None, description="Maximum odds filter", ge=1.01, le=20.0)
+):
+    """
+    Get Over 4.5 goals predictions from FlashScore odds
+    
+    This endpoint fetches matches with Over 4.5 goals betting odds from FlashScore,
+    filtering out African teams by default.
+    
+    Filter options:
+    - exclude_african: Exclude African leagues/teams (default True)
+    - min_odds: Minimum odds to include (default 1.5)
+    - max_odds: Maximum odds to include (optional)
+    
+    Returns predictions sorted by odds (lowest/safest first)
+    """
+    try:
+        predictions = service.fetch_flashscore_over45_predictions(
+            exclude_african=exclude_african
+        )
+        
+        # Apply odds filters
+        filtered_predictions = [
+            p for p in predictions 
+            if p['odds'] >= min_odds and (max_odds is None or p['odds'] <= max_odds)
+        ]
+        
+        return {
+            "source": "FlashScore",
+            "description": f"Over 4.5 goals predictions" + (" (excluding African teams)" if exclude_african else ""),
+            "filter": {
+                "exclude_african": exclude_african,
+                "min_odds": min_odds,
+                "max_odds": max_odds,
+                "total_available": len(filtered_predictions)
+            },
+            "count": len(filtered_predictions),
+            "predictions": filtered_predictions,
+            "odds_summary": {
+                "low_odds_1.5-2.5": sum(1 for p in filtered_predictions if 1.5 <= p.get("odds", 0) < 2.5),
+                "medium_odds_2.5-4.0": sum(1 for p in filtered_predictions if 2.5 <= p.get("odds", 0) < 4.0),
+                "high_odds_4.0+": sum(1 for p in filtered_predictions if p.get("odds", 0) >= 4.0)
+            }
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to fetch FlashScore predictions: {str(e)}")
 
 
 @app.get("/api/predictions/combined")
