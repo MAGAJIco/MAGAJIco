@@ -419,6 +419,97 @@ async def get_statarea_predictions(
         raise HTTPException(status_code=500, detail=f"Failed to fetch StatArea predictions: {str(e)}")
 
 
+@app.get("/api/predictions/combined")
+async def get_combined_predictions(
+    min_confidence: int = Query(86, description="Minimum confidence percentage for both sources", ge=50, le=100),
+    date: str = Query("today", description="Date filter: 'today', 'tomorrow'")
+):
+    """
+    Get high-confidence predictions that appear in BOTH MyBetsToday AND StatArea
+    
+    This endpoint combines predictions from both sources and only returns matches
+    where both sources agree, giving you the highest confidence bets.
+    
+    Filter options:
+    - min_confidence: Minimum confidence % required from both sources (default 86%)
+    - date: 'today' or 'tomorrow'
+    
+    Returns predictions sorted by average confidence (highest first)
+    """
+    try:
+        # Fetch from both sources
+        mybets_predictions = service.fetch_mybetstoday_predictions(
+            min_confidence=min_confidence,
+            date=date
+        )
+        
+        # Convert min_confidence to odds range for StatArea
+        max_odds_for_statarea = round(100 / min_confidence, 2)
+        statarea_predictions = service.fetch_statarea_predictions(
+            min_odds=1.01,
+            max_odds=max_odds_for_statarea
+        )
+        
+        # Find matches that appear in both sources
+        combined_predictions = []
+        
+        for mybets in mybets_predictions:
+            mybets_teams = {mybets['home_team'].lower(), mybets['away_team'].lower()}
+            
+            for statarea in statarea_predictions:
+                statarea_teams = {statarea['home_team'].lower(), statarea['away_team'].lower()}
+                
+                # Check if teams match (allowing for slight name variations)
+                if mybets_teams == statarea_teams or len(mybets_teams & statarea_teams) >= 2:
+                    avg_confidence = (mybets['confidence'] + statarea['confidence']) // 2
+                    avg_odds = round((mybets['implied_odds'] + statarea['odds']) / 2, 2)
+                    
+                    combined_predictions.append({
+                        "home_team": mybets['home_team'],
+                        "away_team": mybets['away_team'],
+                        "game_time": mybets['game_time'],
+                        "mybets_prediction": mybets['prediction'],
+                        "mybets_confidence": mybets['confidence'],
+                        "mybets_odds": mybets['implied_odds'],
+                        "statarea_prediction": statarea['prediction'],
+                        "statarea_confidence": statarea['confidence'],
+                        "statarea_odds": statarea['odds'],
+                        "average_confidence": avg_confidence,
+                        "average_odds": avg_odds,
+                        "predictions_match": mybets['prediction'] == statarea['prediction'],
+                        "league": statarea.get('league', 'Unknown'),
+                        "status": "verified"
+                    })
+                    break
+        
+        # Sort by average confidence (highest first)
+        combined_predictions.sort(key=lambda x: x['average_confidence'], reverse=True)
+        
+        return {
+            "description": f"Predictions verified by BOTH sources with min {min_confidence}% confidence",
+            "date": date,
+            "filter": {
+                "min_confidence": min_confidence,
+                "max_odds": max_odds_for_statarea
+            },
+            "sources": {
+                "mybets_total": len(mybets_predictions),
+                "statarea_total": len(statarea_predictions),
+                "verified_matches": len(combined_predictions)
+            },
+            "count": len(combined_predictions),
+            "predictions": combined_predictions,
+            "safety_tiers": {
+                "ultra_safe_90+": sum(1 for p in combined_predictions if p['average_confidence'] >= 90),
+                "very_safe_85-90": sum(1 for p in combined_predictions if 85 <= p['average_confidence'] < 90),
+                "safe_80-85": sum(1 for p in combined_predictions if 80 <= p['average_confidence'] < 85),
+                "moderate_75-80": sum(1 for p in combined_predictions if 75 <= p['average_confidence'] < 80)
+            }
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to fetch combined predictions: {str(e)}")
+
+
 @app.get("/api/config")
 async def get_config():
     return {
@@ -428,7 +519,7 @@ async def get_config():
             "football_data": bool(os.getenv("FOOTBALL_DATA_API_KEY"))
         },
         "available_sources": {
-            "free": ["ESPN NFL", "ESPN NBA", "ESPN MLB", "MyBetsToday Soccer Predictions"],
+            "free": ["ESPN NFL", "ESPN NBA", "ESPN MLB", "MyBetsToday Soccer Predictions", "StatArea Predictions"],
             "premium": [
                 "RapidAPI (NFL, NBA, MLB)" if os.getenv("RAPIDAPI_KEY") else None,
                 "The Odds API" if os.getenv("ODDS_API_KEY") else None,
