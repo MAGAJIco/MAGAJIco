@@ -7,9 +7,9 @@
   "scripts": {
     "build": "tsc",
     "start": "npm run build && node dist/index.js",
-    "dev": "next dev -p 3000",
+    "dev": "next dev -p 3000 --hostname 0.0.0.0",
     "next:build": "next build",
-    "next:start": "next start -p 3000"
+    "next:start": "next start -p 3000 --hostname 0.0.0.0"
   },
   "keywords": ["sports", "api", "nfl", "nba", "mlb", "soccer", "odds", "live-scores"],
   "author": "",
