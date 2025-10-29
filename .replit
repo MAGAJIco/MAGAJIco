@@ -21,9 +21,14 @@ args = "Sports API Demo"
 name = "Sports API Demo"
 author = "agent"
 
+[workflows.workflow.metadata]
+outputType = "webview"
+
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "npm start"
+args = "python main.py"
+waitForPort = 5000
 
-[workflows.workflow.metadata]
-outputType = "console"
+[[ports]]
+localPort = 5000
+externalPort = 80

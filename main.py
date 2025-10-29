@@ -87,7 +87,7 @@ async def get_all_matches():
 
 
 @app.get("/api/nfl")
-async def get_nfl_matches(source: Optional[str] = Query("espn", description="Data source: 'rapidapi' or 'espn'")):
+async def get_nfl_matches(source: str = Query("espn", description="Data source: 'rapidapi' or 'espn'")):
     try:
         if source.lower() == "rapidapi":
             matches = service.fetch_nfl_matches()
@@ -107,7 +107,7 @@ async def get_nfl_matches(source: Optional[str] = Query("espn", description="Dat
 
 
 @app.get("/api/nba")
-async def get_nba_matches(source: Optional[str] = Query("espn", description="Data source: 'rapidapi' or 'espn'")):
+async def get_nba_matches(source: str = Query("espn", description="Data source: 'rapidapi' or 'espn'")):
     try:
         if source.lower() == "rapidapi":
             matches = service.fetch_nba_matches()
@@ -127,7 +127,7 @@ async def get_nba_matches(source: Optional[str] = Query("espn", description="Dat
 
 
 @app.get("/api/mlb")
-async def get_mlb_matches(source: Optional[str] = Query("espn", description="Data source: 'rapidapi' or 'espn'")):
+async def get_mlb_matches(source: str = Query("espn", description="Data source: 'rapidapi' or 'espn'")):
     try:
         if source.lower() == "rapidapi":
             matches = service.fetch_mlb_matches()
