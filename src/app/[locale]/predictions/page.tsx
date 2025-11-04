@@ -21,6 +21,7 @@ import {
   List,
   LayoutGrid,
 } from "lucide-react";
+import { useSmartRetry } from "../../hook/useSmartRetry";
 
 interface PredictionSource {
   name: string;
@@ -79,6 +80,15 @@ export default function AdvancedPredictionsPage() {
   // View mode: table or cards
   const [viewMode, setViewMode] = useState<"table" | "cards">("table");
 
+  // Smart retry hook with custom configuration
+  const { executeWithRetry, isRetrying, retryCount } = useSmartRetry({
+    maxRetries: 3,
+    baseDelay: 1000,
+    onRetry: (attempt, error) => {
+      console.log(`Retry attempt ${attempt} after error:`, error.message);
+    }
+  });
+
   useEffect(() => {
     fetchEnhancedPredictions();
     const interval = setInterval(fetchEnhancedPredictions, 30000);
@@ -90,72 +100,76 @@ export default function AdvancedPredictionsPage() {
     setError(null);
 
     try {
-      // Fetch from multiple sources
-      const [mybetsResponse, statareaResponse, combinedResponse] = await Promise.all([
-        fetch(`/api/predictions/soccer?min_confidence=${minConfidence}&date=${date}`).then(r => r.json()),
-        fetch(`/api/predictions/statarea?min_odds=1.5`).then(r => r.json()),
-        fetch(`/api/predictions/combined?min_confidence=${minConfidence}&date=${date}`).then(r => r.json()),
-      ]);
+      // Wrap API calls with smart retry logic
+      const result = await executeWithRetry(async () => {
+        // Fetch from multiple sources
+        const [mybetsResponse, statareaResponse, combinedResponse] = await Promise.all([
+          fetch(`/api/predictions/soccer?min_confidence=${minConfidence}&date=${date}`).then(r => r.json()),
+          fetch(`/api/predictions/statarea?min_odds=1.5`).then(r => r.json()),
+          fetch(`/api/predictions/combined?min_confidence=${minConfidence}&date=${date}`).then(r => r.json()),
+        ]);
 
-      console.log('API Responses:', { mybetsResponse, statareaResponse, combinedResponse });
-      console.log('Response types:', { 
-        mybets: typeof mybetsResponse, 
-        statarea: typeof statareaResponse, 
-        combined: typeof combinedResponse 
+        console.log('API Responses:', { mybetsResponse, statareaResponse, combinedResponse });
+        console.log('Response types:', { 
+          mybets: typeof mybetsResponse, 
+          statarea: typeof statareaResponse, 
+          combined: typeof combinedResponse 
+        });
+
+        // Extract predictions arrays from response objects - handle all cases
+        let mybets = [];
+        let statarea = [];
+        let combined = [];
+
+        // Handle mybets response
+        if (Array.isArray(mybetsResponse)) {
+          mybets = mybetsResponse;
+        } else if (mybetsResponse?.predictions && Array.isArray(mybetsResponse.predictions)) {
+          mybets = mybetsResponse.predictions;
+        } else if (mybetsResponse?.data && Array.isArray(mybetsResponse.data)) {
+          mybets = mybetsResponse.data;
+        }
+
+        // Handle statarea response
+        if (Array.isArray(statareaResponse)) {
+          statarea = statareaResponse;
+        } else if (statareaResponse?.predictions && Array.isArray(statareaResponse.predictions)) {
+          statarea = statareaResponse.predictions;
+        } else if (statareaResponse?.data && Array.isArray(statareaResponse.data)) {
+          statarea = statareaResponse.data;
+        }
+
+        // Handle combined response
+        if (Array.isArray(combinedResponse)) {
+          combined = combinedResponse;
+        } else if (combinedResponse?.predictions && Array.isArray(combinedResponse.predictions)) {
+          combined = combinedResponse.predictions;
+        } else if (combinedResponse?.data && Array.isArray(combinedResponse.data)) {
+          combined = combinedResponse.data;
+        }
+
+        console.log('Extracted arrays:', {
+          mybetsCount: mybets.length,
+          statareaCount: statarea.length,
+          combinedCount: combined.length,
+          mybetsSample: mybets[0],
+          statareaSample: statarea[0],
+          combinedSample: combined[0]
+        });
+
+        // Merge and enhance predictions
+        return mergePredictions(mybets, statarea, combined);
       });
 
-      // Extract predictions arrays from response objects - handle all cases
-      let mybets = [];
-      let statarea = [];
-      let combined = [];
-
-      // Handle mybets response
-      if (Array.isArray(mybetsResponse)) {
-        mybets = mybetsResponse;
-      } else if (mybetsResponse?.predictions && Array.isArray(mybetsResponse.predictions)) {
-        mybets = mybetsResponse.predictions;
-      } else if (mybetsResponse?.data && Array.isArray(mybetsResponse.data)) {
-        mybets = mybetsResponse.data;
-      }
-
-      // Handle statarea response
-      if (Array.isArray(statareaResponse)) {
-        statarea = statareaResponse;
-      } else if (statareaResponse?.predictions && Array.isArray(statareaResponse.predictions)) {
-        statarea = statareaResponse.predictions;
-      } else if (statareaResponse?.data && Array.isArray(statareaResponse.data)) {
-        statarea = statareaResponse.data;
-      }
-
-      // Handle combined response
-      if (Array.isArray(combinedResponse)) {
-        combined = combinedResponse;
-      } else if (combinedResponse?.predictions && Array.isArray(combinedResponse.predictions)) {
-        combined = combinedResponse.predictions;
-      } else if (combinedResponse?.data && Array.isArray(combinedResponse.data)) {
-        combined = combinedResponse.data;
-      }
-
-      console.log('Extracted arrays:', {
-        mybetsCount: mybets.length,
-        statareaCount: statarea.length,
-        combinedCount: combined.length,
-        mybetsSample: mybets[0],
-        statareaSample: statarea[0],
-        combinedSample: combined[0]
-      });
-
-      // Merge and enhance predictions
-      const enhanced = mergePredictions(mybets, statarea, combined);
-      console.log('Enhanced predictions:', enhanced.length, enhanced);
+      console.log('Enhanced predictions:', result.length, result);
       
-      if (enhanced.length === 0) {
+      if (result.length === 0) {
         setError("No predictions available for the selected filters");
       }
       
-      setPredictions(enhanced);
+      setPredictions(result);
     } catch (err) {
-      setError("Failed to load predictions");
+      setError("Failed to load predictions after multiple retries");
       console.error('Fetch error:', err);
     } finally {
       setLoading(false);
@@ -368,9 +382,16 @@ export default function AdvancedPredictionsPage() {
             <button
               onClick={fetchEnhancedPredictions}
               disabled={loading}
-              className="p-3 bg-white/5 hover:bg-white/10 rounded-lg transition-colors"
+              className="p-3 bg-white/5 hover:bg-white/10 rounded-lg transition-colors relative"
+              title={isRetrying ? `Retrying... (${retryCount}/3)` : "Refresh predictions"}
             >
               <RefreshCw className={`w-6 h-6 text-gray-400 ${loading ? "animate-spin" : ""}`} />
+              {isRetrying && (
+                <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-amber-500"></span>
+                </span>
+              )}
             </button>
           </div>
         </div>
@@ -437,6 +458,19 @@ export default function AdvancedPredictionsPage() {
             </label>
           </div>
         </div>
+
+        {/* Retry Status */}
+        {isRetrying && (
+          <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 mb-6">
+            <div className="flex items-center gap-3">
+              <RefreshCw className="w-5 h-5 text-amber-400 animate-spin" />
+              <div>
+                <p className="text-amber-400 font-semibold">Retrying connection...</p>
+                <p className="text-sm text-gray-400">Attempt {retryCount} of 3</p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
