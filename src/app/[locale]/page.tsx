@@ -1,5 +1,5 @@
 import { Magajico } from "../components/Magajico";
-import { MagajiCoAppLauncher } from "../components/MagajiCoAppLauncher";
+import { MagajiCoAppLauncher } from "../components/MagajicoAppLauncher";
 
 export default function HomePage() {
   return (
