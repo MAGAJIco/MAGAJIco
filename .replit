@@ -64,6 +64,10 @@ localPort = 5000
 externalPort = 80
 
 [[ports]]
+localPort = 8000
+externalPort = 8000
+
+[[ports]]
 localPort = 40399
 externalPort = 3001
 
@@ -72,5 +76,5 @@ localPort = 46343
 externalPort = 3002
 
 [deployment]
-run = ["sh", "-c", "npm run next:start"]
-build = ["sh", "-c", "npm run next:build"]
+run = ["sh", "-c", "npm run start"]
+build = ["sh", "-c", "npm run build"]
