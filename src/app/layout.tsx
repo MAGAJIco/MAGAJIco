@@ -1,16 +1,18 @@
-import type { Metadata, Viewport } from 'next';
-import { Inter } from 'next/font/google';
-import { Analytics } from '@vercel/analytics/react';
-import './globals.css';
-import '../styles/design-tokens.css';
-import '../styles/theme.css';
-import Script from 'next/script';
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import "./globals.css";
+import "../styles/design-tokens.css";
+import "../styles/theme.css";
+import Script from "next/script";
+import DarkModeToggle from "./components/DarkModeToggle";
+import { Analytics } from "@vercel/analytics/react";
+
 
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: "MagajiCo - Your All-in-One Sports & Entertainment Hub",
-  description: 'Get AI-powered predictions, live match tracking, social connections, rewards, and more. Your complete sports and entertainment platform with 87% accurate predictions.',
+  title: "MagajiCo Sports",
+  description: 'Live sports scores and predictions',
   keywords: ['sports predictions', 'live matches', 'AI sports', 'sports betting', 'sports hub', 'entertainment platform', 'sports social network'],
   authors: [{ name: 'MagajiCo Team' }],
   creator: 'MagajiCo',
@@ -22,7 +24,7 @@ export const metadata: Metadata = {
     title: 'MagajiCo'
   },
   icons: {
-    icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">☄️</text></svg>',
+    icon: '/favicon.svg',
     apple: '/icons/icon-192x192.png'
   },
   openGraph: {
@@ -62,13 +64,14 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth">
       <head>
-        <link rel="icon" href="/favicon.ico" />
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="format-detection" content="telephone=no" />
       </head>
       <body className={inter.className}>
+        <DarkModeToggle />
         {children}
         <Analytics />
         <Script id="register-sw" strategy="afterInteractive">

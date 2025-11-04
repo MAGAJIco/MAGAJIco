@@ -6,7 +6,7 @@ expertMode = true
 channel = "stable-25_05"
 
 [workflows]
-runButton = "Project"
+runButton = "Start Both Servers"
 
 [[workflows.workflow]]
 name = "Project"
@@ -37,7 +37,7 @@ mode = "parallel"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "python main.py"
+args = "python -m uvicorn main:app --host 0.0.0.0 --port 8000 --log-level info"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
@@ -64,8 +64,17 @@ localPort = 5000
 externalPort = 80
 
 [[ports]]
+localPort = 8000
+externalPort = 8000
+
+[[ports]]
 localPort = 40399
 externalPort = 3001
 
+[[ports]]
+localPort = 46343
+externalPort = 3002
+
 [deployment]
-run = ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port 5000"]
+run = ["sh", "-c", "npm run start"]
+build = ["sh", "-c", "npm run build"]

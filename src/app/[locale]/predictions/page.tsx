@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -18,8 +17,12 @@ import {
   ArrowUpDown,
   CheckCircle2,
   XCircle,
+  List,
+  LayoutGrid,
+  Share2,
+  Copy,
 } from "lucide-react";
-import { SharePrediction } from "@/components/SharePrediction";
+import { useSmartRetry } from "../../hook/useSmartRetry";
 
 interface PredictionSource {
   name: string;
@@ -63,7 +66,7 @@ export default function AdvancedPredictionsPage() {
   const [predictions, setPredictions] = useState<EnhancedPrediction[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Filters
   const [sortBy, setSortBy] = useState<SortBy>("confidence");
   const [filterLeague, setFilterLeague] = useState<FilterLeague>("all");
@@ -71,9 +74,22 @@ export default function AdvancedPredictionsPage() {
   const [showLiveOnly, setShowLiveOnly] = useState(false);
   const [minConfidence, setMinConfidence] = useState(86);
   const [date, setDate] = useState("today");
+  const [sportFilter, setSportFilter] = useState<"all" | "soccer">("all");
 
   // Selected prediction for detailed view
   const [selectedPrediction, setSelectedPrediction] = useState<EnhancedPrediction | null>(null);
+
+  // View mode: table or cards
+  const [viewMode, setViewMode] = useState<"table" | "cards">("table");
+
+  // Smart retry hook with custom configuration
+  const { executeWithRetry, isRetrying, retryCount } = useSmartRetry({
+    maxRetries: 3,
+    baseDelay: 1000,
+    onRetry: (attempt, error) => {
+      console.log(`Retry attempt ${attempt} after error:`, error.message);
+    }
+  });
 
   useEffect(() => {
     fetchEnhancedPredictions();
@@ -86,72 +102,76 @@ export default function AdvancedPredictionsPage() {
     setError(null);
 
     try {
-      // Fetch from multiple sources
-      const [mybetsResponse, statareaResponse, combinedResponse] = await Promise.all([
-        fetch(`/api/predictions/soccer?min_confidence=${minConfidence}&date=${date}`).then(r => r.json()),
-        fetch(`/api/predictions/statarea?min_odds=1.5`).then(r => r.json()),
-        fetch(`/api/predictions/combined?min_confidence=${minConfidence}&date=${date}`).then(r => r.json()),
-      ]);
+      // Wrap API calls with smart retry logic
+      const result = await executeWithRetry(async () => {
+        // Fetch from multiple sources
+        const [mybetsResponse, statareaResponse, combinedResponse] = await Promise.all([
+          fetch(`/api/predictions/soccer?min_confidence=${minConfidence}&date=${date}`).then(r => r.json()),
+          fetch(`/api/predictions/statarea?min_odds=1.5`).then(r => r.json()),
+          fetch(`/api/predictions/combined?min_confidence=${minConfidence}&date=${date}`).then(r => r.json()),
+        ]);
 
-      console.log('API Responses:', { mybetsResponse, statareaResponse, combinedResponse });
-      console.log('Response types:', { 
-        mybets: typeof mybetsResponse, 
-        statarea: typeof statareaResponse, 
-        combined: typeof combinedResponse 
+        console.log('API Responses:', { mybetsResponse, statareaResponse, combinedResponse });
+        console.log('Response types:', {
+          mybets: typeof mybetsResponse,
+          statarea: typeof statareaResponse,
+          combined: typeof combinedResponse
+        });
+
+        // Extract predictions arrays from response objects - handle all cases
+        let mybets = [];
+        let statarea = [];
+        let combined = [];
+
+        // Handle mybets response
+        if (Array.isArray(mybetsResponse)) {
+          mybets = mybetsResponse;
+        } else if (mybetsResponse?.predictions && Array.isArray(mybetsResponse.predictions)) {
+          mybets = mybetsResponse.predictions;
+        } else if (mybetsResponse?.data && Array.isArray(mybetsResponse.data)) {
+          mybets = mybetsResponse.data;
+        }
+
+        // Handle statarea response
+        if (Array.isArray(statareaResponse)) {
+          statarea = statareaResponse;
+        } else if (statareaResponse?.predictions && Array.isArray(statareaResponse.predictions)) {
+          statarea = statareaResponse.predictions;
+        } else if (statareaResponse?.data && Array.isArray(statareaResponse.data)) {
+          statarea = statareaResponse.data;
+        }
+
+        // Handle combined response
+        if (Array.isArray(combinedResponse)) {
+          combined = combinedResponse;
+        } else if (combinedResponse?.predictions && Array.isArray(combinedResponse.predictions)) {
+          combined = combinedResponse.predictions;
+        } else if (combinedResponse?.data && Array.isArray(combinedResponse.data)) {
+          combined = combinedResponse.data;
+        }
+
+        console.log('Extracted arrays:', {
+          mybetsCount: mybets.length,
+          statareaCount: statarea.length,
+          combinedCount: combined.length,
+          mybetsSample: mybets[0],
+          statareaSample: statarea[0],
+          combinedSample: combined[0]
+        });
+
+        // Merge and enhance predictions
+        return mergePredictions(mybets, statarea, combined);
       });
 
-      // Extract predictions arrays from response objects - handle all cases
-      let mybets = [];
-      let statarea = [];
-      let combined = [];
+      console.log('Enhanced predictions:', result.length, result);
 
-      // Handle mybets response
-      if (Array.isArray(mybetsResponse)) {
-        mybets = mybetsResponse;
-      } else if (mybetsResponse?.predictions && Array.isArray(mybetsResponse.predictions)) {
-        mybets = mybetsResponse.predictions;
-      } else if (mybetsResponse?.data && Array.isArray(mybetsResponse.data)) {
-        mybets = mybetsResponse.data;
-      }
-
-      // Handle statarea response
-      if (Array.isArray(statareaResponse)) {
-        statarea = statareaResponse;
-      } else if (statareaResponse?.predictions && Array.isArray(statareaResponse.predictions)) {
-        statarea = statareaResponse.predictions;
-      } else if (statareaResponse?.data && Array.isArray(statareaResponse.data)) {
-        statarea = statareaResponse.data;
-      }
-
-      // Handle combined response
-      if (Array.isArray(combinedResponse)) {
-        combined = combinedResponse;
-      } else if (combinedResponse?.predictions && Array.isArray(combinedResponse.predictions)) {
-        combined = combinedResponse.predictions;
-      } else if (combinedResponse?.data && Array.isArray(combinedResponse.data)) {
-        combined = combinedResponse.data;
-      }
-
-      console.log('Extracted arrays:', {
-        mybetsCount: mybets.length,
-        statareaCount: statarea.length,
-        combinedCount: combined.length,
-        mybetsSample: mybets[0],
-        statareaSample: statarea[0],
-        combinedSample: combined[0]
-      });
-
-      // Merge and enhance predictions
-      const enhanced = mergePredictions(mybets, statarea, combined);
-      console.log('Enhanced predictions:', enhanced.length, enhanced);
-      
-      if (enhanced.length === 0) {
+      if (result.length === 0) {
         setError("No predictions available for the selected filters");
       }
-      
-      setPredictions(enhanced);
+
+      setPredictions(result);
     } catch (err) {
-      setError("Failed to load predictions");
+      setError("Failed to load predictions after multiple retries");
       console.error('Fetch error:', err);
     } finally {
       setLoading(false);
@@ -225,7 +245,7 @@ export default function AdvancedPredictionsPage() {
     const homeTeam = pred.home_team || "Unknown";
     const awayTeam = pred.away_team || "Unknown";
     const timestamp = Date.now();
-    
+
     return {
       id: `${homeTeam}-${awayTeam}-${timestamp}-${source}`,
       homeTeam,
@@ -304,6 +324,26 @@ export default function AdvancedPredictionsPage() {
     return "bg-amber-500/10 border-amber-500/30";
   };
 
+  const shareMatch = async (pred: EnhancedPrediction) => {
+    const shareText = `🎯 ${pred.consensus.prediction} - ${pred.consensus.avgConfidence.toFixed(1)}% confidence\n${pred.homeTeam} vs ${pred.awayTeam}\n${pred.league}`;
+    
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Sports Prediction',
+          text: shareText,
+          url: window.location.href
+        });
+      } catch (err) {
+        console.log('Share cancelled');
+      }
+    } else {
+      // Fallback: copy to clipboard
+      navigator.clipboard.writeText(shareText);
+      alert('Prediction copied to clipboard!');
+    }
+  };
+
   const renderFormIndicator = (form: number[]) => (
     <div className="flex gap-1">
       {form.map((result, idx) => (
@@ -321,6 +361,28 @@ export default function AdvancedPredictionsPage() {
     </div>
   );
 
+  const renderConfidenceMeter = (confidence: number) => {
+    const percentage = Math.min(100, Math.max(0, confidence));
+    const color = confidence >= 85 ? "bg-green-500" : confidence >= 70 ? "bg-blue-500" : "bg-amber-500";
+    
+    return (
+      <div className="w-full">
+        <div className="flex items-center justify-between mb-1">
+          <span className="text-xs text-gray-400">Confidence</span>
+          <span className={`text-sm font-bold ${getConfidenceColor(confidence)}`}>
+            {percentage.toFixed(1)}%
+          </span>
+        </div>
+        <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden">
+          <div 
+            className={`h-full ${color} transition-all duration-500 ease-out rounded-full`}
+            style={{ width: `${percentage}%` }}
+          />
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6">
       <div className="max-w-7xl mx-auto">
@@ -335,13 +397,47 @@ export default function AdvancedPredictionsPage() {
               <p className="text-gray-400">Multi-source analysis • Real-time updates</p>
             </div>
           </div>
-          <button
-            onClick={fetchEnhancedPredictions}
-            disabled={loading}
-            className="p-3 bg-white/5 hover:bg-white/10 rounded-lg transition-colors"
-          >
-            <RefreshCw className={`w-6 h-6 text-gray-400 ${loading ? "animate-spin" : ""}`} />
-          </button>
+          <div className="flex items-center gap-2">
+            {/* View Mode Toggle */}
+            <div className="flex items-center gap-1 bg-slate-800 p-1 rounded-lg">
+              <button
+                onClick={() => setViewMode("table")}
+                className={`p-2 rounded transition-colors ${
+                  viewMode === "table"
+                    ? "bg-purple-500 text-white"
+                    : "text-gray-400 hover:text-white"
+                }`}
+                title="Table View"
+              >
+                <List className="w-5 h-5" />
+              </button>
+              <button
+                onClick={() => setViewMode("cards")}
+                className={`p-2 rounded transition-colors ${
+                  viewMode === "cards"
+                    ? "bg-purple-500 text-white"
+                    : "text-gray-400 hover:text-white"
+                }`}
+                title="Card View"
+              >
+                <LayoutGrid className="w-5 h-5" />
+              </button>
+            </div>
+            <button
+              onClick={fetchEnhancedPredictions}
+              disabled={loading}
+              className="p-3 bg-white/5 hover:bg-white/10 rounded-lg transition-colors relative"
+              title={isRetrying ? `Retrying... (${retryCount}/3)` : "Refresh predictions"}
+            >
+              <RefreshCw className={`w-6 h-6 text-gray-400 ${loading ? "animate-spin" : ""}`} />
+              {isRetrying && (
+                <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-amber-500"></span>
+                </span>
+              )}
+            </button>
+          </div>
         </div>
 
         {/* Filters Bar */}
@@ -359,6 +455,15 @@ export default function AdvancedPredictionsPage() {
             >
               <option value="today">📅 Today</option>
               <option value="tomorrow">🔜 Tomorrow</option>
+            </select>
+
+            <select
+              value={sportFilter}
+              onChange={(e) => setSportFilter(e.target.value as "all" | "soccer")}
+              className="px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm"
+            >
+              <option value="all">⚽ All Sports</option>
+              <option value="soccer">⚽ Soccer Only</option>
             </select>
 
             <select
@@ -407,6 +512,19 @@ export default function AdvancedPredictionsPage() {
           </div>
         </div>
 
+        {/* Retry Status */}
+        {isRetrying && (
+          <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 mb-6">
+            <div className="flex items-center gap-3">
+              <RefreshCw className="w-5 h-5 text-amber-400 animate-spin" />
+              <div>
+                <p className="text-amber-400 font-semibold">Retrying connection...</p>
+                <p className="text-sm text-gray-400">Attempt {retryCount} of 3</p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
           <div className="bg-gradient-to-br from-green-500/20 to-green-600/10 p-4 rounded-xl border border-green-500/30">
@@ -448,7 +566,7 @@ export default function AdvancedPredictionsPage() {
           </div>
         </div>
 
-        {/* Predictions Grid */}
+        {/* Predictions Display */}
         {loading && filteredPredictions.length === 0 ? (
           <div className="grid grid-cols-1 gap-4">
             {[1, 2, 3].map((i) => (
@@ -458,7 +576,110 @@ export default function AdvancedPredictionsPage() {
               </div>
             ))}
           </div>
+        ) : viewMode === "table" ? (
+          /* Table View */
+          <div className="bg-slate-800/50 rounded-xl border border-white/10 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-slate-900/50">
+                  <tr>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                      Match
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                      League
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                      Prediction
+                    </th>
+                    <th className="px-6 py-4 text-center text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                      Confidence
+                    </th>
+                    <th className="px-6 py-4 text-center text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                      Agreement
+                    </th>
+                    <th className="px-6 py-4 text-center text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                      Sources
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                      Time
+                    </th>
+                    <th className="px-6 py-4 text-center text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                      Share
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/5">
+                  {filteredPredictions.map((pred) => (
+                    <tr
+                      key={pred.id}
+                      onClick={() => setSelectedPrediction(pred)}
+                      className="hover:bg-white/5 cursor-pointer transition-colors"
+                    >
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center gap-2">
+                          {pred.status === "live" && (
+                            <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+                          )}
+                          <div>
+                            <div className="text-sm font-semibold text-white">
+                              {pred.homeTeam}
+                            </div>
+                            <div className="text-sm text-gray-400">
+                              vs {pred.awayTeam}
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="text-sm text-gray-300">{pred.league}</span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold ${getConfidenceBg(pred.consensus.avgConfidence)}`}>
+                          {pred.consensus.prediction}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-center">
+                        <div className={`text-2xl font-bold ${getConfidenceColor(pred.consensus.avgConfidence)}`}>
+                          {pred.consensus.avgConfidence.toFixed(1)}%
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-center">
+                        <div className="text-sm text-gray-300">
+                          {pred.consensus.agreement.toFixed(0)}%
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-center">
+                        <span className="inline-flex items-center justify-center w-8 h-8 bg-purple-500/20 text-purple-400 rounded-full text-sm font-semibold">
+                          {pred.sources.length}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center gap-1 text-sm text-gray-400">
+                          <Clock className="w-4 h-4" />
+                          {pred.gameTime}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            shareMatch(pred);
+                          }}
+                          className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                          title="Share prediction"
+                        >
+                          <Share2 className="w-4 h-4 text-gray-400 hover:text-purple-400" />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         ) : (
+          /* Card View */
           <div className="grid grid-cols-1 gap-4">
             {filteredPredictions.map((pred) => (
               <div
@@ -485,14 +706,31 @@ export default function AdvancedPredictionsPage() {
                     </div>
                   </div>
 
-                  <div className="text-right">
-                    <div className={`text-3xl font-bold ${getConfidenceColor(pred.consensus.avgConfidence)}`}>
-                      {pred.consensus.avgConfidence.toFixed(1)}%
+                  <div className="flex items-center gap-3">
+                    <div className="text-right">
+                      <div className={`text-3xl font-bold ${getConfidenceColor(pred.consensus.avgConfidence)}`}>
+                        {pred.consensus.avgConfidence.toFixed(1)}%
+                      </div>
+                      <div className="text-xs text-gray-400 mt-1">
+                        {pred.consensus.agreement.toFixed(0)}% agree
+                      </div>
                     </div>
-                    <div className="text-xs text-gray-400 mt-1">
-                      {pred.consensus.agreement.toFixed(0)}% agree
-                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        shareMatch(pred);
+                      }}
+                      className="p-3 bg-purple-500/10 hover:bg-purple-500/20 rounded-lg transition-colors border border-purple-500/30"
+                      title="Share prediction"
+                    >
+                      <Share2 className="w-5 h-5 text-purple-400" />
+                    </button>
                   </div>
+                </div>
+
+                {/* Confidence Meter */}
+                <div className="mb-4">
+                  {renderConfidenceMeter(pred.consensus.avgConfidence)}
                 </div>
 
                 {/* Consensus Prediction */}
