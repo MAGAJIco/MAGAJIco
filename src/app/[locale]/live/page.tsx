@@ -9,6 +9,7 @@ import {
   Flame,
   Activity,
   Circle,
+  Share2,
 } from "lucide-react";
 import { useSmartRetry } from "../../hook/useSmartRetry";
 
@@ -141,6 +142,25 @@ export default function LiveMatchesPage() {
     }
   };
 
+  const shareMatch = async (match: LiveMatch) => {
+    const shareText = `🔴 LIVE: ${match.homeTeam} ${match.homeScore} - ${match.awayScore} ${match.awayTeam}\n${match.period} - ${match.league}`;
+    
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `${match.sport} Live Match`,
+          text: shareText,
+          url: window.location.href
+        });
+      } catch (err) {
+        console.log('Share cancelled');
+      }
+    } else {
+      navigator.clipboard.writeText(shareText);
+      alert('Live score copied to clipboard!');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6">
       <div className="max-w-7xl mx-auto">
@@ -270,9 +290,18 @@ export default function LiveMatchesPage() {
                         </div>
                       </div>
                     </div>
-                    {match.venue && (
-                      <span className="text-xs text-gray-400">{match.venue}</span>
-                    )}
+                    <div className="flex items-center gap-2">
+                      {match.venue && (
+                        <span className="text-xs text-gray-400">{match.venue}</span>
+                      )}
+                      <button
+                        onClick={() => shareMatch(match)}
+                        className="p-2 bg-white/5 hover:bg-white/10 rounded-lg transition-colors"
+                        title="Share live score"
+                      >
+                        <Share2 className="w-5 h-5 text-gray-400 hover:text-purple-400" />
+                      </button>
+                    </div>
                   </div>
 
                   {/* Score Display */}

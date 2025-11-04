@@ -19,6 +19,8 @@ import {
   XCircle,
   List,
   LayoutGrid,
+  Share2,
+  Copy,
 } from "lucide-react";
 import { useSmartRetry } from "../../hook/useSmartRetry";
 
@@ -72,6 +74,7 @@ export default function AdvancedPredictionsPage() {
   const [showLiveOnly, setShowLiveOnly] = useState(false);
   const [minConfidence, setMinConfidence] = useState(86);
   const [date, setDate] = useState("today");
+  const [sportFilter, setSportFilter] = useState<"all" | "soccer">("all");
 
   // Selected prediction for detailed view
   const [selectedPrediction, setSelectedPrediction] = useState<EnhancedPrediction | null>(null);
@@ -321,6 +324,26 @@ export default function AdvancedPredictionsPage() {
     return "bg-amber-500/10 border-amber-500/30";
   };
 
+  const shareMatch = async (pred: EnhancedPrediction) => {
+    const shareText = `🎯 ${pred.consensus.prediction} - ${pred.consensus.avgConfidence.toFixed(1)}% confidence\n${pred.homeTeam} vs ${pred.awayTeam}\n${pred.league}`;
+    
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Sports Prediction',
+          text: shareText,
+          url: window.location.href
+        });
+      } catch (err) {
+        console.log('Share cancelled');
+      }
+    } else {
+      // Fallback: copy to clipboard
+      navigator.clipboard.writeText(shareText);
+      alert('Prediction copied to clipboard!');
+    }
+  };
+
   const renderFormIndicator = (form: number[]) => (
     <div className="flex gap-1">
       {form.map((result, idx) => (
@@ -337,6 +360,28 @@ export default function AdvancedPredictionsPage() {
       ))}
     </div>
   );
+
+  const renderConfidenceMeter = (confidence: number) => {
+    const percentage = Math.min(100, Math.max(0, confidence));
+    const color = confidence >= 85 ? "bg-green-500" : confidence >= 70 ? "bg-blue-500" : "bg-amber-500";
+    
+    return (
+      <div className="w-full">
+        <div className="flex items-center justify-between mb-1">
+          <span className="text-xs text-gray-400">Confidence</span>
+          <span className={`text-sm font-bold ${getConfidenceColor(confidence)}`}>
+            {percentage.toFixed(1)}%
+          </span>
+        </div>
+        <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden">
+          <div 
+            className={`h-full ${color} transition-all duration-500 ease-out rounded-full`}
+            style={{ width: `${percentage}%` }}
+          />
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6">
@@ -410,6 +455,15 @@ export default function AdvancedPredictionsPage() {
             >
               <option value="today">📅 Today</option>
               <option value="tomorrow">🔜 Tomorrow</option>
+            </select>
+
+            <select
+              value={sportFilter}
+              onChange={(e) => setSportFilter(e.target.value as "all" | "soccer")}
+              className="px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm"
+            >
+              <option value="all">⚽ All Sports</option>
+              <option value="soccer">⚽ Soccer Only</option>
             </select>
 
             <select
@@ -550,6 +604,9 @@ export default function AdvancedPredictionsPage() {
                     <th className="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
                       Time
                     </th>
+                    <th className="px-6 py-4 text-center text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                      Share
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/5">
@@ -603,6 +660,18 @@ export default function AdvancedPredictionsPage() {
                           {pred.gameTime}
                         </div>
                       </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            shareMatch(pred);
+                          }}
+                          className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                          title="Share prediction"
+                        >
+                          <Share2 className="w-4 h-4 text-gray-400 hover:text-purple-400" />
+                        </button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -637,14 +706,31 @@ export default function AdvancedPredictionsPage() {
                     </div>
                   </div>
 
-                  <div className="text-right">
-                    <div className={`text-3xl font-bold ${getConfidenceColor(pred.consensus.avgConfidence)}`}>
-                      {pred.consensus.avgConfidence.toFixed(1)}%
+                  <div className="flex items-center gap-3">
+                    <div className="text-right">
+                      <div className={`text-3xl font-bold ${getConfidenceColor(pred.consensus.avgConfidence)}`}>
+                        {pred.consensus.avgConfidence.toFixed(1)}%
+                      </div>
+                      <div className="text-xs text-gray-400 mt-1">
+                        {pred.consensus.agreement.toFixed(0)}% agree
+                      </div>
                     </div>
-                    <div className="text-xs text-gray-400 mt-1">
-                      {pred.consensus.agreement.toFixed(0)}% agree
-                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        shareMatch(pred);
+                      }}
+                      className="p-3 bg-purple-500/10 hover:bg-purple-500/20 rounded-lg transition-colors border border-purple-500/30"
+                      title="Share prediction"
+                    >
+                      <Share2 className="w-5 h-5 text-purple-400" />
+                    </button>
                   </div>
+                </div>
+
+                {/* Confidence Meter */}
+                <div className="mb-4">
+                  {renderConfidenceMeter(pred.consensus.avgConfidence)}
                 </div>
 
                 {/* Consensus Prediction */}

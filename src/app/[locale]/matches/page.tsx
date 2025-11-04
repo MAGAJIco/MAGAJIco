@@ -10,6 +10,7 @@ import {
   Flame,
   TrendingUp,
   Circle,
+  Share2,
 } from "lucide-react";
 import { useSmartRetry } from "../../hook/useSmartRetry";
 
@@ -145,6 +146,27 @@ export default function MatchesPage() {
     }
   };
 
+  const shareMatch = async (match: Match) => {
+    const shareText = match.status.toLowerCase().includes('live')
+      ? `🔴 LIVE: ${match.homeTeam} ${match.homeScore} - ${match.awayScore} ${match.awayTeam}\n${match.league}`
+      : `📅 ${match.homeTeam} vs ${match.awayTeam}\n${match.gameTime} - ${match.league}`;
+    
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `${match.sport} Match`,
+          text: shareText,
+          url: window.location.href
+        });
+      } catch (err) {
+        console.log('Share cancelled');
+      }
+    } else {
+      navigator.clipboard.writeText(shareText);
+      alert('Match details copied to clipboard!');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6">
       <div className="max-w-7xl mx-auto">
@@ -273,6 +295,13 @@ export default function MatchesPage() {
                         </div>
                       </div>
                     </div>
+                    <button
+                      onClick={() => shareMatch(match)}
+                      className="p-2 bg-white/5 hover:bg-white/10 rounded-lg transition-colors"
+                      title="Share match"
+                    >
+                      <Share2 className="w-5 h-5 text-gray-400 hover:text-purple-400" />
+                    </button>
                   </div>
 
                   <div className="bg-black/20 rounded-lg p-4">
