@@ -222,22 +222,26 @@ export default function AdvancedPredictionsPage() {
   };
 
   const createEnhancedPrediction = (pred: any, source: string): EnhancedPrediction => {
+    const homeTeam = pred.home_team || "Unknown";
+    const awayTeam = pred.away_team || "Unknown";
+    const timestamp = Date.now();
+    
     return {
-      id: `${pred.home_team}-${pred.away_team}-${Date.now()}-${Math.random()}`,
-      homeTeam: pred.home_team || "Unknown",
-      awayTeam: pred.away_team || "Unknown",
+      id: `${homeTeam}-${awayTeam}-${timestamp}-${source}`,
+      homeTeam,
+      awayTeam,
       league: pred.league || "Unknown League",
       gameTime: pred.game_time || "TBD",
       status: pred.status === "live" ? "live" : "upcoming",
       sources: [{
         name: source,
         prediction: pred.prediction || pred.mybets_prediction || pred.statarea_prediction || "Unknown",
-        confidence: pred.confidence || pred.mybets_confidence || pred.statarea_confidence || 0,
-        odds: pred.implied_odds || pred.odds || pred.mybets_odds || pred.statarea_odds || 0,
+        confidence: Number(pred.confidence || pred.mybets_confidence || pred.statarea_confidence || 0),
+        odds: Number(pred.implied_odds || pred.odds || pred.mybets_odds || pred.statarea_odds || 0),
       }],
       consensus: {
         prediction: pred.prediction || pred.mybets_prediction || "Unknown",
-        avgConfidence: pred.confidence || pred.average_confidence || 0,
+        avgConfidence: Number(pred.confidence || pred.average_confidence || 0),
         agreement: 100,
       },
       stats: generateMockStats(),
