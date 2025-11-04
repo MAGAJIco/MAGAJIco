@@ -31,15 +31,20 @@
       "static/chunks/main-app.js",
       "static/chunks/app/[locale]/loading.js"
     ],
-    "/[locale]/predictions/page": [
+    "/[locale]/live/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/[locale]/predictions/page.js"
+      "static/chunks/app/[locale]/live/page.js"
     ],
-    "/[locale]/predictions/layout": [
+    "/[locale]/live/layout": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/[locale]/predictions/layout.js"
+      "static/chunks/app/[locale]/live/layout.js"
+    ],
+    "/_not-found/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/_not-found/page.js"
     ]
   }
 }

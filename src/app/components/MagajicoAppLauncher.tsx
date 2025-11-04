@@ -43,7 +43,7 @@ const apps: MicroApp[] = [
     id: 'live',
     name: 'Live Matches',
     icon: '⚡',
-    href: '/en/matches',
+    href: '/en/live',
     category: 'navigation',
     color: 'from-emerald-500 to-teal-600',
     description: 'Real-time match tracking',
