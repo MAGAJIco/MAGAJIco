@@ -6,7 +6,7 @@ expertMode = true
 channel = "stable-25_05"
 
 [workflows]
-runButton = "Start Both Servers"
+runButton = "Project"
 
 [[workflows.workflow]]
 name = "Project"
@@ -26,7 +26,7 @@ outputType = "webview"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "python main.py"
+args = "uvicorn main:app --host 0.0.0.0 --port 5000 --log-level info"
 waitForPort = 5000
 
 [[workflows.workflow]]
@@ -62,6 +62,10 @@ externalPort = 3000
 [[ports]]
 localPort = 5000
 externalPort = 80
+
+[[ports]]
+localPort = 33261
+externalPort = 3001
 
 [deployment]
 run = ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port 5000"]
