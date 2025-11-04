@@ -1,43 +1,7 @@
-// apps/web/src/app/[locale]/page.tsx
-"use client";
+export default function RootPage() {
+  return null;
+}
 
-import React, { useRef, useState } from "react";
-import MagajicoCEO from "@/components/MagajicoCEO";
-import LiverpoolNotifications from "@/components/LiverpoolNotifications";
-import { Magajico } from "@/app/components/Magajico";
-
-import {
-  PortalIcon,
-  PredictionsIcon,
-  LiveIcon,
-  SocialIcon,
-  KidsIcon,
-  RewardsIcon,
-  AnalyticsIcon,
-  ChatIcon,
-  ChallengesIcon,
-  SearchIcon,
-  HelpIcon,
-  SettingsIcon,
-  AppsIcon,
-} from '@/components/icons/SVGIcons';
-
-export default function Page() {
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const [showAIChat, setShowAIChat] = useState(false);
-  const liveRef = useRef<HTMLDivElement | null>(null);
-
-  function toggleAppDrawer() {
-    setDrawerOpen((s) => !s);
-  }
-
-  function scrollCarousel(refName: "live", dir: -1 | 1) {
-    // Only one carousel in this page, for extensibility we accept refName
-    const el = liveRef.current;
-    if (!el) return;
-    const card = el.querySelector<HTMLElement>(".carousel-card");
-    const cardWidth = card ? card.offsetWidth + 20 /* gap */ : 340;
-    el.scrollBy({ left: dir * cardWidth, behavior: "smooth" });
   }
 
   return (
