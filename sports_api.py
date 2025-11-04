@@ -622,6 +622,88 @@ class SportsAPIService:
             print(f"StatArea parsing error: {e}")
             raise Exception(f"Failed to parse StatArea predictions: {str(e)}")
 
+    def fetch_enhanced_predictions(self, min_confidence: int = 86, date: str = "today") -> Dict[str, Any]:
+        """
+        Fetch enhanced predictions with multi-source comparison and statistics
+        """
+        try:
+            # Fetch from all sources
+            mybets = self.fetch_mybetstoday_predictions(min_confidence=min_confidence, date=date)
+            statarea = self.fetch_statarea_predictions(min_odds=1.5)
+            
+            # Merge predictions
+            merged = {}
+            
+            for pred in mybets + statarea:
+                key = f"{pred['home_team']}-{pred['away_team']}"
+                if key not in merged:
+                    merged[key] = {
+                        "home_team": pred['home_team'],
+                        "away_team": pred['away_team'],
+                        "game_time": pred['game_time'],
+                        "league": pred.get('league', 'Unknown'),
+                        "sources": [],
+                        "consensus": {},
+                        "stats": self._generate_team_stats(pred['home_team'], pred['away_team'])
+                    }
+                
+                merged[key]["sources"].append({
+                    "name": "mybetstoday" if pred.get("status") == "ok" and "implied_odds" in pred else "statarea",
+                    "prediction": pred['prediction'],
+                    "confidence": pred['confidence'],
+                    "odds": pred.get('implied_odds', pred.get('odds', 0))
+                })
+            
+            # Calculate consensus
+            for match in merged.values():
+                predictions = [s['prediction'] for s in match['sources']]
+                most_common = max(set(predictions), key=predictions.count)
+                agreement = (predictions.count(most_common) / len(predictions)) * 100
+                avg_confidence = sum(s['confidence'] for s in match['sources']) / len(match['sources'])
+                
+                match['consensus'] = {
+                    "prediction": most_common,
+                    "avg_confidence": avg_confidence,
+                    "agreement": agreement
+                }
+            
+            return {
+                "success": True,
+                "count": len(merged),
+                "predictions": list(merged.values())
+            }
+            
+        except Exception as e:
+            print(f"Enhanced predictions error: {e}")
+            return {"success": False, "error": str(e)}
+    
+    def _generate_team_stats(self, home_team: str, away_team: str) -> Dict[str, Any]:
+        """
+        Generate mock team statistics (in production, fetch from API)
+        """
+        import random
+        
+        def random_form():
+            return [random.choice([1, 0, -1]) for _ in range(5)]
+        
+        return {
+            "home_form": random_form(),
+            "away_form": random_form(),
+            "h2h_last_5": {
+                "home_wins": random.randint(0, 3),
+                "draws": random.randint(0, 2),
+                "away_wins": random.randint(0, 3)
+            },
+            "goals_avg": {
+                "home": round(random.uniform(1.2, 2.5), 1),
+                "away": round(random.uniform(1.0, 2.3), 1)
+            },
+            "clean_sheets": {
+                "home": random.randint(2, 4),
+                "away": random.randint(1, 4)
+            }
+        }
+
     def fetch_flashscore_over45_predictions(self, exclude_african: bool = True) -> List[Dict[str, Any]]:
         """
         Fetch Over 4.5 goals predictions from FlashScore odds

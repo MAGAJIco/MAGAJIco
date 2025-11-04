@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -8,388 +9,458 @@ import {
   Zap,
   AlertCircle,
   RefreshCw,
+  Filter,
+  BarChart3,
+  Trophy,
+  Clock,
+  Flame,
+  Shield,
+  ArrowUpDown,
+  CheckCircle2,
+  XCircle,
 } from "lucide-react";
 import { SharePrediction } from "@/components/SharePrediction";
 
-interface PredictionResult {
+interface PredictionSource {
+  name: string;
   prediction: string;
   confidence: number;
-  probabilities: {
-    home: number;
-    draw: number;
-    away: number;
-  };
-  model_version?: string;
-  source?: string;
+  odds: number;
 }
 
-interface SavedPrediction {
+interface EnhancedPrediction {
   id: string;
   homeTeam: string;
   awayTeam: string;
-  prediction: string;
-  confidence: number;
-  probabilities: {
-    home: number;
-    draw: number;
-    away: number;
+  league: string;
+  gameTime: string;
+  status: "upcoming" | "live" | "finished";
+  liveScore?: { home: number; away: number };
+  sources: PredictionSource[];
+  consensus: {
+    prediction: string;
+    avgConfidence: number;
+    agreement: number; // percentage of sources that agree
   };
-  timestamp: string;
-  source?: string;
+  stats: {
+    homeForm: number[]; // last 5 results (1=win, 0=draw, -1=loss)
+    awayForm: number[];
+    h2hLast5: { homeWins: number; draws: number; awayWins: number };
+    goalsAvg: { home: number; away: number };
+  };
+  aiPrediction?: {
+    prediction: string;
+    confidence: number;
+    probabilities: { home: number; draw: number; away: number };
+  };
 }
 
-export default function PredictionsPage() {
-  const [homeTeam, setHomeTeam] = useState("");
-  const [awayTeam, setAwayTeam] = useState("");
+type SortBy = "time" | "confidence" | "odds" | "consensus";
+type FilterLeague = "all" | "Premier League" | "La Liga" | "Bundesliga" | "Serie A";
+type FilterConfidence = "all" | "high" | "medium" | "low";
+
+export default function AdvancedPredictionsPage() {
+  const [predictions, setPredictions] = useState<EnhancedPrediction[]>([]);
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<PredictionResult | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [savedPredictions, setSavedPredictions] = useState<SavedPrediction[]>(
-    [],
-  );
-  const [loadingPredictions, setLoadingPredictions] = useState(false);
+  
+  // Filters
+  const [sortBy, setSortBy] = useState<SortBy>("confidence");
+  const [filterLeague, setFilterLeague] = useState<FilterLeague>("all");
+  const [filterConfidence, setFilterConfidence] = useState<FilterConfidence>("all");
+  const [showLiveOnly, setShowLiveOnly] = useState(false);
+  const [minConfidence, setMinConfidence] = useState(86);
+  const [date, setDate] = useState("today");
+
+  // Selected prediction for detailed view
+  const [selectedPrediction, setSelectedPrediction] = useState<EnhancedPrediction | null>(null);
 
   useEffect(() => {
-    fetchPredictions();
-    const interval = setInterval(fetchPredictions, 30000); // Refresh every 30 seconds
+    fetchEnhancedPredictions();
+    const interval = setInterval(fetchEnhancedPredictions, 30000);
     return () => clearInterval(interval);
-  }, []);
+  }, [minConfidence, date]);
 
-  const fetchPredictions = async () => {
-    setLoadingPredictions(true);
-    try {
-      const response = await fetch("http://0.0.0.0:3001/api/predictions");
-      const data = await response.json();
-
-      if (data.success && Array.isArray(data.data)) {
-        setSavedPredictions(data.data.slice(0, 10)); // Show latest 10
-      }
-    } catch (err) {
-      console.error("Failed to fetch predictions:", err);
-    } finally {
-      setLoadingPredictions(false);
-    }
-  };
-
-  const handlePredict = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const fetchEnhancedPredictions = async () => {
     setLoading(true);
     setError(null);
-    setResult(null);
 
     try {
-      const features = [0.75, 0.65, 0.7, 0.68, 0.62, 0.55, 0.8];
+      // Fetch from multiple sources
+      const [mybets, statarea, combined] = await Promise.all([
+        fetch(`http://0.0.0.0:5000/api/predictions/soccer?min_confidence=${minConfidence}&date=${date}`).then(r => r.json()),
+        fetch(`http://0.0.0.0:5000/api/predictions/statarea?min_odds=1.5`).then(r => r.json()),
+        fetch(`http://0.0.0.0:5000/api/predictions/combined?min_confidence=${minConfidence}&date=${date}`).then(r => r.json()),
+      ]);
 
-      const response = await fetch(
-        "http://0.0.0.0:3001/api/predictions/predict",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            homeTeam,
-            awayTeam,
-            features,
-            enableAI: true,
-          }),
-        },
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Prediction failed");
-      }
-
-      setResult(data.data);
-
-      // Refresh predictions list after creating new one
-      setTimeout(fetchPredictions, 1000);
-    } catch (err: any) {
-      setError(err.message || "Failed to generate prediction");
+      // Merge and enhance predictions
+      const enhanced = mergePredictions(mybets, statarea, combined);
+      setPredictions(enhanced);
+    } catch (err) {
+      setError("Failed to load predictions");
+      console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
-  const getConfidenceColor = (confidence: number) => {
-    if (confidence >= 80) return "text-green-400";
-    if (confidence >= 60) return "text-blue-400";
-    return "text-amber-400";
+  const mergePredictions = (mybets: any, statarea: any, combined: any): EnhancedPrediction[] => {
+    const predictionsMap = new Map<string, EnhancedPrediction>();
+
+    // Process MyBetsToday predictions
+    mybets.predictions?.forEach((pred: any) => {
+      const key = `${pred.home_team}-${pred.away_team}`;
+      if (!predictionsMap.has(key)) {
+        predictionsMap.set(key, createEnhancedPrediction(pred, "mybetstoday"));
+      } else {
+        addSourceToPrediction(predictionsMap.get(key)!, pred, "mybetstoday");
+      }
+    });
+
+    // Process StatArea predictions
+    statarea.predictions?.forEach((pred: any) => {
+      const key = `${pred.home_team}-${pred.away_team}`;
+      if (!predictionsMap.has(key)) {
+        predictionsMap.set(key, createEnhancedPrediction(pred, "statarea"));
+      } else {
+        addSourceToPrediction(predictionsMap.get(key)!, pred, "statarea");
+      }
+    });
+
+    return Array.from(predictionsMap.values());
   };
+
+  const createEnhancedPrediction = (pred: any, source: string): EnhancedPrediction => {
+    return {
+      id: `${pred.home_team}-${pred.away_team}-${Date.now()}`,
+      homeTeam: pred.home_team,
+      awayTeam: pred.away_team,
+      league: pred.league || "Unknown",
+      gameTime: pred.game_time,
+      status: "upcoming",
+      sources: [{
+        name: source,
+        prediction: pred.prediction,
+        confidence: pred.confidence,
+        odds: pred.implied_odds || pred.odds || 0,
+      }],
+      consensus: {
+        prediction: pred.prediction,
+        avgConfidence: pred.confidence,
+        agreement: 100,
+      },
+      stats: generateMockStats(),
+    };
+  };
+
+  const addSourceToPrediction = (existing: EnhancedPrediction, pred: any, source: string) => {
+    existing.sources.push({
+      name: source,
+      prediction: pred.prediction,
+      confidence: pred.confidence,
+      odds: pred.implied_odds || pred.odds || 0,
+    });
+
+    // Recalculate consensus
+    const predictions = existing.sources.map(s => s.prediction);
+    const mostCommon = predictions.sort((a, b) =>
+      predictions.filter(v => v === a).length - predictions.filter(v => v === b).length
+    ).pop() || predictions[0];
+
+    existing.consensus = {
+      prediction: mostCommon,
+      avgConfidence: existing.sources.reduce((sum, s) => sum + s.confidence, 0) / existing.sources.length,
+      agreement: (predictions.filter(p => p === mostCommon).length / predictions.length) * 100,
+    };
+  };
+
+  const generateMockStats = () => ({
+    homeForm: [1, 1, 0, 1, -1],
+    awayForm: [1, 0, 1, -1, 1],
+    h2hLast5: { homeWins: 2, draws: 1, awayWins: 2 },
+    goalsAvg: { home: 1.8, away: 1.5 },
+  });
+
+  const filteredPredictions = predictions
+    .filter(p => filterLeague === "all" || p.league === filterLeague)
+    .filter(p => {
+      if (filterConfidence === "all") return true;
+      if (filterConfidence === "high") return p.consensus.avgConfidence >= 85;
+      if (filterConfidence === "medium") return p.consensus.avgConfidence >= 70 && p.consensus.avgConfidence < 85;
+      return p.consensus.avgConfidence < 70;
+    })
+    .filter(p => !showLiveOnly || p.status === "live")
+    .sort((a, b) => {
+      if (sortBy === "confidence") return b.consensus.avgConfidence - a.consensus.avgConfidence;
+      if (sortBy === "consensus") return b.consensus.agreement - a.consensus.agreement;
+      if (sortBy === "odds") return Math.min(...a.sources.map(s => s.odds)) - Math.min(...b.sources.map(s => s.odds));
+      return 0;
+    });
+
+  const getConfidenceColor = (confidence: number) => {
+    if (confidence >= 85) return "text-green-500";
+    if (confidence >= 70) return "text-blue-500";
+    return "text-amber-500";
+  };
+
+  const getConfidenceBg = (confidence: number) => {
+    if (confidence >= 85) return "bg-green-500/10 border-green-500/30";
+    if (confidence >= 70) return "bg-blue-500/10 border-blue-500/30";
+    return "bg-amber-500/10 border-amber-500/30";
+  };
+
+  const renderFormIndicator = (form: number[]) => (
+    <div className="flex gap-1">
+      {form.map((result, idx) => (
+        <div
+          key={idx}
+          className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+            result === 1 ? "bg-green-500 text-white" :
+            result === 0 ? "bg-gray-400 text-white" :
+            "bg-red-500 text-white"
+          }`}
+        >
+          {result === 1 ? "W" : result === 0 ? "D" : "L"}
+        </div>
+      ))}
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6">
-      <div className="max-w-4xl mx-auto">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="p-3 bg-purple-500/10 rounded-lg">
-            <Brain className="w-8 h-8 text-purple-400" />
-          </div>
-          <div>
-            <h2 className="text-2xl font-bold text-white">
-              ML Prediction Engine
-            </h2>
-            <p className="text-gray-400">87% accuracy • Powered by AI</p>
-          </div>
-        </div>
-
-        {error && (
-          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-lg flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
-            <p className="text-sm text-red-300">{error}</p>
-          </div>
-        )}
-
-        <form
-          onSubmit={handlePredict}
-          className="space-y-4 mb-6 bg-slate-800/50 p-6 rounded-2xl backdrop-blur-sm border border-white/10"
-        >
-          <div className="grid md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Home Team
-              </label>
-              <input
-                type="text"
-                value={homeTeam}
-                onChange={(e) => setHomeTeam(e.target.value)}
-                placeholder="e.g., Manchester United"
-                className="w-full px-4 py-3 bg-slate-800 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-purple-500"
-                required
-              />
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-purple-500/10 rounded-lg">
+              <Trophy className="w-8 h-8 text-purple-400" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Away Team
-              </label>
-              <input
-                type="text"
-                value={awayTeam}
-                onChange={(e) => setAwayTeam(e.target.value)}
-                placeholder="e.g., Liverpool"
-                className="w-full px-4 py-3 bg-slate-800 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-purple-500"
-                required
-              />
+              <h1 className="text-3xl font-bold text-white">Advanced Predictions Hub</h1>
+              <p className="text-gray-400">Multi-source analysis • Real-time updates</p>
             </div>
           </div>
-
           <button
-            type="submit"
+            onClick={fetchEnhancedPredictions}
             disabled={loading}
-            className="w-full py-4 bg-gradient-to-r from-purple-500 to-blue-500 text-white font-bold rounded-lg hover:from-purple-600 hover:to-blue-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            className="p-3 bg-white/5 hover:bg-white/10 rounded-lg transition-colors"
           >
-            {loading ? (
-              <>
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                Analyzing...
-              </>
-            ) : (
-              <>
-                <Zap className="w-5 h-5" />
-                Generate AI Prediction
-              </>
-            )}
+            <RefreshCw className={`w-6 h-6 text-gray-400 ${loading ? "animate-spin" : ""}`} />
           </button>
-        </form>
+        </div>
 
-        {result && (
-          <div className="space-y-4 animate-in fade-in duration-500">
-            <div className="p-6 bg-gradient-to-br from-purple-500/10 to-blue-500/10 border border-purple-500/20 rounded-2xl">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <Target className="w-6 h-6 text-purple-400" />
-                  <h3 className="text-xl font-bold text-white">
-                    Prediction Result
-                  </h3>
-                </div>
-                <span
-                  className={`text-3xl font-bold ${getConfidenceColor(result.confidence)}`}
-                >
-                  {result.confidence.toFixed(1)}%
-                </span>
-              </div>
-
-              <div className="mb-4">
-                <p className="text-gray-400 mb-2">Predicted Outcome:</p>
-                <p className="text-2xl font-bold text-white capitalize">
-                  {result.prediction}{" "}
-                  {result.prediction === "home"
-                    ? `(${homeTeam})`
-                    : result.prediction === "away"
-                      ? `(${awayTeam})`
-                      : ""}
-                </p>
-              </div>
-
-              <div className="grid grid-cols-3 gap-3">
-                <div className="p-4 bg-white/5 rounded-lg">
-                  <p className="text-xs text-gray-400 mb-1">Home Win</p>
-                  <p className="text-2xl font-bold text-green-400">
-                    {(result.probabilities.home * 100).toFixed(1)}%
-                  </p>
-                </div>
-                <div className="p-4 bg-white/5 rounded-lg">
-                  <p className="text-xs text-gray-400 mb-1">Draw</p>
-                  <p className="text-2xl font-bold text-amber-400">
-                    {(result.probabilities.draw * 100).toFixed(1)}%
-                  </p>
-                </div>
-                <div className="p-4 bg-white/5 rounded-lg">
-                  <p className="text-xs text-gray-400 mb-1">Away Win</p>
-                  <p className="text-2xl font-bold text-blue-400">
-                    {(result.probabilities.away * 100).toFixed(1)}%
-                  </p>
-                </div>
-              </div>
-
-              {result.source && (
-                <div className="mt-4 text-xs text-gray-500">
-                  Source: {result.source} • Model: {result.model_version}
-                </div>
-              )}
+        {/* Filters Bar */}
+        <div className="bg-slate-800/50 p-4 rounded-2xl backdrop-blur-sm border border-white/10 mb-6">
+          <div className="flex items-center gap-4 flex-wrap">
+            <div className="flex items-center gap-2">
+              <Filter className="w-5 h-5 text-gray-400" />
+              <span className="text-sm text-gray-400 font-medium">Filters:</span>
             </div>
 
-            <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
-              <div className="flex items-start gap-2">
-                <TrendingUp className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-sm font-semibold text-blue-300 mb-1">
-                    AI Analysis
-                  </p>
-                  <p className="text-xs text-gray-400">
-                    This prediction is based on advanced machine learning models
-                    analyzing team form, head-to-head records, home advantage,
-                    and current injuries.
-                  </p>
+            <select
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className="px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm"
+            >
+              <option value="today">📅 Today</option>
+              <option value="tomorrow">🔜 Tomorrow</option>
+            </select>
+
+            <select
+              value={filterLeague}
+              onChange={(e) => setFilterLeague(e.target.value as FilterLeague)}
+              className="px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm"
+            >
+              <option value="all">All Leagues</option>
+              <option value="Premier League">Premier League</option>
+              <option value="La Liga">La Liga</option>
+              <option value="Bundesliga">Bundesliga</option>
+              <option value="Serie A">Serie A</option>
+            </select>
+
+            <select
+              value={filterConfidence}
+              onChange={(e) => setFilterConfidence(e.target.value as FilterConfidence)}
+              className="px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm"
+            >
+              <option value="all">All Confidence</option>
+              <option value="high">High (85%+)</option>
+              <option value="medium">Medium (70-85%)</option>
+              <option value="low">Low (&lt;70%)</option>
+            </select>
+
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as SortBy)}
+              className="px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm"
+            >
+              <option value="confidence">Sort: Confidence</option>
+              <option value="consensus">Sort: Consensus</option>
+              <option value="odds">Sort: Best Odds</option>
+              <option value="time">Sort: Time</option>
+            </select>
+
+            <label className="flex items-center gap-2 px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg cursor-pointer">
+              <input
+                type="checkbox"
+                checked={showLiveOnly}
+                onChange={(e) => setShowLiveOnly(e.target.checked)}
+                className="w-4 h-4"
+              />
+              <span className="text-sm text-white">Live Only</span>
+            </label>
+          </div>
+        </div>
+
+        {/* Stats Overview */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <div className="bg-gradient-to-br from-green-500/20 to-green-600/10 p-4 rounded-xl border border-green-500/30">
+            <div className="flex items-center gap-2 mb-2">
+              <Shield className="w-5 h-5 text-green-400" />
+              <span className="text-sm text-gray-300">High Confidence</span>
+            </div>
+            <div className="text-2xl font-bold text-white">
+              {filteredPredictions.filter(p => p.consensus.avgConfidence >= 85).length}
+            </div>
+          </div>
+
+          <div className="bg-gradient-to-br from-blue-500/20 to-blue-600/10 p-4 rounded-xl border border-blue-500/30">
+            <div className="flex items-center gap-2 mb-2">
+              <CheckCircle2 className="w-5 h-5 text-blue-400" />
+              <span className="text-sm text-gray-300">Strong Consensus</span>
+            </div>
+            <div className="text-2xl font-bold text-white">
+              {filteredPredictions.filter(p => p.consensus.agreement >= 80).length}
+            </div>
+          </div>
+
+          <div className="bg-gradient-to-br from-purple-500/20 to-purple-600/10 p-4 rounded-xl border border-purple-500/30">
+            <div className="flex items-center gap-2 mb-2">
+              <Flame className="w-5 h-5 text-purple-400" />
+              <span className="text-sm text-gray-300">Live Matches</span>
+            </div>
+            <div className="text-2xl font-bold text-white">
+              {filteredPredictions.filter(p => p.status === "live").length}
+            </div>
+          </div>
+
+          <div className="bg-gradient-to-br from-amber-500/20 to-amber-600/10 p-4 rounded-xl border border-amber-500/30">
+            <div className="flex items-center gap-2 mb-2">
+              <Target className="w-5 h-5 text-amber-400" />
+              <span className="text-sm text-gray-300">Total Predictions</span>
+            </div>
+            <div className="text-2xl font-bold text-white">{filteredPredictions.length}</div>
+          </div>
+        </div>
+
+        {/* Predictions Grid */}
+        {loading && filteredPredictions.length === 0 ? (
+          <div className="grid grid-cols-1 gap-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="bg-slate-800/50 rounded-xl p-6 animate-pulse">
+                <div className="h-6 bg-white/10 rounded w-3/4 mb-4"></div>
+                <div className="h-4 bg-white/10 rounded w-1/2"></div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-4">
+            {filteredPredictions.map((pred) => (
+              <div
+                key={pred.id}
+                className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 rounded-xl p-6 border border-white/10 hover:border-purple-500/50 transition-all cursor-pointer"
+                onClick={() => setSelectedPrediction(pred)}
+              >
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-xs text-gray-400">{pred.league}</span>
+                      {pred.status === "live" && (
+                        <span className="px-2 py-1 bg-red-500 text-white text-xs font-bold rounded-full animate-pulse">
+                          LIVE
+                        </span>
+                      )}
+                    </div>
+                    <h3 className="text-xl font-bold text-white mb-1">
+                      {pred.homeTeam} vs {pred.awayTeam}
+                    </h3>
+                    <div className="flex items-center gap-2 text-sm text-gray-400">
+                      <Clock className="w-4 h-4" />
+                      {pred.gameTime}
+                    </div>
+                  </div>
+
+                  <div className="text-right">
+                    <div className={`text-3xl font-bold ${getConfidenceColor(pred.consensus.avgConfidence)}`}>
+                      {pred.consensus.avgConfidence.toFixed(1)}%
+                    </div>
+                    <div className="text-xs text-gray-400 mt-1">
+                      {pred.consensus.agreement.toFixed(0)}% agree
+                    </div>
+                  </div>
+                </div>
+
+                {/* Consensus Prediction */}
+                <div className={`p-3 rounded-lg border mb-4 ${getConfidenceBg(pred.consensus.avgConfidence)}`}>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs text-gray-400 mb-1">Consensus Prediction</p>
+                      <p className="text-lg font-bold text-white capitalize">{pred.consensus.prediction}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs text-gray-400 mb-1">Best Odds</p>
+                      <p className="text-lg font-bold text-white">
+                        {Math.min(...pred.sources.map(s => s.odds)).toFixed(2)}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Sources Comparison */}
+                <div className="mb-4">
+                  <p className="text-xs text-gray-400 mb-2">Sources ({pred.sources.length})</p>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                    {pred.sources.map((source, idx) => (
+                      <div key={idx} className="bg-white/5 p-2 rounded-lg">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-xs text-purple-400 font-semibold uppercase">
+                            {source.name}
+                          </span>
+                          <span className="text-xs text-gray-400">{source.odds.toFixed(2)}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-white capitalize">{source.prediction}</span>
+                          <span className={`text-sm font-bold ${getConfidenceColor(source.confidence)}`}>
+                            {source.confidence}%
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Team Form */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-xs text-gray-400 mb-2">{pred.homeTeam} Form</p>
+                    {renderFormIndicator(pred.stats.homeForm)}
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-400 mb-2">{pred.awayTeam} Form</p>
+                    {renderFormIndicator(pred.stats.awayForm)}
+                  </div>
                 </div>
               </div>
-            </div>
-
-            <SharePrediction
-              prediction={{
-                homeTeam,
-                awayTeam,
-                prediction: result.prediction,
-                confidence: result.confidence,
-              }}
-            />
+            ))}
           </div>
         )}
 
-        {/* Saved Predictions List */}
-        <div className="mt-8">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-xl font-bold text-white flex items-center gap-2">
-              <Target className="w-6 h-6 text-purple-400" />
-              Recent Predictions ({savedPredictions.length})
-            </h3>
-            <button
-              onClick={fetchPredictions}
-              disabled={loadingPredictions}
-              className="p-2 bg-white/5 hover:bg-white/10 rounded-lg transition-colors"
-            >
-              <RefreshCw
-                className={`w-5 h-5 text-gray-400 ${loadingPredictions ? "animate-spin" : ""}`}
-              />
-            </button>
+        {filteredPredictions.length === 0 && !loading && (
+          <div className="text-center py-12 bg-slate-800/30 rounded-xl border border-white/5">
+            <div className="text-6xl mb-4">🔍</div>
+            <p className="text-gray-400 text-lg">No predictions match your filters</p>
           </div>
-
-          {loadingPredictions && savedPredictions.length === 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {[1, 2, 3, 4].map((i) => (
-                <div
-                  key={i}
-                  className="bg-slate-800/50 rounded-xl p-6 animate-pulse"
-                >
-                  <div className="h-4 bg-white/10 rounded w-3/4 mb-3"></div>
-                  <div className="h-3 bg-white/10 rounded w-1/2 mb-2"></div>
-                  <div className="h-3 bg-white/10 rounded w-2/3"></div>
-                </div>
-              ))}
-            </div>
-          ) : savedPredictions.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {savedPredictions.map((pred) => (
-                <div
-                  key={pred.id}
-                  className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 rounded-xl p-6 border border-white/10 hover:border-purple-500/50 transition-all hover:scale-[1.02]"
-                >
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex-1">
-                      <h4 className="text-white font-bold text-lg mb-1">
-                        {pred.homeTeam} vs {pred.awayTeam}
-                      </h4>
-                      <p className="text-xs text-gray-400">
-                        {new Date(pred.timestamp).toLocaleString()}
-                      </p>
-                    </div>
-                    <div
-                      className={`px-3 py-1 rounded-full text-xs font-bold ${
-                        pred.confidence >= 80
-                          ? "bg-green-500/20 text-green-400 border border-green-500/30"
-                          : pred.confidence >= 60
-                            ? "bg-blue-500/20 text-blue-400 border border-blue-500/30"
-                            : "bg-amber-500/20 text-amber-400 border border-amber-500/30"
-                      }`}
-                    >
-                      {pred.confidence.toFixed(1)}%
-                    </div>
-                  </div>
-
-                  <div className="mb-3">
-                    <p className="text-sm text-gray-400 mb-1">
-                      Predicted Outcome:
-                    </p>
-                    <p className="text-xl font-bold text-white capitalize">
-                      {pred.prediction === "home"
-                        ? `${pred.homeTeam} Win`
-                        : pred.prediction === "away"
-                          ? `${pred.awayTeam} Win`
-                          : "Draw"}
-                    </p>
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-2">
-                    <div className="bg-white/5 rounded-lg p-2 text-center">
-                      <p className="text-xs text-gray-400 mb-1">Home</p>
-                      <p className="text-sm font-bold text-green-400">
-                        {(pred.probabilities.home * 100).toFixed(1)}%
-                      </p>
-                    </div>
-                    <div className="bg-white/5 rounded-lg p-2 text-center">
-                      <p className="text-xs text-gray-400 mb-1">Draw</p>
-                      <p className="text-sm font-bold text-amber-400">
-                        {(pred.probabilities.draw * 100).toFixed(1)}%
-                      </p>
-                    </div>
-                    <div className="bg-white/5 rounded-lg p-2 text-center">
-                      <p className="text-xs text-gray-400 mb-1">Away</p>
-                      <p className="text-sm font-bold text-blue-400">
-                        {(pred.probabilities.away * 100).toFixed(1)}%
-                      </p>
-                    </div>
-                  </div>
-
-                  {pred.source && (
-                    <div className="mt-3 pt-3 border-t border-white/10">
-                      <p className="text-xs text-gray-500">
-                        Source:{" "}
-                        <span className="text-purple-400">{pred.source}</span>
-                      </p>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12 bg-slate-800/30 rounded-xl border border-white/5">
-              <div className="text-6xl mb-4">🎯</div>
-              <p className="text-gray-400 text-lg">No predictions yet</p>
-              <p className="text-gray-500 text-sm mt-2">
-                Create your first prediction above
-              </p>
-            </div>
-          )}
-        </div>
+        )}
       </div>
     </div>
   );
