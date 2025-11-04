@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -65,7 +64,7 @@ export default function AdvancedPredictionsPage() {
   const [predictions, setPredictions] = useState<EnhancedPrediction[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Filters
   const [sortBy, setSortBy] = useState<SortBy>("confidence");
   const [filterLeague, setFilterLeague] = useState<FilterLeague>("all");
@@ -76,7 +75,7 @@ export default function AdvancedPredictionsPage() {
 
   // Selected prediction for detailed view
   const [selectedPrediction, setSelectedPrediction] = useState<EnhancedPrediction | null>(null);
-  
+
   // View mode: table or cards
   const [viewMode, setViewMode] = useState<"table" | "cards">("table");
 
@@ -110,10 +109,10 @@ export default function AdvancedPredictionsPage() {
         ]);
 
         console.log('API Responses:', { mybetsResponse, statareaResponse, combinedResponse });
-        console.log('Response types:', { 
-          mybets: typeof mybetsResponse, 
-          statarea: typeof statareaResponse, 
-          combined: typeof combinedResponse 
+        console.log('Response types:', {
+          mybets: typeof mybetsResponse,
+          statarea: typeof statareaResponse,
+          combined: typeof combinedResponse
         });
 
         // Extract predictions arrays from response objects - handle all cases
@@ -162,11 +161,11 @@ export default function AdvancedPredictionsPage() {
       });
 
       console.log('Enhanced predictions:', result.length, result);
-      
+
       if (result.length === 0) {
         setError("No predictions available for the selected filters");
       }
-      
+
       setPredictions(result);
     } catch (err) {
       setError("Failed to load predictions after multiple retries");
@@ -243,7 +242,7 @@ export default function AdvancedPredictionsPage() {
     const homeTeam = pred.home_team || "Unknown";
     const awayTeam = pred.away_team || "Unknown";
     const timestamp = Date.now();
-    
+
     return {
       id: `${homeTeam}-${awayTeam}-${timestamp}-${source}`,
       homeTeam,
@@ -359,8 +358,8 @@ export default function AdvancedPredictionsPage() {
               <button
                 onClick={() => setViewMode("table")}
                 className={`p-2 rounded transition-colors ${
-                  viewMode === "table" 
-                    ? "bg-purple-500 text-white" 
+                  viewMode === "table"
+                    ? "bg-purple-500 text-white"
                     : "text-gray-400 hover:text-white"
                 }`}
                 title="Table View"
@@ -370,8 +369,8 @@ export default function AdvancedPredictionsPage() {
               <button
                 onClick={() => setViewMode("cards")}
                 className={`p-2 rounded transition-colors ${
-                  viewMode === "cards" 
-                    ? "bg-purple-500 text-white" 
+                  viewMode === "cards"
+                    ? "bg-purple-500 text-white"
                     : "text-gray-400 hover:text-white"
                 }`}
                 title="Card View"
