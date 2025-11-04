@@ -87,45 +87,90 @@ export default function AdvancedPredictionsPage() {
 
     try {
       // Fetch from multiple sources
-      const [mybets, statarea, combined] = await Promise.all([
+      const [mybetsResponse, statareaResponse, combinedResponse] = await Promise.all([
         fetch(`/api/predictions/soccer?min_confidence=${minConfidence}&date=${date}`).then(r => r.json()),
         fetch(`/api/predictions/statarea?min_odds=1.5`).then(r => r.json()),
         fetch(`/api/predictions/combined?min_confidence=${minConfidence}&date=${date}`).then(r => r.json()),
       ]);
 
+      console.log('API Responses:', { mybetsResponse, statareaResponse, combinedResponse });
+
+      // Extract predictions arrays from response objects
+      const mybets = mybetsResponse.predictions || [];
+      const statarea = statareaResponse.predictions || [];
+      const combined = combinedResponse.predictions || [];
+
       // Merge and enhance predictions
       const enhanced = mergePredictions(mybets, statarea, combined);
+      console.log('Enhanced predictions:', enhanced);
       setPredictions(enhanced);
     } catch (err) {
       setError("Failed to load predictions");
-      console.error(err);
+      console.error('Fetch error:', err);
     } finally {
       setLoading(false);
     }
   };
 
-  const mergePredictions = (mybets: any, statarea: any, combined: any): EnhancedPrediction[] => {
+  const mergePredictions = (mybets: any[], statarea: any[], combined: any[]): EnhancedPrediction[] => {
     const predictionsMap = new Map<string, EnhancedPrediction>();
 
     // Process MyBetsToday predictions
-    mybets.predictions?.forEach((pred: any) => {
-      const key = `${pred.home_team}-${pred.away_team}`;
-      if (!predictionsMap.has(key)) {
-        predictionsMap.set(key, createEnhancedPrediction(pred, "mybetstoday"));
-      } else {
-        addSourceToPrediction(predictionsMap.get(key)!, pred, "mybetstoday");
-      }
-    });
+    if (Array.isArray(mybets)) {
+      mybets.forEach((pred: any) => {
+        const key = `${pred.home_team}-${pred.away_team}`;
+        if (!predictionsMap.has(key)) {
+          predictionsMap.set(key, createEnhancedPrediction(pred, "mybetstoday"));
+        } else {
+          addSourceToPrediction(predictionsMap.get(key)!, pred, "mybetstoday");
+        }
+      });
+    }
 
     // Process StatArea predictions
-    statarea.predictions?.forEach((pred: any) => {
-      const key = `${pred.home_team}-${pred.away_team}`;
-      if (!predictionsMap.has(key)) {
-        predictionsMap.set(key, createEnhancedPrediction(pred, "statarea"));
-      } else {
-        addSourceToPrediction(predictionsMap.get(key)!, pred, "statarea");
-      }
-    });
+    if (Array.isArray(statarea)) {
+      statarea.forEach((pred: any) => {
+        const key = `${pred.home_team}-${pred.away_team}`;
+        if (!predictionsMap.has(key)) {
+          predictionsMap.set(key, createEnhancedPrediction(pred, "statarea"));
+        } else {
+          addSourceToPrediction(predictionsMap.get(key)!, pred, "statarea");
+        }
+      });
+    }
+
+    // Process combined predictions (already merged by backend)
+    if (Array.isArray(combined)) {
+      combined.forEach((pred: any) => {
+        const key = `${pred.home_team}-${pred.away_team}`;
+        if (!predictionsMap.has(key)) {
+          // Create from combined data with both sources
+          const enhanced = createEnhancedPrediction(pred, "combined");
+          if (pred.mybets_prediction && pred.statarea_prediction) {
+            enhanced.sources = [
+              {
+                name: "mybetstoday",
+                prediction: pred.mybets_prediction,
+                confidence: pred.mybets_confidence,
+                odds: pred.mybets_odds
+              },
+              {
+                name: "statarea",
+                prediction: pred.statarea_prediction,
+                confidence: pred.statarea_confidence,
+                odds: pred.statarea_odds
+              }
+            ];
+            enhanced.consensus = {
+              prediction: pred.predictions_match ? pred.mybets_prediction : "Mixed",
+              avgConfidence: pred.average_confidence,
+              agreement: pred.predictions_match ? 100 : 50
+            };
+          }
+          predictionsMap.set(key, enhanced);
+        }
+      });
+    }
 
     return Array.from(predictionsMap.values());
   };
@@ -455,10 +500,25 @@ export default function AdvancedPredictionsPage() {
           </div>
         )}
 
-        {filteredPredictions.length === 0 && !loading && (
+        {error && (
+          <div className="text-center py-12 bg-red-900/20 rounded-xl border border-red-500/30">
+            <div className="text-6xl mb-4">⚠️</div>
+            <p className="text-red-400 text-lg font-semibold mb-2">{error}</p>
+            <p className="text-gray-400 text-sm">Check console for details</p>
+            <button
+              onClick={fetchEnhancedPredictions}
+              className="mt-4 px-6 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors"
+            >
+              Retry
+            </button>
+          </div>
+        )}
+
+        {filteredPredictions.length === 0 && !loading && !error && (
           <div className="text-center py-12 bg-slate-800/30 rounded-xl border border-white/5">
             <div className="text-6xl mb-4">🔍</div>
             <p className="text-gray-400 text-lg">No predictions match your filters</p>
+            <p className="text-gray-500 text-sm mt-2">Try adjusting your filters or check back later</p>
           </div>
         )}
       </div>
