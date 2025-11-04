@@ -88,9 +88,9 @@ export default function AdvancedPredictionsPage() {
     try {
       // Fetch from multiple sources
       const [mybets, statarea, combined] = await Promise.all([
-        fetch(`http://0.0.0.0:5000/api/predictions/soccer?min_confidence=${minConfidence}&date=${date}`).then(r => r.json()),
-        fetch(`http://0.0.0.0:5000/api/predictions/statarea?min_odds=1.5`).then(r => r.json()),
-        fetch(`http://0.0.0.0:5000/api/predictions/combined?min_confidence=${minConfidence}&date=${date}`).then(r => r.json()),
+        fetch(`/api/predictions/soccer?min_confidence=${minConfidence}&date=${date}`).then(r => r.json()),
+        fetch(`/api/predictions/statarea?min_odds=1.5`).then(r => r.json()),
+        fetch(`/api/predictions/combined?min_confidence=${minConfidence}&date=${date}`).then(r => r.json()),
       ]);
 
       // Merge and enhance predictions
