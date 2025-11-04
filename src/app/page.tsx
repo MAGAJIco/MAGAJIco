@@ -141,7 +141,7 @@ export default function Page() {
             {/* Predictions Button */}
             <div style={{ marginTop: '20px', textAlign: 'center' }}>
               <a 
-                href="/en/predictions/filtered" 
+                href="/en/predictions" 
                 style={{
                   display: 'inline-block',
                   padding: '15px 30px',

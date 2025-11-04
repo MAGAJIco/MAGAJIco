@@ -94,16 +94,51 @@ export default function AdvancedPredictionsPage() {
       ]);
 
       console.log('API Responses:', { mybetsResponse, statareaResponse, combinedResponse });
+      console.log('Response types:', { 
+        mybets: typeof mybetsResponse, 
+        statarea: typeof statareaResponse, 
+        combined: typeof combinedResponse 
+      });
 
-      // Extract predictions arrays from response objects
-      const mybets = mybetsResponse?.predictions || mybetsResponse || [];
-      const statarea = statareaResponse?.predictions || statareaResponse || [];
-      const combined = combinedResponse?.predictions || combinedResponse || [];
+      // Extract predictions arrays from response objects - handle all cases
+      let mybets = [];
+      let statarea = [];
+      let combined = [];
+
+      // Handle mybets response
+      if (Array.isArray(mybetsResponse)) {
+        mybets = mybetsResponse;
+      } else if (mybetsResponse?.predictions && Array.isArray(mybetsResponse.predictions)) {
+        mybets = mybetsResponse.predictions;
+      } else if (mybetsResponse?.data && Array.isArray(mybetsResponse.data)) {
+        mybets = mybetsResponse.data;
+      }
+
+      // Handle statarea response
+      if (Array.isArray(statareaResponse)) {
+        statarea = statareaResponse;
+      } else if (statareaResponse?.predictions && Array.isArray(statareaResponse.predictions)) {
+        statarea = statareaResponse.predictions;
+      } else if (statareaResponse?.data && Array.isArray(statareaResponse.data)) {
+        statarea = statareaResponse.data;
+      }
+
+      // Handle combined response
+      if (Array.isArray(combinedResponse)) {
+        combined = combinedResponse;
+      } else if (combinedResponse?.predictions && Array.isArray(combinedResponse.predictions)) {
+        combined = combinedResponse.predictions;
+      } else if (combinedResponse?.data && Array.isArray(combinedResponse.data)) {
+        combined = combinedResponse.data;
+      }
 
       console.log('Extracted arrays:', {
-        mybetsCount: Array.isArray(mybets) ? mybets.length : 0,
-        statareaCount: Array.isArray(statarea) ? statarea.length : 0,
-        combinedCount: Array.isArray(combined) ? combined.length : 0
+        mybetsCount: mybets.length,
+        statareaCount: statarea.length,
+        combinedCount: combined.length,
+        mybetsSample: mybets[0],
+        statareaSample: statarea[0],
+        combinedSample: combined[0]
       });
 
       // Merge and enhance predictions
