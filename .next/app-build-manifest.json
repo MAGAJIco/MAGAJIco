@@ -31,16 +31,6 @@
       "static/chunks/main-app.js",
       "static/chunks/app/[locale]/loading.js"
     ],
-    "/[locale]/live/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/[locale]/live/page.js"
-    ],
-    "/[locale]/live/layout": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/[locale]/live/layout.js"
-    ],
     "/_not-found/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
