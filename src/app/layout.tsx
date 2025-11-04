@@ -5,6 +5,7 @@ import './globals.css';
 import '../styles/design-tokens.css';
 import '../styles/theme.css';
 import Script from 'next/script';
+import DarkModeToggle from './components/DarkModeToggle';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -69,6 +70,7 @@ export default function RootLayout({
         <meta name="format-detection" content="telephone=no" />
       </head>
       <body className={inter.className}>
+        <DarkModeToggle />
         {children}
         <Analytics />
         <Script id="register-sw" strategy="afterInteractive">
