@@ -96,13 +96,24 @@ export default function AdvancedPredictionsPage() {
       console.log('API Responses:', { mybetsResponse, statareaResponse, combinedResponse });
 
       // Extract predictions arrays from response objects
-      const mybets = mybetsResponse.predictions || [];
-      const statarea = statareaResponse.predictions || [];
-      const combined = combinedResponse.predictions || [];
+      const mybets = mybetsResponse?.predictions || mybetsResponse || [];
+      const statarea = statareaResponse?.predictions || statareaResponse || [];
+      const combined = combinedResponse?.predictions || combinedResponse || [];
+
+      console.log('Extracted arrays:', {
+        mybetsCount: Array.isArray(mybets) ? mybets.length : 0,
+        statareaCount: Array.isArray(statarea) ? statarea.length : 0,
+        combinedCount: Array.isArray(combined) ? combined.length : 0
+      });
 
       // Merge and enhance predictions
       const enhanced = mergePredictions(mybets, statarea, combined);
-      console.log('Enhanced predictions:', enhanced);
+      console.log('Enhanced predictions:', enhanced.length, enhanced);
+      
+      if (enhanced.length === 0) {
+        setError("No predictions available for the selected filters");
+      }
+      
       setPredictions(enhanced);
     } catch (err) {
       setError("Failed to load predictions");
@@ -177,21 +188,21 @@ export default function AdvancedPredictionsPage() {
 
   const createEnhancedPrediction = (pred: any, source: string): EnhancedPrediction => {
     return {
-      id: `${pred.home_team}-${pred.away_team}-${Date.now()}`,
-      homeTeam: pred.home_team,
-      awayTeam: pred.away_team,
-      league: pred.league || "Unknown",
-      gameTime: pred.game_time,
-      status: "upcoming",
+      id: `${pred.home_team}-${pred.away_team}-${Date.now()}-${Math.random()}`,
+      homeTeam: pred.home_team || "Unknown",
+      awayTeam: pred.away_team || "Unknown",
+      league: pred.league || "Unknown League",
+      gameTime: pred.game_time || "TBD",
+      status: pred.status === "live" ? "live" : "upcoming",
       sources: [{
         name: source,
-        prediction: pred.prediction,
-        confidence: pred.confidence,
-        odds: pred.implied_odds || pred.odds || 0,
+        prediction: pred.prediction || pred.mybets_prediction || pred.statarea_prediction || "Unknown",
+        confidence: pred.confidence || pred.mybets_confidence || pred.statarea_confidence || 0,
+        odds: pred.implied_odds || pred.odds || pred.mybets_odds || pred.statarea_odds || 0,
       }],
       consensus: {
-        prediction: pred.prediction,
-        avgConfidence: pred.confidence,
+        prediction: pred.prediction || pred.mybets_prediction || "Unknown",
+        avgConfidence: pred.confidence || pred.average_confidence || 0,
         agreement: 100,
       },
       stats: generateMockStats(),
@@ -448,16 +459,18 @@ export default function AdvancedPredictionsPage() {
                 {/* Consensus Prediction */}
                 <div className={`p-3 rounded-lg border mb-4 ${getConfidenceBg(pred.consensus.avgConfidence)}`}>
                   <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs text-gray-400 mb-1">Consensus Prediction</p>
-                      <p className="text-lg font-bold text-white capitalize">{pred.consensus.prediction}</p>
+                    <div className="flex-1">
+                      <p className="text-xs text-gray-400 mb-1">Prediction</p>
+                      <p className="text-lg font-bold text-white">{pred.consensus.prediction}</p>
                     </div>
-                    <div className="text-right">
-                      <p className="text-xs text-gray-400 mb-1">Best Odds</p>
-                      <p className="text-lg font-bold text-white">
-                        {Math.min(...pred.sources.map(s => s.odds)).toFixed(2)}
-                      </p>
-                    </div>
+                    {pred.sources.length > 0 && pred.sources[0].odds > 0 && (
+                      <div className="text-right">
+                        <p className="text-xs text-gray-400 mb-1">Odds</p>
+                        <p className="text-lg font-bold text-white">
+                          {Math.min(...pred.sources.filter(s => s.odds > 0).map(s => s.odds)).toFixed(2)}
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -471,13 +484,17 @@ export default function AdvancedPredictionsPage() {
                           <span className="text-xs text-purple-400 font-semibold uppercase">
                             {source.name}
                           </span>
-                          <span className="text-xs text-gray-400">{source.odds.toFixed(2)}</span>
+                          {source.odds > 0 && (
+                            <span className="text-xs text-gray-400">{source.odds.toFixed(2)}</span>
+                          )}
                         </div>
                         <div className="flex items-center justify-between">
-                          <span className="text-sm text-white capitalize">{source.prediction}</span>
-                          <span className={`text-sm font-bold ${getConfidenceColor(source.confidence)}`}>
-                            {source.confidence}%
-                          </span>
+                          <span className="text-sm text-white">{source.prediction}</span>
+                          {source.confidence > 0 && (
+                            <span className={`text-sm font-bold ${getConfidenceColor(source.confidence)}`}>
+                              {source.confidence}%
+                            </span>
+                          )}
                         </div>
                       </div>
                     ))}
