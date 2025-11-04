@@ -19,7 +19,6 @@ import {
   CheckCircle2,
   XCircle,
 } from "lucide-react";
-import { SharePrediction } from "@/components/SharePrediction";
 
 interface PredictionSource {
   name: string;
