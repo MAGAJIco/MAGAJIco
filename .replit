@@ -6,7 +6,7 @@ expertMode = true
 channel = "stable-25_05"
 
 [workflows]
-runButton = "Project"
+runButton = "Start Both Servers"
 
 [[workflows.workflow]]
 name = "Project"
@@ -37,7 +37,7 @@ mode = "parallel"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "python main.py"
+args = "uvicorn main:app --host 0.0.0.0 --port 8000 --log-level info"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
