@@ -51,7 +51,7 @@ export default function Page() {
               <span />
             </div>
           </div>
-          <div className="logo">🎯 Magajico</div>
+          <div className="logo">M☄️ Magajico</div>
         </div>
 
         <div className="navbar-right">
@@ -123,7 +123,7 @@ export default function Page() {
 
       <main className="container">
         <header>
-          <h1>🎯 Magajico</h1>
+          <h1>M☄️ Magajico</h1>
           <p>Your AI-Powered Betting Assistant</p>
         </header>
 
@@ -163,7 +163,7 @@ export default function Page() {
                   e.currentTarget.style.boxShadow = '0 4px 15px rgba(102, 126, 234, 0.4)';
                 }}
               >
-                🎯 View AI Predictions & Live Matches
+                M☄️ View AI Predictions & Live Matches
               </a>
             </div>
           </div>
