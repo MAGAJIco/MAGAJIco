@@ -1,17 +1,18 @@
-import type { Metadata, Viewport } from 'next';
-import { Inter } from 'next/font/google';
-import { Analytics } from '@vercel/analytics/react';
-import './globals.css';
-import '../styles/design-tokens.css';
-import '../styles/theme.css';
-import Script from 'next/script';
-import DarkModeToggle from './components/DarkModeToggle';
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import "./globals.css";
+import "../styles/design-tokens.css";
+import "../styles/theme.css";
+import Script from "next/script";
+import DarkModeToggle from "./components/DarkModeToggle";
+import { Analytics } from "@vercel/analytics/react";
+
 
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: "MagajiCo - Your All-in-One Sports & Entertainment Hub",
-  description: 'Get AI-powered predictions, live match tracking, social connections, rewards, and more. Your complete sports and entertainment platform with 87% accurate predictions.',
+  title: "MagajiCo Sports",
+  description: 'Live sports scores and predictions',
   keywords: ['sports predictions', 'live matches', 'AI sports', 'sports betting', 'sports hub', 'entertainment platform', 'sports social network'],
   authors: [{ name: 'MagajiCo Team' }],
   creator: 'MagajiCo',
