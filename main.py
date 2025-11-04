@@ -17,8 +17,8 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
+    allow_credentials=False,
+    allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],
 )
 
@@ -470,6 +470,24 @@ async def get_flashscore_over45(
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to fetch FlashScore predictions: {str(e)}")
+
+
+@app.get("/api/predictions/enhanced")
+async def get_enhanced_predictions(
+    min_confidence: int = Query(86, description="Minimum confidence percentage", ge=50, le=100),
+    date: str = Query("today", description="Date filter: 'today', 'tomorrow'")
+):
+    """
+    Get enhanced predictions with multi-source analysis, statistics, and consensus
+    """
+    try:
+        result = service.fetch_enhanced_predictions(
+            min_confidence=min_confidence,
+            date=date
+        )
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to fetch enhanced predictions: {str(e)}")
 
 
 @app.get("/api/predictions/combined")
