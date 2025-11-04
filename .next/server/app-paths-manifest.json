@@ -1,5 +1,6 @@
 {
   "/page": "app/page.js",
+  "/api/predictions/[...path]/route": "app/api/predictions/[...path]/route.js",
   "/[locale]/page": "app/[locale]/page.js",
   "/[locale]/predictions/page": "app/[locale]/predictions/page.js"
 }

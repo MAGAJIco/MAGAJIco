@@ -18,6 +18,8 @@ import {
   ArrowUpDown,
   CheckCircle2,
   XCircle,
+  List,
+  LayoutGrid,
 } from "lucide-react";
 
 interface PredictionSource {
@@ -73,6 +75,9 @@ export default function AdvancedPredictionsPage() {
 
   // Selected prediction for detailed view
   const [selectedPrediction, setSelectedPrediction] = useState<EnhancedPrediction | null>(null);
+  
+  // View mode: table or cards
+  const [viewMode, setViewMode] = useState<"table" | "cards">("table");
 
   useEffect(() => {
     fetchEnhancedPredictions();
@@ -334,13 +339,40 @@ export default function AdvancedPredictionsPage() {
               <p className="text-gray-400">Multi-source analysis • Real-time updates</p>
             </div>
           </div>
-          <button
-            onClick={fetchEnhancedPredictions}
-            disabled={loading}
-            className="p-3 bg-white/5 hover:bg-white/10 rounded-lg transition-colors"
-          >
-            <RefreshCw className={`w-6 h-6 text-gray-400 ${loading ? "animate-spin" : ""}`} />
-          </button>
+          <div className="flex items-center gap-2">
+            {/* View Mode Toggle */}
+            <div className="flex items-center gap-1 bg-slate-800 p-1 rounded-lg">
+              <button
+                onClick={() => setViewMode("table")}
+                className={`p-2 rounded transition-colors ${
+                  viewMode === "table" 
+                    ? "bg-purple-500 text-white" 
+                    : "text-gray-400 hover:text-white"
+                }`}
+                title="Table View"
+              >
+                <List className="w-5 h-5" />
+              </button>
+              <button
+                onClick={() => setViewMode("cards")}
+                className={`p-2 rounded transition-colors ${
+                  viewMode === "cards" 
+                    ? "bg-purple-500 text-white" 
+                    : "text-gray-400 hover:text-white"
+                }`}
+                title="Card View"
+              >
+                <LayoutGrid className="w-5 h-5" />
+              </button>
+            </div>
+            <button
+              onClick={fetchEnhancedPredictions}
+              disabled={loading}
+              className="p-3 bg-white/5 hover:bg-white/10 rounded-lg transition-colors"
+            >
+              <RefreshCw className={`w-6 h-6 text-gray-400 ${loading ? "animate-spin" : ""}`} />
+            </button>
+          </div>
         </div>
 
         {/* Filters Bar */}
@@ -447,7 +479,7 @@ export default function AdvancedPredictionsPage() {
           </div>
         </div>
 
-        {/* Predictions Grid */}
+        {/* Predictions Display */}
         {loading && filteredPredictions.length === 0 ? (
           <div className="grid grid-cols-1 gap-4">
             {[1, 2, 3].map((i) => (
@@ -457,7 +489,95 @@ export default function AdvancedPredictionsPage() {
               </div>
             ))}
           </div>
+        ) : viewMode === "table" ? (
+          /* Table View */
+          <div className="bg-slate-800/50 rounded-xl border border-white/10 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-slate-900/50">
+                  <tr>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                      Match
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                      League
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                      Prediction
+                    </th>
+                    <th className="px-6 py-4 text-center text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                      Confidence
+                    </th>
+                    <th className="px-6 py-4 text-center text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                      Agreement
+                    </th>
+                    <th className="px-6 py-4 text-center text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                      Sources
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                      Time
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/5">
+                  {filteredPredictions.map((pred) => (
+                    <tr
+                      key={pred.id}
+                      onClick={() => setSelectedPrediction(pred)}
+                      className="hover:bg-white/5 cursor-pointer transition-colors"
+                    >
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center gap-2">
+                          {pred.status === "live" && (
+                            <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+                          )}
+                          <div>
+                            <div className="text-sm font-semibold text-white">
+                              {pred.homeTeam}
+                            </div>
+                            <div className="text-sm text-gray-400">
+                              vs {pred.awayTeam}
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="text-sm text-gray-300">{pred.league}</span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold ${getConfidenceBg(pred.consensus.avgConfidence)}`}>
+                          {pred.consensus.prediction}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-center">
+                        <div className={`text-2xl font-bold ${getConfidenceColor(pred.consensus.avgConfidence)}`}>
+                          {pred.consensus.avgConfidence.toFixed(1)}%
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-center">
+                        <div className="text-sm text-gray-300">
+                          {pred.consensus.agreement.toFixed(0)}%
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-center">
+                        <span className="inline-flex items-center justify-center w-8 h-8 bg-purple-500/20 text-purple-400 rounded-full text-sm font-semibold">
+                          {pred.sources.length}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center gap-1 text-sm text-gray-400">
+                          <Clock className="w-4 h-4" />
+                          {pred.gameTime}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         ) : (
+          /* Card View */
           <div className="grid grid-cols-1 gap-4">
             {filteredPredictions.map((pred) => (
               <div
