@@ -1,16 +1,21 @@
 {
-  "name": "sports-api-service",
-  "version": "1.0.0",
-  "description": "Sports API Service - Multi-source sports data aggregation library",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "name": "magajico-sports-platform",
+  "version": "2.0.0",
+  "private": true,
+  "description": "MagajiCo Sports Platform - AI-Powered Sports Predictions & Analytics",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
   "scripts": {
-    "build": "tsc",
-    "start": "npm run build && node dist/index.js",
     "dev": "next dev -p 5000 --hostname 0.0.0.0",
-    "next:build": "next build",
-    "next:start": "next start -p 5000 --hostname 0.0.0.0",
-    "api": "uvicorn main:app --host 0.0.0.0 --port 8000 --log-level info"
+    "build": "next build",
+    "start": "next start -p 5000 --hostname 0.0.0.0",
+    "lint": "next lint",
+    "api:dev": "python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload",
+    "api:start": "python -m uvicorn main:app --host 0.0.0.0 --port 8000",
+    "deploy:build": "npm run build",
+    "deploy:start": "npm run start"
   },
   "keywords": [
     "sports",
