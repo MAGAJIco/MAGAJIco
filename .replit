@@ -37,7 +37,7 @@ mode = "parallel"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "uvicorn main:app --host 0.0.0.0 --port 8000 --log-level info"
+args = "python -m uvicorn main:app --host 0.0.0.0 --port 8000 --log-level info"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
@@ -72,4 +72,5 @@ localPort = 46343
 externalPort = 3002
 
 [deployment]
-run = ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port 5000"]
+run = ["sh", "-c", "npm run next:start"]
+build = ["sh", "-c", "npm run next:build"]
