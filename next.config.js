@@ -33,24 +33,6 @@ module.exports = {
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000',
   },
   
-  // Rewrites for alias routes
-  async rewrites() {
-    return [
-      {
-        source: '/live',
-        destination: '/:locale/live',
-      },
-      {
-        source: '/predictions',
-        destination: '/:locale/predictions',
-      },
-      {
-        source: '/matches',
-        destination: '/:locale/matches',
-      },
-    ];
-  },
-  
   // Headers for security
   async headers() {
     return [

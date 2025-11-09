@@ -5,7 +5,6 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import "../styles/design-tokens.css";
 import "../styles/theme.css";
-import DarkModeToggle from "./components/DarkModeToggle";
 import ThemeInitializer from "./components/ThemeInitializer";
 import { Analytics } from "@vercel/analytics/react";
 
@@ -74,7 +73,6 @@ export default function RootLayout({
       </head>
       <body className={inter.className}>
         <ThemeInitializer />
-        <DarkModeToggle />
         {children}
         <Analytics />
       </body>
