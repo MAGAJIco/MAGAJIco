@@ -481,58 +481,66 @@ export default function HomePage() {
 
           <div className="carousel-wrapper">
             <div className="carousel-container" ref={liveRef}>
-              <article className="carousel-card">
-                <span className="card-badge">🔴 LIVE</span>
-                <div className="card-icon">⚽</div>
-                <div className="card-title">Man United vs Arsenal</div>
-                <div className="card-description">
-                  Premier League - Thrilling match at Old Trafford
-                </div>
-                <div className="card-meta">
-                  <div className="card-meta-item">⏱️ 67'</div>
-                  <div className="card-meta-item">📊 2-1</div>
-                  <div className="card-meta-item">👥 73K watching</div>
-                </div>
-              </article>
+              <Link href={`/${locale}/live`}>
+                <article className="carousel-card">
+                  <span className="card-badge">🔴 LIVE</span>
+                  <div className="card-icon">⚽</div>
+                  <div className="card-title">Man United vs Arsenal</div>
+                  <div className="card-description">
+                    Premier League - Thrilling match at Old Trafford
+                  </div>
+                  <div className="card-meta">
+                    <div className="card-meta-item">⏱️ 67'</div>
+                    <div className="card-meta-item">📊 2-1</div>
+                    <div className="card-meta-item">👥 73K watching</div>
+                  </div>
+                </article>
+              </Link>
 
-              <article className="carousel-card">
-                <span className="card-badge news">LIVE</span>
-                <div className="card-icon">🏀</div>
-                <div className="card-title">Lakers vs Warriors</div>
-                <div className="card-description">
-                  NBA - Western Conference showdown
-                </div>
-                <div className="card-meta">
-                  <div className="card-meta-item">⏱️ Q3 02:14</div>
-                  <div className="card-meta-item">📊 98-101</div>
-                  <div className="card-meta-item">👥 18K watching</div>
-                </div>
-              </article>
+              <Link href={`/${locale}/live`}>
+                <article className="carousel-card">
+                  <span className="card-badge news">LIVE</span>
+                  <div className="card-icon">🏀</div>
+                  <div className="card-title">Lakers vs Warriors</div>
+                  <div className="card-description">
+                    NBA - Western Conference showdown
+                  </div>
+                  <div className="card-meta">
+                    <div className="card-meta-item">⏱️ Q3 02:14</div>
+                    <div className="card-meta-item">📊 98-101</div>
+                    <div className="card-meta-item">👥 18K watching</div>
+                  </div>
+                </article>
+              </Link>
 
-              <article className="carousel-card">
-                <div className="card-icon">🏈</div>
-                <div className="card-title">Dolphins vs Bills</div>
-                <div className="card-description">
-                  NFL - Divisional preview
-                </div>
-                <div className="card-meta">
-                  <div className="card-meta-item">📅 Today</div>
-                  <div className="card-meta-item">📊 —</div>
-                  <div className="card-meta-item">👥 12K watching</div>
-                </div>
-              </article>
+              <Link href={`/${locale}/matches`}>
+                <article className="carousel-card">
+                  <div className="card-icon">🏈</div>
+                  <div className="card-title">Dolphins vs Bills</div>
+                  <div className="card-description">
+                    NFL - Divisional preview
+                  </div>
+                  <div className="card-meta">
+                    <div className="card-meta-item">📅 Today</div>
+                    <div className="card-meta-item">📊 —</div>
+                    <div className="card-meta-item">👥 12K watching</div>
+                  </div>
+                </article>
+              </Link>
 
-              <article className="carousel-card">
-                <div className="card-icon">🎾</div>
-                <div className="card-title">Wimbledon Highlights</div>
-                <div className="card-description">
-                  Recap of yesterday's semi-finals
-                </div>
-                <div className="card-meta">
-                  <div className="card-meta-item">⏱️ 2h ago</div>
-                  <div className="card-meta-item">📊 Recap</div>
-                </div>
-              </article>
+              <Link href={`/${locale}/matches`}>
+                <article className="carousel-card">
+                  <div className="card-icon">🎾</div>
+                  <div className="card-title">Wimbledon Highlights</div>
+                  <div className="card-description">
+                    Recap of yesterday's semi-finals
+                  </div>
+                  <div className="card-meta">
+                    <div className="card-meta-item">⏱️ 2h ago</div>
+                    <div className="card-meta-item">📊 Recap</div>
+                  </div>
+                </article>
+              </Link>
             </div>
           </div>
         </section>
@@ -545,35 +553,41 @@ export default function HomePage() {
           </p>
 
           <div className="apps-grid" style={{ marginTop: 20 }}>
-            <div className="app-card">
-              <h3>🎯 AI Predictions</h3>
-              <ul>
-                <li>87% accuracy rate</li>
-                <li>Multi-source analysis</li>
-                <li>Real-time updates</li>
-                <li>Betting insights</li>
-              </ul>
-            </div>
+            <Link href={`/${locale}/predictions`} style={{ textDecoration: 'none' }}>
+              <div className="app-card">
+                <h3>🎯 AI Predictions</h3>
+                <ul>
+                  <li>87% accuracy rate</li>
+                  <li>Multi-source analysis</li>
+                  <li>Real-time updates</li>
+                  <li>Betting insights</li>
+                </ul>
+              </div>
+            </Link>
 
-            <div className="app-card">
-              <h3>⚡ Live Tracking</h3>
-              <ul>
-                <li>Real-time scores</li>
-                <li>Match commentary</li>
-                <li>Statistics & analytics</li>
-                <li>Multi-sport coverage</li>
-              </ul>
-            </div>
+            <Link href={`/${locale}/live`} style={{ textDecoration: 'none' }}>
+              <div className="app-card">
+                <h3>⚡ Live Tracking</h3>
+                <ul>
+                  <li>Real-time scores</li>
+                  <li>Match commentary</li>
+                  <li>Statistics & analytics</li>
+                  <li>Multi-sport coverage</li>
+                </ul>
+              </div>
+            </Link>
 
-            <div className="app-card">
-              <h3>🏆 Rewards System</h3>
-              <ul>
-                <li>Earn Pi Coins</li>
-                <li>Unlock badges</li>
-                <li>Daily challenges</li>
-                <li>Leaderboards</li>
-              </ul>
-            </div>
+            <Link href={`/${locale}/matches`} style={{ textDecoration: 'none' }}>
+              <div className="app-card">
+                <h3>🏆 All Matches</h3>
+                <ul>
+                  <li>Live & upcoming</li>
+                  <li>Multiple sports</li>
+                  <li>Match schedules</li>
+                  <li>Odds integration</li>
+                </ul>
+              </div>
+            </Link>
           </div>
         </section>
 

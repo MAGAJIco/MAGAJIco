@@ -23,6 +23,7 @@ import {
   Copy,
 } from "lucide-react";
 import { useSmartRetry } from "../../hook/useSmartRetry";
+import StatCard from "../../components/StatCard";
 
 interface PredictionSource {
   name: string;
@@ -527,43 +528,30 @@ export default function AdvancedPredictionsPage() {
 
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <div className="bg-gradient-to-br from-green-500/20 to-green-600/10 p-4 rounded-xl border border-green-500/30">
-            <div className="flex items-center gap-2 mb-2">
-              <Shield className="w-5 h-5 text-green-400" />
-              <span className="text-sm text-gray-300">High Confidence</span>
-            </div>
-            <div className="text-2xl font-bold text-white">
-              {filteredPredictions.filter(p => p.consensus.avgConfidence >= 85).length}
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-br from-blue-500/20 to-blue-600/10 p-4 rounded-xl border border-blue-500/30">
-            <div className="flex items-center gap-2 mb-2">
-              <CheckCircle2 className="w-5 h-5 text-blue-400" />
-              <span className="text-sm text-gray-300">Strong Consensus</span>
-            </div>
-            <div className="text-2xl font-bold text-white">
-              {filteredPredictions.filter(p => p.consensus.agreement >= 80).length}
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-br from-purple-500/20 to-purple-600/10 p-4 rounded-xl border border-purple-500/30">
-            <div className="flex items-center gap-2 mb-2">
-              <Flame className="w-5 h-5 text-purple-400" />
-              <span className="text-sm text-gray-300">Live Matches</span>
-            </div>
-            <div className="text-2xl font-bold text-white">
-              {filteredPredictions.filter(p => p.status === "live").length}
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-br from-amber-500/20 to-amber-600/10 p-4 rounded-xl border border-amber-500/30">
-            <div className="flex items-center gap-2 mb-2">
-              <Target className="w-5 h-5 text-amber-400" />
-              <span className="text-sm text-gray-300">Total Predictions</span>
-            </div>
-            <div className="text-2xl font-bold text-white">{filteredPredictions.length}</div>
-          </div>
+          <StatCard
+            icon={<Shield className="w-5 h-5 text-green-400" />}
+            label="High Confidence"
+            value={filteredPredictions.filter(p => p.consensus.avgConfidence >= 85).length}
+            gradient="from-green-500/20 to-green-600/10 border-green-500/30"
+          />
+          <StatCard
+            icon={<CheckCircle2 className="w-5 h-5 text-blue-400" />}
+            label="Strong Consensus"
+            value={filteredPredictions.filter(p => p.consensus.agreement >= 80).length}
+            gradient="from-blue-500/20 to-blue-600/10 border-blue-500/30"
+          />
+          <StatCard
+            icon={<Flame className="w-5 h-5 text-purple-400" />}
+            label="Live Matches"
+            value={filteredPredictions.filter(p => p.status === "live").length}
+            gradient="from-purple-500/20 to-purple-600/10 border-purple-500/30"
+          />
+          <StatCard
+            icon={<Target className="w-5 h-5 text-amber-400" />}
+            label="Total Predictions"
+            value={filteredPredictions.length}
+            gradient="from-amber-500/20 to-amber-600/10 border-amber-500/30"
+          />
         </div>
 
         {/* Predictions Display */}
