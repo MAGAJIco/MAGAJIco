@@ -1,1 +1,1 @@
-self.__BUILD_MANIFEST = {__rewrites:{afterFiles:[],beforeFiles:[],fallback:[]},sortedPages:["\u002F_app"]};self.__BUILD_MANIFEST_CB && self.__BUILD_MANIFEST_CB()
+self.__BUILD_MANIFEST = (function(a){return {__rewrites:{afterFiles:[{has:a,source:"\u002Flive",destination:"\u002Fen\u002Flive"},{has:a,source:"\u002Fmatches",destination:"\u002Fen\u002Fmatches"},{has:a,source:"\u002Fpredictions",destination:"\u002Fen\u002Fpredictions"}],beforeFiles:[],fallback:[]},sortedPages:["\u002F_app"]}}(void 0));self.__BUILD_MANIFEST_CB && self.__BUILD_MANIFEST_CB()
