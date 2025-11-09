@@ -38,15 +38,15 @@ module.exports = {
     return [
       {
         source: '/live',
-        destination: '/en/live',
-      },
-      {
-        source: '/matches',
-        destination: '/en/matches',
+        destination: '/:locale/live',
       },
       {
         source: '/predictions',
-        destination: '/en/predictions',
+        destination: '/:locale/predictions',
+      },
+      {
+        source: '/matches',
+        destination: '/:locale/matches',
       },
     ];
   },

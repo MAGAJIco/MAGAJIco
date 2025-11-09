@@ -153,7 +153,7 @@ export default function Page() {
                 <div className="card-description">NBA - Western Conference showdown</div>
                 <div className="card-meta">
                   <div className="card-meta-item">⏱️ Q3 02:14</div>
-                  <div className="card-meta-item">📊 98-101</div>
+                  <<div className="card-meta-item">📊 98-101</div>
                   <div className="card-meta-item">👥 18K watching</div>
                 </div>
               </article>

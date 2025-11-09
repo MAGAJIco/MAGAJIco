@@ -1,4 +1,4 @@
-# Sports API Service
+# MagajiCo Sports Empire
 
 A comprehensive REST API for aggregating sports data from multiple sources including ESPN, RapidAPI, The Odds API, and more. Built with FastAPI and Python, providing a clean RESTful interface for accessing live sports data.
 
