@@ -26,12 +26,6 @@ module.exports = {
     unoptimized: true,
   },
   
-  // Internationalization
-  i18n: {
-    locales: ['en', 'es', 'fr', 'de'],
-    defaultLocale: 'en',
-  },
-  
   // Environment variables
   env: {
     BACKEND_URL: process.env.BACKEND_URL || 'http://127.0.0.1:8000',
@@ -57,17 +51,6 @@ module.exports = {
             value: 'nosniff'
           },
         ],
-      },
-    ];
-  },
-  
-  // Redirects
-  async redirects() {
-    return [
-      {
-        source: '/',
-        destination: '/en',
-        permanent: true,
       },
     ];
   },
