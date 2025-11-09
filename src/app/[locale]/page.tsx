@@ -1,30 +1,68 @@
-// apps/frontend/src/app/page.tsx
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useState, useRef } from "react";
+import Link from "next/link";
+import { useParams } from "next/navigation";
 
-export default function Page() {
+export default function HomePage() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const liveRef = useRef<HTMLDivElement | null>(null);
+  const params = useParams();
+  const locale = (params.locale as string) || "en";
 
-  function toggleAppDrawer() {
-    setDrawerOpen((s) => !s);
-  }
+  const drawerApps = [
+    { id: "home", icon: "🏠", name: "Portal", href: `/${locale}` },
+    { id: "predictions", icon: "🤖", name: "Predictions", href: `/${locale}/predictions` },
+    { id: "live", icon: "⚡", name: "Live", href: `/${locale}/live` },
+    { id: "social", icon: "👥", name: "Social", href: `/${locale}/social` },
+    { id: "kids", icon: "🎮", name: "Kids Mode", href: `/${locale}/kids` },
+    { id: "rewards", icon: "🏆", name: "Rewards", href: `/${locale}/rewards` },
+    { id: "analytics", icon: "📊", name: "Analytics", href: `/${locale}/analytics` },
+    { id: "chat", icon: "💬", name: "Chat", href: `/${locale}/chat` },
+    { id: "challenges", icon: "🎯", name: "Challenges", href: `/${locale}/challenges` },
+  ];
 
-  function scrollCarousel(refName: "live", dir: -1 | 1) {
-    // Only one carousel in this page, for extensibility we accept refName
+  const primaryApps = drawerApps.slice(0, 5);
+
+  function scrollCarousel(dir: -1 | 1) {
     const el = liveRef.current;
     if (!el) return;
     const card = el.querySelector<HTMLElement>(".carousel-card");
-    const cardWidth = card ? card.offsetWidth + 20 /* gap */ : 340;
+    const cardWidth = card ? card.offsetWidth + 20 : 340;
     el.scrollBy({ left: dir * cardWidth, behavior: "smooth" });
   }
 
   return (
     <>
+      {/* Mobile Bottom Navigation */}
+      <div className="fixed bottom-0 left-0 right-0 md:hidden z-40 bg-white/95 backdrop-blur-lg border-t border-gray-200 shadow-2xl pb-safe">
+        <div className="flex justify-around items-center px-2 py-2">
+          {primaryApps.map((app) => (
+            <Link
+              key={app.id}
+              href={app.href}
+              className="flex flex-col items-center gap-1 px-3 py-2 rounded-xl hover:bg-gray-100 transition-all active:scale-95 relative"
+            >
+              <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl flex items-center justify-center text-xl shadow-md">
+                {app.icon}
+              </div>
+              <span className="text-[10px] font-semibold text-gray-700">
+                {app.name}
+              </span>
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      {/* Navbar */}
       <nav className="navbar">
         <div className="navbar-left">
-          <div className="menu-icon" role="button" tabIndex={0} onClick={() => {}}>
+          <div
+            className="menu-icon"
+            role="button"
+            tabIndex={0}
+            onClick={() => {}}
+          >
             <div className="hamburger">
               <span />
               <span />
@@ -44,15 +82,18 @@ export default function Page() {
           <div className="nav-icon" title="Settings">
             ⚙️
           </div>
-
           <div
             className="nav-icon app-drawer-btn"
-            onClick={toggleAppDrawer}
+            onClick={() => setDrawerOpen(!drawerOpen)}
             title="Apps"
             role="button"
-            aria-expanded={drawerOpen}
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+            >
               <circle cx="4" cy="4" r="2" />
               <circle cx="12" cy="4" r="2" />
               <circle cx="20" cy="4" r="2" />
@@ -64,10 +105,13 @@ export default function Page() {
               <circle cx="20" cy="20" r="2" />
             </svg>
           </div>
-
           <div
             className="nav-icon"
-            style={{ background: "#667eea", color: "white", fontWeight: "bold" }}
+            style={{
+              background: "#667eea",
+              color: "white",
+              fontWeight: "bold",
+            }}
             title="Profile"
           >
             SC
@@ -78,53 +122,47 @@ export default function Page() {
       {/* App Drawer Overlay */}
       <div
         className={`app-drawer-overlay ${drawerOpen ? "active" : ""}`}
-        onClick={toggleAppDrawer}
+        onClick={() => setDrawerOpen(false)}
       />
 
       {/* App Drawer */}
-      <aside className={`app-drawer ${drawerOpen ? "active" : ""}`} aria-hidden={!drawerOpen}>
+      <aside className={`app-drawer ${drawerOpen ? "active" : ""}`}>
         <div className="app-drawer-header">Sports Central Apps</div>
         <div className="app-grid">
-          {[
-            ["🏠", "Portal"],
-            ["🤖", "Predictions"],
-            ["⚡", "Live"],
-            ["👥", "Social"],
-            ["🎮", "Kids Mode"],
-            ["🏆", "Rewards"],
-            ["📊", "Analytics"],
-            ["💬", "Chat"],
-            ["🎯", "Challenges"],
-          ].map(([emoji, name]) => (
-            <div className="app-item" key={String(name)}>
-              <div className="app-icon">{emoji}</div>
-              <div className="app-name">{name}</div>
-            </div>
+          {drawerApps.map((app) => (
+            <Link
+              key={app.id}
+              href={app.href}
+              className="app-item"
+              onClick={() => setDrawerOpen(false)}
+            >
+              <div className="app-icon">{app.icon}</div>
+              <div className="app-name">{app.name}</div>
+            </Link>
           ))}
         </div>
       </aside>
 
+      {/* Main Content */}
       <main className="container">
         <header>
           <h1>🏗️ Sports Central</h1>
-          <p>Feature-Based Architecture Documentation</p>
+          <p>Your All-in-One Sports & Entertainment Hub</p>
         </header>
 
-        <section className="carousel-section" aria-label="Live matches">
+        <section className="carousel-section">
           <div className="carousel-header">
             <div className="carousel-title">⚡ Live Matches</div>
             <div className="carousel-controls">
               <button
                 className="carousel-btn"
-                onClick={() => scrollCarousel("live", -1)}
-                aria-label="Scroll left"
+                onClick={() => scrollCarousel(-1)}
               >
                 ←
               </button>
               <button
                 className="carousel-btn"
-                onClick={() => scrollCarousel("live", 1)}
-                aria-label="Scroll right"
+                onClick={() => scrollCarousel(1)}
               >
                 →
               </button>
@@ -132,13 +170,14 @@ export default function Page() {
           </div>
 
           <div className="carousel-wrapper">
-            <div className="carousel-container" id="liveCarousel" ref={liveRef}>
-              {/* Cards */}
+            <div className="carousel-container" ref={liveRef}>
               <article className="carousel-card">
                 <span className="card-badge">🔴 LIVE</span>
                 <div className="card-icon">⚽</div>
                 <div className="card-title">Man United vs Arsenal</div>
-                <div className="card-description">Premier League - Thrilling match at Old Trafford</div>
+                <div className="card-description">
+                  Premier League - Thrilling match at Old Trafford
+                </div>
                 <div className="card-meta">
                   <div className="card-meta-item">⏱️ 67'</div>
                   <div className="card-meta-item">📊 2-1</div>
@@ -150,7 +189,9 @@ export default function Page() {
                 <span className="card-badge news">LIVE</span>
                 <div className="card-icon">🏀</div>
                 <div className="card-title">Lakers vs Warriors</div>
-                <div className="card-description">NBA - Western Conference showdown</div>
+                <div className="card-description">
+                  NBA - Western Conference showdown
+                </div>
                 <div className="card-meta">
                   <div className="card-meta-item">⏱️ Q3 02:14</div>
                   <div className="card-meta-item">📊 98-101</div>
@@ -161,10 +202,12 @@ export default function Page() {
               <article className="carousel-card">
                 <div className="card-icon">🏈</div>
                 <div className="card-title">Dolphins vs Bills</div>
-                <div className="card-description">NFL - Divisional preview</div>
+                <div className="card-description">
+                  NFL - Divisional preview
+                </div>
                 <div className="card-meta">
                   <div className="card-meta-item">📅 Today</div>
-                  <div className="card-meta-item">📊  — </div>
+                  <div className="card-meta-item">📊 —</div>
                   <div className="card-meta-item">👥 12K watching</div>
                 </div>
               </article>
@@ -172,7 +215,9 @@ export default function Page() {
               <article className="carousel-card">
                 <div className="card-icon">🎾</div>
                 <div className="card-title">Wimbledon Highlights</div>
-                <div className="card-description">Recap of yesterday's semi-finals</div>
+                <div className="card-description">
+                  Recap of yesterday's semi-finals
+                </div>
                 <div className="card-meta">
                   <div className="card-meta-item">⏱️ 2h ago</div>
                   <div className="card-meta-item">📊 Recap</div>
@@ -183,47 +228,48 @@ export default function Page() {
         </section>
 
         <section className="overview section">
-          <h2>Overview</h2>
+          <h2>🌟 What Makes Us Different</h2>
           <p>
-            This is a demo single-page conversion from static HTML into a Next 16 app `page.tsx`.
-            It keeps the original styling and interactivity (app drawer + horizontal carousel).
+            MagajiCo is your all-in-one sports platform combining AI-powered
+            predictions, live tracking, social connections, and rewards.
           </p>
 
           <div className="apps-grid" style={{ marginTop: 20 }}>
             <div className="app-card">
-              <h3>Portal</h3>
+              <h3>🎯 AI Predictions</h3>
               <ul>
-                <li>Home</li>
-                <li>Teams</li>
-                <li>Fixtures</li>
-                <li>Standings</li>
+                <li>87% accuracy rate</li>
+                <li>Multi-source analysis</li>
+                <li>Real-time updates</li>
+                <li>Betting insights</li>
               </ul>
             </div>
 
             <div className="app-card">
-              <h3>Predictions</h3>
+              <h3>⚡ Live Tracking</h3>
               <ul>
-                <li>Machine learning models</li>
-                <li>Live odds</li>
-                <li>User tips</li>
+                <li>Real-time scores</li>
+                <li>Match commentary</li>
+                <li>Statistics & analytics</li>
+                <li>Multi-sport coverage</li>
               </ul>
             </div>
 
             <div className="app-card">
-              <h3>Live</h3>
+              <h3>🏆 Rewards System</h3>
               <ul>
-                <li>Real-time score</li>
-                <li>Commentary</li>
-                <li>Streaming links</li>
+                <li>Earn Pi Coins</li>
+                <li>Unlock badges</li>
+                <li>Daily challenges</li>
+                <li>Leaderboards</li>
               </ul>
             </div>
           </div>
         </section>
 
-        <footer>© Sports Central — Design & Architecture</footer>
+        <footer>© MagajiCo Sports Central — Design & Architecture</footer>
       </main>
 
-      {/* Styles (keeps the original CSS; injected globally for this page) */}
       <style jsx global>{`
         * {
           margin: 0;
@@ -254,22 +300,12 @@ export default function Page() {
         .navbar-left {
           display: flex;
           align-items: center;
-          gap: 20px;
+          gap: 16px;
         }
 
         .menu-icon {
-          width: 40px;
-          height: 40px;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
           cursor: pointer;
-          transition: all 0.2s ease;
-        }
-
-        .menu-icon:hover {
-          background: #f1f3f4;
+          padding: 8px;
         }
 
         .hamburger {
@@ -279,27 +315,23 @@ export default function Page() {
         }
 
         .hamburger span {
-          display: block;
-          width: 20px;
-          height: 2px;
-          background: #5f6368;
+          width: 24px;
+          height: 3px;
+          background: #333;
           border-radius: 2px;
-          transition: all 0.3s ease;
+          transition: 0.3s;
         }
 
         .logo {
-          font-size: 1.5rem;
-          font-weight: 600;
+          font-size: 20px;
+          font-weight: bold;
           color: #667eea;
-          display: flex;
-          align-items: center;
-          gap: 8px;
         }
 
         .navbar-right {
           display: flex;
           align-items: center;
-          gap: 10px;
+          gap: 12px;
         }
 
         .nav-icon {
@@ -310,168 +342,155 @@ export default function Page() {
           align-items: center;
           justify-content: center;
           cursor: pointer;
-          transition: all 0.2s ease;
-          font-size: 1.2rem;
+          transition: background 0.2s;
         }
 
         .nav-icon:hover {
-          background: #f1f3f4;
-        }
-
-        .app-drawer-btn {
-          position: relative;
+          background: #f5f5f5;
         }
 
         .app-drawer-overlay {
           position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
+          inset: 0;
           background: rgba(0, 0, 0, 0.5);
+          z-index: 1100;
           opacity: 0;
-          visibility: hidden;
-          transition: all 0.3s ease;
-          z-index: 1998;
+          pointer-events: none;
+          transition: opacity 0.3s;
         }
 
         .app-drawer-overlay.active {
           opacity: 1;
-          visibility: visible;
+          pointer-events: auto;
         }
 
         .app-drawer {
           position: fixed;
-          top: 70px;
-          right: 20px;
+          top: 64px;
+          right: 0;
+          width: 320px;
+          height: calc(100vh - 64px);
           background: white;
-          border-radius: 12px;
-          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-          padding: 20px;
-          width: 380px;
-          max-height: 480px;
+          box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
+          z-index: 1200;
+          transform: translateX(100%);
+          transition: transform 0.3s;
           overflow-y: auto;
-          opacity: 0;
-          visibility: hidden;
-          transform: translateY(-20px);
-          transition: all 0.3s ease;
-          z-index: 1999;
         }
 
         .app-drawer.active {
-          opacity: 1;
-          visibility: visible;
-          transform: translateY(0);
+          transform: translateX(0);
         }
 
         .app-drawer-header {
-          font-size: 1.1rem;
-          font-weight: 600;
-          color: #5f6368;
-          margin-bottom: 20px;
-          padding-bottom: 15px;
-          border-bottom: 1px solid #e8eaed;
+          padding: 20px;
+          font-size: 18px;
+          font-weight: bold;
+          border-bottom: 1px solid #eee;
         }
 
         .app-grid {
           display: grid;
           grid-template-columns: repeat(3, 1fr);
-          gap: 15px;
+          gap: 16px;
+          padding: 20px;
         }
 
         .app-item {
           display: flex;
           flex-direction: column;
           align-items: center;
-          padding: 15px;
-          border-radius: 8px;
+          gap: 8px;
+          padding: 16px;
+          border-radius: 12px;
           cursor: pointer;
-          transition: all 0.2s ease;
+          transition: background 0.2s;
           text-decoration: none;
-          color: #5f6368;
+          color: inherit;
         }
 
         .app-item:hover {
-          background: #f1f3f4;
+          background: #f5f5f5;
         }
 
         .app-icon {
           width: 48px;
           height: 48px;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
           border-radius: 12px;
+          background: linear-gradient(135deg, #667eea, #764ba2);
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 1.5rem;
-          margin-bottom: 8px;
-          color: white;
+          font-size: 24px;
         }
 
         .app-name {
-          font-size: 0.85rem;
+          font-size: 12px;
           text-align: center;
-          font-weight: 500;
         }
 
         .container {
-          max-width: 1400px;
+          max-width: 1200px;
           margin: 0 auto;
-          padding: 20px;
+          padding: 40px 20px 100px;
+        }
+
+        header {
+          text-align: center;
+          margin-bottom: 40px;
+        }
+
+        header h1 {
+          font-size: 48px;
+          color: white;
+          margin-bottom: 12px;
+          text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        header p {
+          font-size: 18px;
+          color: rgba(255, 255, 255, 0.9);
         }
 
         .carousel-section {
-          background: white;
-          border-radius: 15px;
-          padding: 25px;
-          margin-bottom: 30px;
-          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-          animation: fadeInUp 0.8s ease 0.3s backwards;
+          margin-bottom: 40px;
         }
 
         .carousel-header {
           display: flex;
-          align-items: center;
           justify-content: space-between;
+          align-items: center;
           margin-bottom: 20px;
         }
 
         .carousel-title {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          color: #667eea;
-          font-size: 1.8rem;
-          font-weight: 600;
+          font-size: 24px;
+          font-weight: bold;
+          color: white;
         }
 
         .carousel-controls {
           display: flex;
-          gap: 10px;
+          gap: 8px;
         }
 
         .carousel-btn {
-          width: 40px;
-          height: 40px;
+          width: 36px;
+          height: 36px;
           border-radius: 50%;
-          background: #f1f3f4;
+          background: white;
           border: none;
           cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 1.2rem;
-          transition: all 0.2s ease;
+          font-size: 18px;
+          transition: background 0.2s;
         }
 
         .carousel-btn:hover {
-          background: #e8eaed;
-          transform: scale(1.1);
+          background: #f0f0f0;
         }
 
         .carousel-wrapper {
           position: relative;
-          overflow: hidden;
         }
 
         .carousel-container {
@@ -479,231 +498,139 @@ export default function Page() {
           gap: 20px;
           overflow-x: auto;
           scroll-behavior: smooth;
-          scrollbar-width: none;
-          -ms-overflow-style: none;
-          padding: 10px 0;
+          padding-bottom: 16px;
+          scrollbar-width: thin;
         }
 
         .carousel-container::-webkit-scrollbar {
-          display: none;
+          height: 8px;
+        }
+
+        .carousel-container::-webkit-scrollbar-thumb {
+          background: rgba(255, 255, 255, 0.3);
+          border-radius: 4px;
         }
 
         .carousel-card {
-          min-width: 320px;
-          background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-          border-radius: 12px;
-          padding: 20px;
-          cursor: pointer;
-          transition: all 0.3s ease;
-          border: 2px solid transparent;
+          flex: 0 0 320px;
+          background: white;
+          border-radius: 16px;
+          padding: 24px;
           position: relative;
-          overflow: hidden;
-        }
-
-        .carousel-card:hover {
-          transform: translateY(-5px);
-          box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
-          border-color: #667eea;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         .card-badge {
           position: absolute;
-          top: 15px;
-          right: 15px;
+          top: 12px;
+          right: 12px;
           background: #ff4444;
           color: white;
-          padding: 5px 12px;
-          border-radius: 20px;
-          font-size: 0.75rem;
-          font-weight: 600;
-          animation: pulse 2s infinite;
+          padding: 4px 12px;
+          border-radius: 12px;
+          font-size: 11px;
+          font-weight: bold;
         }
 
         .card-badge.news {
-          background: #2196f3;
-        }
-
-        @keyframes pulse {
-          0%,
-          100% {
-            transform: scale(1);
-          }
-          50% {
-            transform: scale(1.05);
-          }
+          background: #4caf50;
         }
 
         .card-icon {
-          width: 50px;
-          height: 50px;
-          background: white;
-          border-radius: 10px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 1.5rem;
-          margin-bottom: 15px;
+          font-size: 48px;
+          margin-bottom: 12px;
         }
 
         .card-title {
-          font-size: 1.2rem;
-          font-weight: 600;
-          color: #333;
-          margin-bottom: 10px;
+          font-size: 18px;
+          font-weight: bold;
+          margin-bottom: 8px;
         }
 
         .card-description {
-          font-size: 0.9rem;
+          font-size: 14px;
           color: #666;
-          line-height: 1.5;
-          margin-bottom: 15px;
+          margin-bottom: 16px;
         }
 
         .card-meta {
           display: flex;
-          align-items: center;
-          gap: 15px;
-          font-size: 0.85rem;
-          color: #999;
+          gap: 12px;
+          flex-wrap: wrap;
         }
 
-        header {
-          text-align: center;
-          color: white;
-          margin-bottom: 40px;
-          animation: fadeInDown 0.8s ease;
-        }
-
-        header h1 {
-          font-size: 3.5rem;
-          margin-bottom: 10px;
-          text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-        }
-
-        header p {
-          font-size: 1.2rem;
-          opacity: 0.95;
-        }
-
-        .overview {
-          background: white;
-          border-radius: 15px;
-          padding: 30px;
-          margin-bottom: 30px;
-          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-          animation: fadeInUp 0.8s ease 0.2s backwards;
+        .card-meta-item {
+          font-size: 12px;
+          color: #888;
         }
 
         .section {
-          background: white;
-          border-radius: 15px;
-          padding: 30px;
-          margin-bottom: 30px;
-          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-          animation: fadeInUp 0.8s ease 0.4s backwards;
+          background: rgba(255, 255, 255, 0.95);
+          border-radius: 16px;
+          padding: 32px;
+          margin-bottom: 32px;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         .section h2 {
-          color: #667eea;
-          margin-bottom: 20px;
-          font-size: 2rem;
-          display: flex;
-          align-items: center;
-          gap: 10px;
+          font-size: 28px;
+          margin-bottom: 12px;
+        }
+
+        .section p {
+          font-size: 16px;
+          color: #666;
+          line-height: 1.6;
         }
 
         .apps-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
           gap: 20px;
-          margin-top: 20px;
         }
 
         .app-card {
-          background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+          background: #f8f9fa;
           border-radius: 12px;
-          padding: 25px;
-          transition: all 0.3s ease;
-          border: 2px solid transparent;
-          cursor: pointer;
-        }
-
-        .app-card:hover {
-          transform: translateY(-5px);
-          box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
-          border-color: #667eea;
+          padding: 24px;
         }
 
         .app-card h3 {
-          color: #667eea;
-          font-size: 1.5rem;
-          margin-bottom: 15px;
-          display: flex;
-          align-items: center;
-          gap: 10px;
+          font-size: 20px;
+          margin-bottom: 16px;
         }
 
         .app-card ul {
           list-style: none;
-          padding-left: 0;
         }
 
         .app-card li {
           padding: 8px 0;
-          color: #555;
-          border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-          transition: all 0.2s ease;
+          border-bottom: 1px solid #e0e0e0;
         }
 
-        .app-card li:hover {
-          padding-left: 10px;
-          color: #667eea;
+        .app-card li:last-child {
+          border-bottom: none;
         }
 
         footer {
           text-align: center;
-          color: white;
-          padding: 30px;
-          margin-top: 40px;
-          font-size: 0.9rem;
-          opacity: 0.9;
-        }
-
-        @keyframes fadeInDown {
-          from {
-            opacity: 0;
-            transform: translateY(-30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
+          padding: 24px;
+          color: rgba(255, 255, 255, 0.8);
+          font-size: 14px;
         }
 
         @media (max-width: 768px) {
           header h1 {
-            font-size: 2.5rem;
+            font-size: 32px;
           }
 
-          .apps-grid {
-            grid-template-columns: 1fr;
+          .carousel-card {
+            flex: 0 0 280px;
           }
 
-          .app-drawer {
-            right: 10px;
-            left: 10px;
-            width: auto;
+          .container {
+            padding-bottom: 120px;
           }
         }
       `}</style>

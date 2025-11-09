@@ -1,10 +1,11 @@
-import type { Metadata } from "next";
+
+import React, { type ReactNode } from "react";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import "../styles/design-tokens.css";
 import "../styles/theme.css";
-import Script from "next/script";
-import DarkModeToggle from "./components/DarkModeToggle";
+import ThemeInitializer from "./components/ThemeInitializer";
 import { Analytics } from "@vercel/analytics/react";
 
 
@@ -59,10 +60,10 @@ export const viewport: Viewport = {
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   return (
-    <html lang="en" className="scroll-smooth">
+    <html lang="en">
       <head>
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
@@ -71,25 +72,9 @@ export default function RootLayout({
         <meta name="format-detection" content="telephone=no" />
       </head>
       <body className={inter.className}>
-        <DarkModeToggle />
+        <ThemeInitializer />
         {children}
         <Analytics />
-        <Script id="register-sw" strategy="afterInteractive">
-          {`
-            if ('serviceWorker' in navigator) {
-              window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js').then(
-                  (registration) => {
-                    console.log('SW registered:', registration);
-                  },
-                  (error) => {
-                    console.log('SW registration failed:', error);
-                  }
-                );
-              });
-            }
-          `}
-        </Script>
       </body>
     </html>
   );

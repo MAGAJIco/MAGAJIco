@@ -12,6 +12,7 @@ import {
   Share2,
 } from "lucide-react";
 import { useSmartRetry } from "../../hook/useSmartRetry";
+import StatCard from "../../components/StatCard";
 
 interface LiveMatch {
   id: string;
@@ -238,29 +239,24 @@ export default function LiveMatchesPage() {
 
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <div className="bg-gradient-to-br from-red-500/20 to-red-600/10 p-4 rounded-xl border border-red-500/30">
-            <div className="flex items-center gap-2 mb-2">
-              <Circle className="w-5 h-5 text-red-400 fill-red-400 animate-pulse" />
-              <span className="text-sm text-gray-300">Live Now</span>
-            </div>
-            <div className="text-2xl font-bold text-white">{filteredMatches.length}</div>
-          </div>
-
-          <div className="bg-gradient-to-br from-blue-500/20 to-blue-600/10 p-4 rounded-xl border border-blue-500/30">
-            <div className="flex items-center gap-2 mb-2">
-              <Clock className="w-5 h-5 text-blue-400" />
-              <span className="text-sm text-gray-300">Upcoming</span>
-            </div>
-            <div className="text-2xl font-bold text-white">{upcomingMatches.length}</div>
-          </div>
-
-          <div className="bg-gradient-to-br from-purple-500/20 to-purple-600/10 p-4 rounded-xl border border-purple-500/30">
-            <div className="flex items-center gap-2 mb-2">
-              <Trophy className="w-5 h-5 text-purple-400" />
-              <span className="text-sm text-gray-300">Total Matches</span>
-            </div>
-            <div className="text-2xl font-bold text-white">{matches.length}</div>
-          </div>
+          <StatCard
+            icon={<Circle className="w-5 h-5 text-red-400 fill-red-400 animate-pulse" />}
+            label="Live Now"
+            value={filteredMatches.length}
+            gradient="from-red-500/20 to-red-600/10 border-red-500/30"
+          />
+          <StatCard
+            icon={<Clock className="w-5 h-5 text-blue-400" />}
+            label="Upcoming"
+            value={upcomingMatches.length}
+            gradient="from-blue-500/20 to-blue-600/10 border-blue-500/30"
+          />
+          <StatCard
+            icon={<Trophy className="w-5 h-5 text-purple-400" />}
+            label="Total Matches"
+            value={matches.length}
+            gradient="from-purple-500/20 to-purple-600/10 border-purple-500/30"
+          />
         </div>
 
         {/* Live Matches Section */}
