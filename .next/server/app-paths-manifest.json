@@ -1,8 +1,4 @@
 {
-  "/_not-found/page": "app/_not-found/page.js",
-  "/api/predictions/[...path]/route": "app/api/predictions/[...path]/route.js",
-  "/[locale]/page": "app/[locale]/page.js",
-  "/[locale]/matches/page": "app/[locale]/matches/page.js",
-  "/[locale]/predictions/page": "app/[locale]/predictions/page.js",
-  "/[locale]/live/page": "app/[locale]/live/page.js"
+  "/page": "app/page.js",
+  "/[locale]/page": "app/[locale]/page.js"
 }
