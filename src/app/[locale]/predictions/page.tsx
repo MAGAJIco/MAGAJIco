@@ -326,7 +326,7 @@ export default function AdvancedPredictionsPage() {
 
   const shareMatch = async (pred: EnhancedPrediction) => {
     const shareText = `🎯 ${pred.consensus.prediction} - ${pred.consensus.avgConfidence.toFixed(1)}% confidence\n${pred.homeTeam} vs ${pred.awayTeam}\n${pred.league}`;
-    
+
     if (navigator.share) {
       try {
         await navigator.share({
@@ -364,7 +364,7 @@ export default function AdvancedPredictionsPage() {
   const renderConfidenceMeter = (confidence: number) => {
     const percentage = Math.min(100, Math.max(0, confidence));
     const color = confidence >= 85 ? "bg-green-500" : confidence >= 70 ? "bg-blue-500" : "bg-amber-500";
-    
+
     return (
       <div className="w-full">
         <div className="flex items-center justify-between mb-1">
@@ -374,7 +374,7 @@ export default function AdvancedPredictionsPage() {
           </span>
         </div>
         <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden">
-          <div 
+          <div
             className={`h-full ${color} transition-all duration-500 ease-out rounded-full`}
             style={{ width: `${percentage}%` }}
           />
