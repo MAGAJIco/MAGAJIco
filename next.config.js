@@ -1,4 +1,5 @@
 
+
 /** @type {import('next').NextConfig} */
 module.exports = {
   reactStrictMode: true,
@@ -30,6 +31,24 @@ module.exports = {
   env: {
     BACKEND_URL: process.env.BACKEND_URL || 'http://127.0.0.1:8000',
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000',
+  },
+  
+  // Rewrites for alias routes
+  async rewrites() {
+    return [
+      {
+        source: '/live',
+        destination: '/en/live',
+      },
+      {
+        source: '/matches',
+        destination: '/en/matches',
+      },
+      {
+        source: '/predictions',
+        destination: '/en/predictions',
+      },
+    ];
   },
   
   // Headers for security
