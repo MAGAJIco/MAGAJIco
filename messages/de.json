@@ -1,0 +1,14 @@
+{
+  "common": {
+    "welcome": "Willkommen bei MagajiCo Sports",
+    "loading": "Wird geladen...",
+    "error": "Ein Fehler ist aufgetreten",
+    "retry": "Wiederholen"
+  },
+  "nav": {
+    "home": "Startseite",
+    "predictions": "Vorhersagen",
+    "matches": "Spiele",
+    "live": "Live"
+  }
+}
