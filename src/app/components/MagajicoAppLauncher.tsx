@@ -1,8 +1,8 @@
-
-"use client";
+'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
+import { useParams } from 'next/navigation';
 
 interface MicroApp {
   id: string;
@@ -16,108 +16,6 @@ interface MicroApp {
   isPrimary?: boolean;
 }
 
-const apps: MicroApp[] = [
-  // Primary Navigation (from mobile bottom nav)
-  {
-    id: 'home',
-    name: 'Home',
-    icon: '🏠',
-    href: '/en',
-    category: 'navigation',
-    color: 'from-blue-500 to-blue-700',
-    description: 'Your sports hub dashboard',
-    isPrimary: true
-  },
-  {
-    id: 'predictions',
-    name: 'Predictions',
-    icon: '🎯',
-    href: '/en/predictions',
-    category: 'navigation',
-    color: 'from-purple-500 to-indigo-600',
-    description: '87% accurate ML predictions',
-    badge: 'AI',
-    isPrimary: true
-  },
-  {
-    id: 'live',
-    name: 'Live Matches',
-    icon: '⚡',
-    href: '/en/live',
-    category: 'navigation',
-    color: 'from-emerald-500 to-teal-600',
-    description: 'Real-time match tracking',
-    badge: 'LIVE',
-    isPrimary: true
-  },
-  {
-    id: 'social',
-    name: 'Social Hub',
-    icon: '👥',
-    href: '/en/social/feed',
-    category: 'navigation',
-    color: 'from-pink-500 to-rose-600',
-    description: 'Connect with fans worldwide',
-    isPrimary: true
-  },
-  {
-    id: 'rewards',
-    name: 'Rewards',
-    icon: '🏆',
-    href: '/en/achievements',
-    category: 'navigation',
-    color: 'from-yellow-500 to-orange-600',
-    description: 'Earn Pi Coins & badges',
-    isPrimary: true
-  },
-  // Additional Apps
-  {
-    id: 'news',
-    name: 'Sports News',
-    icon: '📰',
-    href: '/en/news',
-    category: 'sports',
-    color: 'from-blue-500 to-cyan-600',
-    description: 'Breaking news worldwide'
-  },
-  {
-    id: 'analytics',
-    name: 'Analytics',
-    icon: '📊',
-    href: '/en/analytics',
-    category: 'tools',
-    color: 'from-violet-500 to-purple-600',
-    description: 'Deep performance insights'
-  },
-  {
-    id: 'kids',
-    name: 'Kids Mode',
-    icon: '🎮',
-    href: '/en/kids',
-    category: 'kids',
-    color: 'from-orange-500 to-amber-600',
-    description: 'Safe learning environment'
-  },
-  {
-    id: 'chat',
-    name: 'AI Chat',
-    icon: '💬',
-    href: '/en/chat',
-    category: 'tools',
-    color: 'from-cyan-500 to-blue-600',
-    description: 'Chat with AI assistant'
-  },
-  {
-    id: 'challenges',
-    name: 'Challenges',
-    icon: '🎮',
-    href: '/en/challenges',
-    category: 'rewards',
-    color: 'from-red-500 to-pink-600',
-    description: 'Complete daily challenges'
-  }
-];
-
 const categories = [
   { id: 'all', label: 'All Apps', icon: '🌟' },
   { id: 'navigation', label: 'Quick Nav', icon: '🧭' },
@@ -129,10 +27,120 @@ const categories = [
 ];
 
 export function MagajiCoAppLauncher() {
+  const routerParams = useParams();
+  const locale = routerParams.locale as string || 'en';
+
+  const getPrimaryApps = (locale: string): MicroApp[] => [
+    {
+      id: 'home',
+      name: 'Home',
+      icon: '🏠',
+      href: `/${locale}`,
+      category: 'navigation',
+      color: 'from-blue-500 to-blue-700',
+      description: 'Your sports hub dashboard',
+      isPrimary: true
+    },
+    {
+      id: 'predictions',
+      name: 'Predictions',
+      icon: '🎯',
+      href: `/${locale}/predictions`,
+      category: 'navigation',
+      color: 'from-purple-500 to-indigo-600',
+      description: '87% accurate ML predictions',
+      badge: 'AI',
+      isPrimary: true
+    },
+    {
+      id: 'live',
+      name: 'Live Matches',
+      icon: '⚡',
+      href: `/${locale}/live`,
+      category: 'navigation',
+      color: 'from-emerald-500 to-teal-600',
+      description: 'Real-time match tracking',
+      badge: 'LIVE',
+      isPrimary: true
+    },
+    {
+      id: 'social',
+      name: 'Social Hub',
+      icon: '👥',
+      href: `/${locale}/social/feed`,
+      category: 'navigation',
+      color: 'from-pink-500 to-rose-600',
+      description: 'Connect with fans worldwide',
+      isPrimary: true
+    },
+    {
+      id: 'rewards',
+      name: 'Rewards',
+      icon: '🏆',
+      href: `/${locale}/achievements`,
+      category: 'navigation',
+      color: 'from-yellow-500 to-orange-600',
+      description: 'Earn Pi Coins & badges',
+      isPrimary: true
+    },
+  ];
+
+  const getAllApps = (locale: string): MicroApp[] => [
+    ...getPrimaryApps(locale),
+    {
+      id: 'news',
+      name: 'Sports News',
+      icon: '📰',
+      href: `/${locale}/news`,
+      category: 'sports',
+      color: 'from-blue-500 to-cyan-600',
+      description: 'Breaking news worldwide'
+    },
+    {
+      id: 'analytics',
+      name: 'Analytics',
+      icon: '📊',
+      href: `/${locale}/analytics`,
+      category: 'tools',
+      color: 'from-violet-500 to-purple-600',
+      description: 'Deep performance insights'
+    },
+    {
+      id: 'kids',
+      name: 'Kids Mode',
+      icon: '🎮',
+      href: `/${locale}/kids`,
+      category: 'kids',
+      color: 'from-orange-500 to-amber-600',
+      description: 'Safe learning environment'
+    },
+    {
+      id: 'chat',
+      name: 'AI Chat',
+      icon: '💬',
+      href: `/${locale}/chat`,
+      category: 'tools',
+      color: 'from-cyan-500 to-blue-600',
+      description: 'Chat with AI assistant'
+    },
+    {
+      id: 'challenges',
+      name: 'Challenges',
+      icon: '🎮',
+      href: `/${locale}/challenges`,
+      category: 'rewards',
+      color: 'from-red-500 to-pink-600',
+      description: 'Complete daily challenges'
+    }
+  ];
+
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [mounted, setMounted] = useState(false);
+
+  const primaryApps = useMemo(() => getPrimaryApps(locale), [locale]);
+  const allApps = useMemo(() => getAllApps(locale), [locale]);
 
   useEffect(() => {
     setMounted(true);
@@ -154,15 +162,13 @@ export function MagajiCoAppLauncher() {
   }, [mounted]);
 
   const filteredApps = useMemo(() => {
-    return apps.filter(app => {
+    return allApps.filter(app => {
       const matchesSearch = app.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            app.description.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesCategory = selectedCategory === 'all' || app.category === selectedCategory;
       return matchesSearch && matchesCategory;
     });
-  }, [searchQuery, selectedCategory]);
-
-  const primaryApps = useMemo(() => apps.filter(app => app.isPrimary), []);
+  }, [searchQuery, selectedCategory, allApps]);
 
   if (!mounted) return null;
 
@@ -337,7 +343,7 @@ export function MagajiCoAppLauncher() {
               {/* Footer */}
               <div className="bg-white/5 border-t border-white/20 p-4">
                 <div className="flex items-center justify-between text-sm text-gray-400">
-                  <span>{filteredApps.length} of {apps.length} apps</span>
+                  <span>{filteredApps.length} of {allApps.length} apps</span>
                   <span className="flex items-center gap-2">
                     <kbd className="px-2 py-1 bg-white/10 rounded text-xs">⌘K</kbd>
                     <span>to open</span>
@@ -353,11 +359,11 @@ export function MagajiCoAppLauncher() {
         .pb-safe {
           padding-bottom: max(8px, env(safe-area-inset-bottom));
         }
-        
+
         .scrollbar-hide::-webkit-scrollbar {
           display: none;
         }
-        
+
         .scrollbar-hide {
           -ms-overflow-style: none;
           scrollbar-width: none;

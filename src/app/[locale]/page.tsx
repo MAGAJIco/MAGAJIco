@@ -2,6 +2,7 @@
 "use client";
 
 import React, { useRef, useState } from "react";
+import { MagajiCoAppLauncher } from "../components/MagajicoAppLauncher";
 
 export default function Page() {
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -22,6 +23,7 @@ export default function Page() {
 
   return (
     <>
+      <MagajiCoAppLauncher />
       <nav className="navbar">
         <div className="navbar-left">
           <div className="menu-icon" role="button" tabIndex={0} onClick={() => {}}>
@@ -191,7 +193,7 @@ export default function Page() {
 
           <div className="apps-grid" style={{ marginTop: 20 }}>
             <div className="app-card">
-              <h3>Portal</h3>
+              <h3>Empire</h3>
               <ul>
                 <li>Home</li>
                 <li>Teams</li>
