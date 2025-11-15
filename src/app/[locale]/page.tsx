@@ -35,7 +35,7 @@ export default function HomePage() {
   return (
     <>
       {/* ✅ Mobile Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 md:hidden z-40 bg-white/95 backdrop-blur-lg border-t border-gray-200 shadow-2xl pb-safe">
+      <div className="mobile-bottom-nav">
         <div className="flex justify-around items-center px-2 py-2">
           {primaryApps.map((app) => (
             <Link
@@ -333,10 +333,25 @@ export default function HomePage() {
         footer {
           text-align: center; padding: 24px; color: rgba(255,255,255,0.8); font-size: 14px;
         }
+        .mobile-bottom-nav {
+          display: none;
+        }
         @media (max-width: 768px) {
           header h1 { font-size: 32px; }
           .carousel-card { flex: 0 0 280px; }
           .container { padding-bottom: 120px; }
+          .mobile-bottom-nav {
+            display: block;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 40;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid #e5e7eb;
+            box-shadow: 0 -10px 30px rgba(0,0,0,0.1);
+          }
         }
       `}</style>
     </>
