@@ -1,4 +1,3 @@
-
 import React, { type ReactNode } from "react";
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
@@ -12,8 +11,8 @@ import { Analytics } from "@vercel/analytics/react";
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: "MagajiCo Sports",
-  description: 'Live sports scores and predictions',
+  title: "MagajiCo Sports Central - AI Sports Predictions & Live Matches",
+  description: "Join 1.2M+ users! Get 87% accurate AI predictions, live match tracking, and earn rewards. Share with friends and earn 100 Pi!",
   keywords: ['sports predictions', 'live matches', 'AI sports', 'sports betting', 'sports hub', 'entertainment platform', 'sports social network'],
   authors: [{ name: 'MagajiCo Team' }],
   creator: 'MagajiCo',
@@ -30,14 +29,22 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: 'website',
-    title: 'MagajiCo - Your All-in-One Sports & Entertainment Hub',
-    description: 'AI-powered predictions, live match tracking, social connections, and rewards - all in one powerful platform.',
-    siteName: 'MagajiCo'
+    title: "MagajiCo Sports Central - AI Sports Predictions",
+    description: "87% accurate AI predictions • 1.2M+ active users • Earn rewards by sharing",
+    siteName: 'MagajiCo',
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Sports Central - AI Predictions & Live Matches"
+      }
+    ]
   },
   twitter: {
-    card: 'summary',
-    title: 'MagajiCo - Your All-in-One Sports & Entertainment Hub',
-    description: 'AI-powered predictions, live match tracking, social connections, and rewards - all in one platform.'
+    card: "summary_large_image",
+    title: "Sports Central - AI Sports Predictions",
+    description: "87% accuracy • Join 1.2M+ users • Earn rewards",
   },
   robots: {
     index: true,

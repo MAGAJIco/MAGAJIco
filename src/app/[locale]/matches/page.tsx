@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -29,6 +28,11 @@ interface Match {
     home: number;
     draw?: number;
     away: number;
+  };
+  isLive?: boolean; // Added for live status indication
+  prediction?: { // Added for prediction details
+    winner: string;
+    confidence: number;
   };
 }
 
@@ -81,12 +85,12 @@ export default function MatchesPage() {
         );
 
         const allMatches: Match[] = [];
-        
+
         responses.forEach((result) => {
           if (result.status === 'fulfilled') {
             const { sport, data } = result.value;
             const matchesArray = data.matches || [];
-            
+
             matchesArray.forEach((match: any, idx: number) => {
               allMatches.push({
                 id: match.id || `${sport}-${idx}-${Date.now()}`,
@@ -98,7 +102,9 @@ export default function MatchesPage() {
                 status: match.status || "scheduled",
                 league: data.league || sport,
                 gameTime: match.gameTime || "TBD",
-                odds: match.odds
+                odds: match.odds,
+                isLive: match.status.toLowerCase().includes('live') || match.status.toLowerCase().includes('in progress'), // Determine live status
+                prediction: match.prediction // Assuming prediction data is available
               });
             });
           }
@@ -151,7 +157,7 @@ export default function MatchesPage() {
     const shareText = match.status.toLowerCase().includes('live')
       ? `🔴 LIVE: ${match.homeTeam} ${match.homeScore} - ${match.awayScore} ${match.awayTeam}\n${match.league}`
       : `📅 ${match.homeTeam} vs ${match.awayTeam}\n${match.gameTime} - ${match.league}`;
-    
+
     if (navigator.share) {
       try {
         await navigator.share({
@@ -305,13 +311,13 @@ export default function MatchesPage() {
                       <div className="text-right">
                         <p className="text-lg font-bold text-white">{match.homeTeam}</p>
                       </div>
-                      
+
                       <div className="flex items-center justify-center gap-3">
                         <span className="text-4xl font-bold text-white">{match.homeScore}</span>
                         <span className="text-2xl text-gray-400">-</span>
                         <span className="text-4xl font-bold text-white">{match.awayScore}</span>
                       </div>
-                      
+
                       <div className="text-left">
                         <p className="text-lg font-bold text-white">{match.awayTeam}</p>
                       </div>
@@ -334,8 +340,16 @@ export default function MatchesPage() {
               {upcomingMatches.map((match) => (
                 <div
                   key={match.id}
-                  className="bg-slate-800/50 rounded-xl p-4 border border-white/10 hover:border-purple-500/50 transition-all"
+                  className="bg-slate-800/50 rounded-xl p-4 border border-white/10 hover:border-purple-500/50 transition-all relative"
                 >
+                  {match.isLive && (
+                    <div className="absolute top-2 right-2">
+                      <span className="px-2 py-1 bg-red-500 text-white text-xs font-bold rounded-full animate-pulse flex items-center gap-1">
+                        <Circle className="w-2 h-2 fill-white" />
+                        LIVE
+                      </span>
+                    </div>
+                  )}
                   <div className="flex items-center gap-2 mb-3">
                     <span className="text-xl">{getSportIcon(match.sport)}</span>
                     <div className="flex-1">
@@ -346,9 +360,26 @@ export default function MatchesPage() {
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="text-white font-semibold">{match.homeTeam}</span>
-                      <span className="text-gray-500">vs</span>
+                      {match.isLive ? (
+                        <div className="flex items-center gap-2">
+                          <span className="text-xl font-bold text-white">{match.homeScore}</span>
+                          <span className="text-gray-400">-</span>
+                          <span className="text-xl font-bold text-white">{match.awayScore}</span>
+                        </div>
+                      ) : (
+                        <span className="text-gray-500">vs</span>
+                      )}
                       <span className="text-white font-semibold">{match.awayTeam}</span>
                     </div>
+                    {match.prediction && (
+                      <div className="bg-purple-500/10 border border-purple-500/30 rounded-lg p-2">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-gray-400">Prediction:</span>
+                          <span className="text-purple-400 font-semibold">{match.prediction.winner}</span>
+                          <span className="text-green-400 font-bold">{match.prediction.confidence.toFixed(0)}%</span>
+                        </div>
+                      </div>
+                    )}
                     {match.odds && (
                       <div className="flex items-center justify-between text-xs text-gray-400 pt-2 border-t border-white/5">
                         <span>H: {match.odds.home}</span>

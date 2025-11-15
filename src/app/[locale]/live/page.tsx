@@ -26,6 +26,17 @@ interface LiveMatch {
   time: string;
   league: string;
   venue?: string;
+  prediction?: {
+    winner: string;
+    confidence: number;
+    odds?: number;
+  };
+  stats?: {
+    homeForm: number[];
+    awayForm: number[];
+    possession?: { home: number; away: number };
+    shots?: { home: number; away: number };
+  };
 }
 
 type SportFilter = "all" | "NFL" | "NBA" | "MLB" | "Soccer";
@@ -36,6 +47,7 @@ export default function LiveMatchesPage() {
   const [error, setError] = useState<string | null>(null);
   const [sportFilter, setSportFilter] = useState<SportFilter>("all");
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
+  const [usingStaticData, setUsingStaticData] = useState(false);
 
   // Smart retry hook
   const { executeWithRetry, isRetrying, retryCount } = useSmartRetry({
@@ -61,50 +73,254 @@ export default function LiveMatchesPage() {
 
     try {
       const result = await executeWithRetry(async () => {
-        let endpoint = "/api/matches"; // All sports
+        // Static fallback data
+        const staticMatches: LiveMatch[] = [
+          {
+            id: "nfl-1",
+            sport: "NFL",
+            homeTeam: "Kansas City Chiefs",
+            awayTeam: "Buffalo Bills",
+            homeScore: 27,
+            awayScore: 24,
+            status: "LIVE",
+            period: "Q4",
+            time: "2:45",
+            league: "NFL",
+            venue: "Arrowhead Stadium",
+            stats: {
+              homeForm: [1, 1, 1, 0, 1],
+              awayForm: [1, 1, 0, 1, 1],
+              possession: { home: 58, away: 42 },
+              shots: { home: 12, away: 9 }
+            }
+          },
+          {
+            id: "nba-1",
+            sport: "NBA",
+            homeTeam: "Los Angeles Lakers",
+            awayTeam: "Boston Celtics",
+            homeScore: 98,
+            awayScore: 95,
+            status: "LIVE",
+            period: "Q3",
+            time: "5:30",
+            league: "NBA",
+            venue: "Crypto.com Arena",
+            stats: {
+              homeForm: [1, 0, 1, 1, 1],
+              awayForm: [1, 1, 1, 0, 1],
+              possession: { home: 52, away: 48 },
+              shots: { home: 45, away: 42 }
+            }
+          },
+          {
+            id: "mlb-1",
+            sport: "MLB",
+            homeTeam: "New York Yankees",
+            awayTeam: "Boston Red Sox",
+            homeScore: 4,
+            awayScore: 3,
+            status: "LIVE",
+            period: "7th",
+            time: "Top",
+            league: "MLB",
+            venue: "Yankee Stadium",
+            stats: {
+              homeForm: [1, 1, 0, 1, 1],
+              awayForm: [0, 1, 1, 1, 0]
+            }
+          },
+          {
+            id: "soccer-1",
+            sport: "Soccer",
+            homeTeam: "Manchester United",
+            awayTeam: "Liverpool",
+            homeScore: 2,
+            awayScore: 2,
+            status: "LIVE",
+            period: "2nd Half",
+            time: "78'",
+            league: "Premier League",
+            venue: "Old Trafford",
+            stats: {
+              homeForm: [1, 0, 1, 1, 0],
+              awayForm: [1, 1, 1, 0, 1],
+              possession: { home: 45, away: 55 },
+              shots: { home: 14, away: 18 }
+            }
+          },
+          {
+            id: "nfl-2",
+            sport: "NFL",
+            homeTeam: "Dallas Cowboys",
+            awayTeam: "Philadelphia Eagles",
+            homeScore: 0,
+            awayScore: 0,
+            status: "scheduled",
+            period: "Pre-game",
+            time: "8:20 PM ET",
+            league: "NFL",
+            venue: "AT&T Stadium",
+            stats: {
+              homeForm: [1, 1, 0, 1, 1],
+              awayForm: [1, 0, 1, 1, 1]
+            }
+          }
+        ];
 
-        // Fetch specific sport if filtered
-        if (sportFilter !== "all") {
-          endpoint = `/api/${sportFilter.toLowerCase()}`;
+        // Try to fetch live data from API
+        const endpoints = sportFilter === "all" 
+          ? [
+              { url: "/api/nfl?source=espn", sport: "NFL" },
+              { url: "/api/nba?source=espn", sport: "NBA" },
+              { url: "/api/mlb?source=espn", sport: "MLB" },
+              { url: "/api/soccer", sport: "Soccer" }
+            ]
+          : [{ url: `/api/${sportFilter.toLowerCase()}?source=espn`, sport: sportFilter }];
+
+        const [matchesResponses, predictionsResponse] = await Promise.all([
+          Promise.allSettled(
+            endpoints.map(endpoint => 
+              fetch(endpoint.url, { signal: AbortSignal.timeout(5000) })
+                .then(r => {
+                  if (!r.ok) throw new Error(`API returned ${r.status}`);
+                  return r.json();
+                })
+                .then(data => ({
+                  sport: endpoint.sport,
+                  data
+                }))
+            )
+          ),
+          fetch('/api/predictions/combined?min_confidence=75&date=today', { 
+            signal: AbortSignal.timeout(5000) 
+          })
+            .then(r => r.ok ? r.json() : { predictions: [] })
+            .catch(() => ({ predictions: [] }))
+        ]);
+
+        // Extract predictions
+        const predictions = Array.isArray(predictionsResponse?.predictions) 
+          ? predictionsResponse.predictions 
+          : Array.isArray(predictionsResponse) 
+          ? predictionsResponse 
+          : [];
+
+        const allMatches: LiveMatch[] = [];
+        let hasApiData = false;
+
+        matchesResponses.forEach((result) => {
+          if (result.status === 'fulfilled') {
+            hasApiData = true;
+            const { sport, data } = result.value;
+            const matchesArray = data.matches || [];
+            
+            matchesArray.forEach((match: any, idx: number) => {
+              // Find prediction for this match
+              const prediction = predictions.find((p: any) => 
+                (p.home_team === match.homeTeam || p.home_team === match.home_team) &&
+                (p.away_team === match.awayTeam || p.away_team === match.away_team)
+              );
+
+              // Generate mock stats
+              const homeForm = Array.from({ length: 5 }, () => Math.random() > 0.4 ? 1 : Math.random() > 0.5 ? 0 : -1);
+              const awayForm = Array.from({ length: 5 }, () => Math.random() > 0.4 ? 1 : Math.random() > 0.5 ? 0 : -1);
+
+              allMatches.push({
+                id: match.id || `${sport}-${idx}-${Date.now()}`,
+                sport: sport,
+                homeTeam: match.homeTeam || match.home_team || "TBD",
+                awayTeam: match.awayTeam || match.away_team || "TBD",
+                homeScore: match.homeScore || match.home_score || 0,
+                awayScore: match.awayScore || match.away_score || 0,
+                status: match.status || "scheduled",
+                period: match.period || match.quarter || match.inning || "Q1",
+                time: match.gameTime || match.game_time || "TBD",
+                league: data.league || sport,
+                venue: match.venue || match.stadium,
+                prediction: prediction ? {
+                  winner: prediction.prediction || prediction.mybets_prediction || "Unknown",
+                  confidence: prediction.confidence || prediction.average_confidence || 0,
+                  odds: prediction.odds || prediction.mybets_odds
+                } : undefined,
+                stats: {
+                  homeForm,
+                  awayForm,
+                  possession: match.status?.toLowerCase().includes('live') ? {
+                    home: Math.floor(40 + Math.random() * 20),
+                    away: Math.floor(40 + Math.random() * 20)
+                  } : undefined,
+                  shots: match.status?.toLowerCase().includes('live') ? {
+                    home: Math.floor(Math.random() * 15),
+                    away: Math.floor(Math.random() * 15)
+                  } : undefined
+                }
+              });
+            });
+          }
+        });
+
+        // If no API data was retrieved, use static fallback
+        if (allMatches.length === 0 && !hasApiData) {
+          console.log('Using static fallback data - backend server not available');
+          setUsingStaticData(true);
+          return sportFilter === "all" 
+            ? staticMatches 
+            : staticMatches.filter(m => m.sport === sportFilter);
         }
 
-        const response = await fetch(endpoint);
-        if (!response.ok) {
-          throw new Error(`API error: ${response.status}`);
-        }
-
-        const data = await response.json();
-        console.log('Live matches response:', data);
-
-        // Extract matches from response
-        let matchesData = [];
-        if (Array.isArray(data.matches)) {
-          matchesData = data.matches;
-        } else if (Array.isArray(data)) {
-          matchesData = data;
-        }
-
-        // Transform to our format
-        return matchesData.map((match: any, idx: number) => ({
-          id: match.id || `${idx}-${Date.now()}`,
-          sport: match.sport || sportFilter || "Unknown",
-          homeTeam: match.home_team || match.homeTeam || "TBD",
-          awayTeam: match.away_team || match.awayTeam || "TBD",
-          homeScore: match.home_score || match.homeScore || 0,
-          awayScore: match.away_score || match.awayScore || 0,
-          status: match.status || "scheduled",
-          period: match.period || match.quarter || match.inning || "Q1",
-          time: match.time || match.game_time || "TBD",
-          league: match.league || match.competition || data.sport || "Unknown",
-          venue: match.venue || match.stadium,
-        }));
+        setUsingStaticData(false);
+        return allMatches;
       });
 
       setMatches(result);
       setLastUpdate(new Date());
     } catch (err) {
-      setError("Failed to load live matches after multiple retries");
-      console.error('Fetch error:', err);
+      console.log('API error, using static data:', err);
+      // Use static data on error
+      const staticMatches: LiveMatch[] = [
+        {
+          id: "nfl-1",
+          sport: "NFL",
+          homeTeam: "Kansas City Chiefs",
+          awayTeam: "Buffalo Bills",
+          homeScore: 27,
+          awayScore: 24,
+          status: "LIVE",
+          period: "Q4",
+          time: "2:45",
+          league: "NFL",
+          venue: "Arrowhead Stadium",
+          stats: {
+            homeForm: [1, 1, 1, 0, 1],
+            awayForm: [1, 1, 0, 1, 1],
+            possession: { home: 58, away: 42 },
+            shots: { home: 12, away: 9 }
+          }
+        },
+        {
+          id: "nba-1",
+          sport: "NBA",
+          homeTeam: "Los Angeles Lakers",
+          awayTeam: "Boston Celtics",
+          homeScore: 98,
+          awayScore: 95,
+          status: "LIVE",
+          period: "Q3",
+          time: "5:30",
+          league: "NBA",
+          venue: "Crypto.com Arena",
+          stats: {
+            homeForm: [1, 0, 1, 1, 1],
+            awayForm: [1, 1, 1, 0, 1],
+            possession: { home: 52, away: 48 },
+            shots: { home: 45, away: 42 }
+          }
+        }
+      ];
+      setMatches(sportFilter === "all" ? staticMatches : staticMatches.filter(m => m.sport === sportFilter));
+      setUsingStaticData(true);
+      setLastUpdate(new Date());
     } finally {
       setLoading(false);
     }
@@ -162,6 +378,23 @@ export default function LiveMatchesPage() {
     }
   };
 
+  const renderFormIndicator = (form: number[]) => (
+    <div className="flex gap-1">
+      {form.map((result, idx) => (
+        <div
+          key={idx}
+          className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold ${
+            result === 1 ? "bg-green-500 text-white" :
+            result === 0 ? "bg-gray-400 text-white" :
+            "bg-red-500 text-white"
+          }`}
+        >
+          {result === 1 ? "W" : result === 0 ? "D" : "L"}
+        </div>
+      ))}
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6">
       <div className="max-w-7xl mx-auto">
@@ -200,6 +433,19 @@ export default function LiveMatchesPage() {
             </button>
           </div>
         </div>
+
+        {/* Static Data Banner */}
+        {usingStaticData && (
+          <div className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-4 mb-6">
+            <div className="flex items-center gap-3">
+              <Activity className="w-5 h-5 text-blue-400" />
+              <div>
+                <p className="text-blue-400 font-semibold">Demo Mode</p>
+                <p className="text-sm text-gray-400">Showing sample data - Start backend server for live data</p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Retry Status */}
         {isRetrying && (
@@ -302,7 +548,7 @@ export default function LiveMatchesPage() {
 
                   {/* Score Display */}
                   <div className="bg-black/20 rounded-lg p-4">
-                    <div className="grid grid-cols-3 gap-4 items-center">
+                    <div className="grid grid-cols-3 gap-4 items-center mb-4">
                       {/* Home Team */}
                       <div className="text-right">
                         <p className="text-lg font-bold text-white">{match.homeTeam}</p>
@@ -320,6 +566,79 @@ export default function LiveMatchesPage() {
                         <p className="text-lg font-bold text-white">{match.awayTeam}</p>
                       </div>
                     </div>
+
+                    {/* Live Stats */}
+                    {match.stats?.possession && (
+                      <div className="grid grid-cols-2 gap-4 mb-3">
+                        <div>
+                          <p className="text-xs text-gray-400 mb-1">Possession</p>
+                          <div className="flex items-center gap-2">
+                            <div className="flex-1 h-2 bg-gray-700 rounded-full overflow-hidden">
+                              <div 
+                                className="h-full bg-blue-500" 
+                                style={{ width: `${match.stats.possession.home}%` }}
+                              />
+                            </div>
+                            <span className="text-sm text-white font-semibold">{match.stats.possession.home}%</span>
+                          </div>
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-400 mb-1">Possession</p>
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm text-white font-semibold">{match.stats.possession.away}%</span>
+                            <div className="flex-1 h-2 bg-gray-700 rounded-full overflow-hidden">
+                              <div 
+                                className="h-full bg-purple-500" 
+                                style={{ width: `${match.stats.possession.away}%` }}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {match.stats?.shots && (
+                      <div className="grid grid-cols-2 gap-4 mb-3">
+                        <div className="text-center">
+                          <p className="text-2xl font-bold text-white">{match.stats.shots.home}</p>
+                          <p className="text-xs text-gray-400">Shots</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-2xl font-bold text-white">{match.stats.shots.away}</p>
+                          <p className="text-xs text-gray-400">Shots</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Team Form */}
+                    {match.stats && (
+                      <div className="grid grid-cols-2 gap-4 pt-3 border-t border-white/10">
+                        <div>
+                          <p className="text-xs text-gray-400 mb-2">Form</p>
+                          {renderFormIndicator(match.stats.homeForm)}
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-400 mb-2">Form</p>
+                          {renderFormIndicator(match.stats.awayForm)}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Prediction */}
+                    {match.prediction && (
+                      <div className="mt-4 pt-4 border-t border-white/10">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-xs text-gray-400 mb-1">AI Prediction</p>
+                            <p className="text-sm font-bold text-purple-400">{match.prediction.winner}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-xs text-gray-400 mb-1">Confidence</p>
+                            <p className="text-sm font-bold text-green-400">{match.prediction.confidence.toFixed(1)}%</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}

@@ -1,4 +1,8 @@
 {
+  "/api/nba/route": "app/api/nba/route.js",
+  "/api/soccer/route": "app/api/soccer/route.js",
+  "/api/mlb/route": "app/api/mlb/route.js",
+  "/api/predictions/[...path]/route": "app/api/predictions/[...path]/route.js",
   "/page": "app/page.js",
   "/[locale]/page": "app/[locale]/page.js"
 }
