@@ -8,6 +8,33 @@ import UserMenu from "../components/UserMenu";
 import SettingsModal from "../components/SettingsModal";
 import { motion } from "framer-motion";
 
+// Assume these are defined elsewhere or imported
+const ErrorBoundary = ({ children }: { children: React.ReactNode }) => <>{children}</>;
+const StatCard = ({ title, value, icon, trend, color }: any) => (
+  <div style={{ background: "white", padding: "20px", borderRadius: "12px", minWidth: "250px" }}>
+    <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px" }}>
+      <div style={{ color, fontSize: "24px" }}>{icon}</div>
+      <h3 style={{ fontSize: "18px", fontWeight: "600" }}>{title}</h3>
+    </div>
+    <div style={{ fontSize: "28px", fontWeight: "700", marginBottom: "8px" }}>{value}</div>
+    <div style={{ fontSize: "13px", color: trend.startsWith("+") ? "green" : "red" }}>{trend}</div>
+  </div>
+);
+const t = (key: string) => {
+  if (key === "hero.title") return "Sports Central";
+  if (key === "hero.subtitle") return "Your All-in-One Sports & Entertainment Hub";
+  if (key === "features.title") return "Key Features";
+  if (key === "content.mainTitle") return "Discover Sports Central";
+  if (key === "content.description") return "Experience the future of sports engagement with AI-powered predictions, live tracking, social features, and a rewarding system.";
+  return key;
+};
+const featuredMatches = [
+  { title: "AI Accuracy", value: "87%", icon: "🤖", trend: "+5% vs last week", color: "#667eea" },
+  { title: "Live Viewers", value: "1.2M", icon: "⚡", trend: "+10% today", color: "#f6ad55" },
+  { title: "Rewards Earned", value: "50K Pi", icon: "🏆", trend: "+2% daily", color: "#805ad5" },
+];
+
+
 export default function HomePage() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
@@ -158,135 +185,215 @@ export default function HomePage() {
         </div>
       </aside>
 
-      {/* ✅ Main Content */}
+      {/* Main Content */}
       <motion.main 
         className="container"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <motion.header
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-        >
-          <h1>🏗️ Sports Central</h1>
-          <p>Your All-in-One Sports & Entertainment Hub</p>
-        </motion.header>
+        <ErrorBoundary>
+          <div className="container" style={{ paddingTop: "40px", paddingBottom: "100px" }}>
+            {/* Hero Section with Gradient - Jobs-style simplicity */}
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, ease: [0.6, 0.05, 0.01, 0.9] }}
+              style={{ textAlign: "center", marginBottom: "60px" }}
+            >
+              <motion.h1
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 1, delay: 0.2 }}
+                style={{
+                  fontSize: "clamp(2.5rem, 5vw, 4.5rem)",
+                  fontWeight: "700",
+                  background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  marginBottom: "20px",
+                  letterSpacing: "-0.03em",
+                  lineHeight: "1.1"
+                }}
+              >
+                {t("hero.title")}
+              </motion.h1>
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.8, delay: 0.4 }}
+                style={{
+                  fontSize: "clamp(1.1rem, 2vw, 1.35rem)",
+                  color: "rgba(255,255,255,0.85)",
+                  maxWidth: "650px",
+                  margin: "0 auto",
+                  fontWeight: "300",
+                  lineHeight: "1.6"
+                }}
+              >
+                {t("hero.subtitle")}
+              </motion.p>
+            </motion.div>
 
-        {/* Live Carousel */}
-        <section className="carousel-section">
-          <div className="carousel-header">
-            <div className="carousel-title">⚡ Live Matches</div>
-            <div className="carousel-controls">
-              <button className="carousel-btn" onClick={() => scrollCarousel(-1)}>←</button>
-              <button className="carousel-btn" onClick={() => scrollCarousel(1)}>→</button>
-            </div>
-          </div>
+            {/* ✅ Horizontal Scrolling Cards - Jobs-style polish */}
+            <section style={{ marginBottom: "60px" }}>
+              <motion.h2
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6 }}
+                style={{
+                  fontSize: "clamp(1.75rem, 3vw, 2.25rem)",
+                  fontWeight: "600",
+                  color: "#fff",
+                  marginBottom: "32px",
+                  textAlign: "center",
+                  letterSpacing: "-0.02em"
+                }}
+              >
+                {t("features.title")}
+              </motion.h2>
+              <div style={{ display: "flex", gap: "24px", overflowX: "auto", paddingBottom: "16px" }}>
+                {featuredMatches.map((match, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ 
+                      duration: 0.5, 
+                      delay: index * 0.1,
+                      ease: [0.6, 0.05, 0.01, 0.9]
+                    }}
+                    whileHover={{ 
+                      scale: 1.05, 
+                      y: -8,
+                      transition: { duration: 0.2 }
+                    }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <StatCard
+                      title={match.title}
+                      value={match.value}
+                      icon={match.icon}
+                      trend={match.trend}
+                      color={match.color}
+                    />
+                  </motion.div>
+                ))}
+              </div>
+            </section>
 
-          <div className="carousel-wrapper">
-            <div className="carousel-container" ref={liveRef}>
-              {[
-                {
-                  icon: "⚽",
-                  title: "Man United vs Arsenal",
-                  desc: "Premier League - Thrilling match at Old Trafford",
-                  meta: ["⏱️ 67'", "📊 2-1", "👥 73K watching"],
-                  badge: "LIVE",
-                  isLive: true,
-                },
-                {
-                  icon: "🏀",
-                  title: "Lakers vs Warriors",
-                  desc: "NBA - Western Conference showdown",
-                  meta: ["⏱️ Q3 02:14", "📊 98-101", "👥 18K watching"],
-                  badge: "LIVE",
-                  isLive: true,
-                },
-                {
-                  icon: "🏈",
-                  title: "Dolphins vs Bills",
-                  desc: "NFL - Divisional preview",
-                  meta: ["📅 Today", "📊 —", "👥 12K watching"],
-                },
-                {
-                  icon: "🎾",
-                  title: "Wimbledon Highlights",
-                  desc: "Recap of yesterday's semi-finals",
-                  meta: ["⏱️ 2h ago", "📊 Recap"],
-                },
-              ].map((match, i) => (
-                <motion.article 
-                  key={i} 
-                  className={`carousel-card ${match.isLive ? 'live-indicator' : ''}`}
-                  initial={{ opacity: 0, x: 50 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.4, delay: i * 0.1 }}
-                  whileHover={{ scale: 1.03, transition: { duration: 0.2 } }}
-                >
-                  {match.badge && (
-                    <motion.span 
-                      className="card-badge"
-                      animate={match.isLive ? { scale: [1, 1.05, 1] } : {}}
-                      transition={{ duration: 2, repeat: Infinity }}
+            {/* ✅ Main Content Section - Jobs-style clarity */}
+            <motion.section
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.7, ease: [0.6, 0.05, 0.01, 0.9] }}
+              style={{
+                background: "rgba(255,255,255,0.97)",
+                borderRadius: "24px",
+                padding: "48px",
+                boxShadow: "0 25px 70px rgba(0,0,0,0.25), 0 10px 25px rgba(0,0,0,0.15)",
+                marginBottom: "50px",
+                border: "1px solid rgba(255,255,255,0.3)"
+              }}
+            >
+              <h2 style={{
+                fontSize: "clamp(2rem, 3vw, 2.75rem)",
+                fontWeight: "600",
+                color: "#1a202c",
+                marginBottom: "24px",
+                letterSpacing: "-0.02em",
+                lineHeight: "1.2"
+              }}>
+                {t("content.mainTitle")}
+              </h2>
+              <p style={{
+                fontSize: "clamp(1.05rem, 2vw, 1.2rem)",
+                color: "#4a5568",
+                lineHeight: "1.75",
+                marginBottom: "32px",
+                fontWeight: "400"
+              }}>
+                {t("content.description")}
+              </p>
+            </motion.section>
+
+            {/* Live Carousel */}
+            <section className="carousel-section">
+              <div className="carousel-header">
+                <div className="carousel-title">⚡ Live Matches</div>
+                <div className="carousel-controls">
+                  <button className="carousel-btn" onClick={() => scrollCarousel(-1)}>←</button>
+                  <button className="carousel-btn" onClick={() => scrollCarousel(1)}>→</button>
+                </div>
+              </div>
+
+              <div className="carousel-wrapper">
+                <div className="carousel-container" ref={liveRef}>
+                  {[
+                    {
+                      icon: "⚽",
+                      title: "Man United vs Arsenal",
+                      desc: "Premier League - Thrilling match at Old Trafford",
+                      meta: ["⏱️ 67'", "📊 2-1", "👥 73K watching"],
+                      badge: "LIVE",
+                      isLive: true,
+                    },
+                    {
+                      icon: "🏀",
+                      title: "Lakers vs Warriors",
+                      desc: "NBA - Western Conference showdown",
+                      meta: ["⏱️ Q3 02:14", "📊 98-101", "👥 18K watching"],
+                      badge: "LIVE",
+                      isLive: true,
+                    },
+                    {
+                      icon: "🏈",
+                      title: "Dolphins vs Bills",
+                      desc: "NFL - Divisional preview",
+                      meta: ["📅 Today", "📊 —", "👥 12K watching"],
+                    },
+                    {
+                      icon: "🎾",
+                      title: "Wimbledon Highlights",
+                      desc: "Recap of yesterday's semi-finals",
+                      meta: ["⏱️ 2h ago", "📊 Recap"],
+                    },
+                  ].map((match, i) => (
+                    <motion.article 
+                      key={i} 
+                      className={`carousel-card ${match.isLive ? 'live-indicator' : ''}`}
+                      initial={{ opacity: 0, x: 50 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.4, delay: i * 0.1 }}
+                      whileHover={{ scale: 1.03, transition: { duration: 0.2 } }}
                     >
-                      🔴 {match.badge}
-                    </motion.span>
-                  )}
-                  <div className="card-icon">{match.icon}</div>
-                  <div className="card-title">{match.title}</div>
-                  <div className="card-description">{match.desc}</div>
-                  <div className="card-meta">
-                    {match.meta.map((m, i) => (
-                      <div key={i} className="card-meta-item">{m}</div>
-                    ))}
-                  </div>
-                </motion.article>
-              ))}
-            </div>
+                      {match.badge && (
+                        <motion.span 
+                          className="card-badge"
+                          animate={match.isLive ? { scale: [1, 1.05, 1] } : {}}
+                          transition={{ duration: 2, repeat: Infinity }}
+                        >
+                          🔴 {match.badge}
+                        </motion.span>
+                      )}
+                      <div className="card-icon">{match.icon}</div>
+                      <div className="card-title">{match.title}</div>
+                      <div className="card-description">{match.desc}</div>
+                      <div className="card-meta">
+                        {match.meta.map((m, i) => (
+                          <div key={i} className="card-meta-item">{m}</div>
+                        ))}
+                      </div>
+                    </motion.article>
+                  ))}
+                </div>
+              </div>
+            </section>
           </div>
-        </section>
-
-        {/* Overview Section */}
-        <section className="overview section">
-          <h2>🌟 What Makes Us Different</h2>
-          <p>
-            MagajiCo is your all-in-one sports platform combining AI-powered
-            predictions, live tracking, social connections, and rewards.
-          </p>
-
-          <div className="apps-grid" style={{ marginTop: 20 }}>
-            <div className="app-card">
-              <h3>🎯 AI Predictions</h3>
-              <ul>
-                <li>87% accuracy rate</li>
-                <li>Multi-source analysis</li>
-                <li>Real-time updates</li>
-                <li>Betting insights</li>
-              </ul>
-            </div>
-
-            <div className="app-card">
-              <h3>⚡ Live Tracking</h3>
-              <ul>
-                <li>Real-time scores</li>
-                <li>Match commentary</li>
-                <li>Statistics & analytics</li>
-                <li>Multi-sport coverage</li>
-              </ul>
-            </div>
-
-            <div className="app-card">
-              <h3>🏆 Rewards System</h3>
-              <ul>
-                <li>Earn Pi Coins</li>
-                <li>Unlock badges</li>
-                <li>Daily challenges</li>
-                <li>Leaderboards</li>
-              </ul>
-            </div>
-          </div>
-        </section>
+        </ErrorBoundary>
 
         <footer>© MagajiCo Sports Central — Design & Architecture</footer>
       </motion.main>
