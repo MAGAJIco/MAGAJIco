@@ -292,6 +292,58 @@
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
+/* Dark Mode Global Styles */
+.dark {
+  color-scheme: dark;
+}
+
+.dark body {
+  background-color: #111827;
+  color: #f9fafb;
+}
+
+.dark .navbar {
+  background: #1f2937;
+  border-bottom: 1px solid #374151;
+}
+
+.dark .nav-icon {
+  color: #d1d5db;
+}
+
+.dark .nav-icon:hover {
+  background: #374151;
+}
+
+.dark .logo {
+  color: #818cf8;
+}
+
+.dark .mobile-bottom-nav {
+  background: rgba(31, 41, 55, 0.98);
+  border-top-color: #374151;
+}
+
+.dark .app-drawer {
+  background: #1f2937;
+}
+
+.dark .drawer-header {
+  border-bottom-color: #374151;
+}
+
+.dark .app-item {
+  background: #374151;
+}
+
+.dark .app-item:hover {
+  background: #4b5563;
+}
+
+.dark .app-name {
+  color: #d1d5db;
+}
+
 /* Hover Effects */
 .hover-lift {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -630,13 +682,64 @@ html {
 }
 
 /* Dark Mode */
-[data-theme="dark"] {
+[data-theme="dark"],
+.dark {
   --color-bg-primary: #1f2937;
   --color-bg-secondary: #111827;
   --color-bg-tertiary: #0f172a;
   --color-text-primary: #f9fafb;
   --color-text-secondary: #d1d5db;
   --color-text-tertiary: #9ca3af;
+}
+
+[data-theme="dark"] body,
+.dark body {
+  background-color: #111827;
+  color: #f9fafb;
+}
+
+[data-theme="dark"] .settings-modal,
+.dark .settings-modal {
+  background: #1f2937;
+  color: #f9fafb;
+}
+
+[data-theme="dark"] .settings-header h2,
+.dark .settings-header h2 {
+  color: #f9fafb;
+}
+
+[data-theme="dark"] .setting-group h3,
+.dark .setting-group h3 {
+  color: #f9fafb;
+}
+
+[data-theme="dark"] .setting-select,
+.dark .setting-select {
+  background: #374151;
+  color: #f9fafb;
+  border-color: #4b5563;
+}
+
+[data-theme="dark"] .about-section,
+.dark .about-section {
+  background: #374151;
+}
+
+[data-theme="dark"] .about-title,
+.dark .about-title {
+  color: #f9fafb;
+}
+
+[data-theme="dark"] .close-btn,
+.dark .close-btn {
+  background: #374151;
+  color: #f9fafb;
+}
+
+[data-theme="dark"] .close-btn:hover,
+.dark .close-btn:hover {
+  background: #4b5563;
 }
 
 /* Utility Classes */
