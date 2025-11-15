@@ -19,6 +19,23 @@ export default function SettingsModal({ isOpen, onClose, currentLocale = "en" }:
 
   useEffect(() => {
     setLanguage(currentLocale);
+    
+    // Load saved settings
+    if (typeof window !== "undefined") {
+      const savedSettings = localStorage.getItem("settings");
+      if (savedSettings) {
+        const settings = JSON.parse(savedSettings);
+        setNotifications(settings.notifications ?? true);
+        setDarkMode(settings.darkMode ?? false);
+        setAutoplay(settings.autoplay ?? true);
+      }
+      
+      // Sync with current theme
+      const currentTheme = localStorage.getItem("theme");
+      if (currentTheme) {
+        setDarkMode(currentTheme === "dark");
+      }
+    }
   }, [currentLocale]);
 
   if (!isOpen) return null;
@@ -35,6 +52,10 @@ export default function SettingsModal({ isOpen, onClose, currentLocale = "en" }:
         darkMode,
         autoplay
       }));
+      
+      // Apply theme changes
+      localStorage.setItem("theme", darkMode ? "dark" : "light");
+      document.documentElement.setAttribute("data-theme", darkMode ? "dark" : "light");
     }
     
     onClose();

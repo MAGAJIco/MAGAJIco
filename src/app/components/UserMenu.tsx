@@ -5,9 +5,10 @@ import { useState } from "react";
 interface UserMenuProps {
   user: { name: string; email: string } | null;
   onSignOut: () => void;
+  onOpenSettings?: () => void;
 }
 
-export default function UserMenu({ user, onSignOut }: UserMenuProps) {
+export default function UserMenu({ user, onSignOut, onOpenSettings }: UserMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   if (!user) return null;
@@ -21,7 +22,7 @@ export default function UserMenu({ user, onSignOut }: UserMenuProps) {
         >
           {user.name.charAt(0).toUpperCase()}
         </div>
-        
+
         {isOpen && (
           <div className="user-dropdown">
             <div className="user-info">
@@ -34,7 +35,10 @@ export default function UserMenu({ user, onSignOut }: UserMenuProps) {
               </div>
             </div>
             <div className="dropdown-divider" />
-            <button className="dropdown-item" onClick={() => setIsOpen(false)}>
+            <button className="dropdown-item" onClick={() => {
+              setIsOpen(false);
+              onOpenSettings?.(); 
+            }}>
               ⚙️ Settings
             </button>
             <button className="dropdown-item" onClick={() => setIsOpen(false)}>
@@ -53,7 +57,7 @@ export default function UserMenu({ user, onSignOut }: UserMenuProps) {
           </div>
         )}
       </div>
-      
+
       {isOpen && (
         <div 
           className="user-menu-overlay"
@@ -65,7 +69,7 @@ export default function UserMenu({ user, onSignOut }: UserMenuProps) {
         .user-menu-container {
           position: relative;
         }
-        
+
         .nav-icon.profile {
           width: 40px;
           height: 40px;
@@ -79,17 +83,17 @@ export default function UserMenu({ user, onSignOut }: UserMenuProps) {
           cursor: pointer;
           transition: transform 0.2s;
         }
-        
+
         .nav-icon.profile:hover {
           transform: scale(1.05);
         }
-        
+
         .user-menu-overlay {
           position: fixed;
           inset: 0;
           z-index: 1500;
         }
-        
+
         .user-dropdown {
           position: absolute;
           top: calc(100% + 8px);
@@ -101,7 +105,7 @@ export default function UserMenu({ user, onSignOut }: UserMenuProps) {
           z-index: 1600;
           overflow: hidden;
         }
-        
+
         .user-info {
           display: flex;
           align-items: center;
@@ -109,7 +113,7 @@ export default function UserMenu({ user, onSignOut }: UserMenuProps) {
           padding: 16px;
           background: linear-gradient(135deg, #667eea10, #764ba210);
         }
-        
+
         .user-avatar {
           width: 48px;
           height: 48px;
@@ -122,28 +126,28 @@ export default function UserMenu({ user, onSignOut }: UserMenuProps) {
           align-items: center;
           justify-content: center;
         }
-        
+
         .user-details {
           flex: 1;
         }
-        
+
         .user-name {
           font-weight: 600;
           color: #333;
           margin-bottom: 4px;
         }
-        
+
         .user-email {
           font-size: 14px;
           color: #666;
         }
-        
+
         .dropdown-divider {
           height: 1px;
           background: #e5e7eb;
           margin: 8px 0;
         }
-        
+
         .dropdown-item {
           width: 100%;
           padding: 12px 16px;
@@ -155,15 +159,15 @@ export default function UserMenu({ user, onSignOut }: UserMenuProps) {
           transition: background 0.2s;
           color: #333;
         }
-        
+
         .dropdown-item:hover {
           background: #f5f5f5;
         }
-        
+
         .dropdown-item.sign-out {
           color: #ef4444;
         }
-        
+
         .dropdown-item.sign-out:hover {
           background: #fee2e2;
         }

@@ -105,7 +105,11 @@ export default function HomePage() {
             </svg>
           </div>
           {user ? (
-            <UserMenu user={user} onSignOut={handleSignOut} />
+            <UserMenu 
+              user={user} 
+              onSignOut={handleSignOut}
+              onOpenSettings={() => setSettingsModalOpen(true)}
+            />
           ) : (
             <div 
               className="nav-icon profile"
