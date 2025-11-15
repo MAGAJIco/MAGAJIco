@@ -1,9 +1,14 @@
 {
   "pages": {
-    "/[locale]/page": [
+    "/[locale]/matches/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/[locale]/page.js"
+      "static/chunks/app/[locale]/matches/page.js"
+    ],
+    "/[locale]/matches/layout": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/[locale]/matches/layout.js"
     ],
     "/[locale]/layout": [
       "static/chunks/webpack.js",
@@ -30,6 +35,11 @@
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/page.js"
+    ],
+    "/[locale]/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/[locale]/page.js"
     ]
   }
 }
