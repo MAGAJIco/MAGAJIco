@@ -6,7 +6,7 @@
  * or disable the default devtool with "devtool: false".
  * If you are looking for production-ready output files, see mode: "production" (https://webpack.js.org/configuration/mode/).
  */
-(self["webpackChunk_N_E"] = self["webpackChunk_N_E"] || []).push([["app/[locale]/loading"],{
+self["webpackHotUpdate_N_E"]("app/[locale]/loading",{
 
 /***/ "(app-pages-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-client-entry-loader.js?modules=%7B%22request%22%3A%22%2Fhome%2Frunner%2Fworkspace%2Fsrc%2Fapp%2Fcomponents%2FSkeletonCard.tsx%22%2C%22ids%22%3A%5B%22default%22%5D%7D&server=false!":
 /*!******************************************************************************************************************************************************************************************************************************************************!*\
@@ -104,11 +104,4 @@ eval(__webpack_require__.ts("\n\nif (false) {} else {\n  module.exports = __webp
 
 /***/ })
 
-},
-/******/ function(__webpack_require__) { // webpackRuntimeModules
-/******/ var __webpack_exec__ = function(moduleId) { return __webpack_require__(__webpack_require__.s = moduleId); }
-/******/ __webpack_require__.O(0, ["main-app"], function() { return __webpack_exec__("(app-pages-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-client-entry-loader.js?modules=%7B%22request%22%3A%22%2Fhome%2Frunner%2Fworkspace%2Fsrc%2Fapp%2Fcomponents%2FSkeletonCard.tsx%22%2C%22ids%22%3A%5B%22default%22%5D%7D&server=false!"); });
-/******/ var __webpack_exports__ = __webpack_require__.O();
-/******/ _N_E = __webpack_exports__;
-/******/ }
-]);
+});
