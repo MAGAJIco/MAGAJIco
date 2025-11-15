@@ -47,6 +47,7 @@ export default function LiveMatchesPage() {
   const [error, setError] = useState<string | null>(null);
   const [sportFilter, setSportFilter] = useState<SportFilter>("all");
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
+  const [usingStaticData, setUsingStaticData] = useState(false);
 
   // Smart retry hook
   const { executeWithRetry, isRetrying, retryCount } = useSmartRetry({
@@ -72,7 +73,102 @@ export default function LiveMatchesPage() {
 
     try {
       const result = await executeWithRetry(async () => {
-        // Fetch both live matches and predictions in parallel
+        // Static fallback data
+        const staticMatches: LiveMatch[] = [
+          {
+            id: "nfl-1",
+            sport: "NFL",
+            homeTeam: "Kansas City Chiefs",
+            awayTeam: "Buffalo Bills",
+            homeScore: 27,
+            awayScore: 24,
+            status: "LIVE",
+            period: "Q4",
+            time: "2:45",
+            league: "NFL",
+            venue: "Arrowhead Stadium",
+            stats: {
+              homeForm: [1, 1, 1, 0, 1],
+              awayForm: [1, 1, 0, 1, 1],
+              possession: { home: 58, away: 42 },
+              shots: { home: 12, away: 9 }
+            }
+          },
+          {
+            id: "nba-1",
+            sport: "NBA",
+            homeTeam: "Los Angeles Lakers",
+            awayTeam: "Boston Celtics",
+            homeScore: 98,
+            awayScore: 95,
+            status: "LIVE",
+            period: "Q3",
+            time: "5:30",
+            league: "NBA",
+            venue: "Crypto.com Arena",
+            stats: {
+              homeForm: [1, 0, 1, 1, 1],
+              awayForm: [1, 1, 1, 0, 1],
+              possession: { home: 52, away: 48 },
+              shots: { home: 45, away: 42 }
+            }
+          },
+          {
+            id: "mlb-1",
+            sport: "MLB",
+            homeTeam: "New York Yankees",
+            awayTeam: "Boston Red Sox",
+            homeScore: 4,
+            awayScore: 3,
+            status: "LIVE",
+            period: "7th",
+            time: "Top",
+            league: "MLB",
+            venue: "Yankee Stadium",
+            stats: {
+              homeForm: [1, 1, 0, 1, 1],
+              awayForm: [0, 1, 1, 1, 0]
+            }
+          },
+          {
+            id: "soccer-1",
+            sport: "Soccer",
+            homeTeam: "Manchester United",
+            awayTeam: "Liverpool",
+            homeScore: 2,
+            awayScore: 2,
+            status: "LIVE",
+            period: "2nd Half",
+            time: "78'",
+            league: "Premier League",
+            venue: "Old Trafford",
+            stats: {
+              homeForm: [1, 0, 1, 1, 0],
+              awayForm: [1, 1, 1, 0, 1],
+              possession: { home: 45, away: 55 },
+              shots: { home: 14, away: 18 }
+            }
+          },
+          {
+            id: "nfl-2",
+            sport: "NFL",
+            homeTeam: "Dallas Cowboys",
+            awayTeam: "Philadelphia Eagles",
+            homeScore: 0,
+            awayScore: 0,
+            status: "scheduled",
+            period: "Pre-game",
+            time: "8:20 PM ET",
+            league: "NFL",
+            venue: "AT&T Stadium",
+            stats: {
+              homeForm: [1, 1, 0, 1, 1],
+              awayForm: [1, 0, 1, 1, 1]
+            }
+          }
+        ];
+
+        // Try to fetch live data from API
         const endpoints = sportFilter === "all" 
           ? [
               { url: "/api/nfl?source=espn", sport: "NFL" },
@@ -85,14 +181,21 @@ export default function LiveMatchesPage() {
         const [matchesResponses, predictionsResponse] = await Promise.all([
           Promise.allSettled(
             endpoints.map(endpoint => 
-              fetch(endpoint.url).then(r => r.json()).then(data => ({
-                sport: endpoint.sport,
-                data
-              }))
+              fetch(endpoint.url, { signal: AbortSignal.timeout(5000) })
+                .then(r => {
+                  if (!r.ok) throw new Error(`API returned ${r.status}`);
+                  return r.json();
+                })
+                .then(data => ({
+                  sport: endpoint.sport,
+                  data
+                }))
             )
           ),
-          fetch('/api/predictions/combined?min_confidence=75&date=today')
-            .then(r => r.json())
+          fetch('/api/predictions/combined?min_confidence=75&date=today', { 
+            signal: AbortSignal.timeout(5000) 
+          })
+            .then(r => r.ok ? r.json() : { predictions: [] })
             .catch(() => ({ predictions: [] }))
         ]);
 
@@ -104,9 +207,11 @@ export default function LiveMatchesPage() {
           : [];
 
         const allMatches: LiveMatch[] = [];
+        let hasApiData = false;
 
         matchesResponses.forEach((result) => {
           if (result.status === 'fulfilled') {
+            hasApiData = true;
             const { sport, data } = result.value;
             const matchesArray = data.matches || [];
             
@@ -155,14 +260,67 @@ export default function LiveMatchesPage() {
           }
         });
 
+        // If no API data was retrieved, use static fallback
+        if (allMatches.length === 0 && !hasApiData) {
+          console.log('Using static fallback data - backend server not available');
+          setUsingStaticData(true);
+          return sportFilter === "all" 
+            ? staticMatches 
+            : staticMatches.filter(m => m.sport === sportFilter);
+        }
+
+        setUsingStaticData(false);
         return allMatches;
       });
 
       setMatches(result);
       setLastUpdate(new Date());
     } catch (err) {
-      setError("Failed to load live matches after multiple retries");
-      console.error('Fetch error:', err);
+      console.log('API error, using static data:', err);
+      // Use static data on error
+      const staticMatches: LiveMatch[] = [
+        {
+          id: "nfl-1",
+          sport: "NFL",
+          homeTeam: "Kansas City Chiefs",
+          awayTeam: "Buffalo Bills",
+          homeScore: 27,
+          awayScore: 24,
+          status: "LIVE",
+          period: "Q4",
+          time: "2:45",
+          league: "NFL",
+          venue: "Arrowhead Stadium",
+          stats: {
+            homeForm: [1, 1, 1, 0, 1],
+            awayForm: [1, 1, 0, 1, 1],
+            possession: { home: 58, away: 42 },
+            shots: { home: 12, away: 9 }
+          }
+        },
+        {
+          id: "nba-1",
+          sport: "NBA",
+          homeTeam: "Los Angeles Lakers",
+          awayTeam: "Boston Celtics",
+          homeScore: 98,
+          awayScore: 95,
+          status: "LIVE",
+          period: "Q3",
+          time: "5:30",
+          league: "NBA",
+          venue: "Crypto.com Arena",
+          stats: {
+            homeForm: [1, 0, 1, 1, 1],
+            awayForm: [1, 1, 1, 0, 1],
+            possession: { home: 52, away: 48 },
+            shots: { home: 45, away: 42 }
+          }
+        }
+      ];
+      setMatches(sportFilter === "all" ? staticMatches : staticMatches.filter(m => m.sport === sportFilter));
+      setUsingStaticData(true);
+      setLastUpdate(new Date());
     } finally {
       setLoading(false);
     }
@@ -275,6 +433,19 @@ export default function LiveMatchesPage() {
             </button>
           </div>
         </div>
+
+        {/* Static Data Banner */}
+        {usingStaticData && (
+          <div className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-4 mb-6">
+            <div className="flex items-center gap-3">
+              <Activity className="w-5 h-5 text-blue-400" />
+              <div>
+                <p className="text-blue-400 font-semibold">Demo Mode</p>
+                <p className="text-sm text-gray-400">Showing sample data - Start backend server for live data</p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Retry Status */}
         {isRetrying && (
