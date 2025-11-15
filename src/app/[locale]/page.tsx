@@ -34,15 +34,54 @@ const featuredMatches = [
   { title: "Rewards Earned", value: "50K Pi", icon: "🏆", trend: "+2% daily", color: "#805ad5" },
 ];
 
+// Social Proof Data
+const socialProofMetrics = {
+  activeUsers: 24567,
+  totalPredictions: 892341,
+  accuracyRate: 87,
+  sharesLast24h: 15234,
+  topPredictors: [
+    { name: "SportsFan2024", accuracy: 94, predictions: 156 },
+    { name: "AIPredictor", accuracy: 91, predictions: 203 },
+    { name: "MatchGuru", accuracy: 89, predictions: 187 }
+  ]
+};
+
 
 export default function HomePage() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [settingsModalOpen, setSettingsModalOpen] = useState(false);
   const [user, setUser] = useState<{ name: string; email: string } | null>(null);
+  const [activeViewers, setActiveViewers] = useState(socialProofMetrics.activeUsers);
+  const [recentActivity, setRecentActivity] = useState<string[]>([]);
   const liveRef = useRef<HTMLDivElement | null>(null);
   const params = useParams();
   const locale = (params?.locale as string) || "en";
+
+  // Simulate real-time viewer updates (Zuckerberg's FOMO tactic)
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveViewers(prev => prev + Math.floor(Math.random() * 20) - 8);
+    }, 3000);
+
+    // Simulate activity feed
+    const activityInterval = setInterval(() => {
+      const activities = [
+        "🎯 SportsFan2024 predicted Lakers win with 94% confidence",
+        "⚡ MatchGuru just earned 500 Pi for accurate prediction",
+        "🔥 AIPredictor is on a 12-game streak!",
+        "👥 1,234 users shared today's top prediction",
+        "🏆 New record: 94% accuracy this week!"
+      ];
+      setRecentActivity([activities[Math.floor(Math.random() * activities.length)]]);
+    }, 5000);
+
+    return () => {
+      clearInterval(interval);
+      clearInterval(activityInterval);
+    };
+  }, []);
 
   const handleSignIn = (email: string, password: string) => {
     setUser({ name: email.split("@")[0], email });
@@ -235,6 +274,73 @@ export default function HomePage() {
               </motion.p>
             </motion.div>
 
+            {/* Social Proof Bar - Zuckerberg Style */}
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="social-proof-bar"
+              style={{
+                background: "rgba(255,255,255,0.1)",
+                backdropFilter: "blur(10px)",
+                borderRadius: "16px",
+                padding: "16px 24px",
+                marginBottom: "40px",
+                border: "1px solid rgba(255,255,255,0.2)",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                flexWrap: "wrap",
+                gap: "16px"
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                <motion.div
+                  animate={{ scale: [1, 1.2, 1] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  style={{
+                    width: "12px",
+                    height: "12px",
+                    background: "#10b981",
+                    borderRadius: "50%",
+                    boxShadow: "0 0 20px #10b981"
+                  }}
+                />
+                <span style={{ color: "#fff", fontSize: "15px", fontWeight: "500" }}>
+                  🔴 <strong>{activeViewers.toLocaleString()}</strong> people watching now
+                </span>
+              </div>
+              <div style={{ color: "rgba(255,255,255,0.8)", fontSize: "14px" }}>
+                📊 {socialProofMetrics.totalPredictions.toLocaleString()} predictions made today
+              </div>
+              <div style={{ color: "rgba(255,255,255,0.8)", fontSize: "14px" }}>
+                🎯 {socialProofMetrics.accuracyRate}% average accuracy
+              </div>
+            </motion.div>
+
+            {/* Live Activity Feed - Social Validation */}
+            {recentActivity.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                style={{
+                  background: "linear-gradient(135deg, rgba(102,126,234,0.2), rgba(118,75,162,0.2))",
+                  borderRadius: "12px",
+                  padding: "12px 20px",
+                  marginBottom: "32px",
+                  border: "1px solid rgba(255,255,255,0.2)",
+                  overflow: "hidden"
+                }}
+              >
+                <motion.div
+                  animate={{ x: [0, -10, 0] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  style={{ color: "#fff", fontSize: "14px", fontWeight: "500" }}
+                >
+                  {recentActivity[0]}
+                </motion.div>
+              </motion.div>
+            )}
+
             {/* ✅ Horizontal Scrolling Cards - Jobs-style polish */}
             <section style={{ marginBottom: "60px" }}>
               <motion.h2
@@ -283,6 +389,110 @@ export default function HomePage() {
                 ))}
               </div>
             </section>
+
+            {/* Viral Sharing Section - Zuckerberg's Growth Hack */}
+            <motion.section
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              style={{
+                background: "linear-gradient(135deg, #667eea, #764ba2)",
+                borderRadius: "24px",
+                padding: "40px",
+                marginBottom: "40px",
+                textAlign: "center",
+                border: "1px solid rgba(255,255,255,0.3)"
+              }}
+            >
+              <h3 style={{ color: "#fff", fontSize: "28px", fontWeight: "700", marginBottom: "16px" }}>
+                🎁 Share & Earn Rewards
+              </h3>
+              <p style={{ color: "rgba(255,255,255,0.9)", fontSize: "16px", marginBottom: "24px" }}>
+                Invite friends and earn <strong>100 Pi</strong> for each active referral!
+              </p>
+              <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
+                <button style={{
+                  padding: "12px 32px",
+                  background: "#fff",
+                  color: "#667eea",
+                  border: "none",
+                  borderRadius: "12px",
+                  fontSize: "16px",
+                  fontWeight: "600",
+                  cursor: "pointer",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.1)"
+                }}>
+                  📱 Share on Social Media
+                </button>
+                <button style={{
+                  padding: "12px 32px",
+                  background: "rgba(255,255,255,0.2)",
+                  color: "#fff",
+                  border: "1px solid rgba(255,255,255,0.3)",
+                  borderRadius: "12px",
+                  fontSize: "16px",
+                  fontWeight: "600",
+                  cursor: "pointer"
+                }}>
+                  📋 Copy Invite Link
+                </button>
+              </div>
+              <p style={{ color: "rgba(255,255,255,0.7)", fontSize: "13px", marginTop: "16px" }}>
+                ⚡ {socialProofMetrics.sharesLast24h.toLocaleString()} people shared in the last 24 hours
+              </p>
+            </motion.section>
+
+            {/* Top Predictors Leaderboard - Social Validation */}
+            <motion.section
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              style={{
+                background: "rgba(255,255,255,0.97)",
+                borderRadius: "24px",
+                padding: "40px",
+                marginBottom: "40px",
+                border: "1px solid rgba(255,255,255,0.3)"
+              }}
+            >
+              <h3 style={{ fontSize: "24px", fontWeight: "700", marginBottom: "24px", color: "#1a202c" }}>
+                🏆 Top Predictors This Week
+              </h3>
+              <div style={{ display: "grid", gap: "16px" }}>
+                {socialProofMetrics.topPredictors.map((predictor, index) => (
+                  <div
+                    key={index}
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      padding: "16px",
+                      background: index === 0 ? "linear-gradient(135deg, #ffd70020, #ffa50020)" : "#f9fafb",
+                      borderRadius: "12px",
+                      border: index === 0 ? "2px solid #ffd700" : "1px solid #e5e7eb"
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                      <span style={{ fontSize: "24px" }}>
+                        {index === 0 ? "🥇" : index === 1 ? "🥈" : "🥉"}
+                      </span>
+                      <div>
+                        <div style={{ fontWeight: "600", color: "#333" }}>{predictor.name}</div>
+                        <div style={{ fontSize: "13px", color: "#666" }}>
+                          {predictor.predictions} predictions
+                        </div>
+                      </div>
+                    </div>
+                    <div style={{ textAlign: "right" }}>
+                      <div style={{ fontSize: "20px", fontWeight: "700", color: "#10b981" }}>
+                        {predictor.accuracy}%
+                      </div>
+                      <div style={{ fontSize: "12px", color: "#666" }}>accuracy</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </motion.section>
 
             {/* ✅ Main Content Section - Jobs-style clarity */}
             <motion.section
