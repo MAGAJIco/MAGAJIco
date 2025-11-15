@@ -6,7 +6,7 @@ expertMode = true
 channel = "stable-25_05"
 
 [workflows]
-runButton = "Start Both Servers"
+runButton = "Project"
 
 [[workflows.workflow]]
 name = "Project"
@@ -47,13 +47,13 @@ args = "npm run dev"
 name = "MagajiCo Frontend"
 author = "agent"
 
+[workflows.workflow.metadata]
+outputType = "webview"
+
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "npm run dev"
 waitForPort = 5000
-
-[workflows.workflow.metadata]
-outputType = "webview"
 
 [[workflows.workflow]]
 name = "Start Frontend Only"
@@ -77,8 +77,8 @@ localPort = 5000
 externalPort = 80
 
 [[ports]]
-localPort = 8000
-externalPort = 8000
+localPort = 39335
+externalPort = 4200
 
 [[ports]]
 localPort = 40399
