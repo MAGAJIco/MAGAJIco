@@ -738,8 +738,40 @@ export default function HomePage() {
             left: 0;
             right: 0;
             z-index: 40;
-            background: rgba(255,255,255,0.95);
+            background: rgba(255,255,255,0.98);
             backdrop-filter: blur(10px);
+            box-shadow: 0 -4px 12px rgba(0,0,0,0.1);
+            border-top: 1px solid rgba(0,0,0,0.1);
+          }
+          .mobile-bottom-nav .touch-target {
+            min-width: 60px;
+            min-height: 60px;
+          }
+          .drawer-overlay { backdrop-filter: blur(4px); }
+          .app-drawer {
+            width: 100% !important;
+            max-width: 100% !important;
+            height: 80vh !important;
+            border-radius: 24px 24px 0 0 !important;
+          }
+          .app-drawer-grid {
+            grid-template-columns: repeat(3, 1fr) !important;
+            gap: 16px !important;
+            padding: 20px !important;
+          }
+          .app-item {
+            flex-direction: column !important;
+            padding: 16px 12px !important;
+          }
+          .app-icon {
+            width: 48px !important;
+            height: 48px !important;
+            font-size: 24px !important;
+          }
+          .app-name {
+            font-size: 12px !important;
+            margin-top: 8px !important;
+          }ilter: blur(10px);
             border-top: 1px solid #e5e7eb;
             box-shadow: 0 -10px 30px rgba(0,0,0,0.1);
           }

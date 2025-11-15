@@ -41,6 +41,15 @@ export default function SettingsModal({ isOpen, onClose, currentLocale = "en" }:
     }
   }, [isOpen, currentLocale]);
 
+  // Real-time theme preview
+  useEffect(() => {
+    if (typeof window !== "undefined" && isOpen) {
+      const newTheme = darkMode ? "dark" : "light";
+      document.documentElement.setAttribute("data-theme", newTheme);
+      document.documentElement.classList.toggle("dark", darkMode);
+    }
+  }, [darkMode, isOpen]);
+
   if (!isOpen) return null;
 
   const handleSave = () => {
@@ -56,9 +65,20 @@ export default function SettingsModal({ isOpen, onClose, currentLocale = "en" }:
         autoplay
       }));
       
-      // Apply theme changes
-      localStorage.setItem("theme", darkMode ? "dark" : "light");
-      document.documentElement.setAttribute("data-theme", darkMode ? "dark" : "light");
+      // Apply theme changes immediately
+      const newTheme = darkMode ? "dark" : "light";
+      localStorage.setItem("theme", newTheme);
+      document.documentElement.setAttribute("data-theme", newTheme);
+      document.documentElement.classList.toggle("dark", darkMode);
+      
+      // Force a reflow to ensure styles are applied
+      if (darkMode) {
+        document.body.style.backgroundColor = "#111827";
+        document.body.style.color = "#F9FAFB";
+      } else {
+        document.body.style.backgroundColor = "#FFFFFF";
+        document.body.style.color = "#111827";
+      }
     }
     
     onClose();

@@ -68,13 +68,64 @@
 }
 
 /* Dark Mode */
-[data-theme="dark"] {
+[data-theme="dark"],
+.dark {
   --color-bg-primary: #1f2937;
   --color-bg-secondary: #111827;
   --color-bg-tertiary: #0f172a;
   --color-text-primary: #f9fafb;
   --color-text-secondary: #d1d5db;
   --color-text-tertiary: #9ca3af;
+}
+
+[data-theme="dark"] body,
+.dark body {
+  background-color: #111827;
+  color: #f9fafb;
+}
+
+[data-theme="dark"] .settings-modal,
+.dark .settings-modal {
+  background: #1f2937;
+  color: #f9fafb;
+}
+
+[data-theme="dark"] .settings-header h2,
+.dark .settings-header h2 {
+  color: #f9fafb;
+}
+
+[data-theme="dark"] .setting-group h3,
+.dark .setting-group h3 {
+  color: #f9fafb;
+}
+
+[data-theme="dark"] .setting-select,
+.dark .setting-select {
+  background: #374151;
+  color: #f9fafb;
+  border-color: #4b5563;
+}
+
+[data-theme="dark"] .about-section,
+.dark .about-section {
+  background: #374151;
+}
+
+[data-theme="dark"] .about-title,
+.dark .about-title {
+  color: #f9fafb;
+}
+
+[data-theme="dark"] .close-btn,
+.dark .close-btn {
+  background: #374151;
+  color: #f9fafb;
+}
+
+[data-theme="dark"] .close-btn:hover,
+.dark .close-btn:hover {
+  background: #4b5563;
 }
 
 /* Utility Classes */
