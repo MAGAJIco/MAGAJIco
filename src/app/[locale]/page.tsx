@@ -5,11 +5,13 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import AuthModal from "../components/AuthModal";
 import UserMenu from "../components/UserMenu";
+import SettingsModal from "../components/SettingsModal";
 import { motion } from "framer-motion";
 
 export default function HomePage() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [settingsModalOpen, setSettingsModalOpen] = useState(false);
   const [user, setUser] = useState<{ name: string; email: string } | null>(null);
   const liveRef = useRef<HTMLDivElement | null>(null);
   const params = useParams();
@@ -84,7 +86,13 @@ export default function HomePage() {
         <div className="navbar-right">
           <div className="nav-icon" title="Search">🔍</div>
           <div className="nav-icon" title="Help">❓</div>
-          <div className="nav-icon" title="Settings">⚙️</div>
+          <div 
+            className="nav-icon" 
+            onClick={() => setSettingsModalOpen(true)}
+            title="Settings"
+          >
+            ⚙️
+          </div>
           <div
             className="nav-icon"
             onClick={() => setDrawerOpen(!drawerOpen)}
@@ -114,6 +122,11 @@ export default function HomePage() {
         isOpen={authModalOpen}
         onClose={() => setAuthModalOpen(false)}
         onSignIn={handleSignIn}
+      />
+
+      <SettingsModal 
+        isOpen={settingsModalOpen}
+        onClose={() => setSettingsModalOpen(false)}
       />
 
       {/* ✅ Drawer Overlay */}
