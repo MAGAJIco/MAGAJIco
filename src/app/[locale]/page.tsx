@@ -3,12 +3,25 @@
 import React, { useState, useRef } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import AuthModal from "../components/AuthModal";
+import UserMenu from "../components/UserMenu";
 
 export default function HomePage() {
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [user, setUser] = useState<{ name: string; email: string } | null>(null);
   const liveRef = useRef<HTMLDivElement | null>(null);
   const params = useParams();
   const locale = (params?.locale as string) || "en";
+
+  const handleSignIn = (email: string, password: string) => {
+    setUser({ name: email.split("@")[0], email });
+    setAuthModalOpen(false);
+  };
+
+  const handleSignOut = () => {
+    setUser(null);
+  };
 
   const drawerApps = [
     { id: "home", icon: "🏠", name: "Portal", href: `/${locale}` },
@@ -82,9 +95,25 @@ export default function HomePage() {
               )}
             </svg>
           </div>
-          <div className="nav-icon profile">SC</div>
+          {user ? (
+            <UserMenu user={user} onSignOut={handleSignOut} />
+          ) : (
+            <div 
+              className="nav-icon profile"
+              onClick={() => setAuthModalOpen(true)}
+              title="Sign In"
+            >
+              SC
+            </div>
+          )}
         </div>
       </nav>
+
+      <AuthModal 
+        isOpen={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+        onSignIn={handleSignIn}
+      />
 
       {/* ✅ Drawer Overlay */}
       <div
