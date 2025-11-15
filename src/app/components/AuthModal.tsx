@@ -6,20 +6,43 @@ interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSignIn: (email: string, password: string) => void;
+  onSignUp?: (email: string, password: string) => void;
 }
 
-export default function AuthModal({ isOpen, onClose, onSignIn }: AuthModalProps) {
+export default function AuthModal({ isOpen, onClose, onSignIn, onSignUp }: AuthModalProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSignUp, setIsSignUp] = useState(false);
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSignIn(email, password);
-    setEmail("");
-    setPassword("");
+    setError("");
+    setIsLoading(true);
+
+    try {
+      if (isSignUp) {
+        if (onSignUp) {
+          await onSignUp(email, password);
+        } else {
+          setError("Sign up is coming soon! Please sign in instead.");
+          setIsLoading(false);
+          return;
+        }
+      } else {
+        await onSignIn(email, password);
+      }
+      setEmail("");
+      setPassword("");
+      onClose();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Authentication failed");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -32,6 +55,12 @@ export default function AuthModal({ isOpen, onClose, onSignIn }: AuthModalProps)
         </div>
         
         <form onSubmit={handleSubmit} className="auth-form">
+          {error && (
+            <div className="error-message">
+              {error}
+            </div>
+          )}
+          
           <div className="form-group">
             <label htmlFor="email">Email</label>
             <input
@@ -41,6 +70,7 @@ export default function AuthModal({ isOpen, onClose, onSignIn }: AuthModalProps)
               onChange={(e) => setEmail(e.target.value)}
               placeholder="your@email.com"
               required
+              disabled={isLoading}
             />
           </div>
           
@@ -53,11 +83,12 @@ export default function AuthModal({ isOpen, onClose, onSignIn }: AuthModalProps)
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
               required
+              disabled={isLoading}
             />
           </div>
           
-          <button type="submit" className="submit-btn">
-            {isSignUp ? "Create Account" : "Sign In"}
+          <button type="submit" className="submit-btn" disabled={isLoading}>
+            {isLoading ? "Please wait..." : (isSignUp ? "Create Account" : "Sign In")}
           </button>
         </form>
         
@@ -159,6 +190,20 @@ export default function AuthModal({ isOpen, onClose, onSignIn }: AuthModalProps)
           border-color: #667eea;
         }
         
+        .form-group input:disabled {
+          background: #f5f5f5;
+          cursor: not-allowed;
+        }
+        
+        .error-message {
+          padding: 12px 16px;
+          background: #fee2e2;
+          color: #dc2626;
+          border-radius: 8px;
+          font-size: 14px;
+          font-weight: 500;
+        }
+        
         .submit-btn {
           padding: 12px 24px;
           background: linear-gradient(135deg, #667eea, #764ba2);
@@ -178,6 +223,12 @@ export default function AuthModal({ isOpen, onClose, onSignIn }: AuthModalProps)
         
         .submit-btn:active {
           transform: translateY(0);
+        }
+        
+        .submit-btn:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+          transform: none;
         }
         
         .auth-footer {

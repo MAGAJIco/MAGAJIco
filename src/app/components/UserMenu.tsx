@@ -87,7 +87,7 @@ export default function UserMenu({ user, onSignOut }: UserMenuProps) {
         .user-menu-overlay {
           position: fixed;
           inset: 0;
-          z-index: 999;
+          z-index: 1500;
         }
         
         .user-dropdown {
@@ -98,7 +98,7 @@ export default function UserMenu({ user, onSignOut }: UserMenuProps) {
           border-radius: 12px;
           box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
           min-width: 280px;
-          z-index: 1000;
+          z-index: 1600;
           overflow: hidden;
         }
         
