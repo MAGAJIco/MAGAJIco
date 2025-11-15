@@ -57,7 +57,7 @@ export default function HomePage() {
             <Link
               key={app.id}
               href={app.href}
-              className="flex flex-col items-center gap-1 px-4 py-3 rounded-xl hover:bg-gray-100 transition-all active:scale-95 min-w-[60px]"
+              className="touch-target flex flex-col items-center gap-1 px-4 py-3 rounded-xl hover:bg-gray-100 transition-all active:scale-95 min-w-[60px]"
             >
               <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl flex items-center justify-center text-xl shadow-md">
                 {app.icon}
@@ -188,6 +188,7 @@ export default function HomePage() {
                   desc: "Premier League - Thrilling match at Old Trafford",
                   meta: ["⏱️ 67'", "📊 2-1", "👥 73K watching"],
                   badge: "LIVE",
+                  isLive: true,
                 },
                 {
                   icon: "🏀",
@@ -195,6 +196,7 @@ export default function HomePage() {
                   desc: "NBA - Western Conference showdown",
                   meta: ["⏱️ Q3 02:14", "📊 98-101", "👥 18K watching"],
                   badge: "LIVE",
+                  isLive: true,
                 },
                 {
                   icon: "🏈",
@@ -211,13 +213,21 @@ export default function HomePage() {
               ].map((match, i) => (
                 <motion.article 
                   key={i} 
-                  className="carousel-card"
+                  className={`carousel-card ${match.isLive ? 'live-indicator' : ''}`}
                   initial={{ opacity: 0, x: 50 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.4, delay: i * 0.1 }}
                   whileHover={{ scale: 1.03, transition: { duration: 0.2 } }}
                 >
-                  {match.badge && <span className="card-badge">🔴 {match.badge}</span>}
+                  {match.badge && (
+                    <motion.span 
+                      className="card-badge"
+                      animate={match.isLive ? { scale: [1, 1.05, 1] } : {}}
+                      transition={{ duration: 2, repeat: Infinity }}
+                    >
+                      🔴 {match.badge}
+                    </motion.span>
+                  )}
                   <div className="card-icon">{match.icon}</div>
                   <div className="card-title">{match.title}</div>
                   <div className="card-description">{match.desc}</div>
