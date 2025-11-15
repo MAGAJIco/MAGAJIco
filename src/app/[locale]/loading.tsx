@@ -3,48 +3,59 @@ import SkeletonCard from "../components/SkeletonCard";
 
 export default function Loading() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header Skeleton */}
-        <div className="mb-6 animate-pulse">
-          <div className="h-12 bg-white/10 rounded-lg w-64 mb-3"></div>
-          <div className="h-6 bg-white/5 rounded-lg w-48"></div>
-        </div>
-
-        {/* Stats Cards Skeleton */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="bg-white/10 rounded-xl p-6 animate-pulse">
-              <div className="h-6 bg-white/10 rounded w-24 mb-2"></div>
-              <div className="h-10 bg-white/10 rounded w-16"></div>
-            </div>
-          ))}
-        </div>
-
-        {/* Content Skeleton */}
-        <div className="grid grid-cols-1 gap-4">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="bg-white/10 rounded-xl p-6 animate-pulse">
-              <div className="flex items-center gap-4 mb-4">
-                <div className="w-12 h-12 bg-white/10 rounded-full"></div>
-                <div className="flex-1">
-                  <div className="h-4 bg-white/10 rounded w-32 mb-2"></div>
-                  <div className="h-6 bg-white/10 rounded w-48"></div>
-                </div>
-              </div>
-              <div className="h-24 bg-white/10 rounded"></div>
-            </div>
-          ))}
-        </div>
-
-        {/* Loading Text */}
-        <div className="text-center mt-8">
-          <div className="inline-flex items-center gap-3 text-white">
-            <div className="w-6 h-6 border-3 border-purple-400 border-t-transparent rounded-full animate-spin"></div>
-            <p className="text-gray-300 font-medium">Loading amazing content...</p>
-          </div>
-        </div>
+    <div className="container" style={{ paddingTop: '40px', paddingBottom: '100px' }}>
+      <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+        <div style={{ 
+          height: '48px', 
+          width: '300px', 
+          background: 'rgba(255,255,255,0.3)', 
+          borderRadius: '8px',
+          margin: '0 auto 12px'
+        }} />
+        <div style={{ 
+          height: '18px', 
+          width: '200px', 
+          background: 'rgba(255,255,255,0.2)', 
+          borderRadius: '4px',
+          margin: '0 auto'
+        }} />
       </div>
+
+      <section style={{ marginBottom: '40px' }}>
+        <div style={{ display: 'flex', gap: '20px', overflowX: 'auto', paddingBottom: '10px' }}>
+          {[1, 2, 3, 4].map((i) => (
+            <SkeletonCard key={i} />
+          ))}
+        </div>
+      </section>
+
+      <section style={{
+        background: 'rgba(255,255,255,0.95)',
+        borderRadius: '16px',
+        padding: '32px',
+        marginBottom: '32px'
+      }}>
+        <div style={{ 
+          height: '32px', 
+          width: '250px', 
+          background: '#e5e7eb', 
+          borderRadius: '8px',
+          marginBottom: '16px'
+        }} />
+        <div style={{ 
+          height: '18px', 
+          width: '100%', 
+          background: '#e5e7eb', 
+          borderRadius: '4px',
+          marginBottom: '8px'
+        }} />
+        <div style={{ 
+          height: '18px', 
+          width: '80%', 
+          background: '#e5e7eb', 
+          borderRadius: '4px'
+        }} />
+      </section>
     </div>
   );
 }

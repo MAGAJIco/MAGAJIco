@@ -131,6 +131,7 @@ export default function HomePage() {
       <SettingsModal 
         isOpen={settingsModalOpen}
         onClose={() => setSettingsModalOpen(false)}
+        currentLocale={locale}
       />
 
       {/* ✅ Drawer Overlay */}

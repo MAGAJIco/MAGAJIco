@@ -18,25 +18,28 @@ export default function SettingsModal({ isOpen, onClose, currentLocale = "en" }:
   const [autoplay, setAutoplay] = useState(true);
 
   useEffect(() => {
-    setLanguage(currentLocale);
-    
-    // Load saved settings
-    if (typeof window !== "undefined") {
-      const savedSettings = localStorage.getItem("settings");
-      if (savedSettings) {
-        const settings = JSON.parse(savedSettings);
-        setNotifications(settings.notifications ?? true);
-        setDarkMode(settings.darkMode ?? false);
-        setAutoplay(settings.autoplay ?? true);
-      }
+    if (isOpen) {
+      // Always sync with current locale when modal opens
+      setLanguage(currentLocale);
       
-      // Sync with current theme
-      const currentTheme = localStorage.getItem("theme");
-      if (currentTheme) {
-        setDarkMode(currentTheme === "dark");
+      // Load saved settings
+      if (typeof window !== "undefined") {
+        const savedSettings = localStorage.getItem("settings");
+        if (savedSettings) {
+          const settings = JSON.parse(savedSettings);
+          setNotifications(settings.notifications ?? true);
+          setDarkMode(settings.darkMode ?? false);
+          setAutoplay(settings.autoplay ?? true);
+        }
+        
+        // Sync with current theme
+        const currentTheme = localStorage.getItem("theme");
+        if (currentTheme) {
+          setDarkMode(currentTheme === "dark");
+        }
       }
     }
-  }, [currentLocale]);
+  }, [isOpen, currentLocale]);
 
   if (!isOpen) return null;
 
