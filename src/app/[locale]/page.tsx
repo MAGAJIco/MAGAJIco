@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import AuthModal from "../components/AuthModal";
 import UserMenu from "../components/UserMenu";
+import { motion } from "framer-motion";
 
 export default function HomePage() {
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -54,12 +55,12 @@ export default function HomePage() {
             <Link
               key={app.id}
               href={app.href}
-              className="flex flex-col items-center gap-1 px-3 py-2 rounded-xl hover:bg-gray-100 transition-all active:scale-95"
+              className="flex flex-col items-center gap-1 px-4 py-3 rounded-xl hover:bg-gray-100 transition-all active:scale-95 min-w-[60px]"
             >
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl flex items-center justify-center text-xl shadow-md">
+              <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl flex items-center justify-center text-xl shadow-md">
                 {app.icon}
               </div>
-              <span className="text-[10px] font-semibold text-gray-700">
+              <span className="text-[11px] font-semibold text-gray-700 text-center">
                 {app.name}
               </span>
             </Link>
@@ -140,11 +141,20 @@ export default function HomePage() {
       </aside>
 
       {/* ✅ Main Content */}
-      <main className="container">
-        <header>
+      <motion.main 
+        className="container"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <motion.header
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+        >
           <h1>🏗️ Sports Central</h1>
           <p>Your All-in-One Sports & Entertainment Hub</p>
-        </header>
+        </motion.header>
 
         {/* Live Carousel */}
         <section className="carousel-section">
@@ -186,7 +196,14 @@ export default function HomePage() {
                   meta: ["⏱️ 2h ago", "📊 Recap"],
                 },
               ].map((match, i) => (
-                <article key={i} className="carousel-card">
+                <motion.article 
+                  key={i} 
+                  className="carousel-card"
+                  initial={{ opacity: 0, x: 50 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.4, delay: i * 0.1 }}
+                  whileHover={{ scale: 1.03, transition: { duration: 0.2 } }}
+                >
                   {match.badge && <span className="card-badge">🔴 {match.badge}</span>}
                   <div className="card-icon">{match.icon}</div>
                   <div className="card-title">{match.title}</div>
@@ -196,7 +213,7 @@ export default function HomePage() {
                       <div key={i} className="card-meta-item">{m}</div>
                     ))}
                   </div>
-                </article>
+                </motion.article>
               ))}
             </div>
           </div>
@@ -244,7 +261,7 @@ export default function HomePage() {
         </section>
 
         <footer>© MagajiCo Sports Central — Design & Architecture</footer>
-      </main>
+      </motion.main>
 
       {/* ✅ Styles */}
       <style jsx global>{`
