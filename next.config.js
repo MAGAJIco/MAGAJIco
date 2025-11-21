@@ -24,12 +24,10 @@ module.exports = {
   },
   
   // Allow cross-origin requests from Replit domains
-  experimental: {
-    allowedOrigins: [
-      '*.replit.dev',
-      '*.repl.co',
-    ],
-  },
+  allowedDevOrigins: [
+    '*.replit.dev',
+    '*.repl.co',
+  ],
   
   // Environment variables
   env: {
