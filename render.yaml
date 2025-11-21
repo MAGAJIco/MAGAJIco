@@ -1,20 +1,5 @@
 services:
-  # Next.js Frontend (Static Site or Web Service)
-  - type: web
-    name: magajico-frontend
-    env: node
-    region: oregon
-    plan: free
-    buildCommand: npm ci && npm run build
-    startCommand: npm start
-    envVars:
-      - key: NODE_ENV
-        value: production
-      - key: NEXT_PUBLIC_API_URL
-        sync: false
-    autoDeploy: true
-
-  # FastAPI ML Service (Zero Cost - Free Tier)
+  # FastAPI ML Service
   - type: web
     name: magajico-ml-service
     env: python
@@ -31,13 +16,21 @@ services:
         value: production
       - key: MONGODB_URI
         sync: false
+      - key: SPORTS_API_KEY
+        sync: false
+      - key: ODDS_API_KEY
+        sync: false
       - key: OPENAI_API_KEY
         sync: false
       - key: CLAUDE_API_KEY
         sync: false
-      - key: SPORTS_API_KEY
+      - key: ANALYTICS_API_KEY
         sync: false
-      - key: ODDS_API_KEY
+      - key: JWT_SECRET
+        sync: false
+      - key: ENCRYPTION_KEY
+        sync: false
+      - key: PICOIN_ENCRYPTION_KEY
         sync: false
     healthCheckPath: /health
     autoDeploy: true
