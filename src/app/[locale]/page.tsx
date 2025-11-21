@@ -50,6 +50,7 @@ const socialProofMetrics = {
 
 export default function HomePage() {
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [settingsModalOpen, setSettingsModalOpen] = useState(false);
   const [user, setUser] = useState<{ name: string; email: string } | null>(null);
@@ -139,8 +140,12 @@ export default function HomePage() {
       {/* ✅ Navbar */}
       <nav className="navbar">
         <div className="navbar-left">
-          <div className="menu-icon">
-            <div className="hamburger">
+          <div 
+            className="menu-icon"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            style={{ cursor: 'pointer' }}
+          >
+            <div className={`hamburger ${mobileMenuOpen ? 'active' : ''}`}>
               <span />
               <span />
               <span />
@@ -149,7 +154,7 @@ export default function HomePage() {
           <div className="logo">🏗️ Sports Central</div>
         </div>
 
-        <div className="navbar-right">
+        <div className={`navbar-right ${mobileMenuOpen ? 'mobile-open' : ''}`}>
           <div className="nav-icon" title="Search">🔍</div>
           <div className="nav-icon" title="Help">❓</div>
           <div 
@@ -187,6 +192,14 @@ export default function HomePage() {
           )}
         </div>
       </nav>
+
+      {/* Mobile Menu Overlay */}
+      {mobileMenuOpen && (
+        <div 
+          className="mobile-menu-overlay"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
 
       <AuthModal 
         isOpen={authModalOpen}
@@ -634,8 +647,29 @@ export default function HomePage() {
           box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         .navbar-left { display: flex; align-items: center; gap: 16px; }
+        .hamburger {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+          padding: 8px;
+          cursor: pointer;
+        }
         .hamburger span {
-          width: 24px; height: 3px; background: #333; margin: 3px 0; border-radius: 2px;
+          width: 24px; 
+          height: 3px; 
+          background: #333; 
+          border-radius: 2px;
+          transition: all 0.3s ease;
+          display: block;
+        }
+        .hamburger.active span:nth-child(1) {
+          transform: rotate(45deg) translate(6px, 6px);
+        }
+        .hamburger.active span:nth-child(2) {
+          opacity: 0;
+        }
+        .hamburger.active span:nth-child(3) {
+          transform: rotate(-45deg) translate(6px, -6px);
         }
         .logo { font-size: 20px; font-weight: bold; color: #667eea; }
         .navbar-right { display: flex; align-items: center; gap: 12px; }
@@ -726,6 +760,60 @@ export default function HomePage() {
         }
         .mobile-bottom-nav {
           display: none;
+        }
+        .mobile-menu-overlay {
+          position: fixed;
+          top: 64px;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.5);
+          z-index: 999;
+          backdrop-filter: blur(4px);
+        }
+        @media (max-width: 768px) {
+          .menu-icon {
+            display: block !important;
+          }
+          .navbar-right {
+            position: fixed;
+            top: 64px;
+            left: 0;
+            right: 0;
+            background: white;
+            flex-direction: column;
+            align-items: stretch;
+            padding: 20px;
+            gap: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transform: translateY(-100%);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+            z-index: 1000;
+          }
+          .navbar-right.mobile-open {
+            transform: translateY(0);
+            opacity: 1;
+            pointer-events: auto;
+          }
+          .navbar-right .nav-icon {
+            width: 100%;
+            height: 50px;
+            border-radius: 12px;
+            justify-content: flex-start;
+            padding: 0 20px;
+            gap: 12px;
+            background: #f5f5f5;
+          }
+          .navbar-right .nav-icon:hover {
+            background: #e5e5e5;
+          }
+        }
+        @media (min-width: 769px) {
+          .menu-icon {
+            display: none;
+          }
         }
         @media (max-width: 768px) {
           header h1 { font-size: 32px; }
