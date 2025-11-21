@@ -117,19 +117,20 @@ export default function HomePage() {
 
   return (
     <>
-      {/* ✅ Mobile Bottom Navigation */}
+      {/* ✅ Mobile Bottom Navigation - Enhanced Touch Targets */}
       <div className="mobile-bottom-nav">
-        <div className="flex justify-around items-center px-2 py-2">
+        <div className="flex justify-around items-center px-1 py-2 safe-area-inset-bottom">
           {primaryApps.map((app) => (
             <Link
               key={app.id}
               href={app.href}
-              className="touch-target flex flex-col items-center gap-1 px-4 py-3 rounded-xl hover:bg-gray-100 transition-all active:scale-95 min-w-[60px]"
+              className="touch-target flex flex-col items-center gap-1.5 px-2 py-2.5 rounded-2xl hover:bg-gray-100 active:bg-gray-200 transition-all active:scale-95 min-w-[68px] min-h-[68px]"
+              style={{ WebkitTapHighlightColor: 'transparent' }}
             >
-              <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl flex items-center justify-center text-xl shadow-md">
+              <div className="w-11 h-11 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl flex items-center justify-center text-xl shadow-md transition-transform active:scale-90">
                 {app.icon}
               </div>
-              <span className="text-[11px] font-semibold text-gray-700 text-center">
+              <span className="text-[10px] font-semibold text-gray-700 text-center leading-tight max-w-[64px] truncate">
                 {app.name}
               </span>
             </Link>
@@ -775,6 +776,7 @@ export default function HomePage() {
           .menu-icon {
             display: block !important;
           }
+          /* Improved navbar mobile menu */
           .navbar-right {
             position: fixed;
             top: 64px;
@@ -782,6 +784,9 @@ export default function HomePage() {
             right: 0;
             background: white;
             flex-direction: column;
+            max-height: calc(100vh - 64px - env(safe-area-inset-bottom));
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
             align-items: stretch;
             padding: 20px;
             gap: 16px;
@@ -815,24 +820,42 @@ export default function HomePage() {
             display: none;
           }
         }
-        @media (max-width: 768px) {
+        /* Mobile Optimizations - Improved breakpoints */
+        @media (max-width: 640px) {
+          header h1 { font-size: 28px; }
+          .carousel-card { flex: 0 0 260px; }
+          .container { padding-bottom: 100px; }
+        }
+        
+        @media (min-width: 641px) and (max-width: 768px) {
           header h1 { font-size: 32px; }
-          .carousel-card { flex: 0 0 280px; }
-          .container { padding-bottom: 120px; }
+          .carousel-card { flex: 0 0 300px; }
+          .container { padding-bottom: 110px; }
+        }
+        
+        @media (max-width: 768px) {
           .mobile-bottom-nav {
             display: block;
             position: fixed;
             bottom: 0;
             left: 0;
             right: 0;
-            z-index: 40;
+            z-index: 50;
             background: rgba(255,255,255,0.98);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 -4px 12px rgba(0,0,0,0.1);
-            border-top: 1px solid rgba(0,0,0,0.1);
+            backdrop-filter: blur(16px);
+            box-shadow: 0 -2px 16px rgba(0,0,0,0.08);
+            border-top: 1px solid rgba(0,0,0,0.06);
           }
+          
+          /* Prevent text selection on touch */
+          .mobile-bottom-nav * {
+            -webkit-user-select: none;
+            user-select: none;
+          }
+          
           .mobile-bottom-nav .touch-target {
-            min-width: 60px;
+            min-width: 68px;
+            min-height: 68pxth: 60px;
             min-height: 60px;
           }
           .drawer-overlay { backdrop-filter: blur(4px); }

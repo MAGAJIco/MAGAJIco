@@ -167,11 +167,24 @@
   }
 }
 
-/* Touch Target Improvements */
+/* Touch Target Improvements - Enhanced for mobile */
 @media (max-width: 768px) {
   .touch-target {
+    min-height: 48px;
+    min-width: 48px;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+  
+  /* Increase tap targets for primary interactive elements */
+  button, a, [role="button"] {
     min-height: 44px;
     min-width: 44px;
+  }
+  
+  /* Improve mobile navigation spacing */
+  .mobile-bottom-nav {
+    padding-bottom: max(8px, env(safe-area-inset-bottom));
   }
 }
 

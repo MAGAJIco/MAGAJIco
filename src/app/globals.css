@@ -453,3 +453,22 @@ html {
   box-shadow: var(--shadow-icon-hover) !important;
   transform: translateY(-2px) !important;
 }
+
+/* Touch Target Improvements - iOS and Android optimized */
+@media (max-width: 768px) {
+  .touch-target {
+    min-height: 48px;
+    min-width: 48px;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  /* Safe area support for notched devices */
+  .safe-area-inset-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .safe-area-inset-top {
+    padding-top: env(safe-area-inset-top);
+  }
+}
