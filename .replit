@@ -4,6 +4,7 @@ expertMode = true
 
 [nix]
 channel = "stable-25_05"
+packages = ["xcodebuild", "zlib"]
 
 [workflows]
 runButton = "Project"
@@ -16,6 +17,10 @@ author = "agent"
 [[workflows.workflow.tasks]]
 task = "workflow.run"
 args = "MagajiCo Frontend"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "MagajiCo Backend"
 
 [[workflows.workflow]]
 name = "Start Frontend"
@@ -68,6 +73,18 @@ args = "npm install"
 task = "shell.exec"
 args = "npm run dev"
 
+[[workflows.workflow]]
+name = "MagajiCo Backend"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
+waitForPort = 8000
+
+[workflows.workflow.metadata]
+outputType = "console"
+
 [[ports]]
 localPort = 3000
 externalPort = 3000
@@ -91,6 +108,10 @@ externalPort = 3002
 [[ports]]
 localPort = 46777
 externalPort = 3003
+
+[[ports]]
+localPort = 8000
+externalPort = 8000
 
 [deployment]
 run = ["sh", "-c", "npm run start"]
