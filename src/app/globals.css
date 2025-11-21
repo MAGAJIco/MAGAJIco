@@ -294,21 +294,22 @@ html {
 
 /* Icon container styles with rounded corners and shadows */
 .nav-icon {
-          width: 40px; 
-          height: 40px; 
-          border-radius: var(--radius-lg);
-          display: flex; 
-          align-items: center; 
-          justify-content: center;
-          cursor: pointer; 
-          transition: all var(--transition-base);
-          box-shadow: var(--shadow-icon);
-        }
-        .nav-icon:hover { 
-          background: #f5f5f5; 
-          box-shadow: var(--shadow-icon-hover);
-          transform: translateY(-2px);
-        }
+  width: 40px; 
+  height: 40px; 
+  border-radius: var(--radius-lg);
+  display: flex; 
+  align-items: center; 
+  justify-content: center;
+  cursor: pointer; 
+  transition: all var(--transition-base);
+  box-shadow: var(--shadow-icon);
+}
+
+.nav-icon:hover { 
+  background: #f5f5f5; 
+  box-shadow: var(--shadow-icon-hover);
+  transform: translateY(-2px);
+}
 
 /* Carousel animations matching reference */
 @keyframes pulse {
@@ -440,14 +441,15 @@ html {
 
 /* Update app icon styles with consistent sizing and rounded corners */
 .app-icon {
-            width: var(--icon-lg) !important;
-            height: var(--icon-lg) !important;
-            font-size: 24px !important;
-            border-radius: var(--radius-lg) !important;
-            box-shadow: var(--shadow-icon) !important;
-            transition: all var(--transition-base) !important;
-          }
-          .app-icon:hover {
-            box-shadow: var(--shadow-icon-hover) !important;
-            transform: translateY(-2px) !important;
-          }
+  width: var(--icon-lg) !important;
+  height: var(--icon-lg) !important;
+  font-size: 24px !important;
+  border-radius: var(--radius-lg) !important;
+  box-shadow: var(--shadow-icon) !important;
+  transition: all var(--transition-base) !important;
+}
+
+.app-icon:hover {
+  box-shadow: var(--shadow-icon-hover) !important;
+  transform: translateY(-2px) !important;
+}
