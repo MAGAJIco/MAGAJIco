@@ -3,7 +3,6 @@
 /** @type {import('next').NextConfig} */
 module.exports = {
   reactStrictMode: true,
-  swcMinify: true,
   compress: true,
   
   // Performance optimizations
@@ -11,9 +10,6 @@ module.exports = {
   generateEtags: true,
   
   // Build configuration
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
   typescript: {
     ignoreBuildErrors: true,
   },
@@ -26,6 +22,12 @@ module.exports = {
     domains: [],
     unoptimized: true,
   },
+  
+  // Allow cross-origin requests from Replit domains
+  allowedDevOrigins: [
+    /.*\.replit\.dev$/,
+    /.*\.repl\.co$/,
+  ],
   
   // Environment variables
   env: {
