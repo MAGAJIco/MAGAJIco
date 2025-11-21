@@ -5,7 +5,7 @@ services:
     env: node
     region: oregon
     plan: free
-    buildCommand: npm ci && npm run build --workspace=packages/shared && npm run build --workspace=apps/api
+    buildCommand: npm ci && npm run build --workspace=shared && npm run build --workspace=apps/api
     startCommand: cd apps/api && npm start
     envVars:
       - key: NODE_ENV
