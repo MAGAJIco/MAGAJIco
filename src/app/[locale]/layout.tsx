@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 import { notFound } from "next/navigation";
-import "../globals.css";
+import '../globals.css';
+import '../../styles/icons.css';
 
 type Props = {
   children: ReactNode;

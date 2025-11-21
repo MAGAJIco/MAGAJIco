@@ -32,11 +32,20 @@
   --radius-xl: 1rem;
   --radius-2xl: 1.5rem;
   
+  /* Icon Sizes */
+  --icon-xs: 16px;
+  --icon-sm: 24px;
+  --icon-md: 32px;
+  --icon-lg: 48px;
+  --icon-xl: 64px;
+  
   /* Shadows */
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
   --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
   --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+  --shadow-icon: 0 2px 4px rgba(0, 0, 0, 0.08);
+  --shadow-icon-hover: 0 4px 8px rgba(0, 0, 0, 0.12);
   
   /* Typography */
   --font-size-xs: 0.75rem;
@@ -106,4 +115,62 @@
 
 .btn-primary:hover {
   background-color: var(--color-primary-hover);
+}
+
+/* Icon Container Utilities */
+.icon-container {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-lg);
+  background-color: var(--color-bg-secondary);
+  box-shadow: var(--shadow-icon);
+  transition: all var(--transition-base);
+}
+
+.icon-container:hover {
+  box-shadow: var(--shadow-icon-hover);
+  transform: translateY(-1px);
+}
+
+.icon-container-xs {
+  width: var(--icon-xs);
+  height: var(--icon-xs);
+  padding: 2px;
+}
+
+.icon-container-sm {
+  width: var(--icon-sm);
+  height: var(--icon-sm);
+  padding: 4px;
+}
+
+.icon-container-md {
+  width: var(--icon-md);
+  height: var(--icon-md);
+  padding: 6px;
+}
+
+.icon-container-lg {
+  width: var(--icon-lg);
+  height: var(--icon-lg);
+  padding: 8px;
+}
+
+.icon-container-xl {
+  width: var(--icon-xl);
+  height: var(--icon-xl);
+  padding: 12px;
+}
+
+.icon-primary {
+  color: var(--color-primary);
+}
+
+.icon-secondary {
+  color: var(--color-secondary);
+}
+
+.icon-accent {
+  color: var(--color-accent);
 }
