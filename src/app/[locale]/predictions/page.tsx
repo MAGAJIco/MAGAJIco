@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { useSmartRetry } from "../../hook/useSmartRetry";
 import StatCard from "../../components/StatCard";
+import { API_BASE_URL } from "../../../lib/api";
 
 interface PredictionSource {
   name: string;
@@ -107,9 +108,9 @@ export default function AdvancedPredictionsPage() {
       const result = await executeWithRetry(async () => {
         // Fetch from multiple sources
         const [mybetsResponse, statareaResponse, combinedResponse] = await Promise.all([
-          fetch(`/api/predictions/soccer?min_confidence=${minConfidence}&date=${date}`).then(r => r.json()),
-          fetch(`/api/predictions/statarea?min_odds=1.5`).then(r => r.json()),
-          fetch(`/api/predictions/combined?min_confidence=${minConfidence}&date=${date}`).then(r => r.json()),
+          fetch(`${API_BASE_URL}/api/predictions/soccer?min_confidence=${minConfidence}&date=${date}`).then(r => r.json()),
+          fetch(`${API_BASE_URL}/api/predictions/statarea?min_odds=1.5`).then(r => r.json()),
+          fetch(`${API_BASE_URL}/api/predictions/combined?min_confidence=${minConfidence}&date=${date}`).then(r => r.json()),
         ]);
 
         console.log('API Responses:', { mybetsResponse, statareaResponse, combinedResponse });

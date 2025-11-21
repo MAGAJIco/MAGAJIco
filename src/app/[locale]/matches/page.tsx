@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { useSmartRetry } from "../../hook/useSmartRetry";
 import StatCard from "../../components/StatCard";
+import { API_BASE_URL } from "../../../lib/api";
 
 interface Match {
   id: string;
@@ -44,6 +45,9 @@ export default function MatchesPage() {
   const [error, setError] = useState<string | null>(null);
   const [sportFilter, setSportFilter] = useState<SportFilter>("all");
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
+  
+  // Check if we're in production (Vercel deployment)
+  const isProduction = process.env.NODE_ENV === 'production' || process.env.VERCEL === '1';
 
   const { executeWithRetry, isRetrying, retryCount } = useSmartRetry({
     maxRetries: 3,
@@ -68,12 +72,12 @@ export default function MatchesPage() {
         // Fetch from multiple sources like FlashScore
         const endpoints = sportFilter === "all" 
           ? [
-              { url: "/api/nfl?source=espn", sport: "NFL" },
-              { url: "/api/nba?source=espn", sport: "NBA" },
-              { url: "/api/mlb?source=espn", sport: "MLB" },
-              { url: "/api/soccer", sport: "Soccer" }
+              { url: `${API_BASE_URL}/api/nfl?source=espn`, sport: "NFL" },
+              { url: `${API_BASE_URL}/api/nba?source=espn`, sport: "NBA" },
+              { url: `${API_BASE_URL}/api/mlb?source=espn`, sport: "MLB" },
+              { url: `${API_BASE_URL}/api/soccer`, sport: "Soccer" }
             ]
-          : [{ url: `/api/${sportFilter.toLowerCase()}?source=espn`, sport: sportFilter }];
+          : [{ url: `${API_BASE_URL}/api/${sportFilter.toLowerCase()}?source=espn`, sport: sportFilter }];
 
         const responses = await Promise.allSettled(
           endpoints.map(endpoint => 
@@ -116,8 +120,15 @@ export default function MatchesPage() {
       setMatches(result);
       setLastUpdate(new Date());
     } catch (err) {
-      setError("Failed to load matches");
       console.error('Fetch error:', err);
+      
+      // In production, show error; in development, allow empty state
+      if (isProduction) {
+        setError(err instanceof Error ? err.message : "Failed to load matches - backend server unavailable");
+      } else {
+        setError("Failed to load matches from backend (development mode)");
+      }
+      setMatches([]);
     } finally {
       setLoading(false);
     }

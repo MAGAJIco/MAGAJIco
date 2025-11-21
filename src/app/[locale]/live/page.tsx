@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { useSmartRetry } from "../../hook/useSmartRetry";
 import StatCard from "../../components/StatCard";
+import { API_BASE_URL } from "../../../lib/api";
 
 interface LiveMatch {
   id: string;
@@ -48,6 +49,9 @@ export default function LiveMatchesPage() {
   const [sportFilter, setSportFilter] = useState<SportFilter>("all");
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
   const [usingStaticData, setUsingStaticData] = useState(false);
+  
+  // Check if we're in production (Vercel deployment)
+  const isProduction = process.env.NODE_ENV === 'production' || process.env.VERCEL === '1';
 
   // Smart retry hook
   const { executeWithRetry, isRetrying, retryCount } = useSmartRetry({
@@ -171,12 +175,12 @@ export default function LiveMatchesPage() {
         // Try to fetch live data from API
         const endpoints = sportFilter === "all" 
           ? [
-              { url: "/api/nfl?source=espn", sport: "NFL" },
-              { url: "/api/nba?source=espn", sport: "NBA" },
-              { url: "/api/mlb?source=espn", sport: "MLB" },
-              { url: "/api/soccer", sport: "Soccer" }
+              { url: `${API_BASE_URL}/api/nfl?source=espn`, sport: "NFL" },
+              { url: `${API_BASE_URL}/api/nba?source=espn`, sport: "NBA" },
+              { url: `${API_BASE_URL}/api/mlb?source=espn`, sport: "MLB" },
+              { url: `${API_BASE_URL}/api/soccer`, sport: "Soccer" }
             ]
-          : [{ url: `/api/${sportFilter.toLowerCase()}?source=espn`, sport: sportFilter }];
+          : [{ url: `${API_BASE_URL}/api/${sportFilter.toLowerCase()}?source=espn`, sport: sportFilter }];
 
         const [matchesResponses, predictionsResponse] = await Promise.all([
           Promise.allSettled(
@@ -192,7 +196,7 @@ export default function LiveMatchesPage() {
                 }))
             )
           ),
-          fetch('/api/predictions/combined?min_confidence=75&date=today', { 
+          fetch(`${API_BASE_URL}/api/predictions/combined?min_confidence=75&date=today`, { 
             signal: AbortSignal.timeout(5000) 
           })
             .then(r => r.ok ? r.json() : { predictions: [] })
@@ -260,13 +264,18 @@ export default function LiveMatchesPage() {
           }
         });
 
-        // If no API data was retrieved, use static fallback
+        // If no API data was retrieved, use static fallback (only in development)
         if (allMatches.length === 0 && !hasApiData) {
-          console.log('Using static fallback data - backend server not available');
-          setUsingStaticData(true);
-          return sportFilter === "all" 
-            ? staticMatches 
-            : staticMatches.filter(m => m.sport === sportFilter);
+          if (!isProduction) {
+            console.log('Using static fallback data - backend server not available');
+            setUsingStaticData(true);
+            return sportFilter === "all" 
+              ? staticMatches 
+              : staticMatches.filter(m => m.sport === sportFilter);
+          } else {
+            // In production, throw error instead of showing static data
+            throw new Error('Failed to load live matches - backend server unavailable');
+          }
         }
 
         setUsingStaticData(false);
@@ -276,51 +285,59 @@ export default function LiveMatchesPage() {
       setMatches(result);
       setLastUpdate(new Date());
     } catch (err) {
-      console.log('API error, using static data:', err);
-      // Use static data on error
-      const staticMatches: LiveMatch[] = [
-        {
-          id: "nfl-1",
-          sport: "NFL",
-          homeTeam: "Kansas City Chiefs",
-          awayTeam: "Buffalo Bills",
-          homeScore: 27,
-          awayScore: 24,
-          status: "LIVE",
-          period: "Q4",
-          time: "2:45",
-          league: "NFL",
-          venue: "Arrowhead Stadium",
-          stats: {
-            homeForm: [1, 1, 1, 0, 1],
-            awayForm: [1, 1, 0, 1, 1],
-            possession: { home: 58, away: 42 },
-            shots: { home: 12, away: 9 }
+      console.error('API error:', err);
+      
+      // Only use static data in development, not in production
+      if (!isProduction) {
+        console.log('Using static fallback data in development');
+        const staticMatches: LiveMatch[] = [
+          {
+            id: "nfl-1",
+            sport: "NFL",
+            homeTeam: "Kansas City Chiefs",
+            awayTeam: "Buffalo Bills",
+            homeScore: 27,
+            awayScore: 24,
+            status: "LIVE",
+            period: "Q4",
+            time: "2:45",
+            league: "NFL",
+            venue: "Arrowhead Stadium",
+            stats: {
+              homeForm: [1, 1, 1, 0, 1],
+              awayForm: [1, 1, 0, 1, 1],
+              possession: { home: 58, away: 42 },
+              shots: { home: 12, away: 9 }
+            }
+          },
+          {
+            id: "nba-1",
+            sport: "NBA",
+            homeTeam: "Los Angeles Lakers",
+            awayTeam: "Boston Celtics",
+            homeScore: 98,
+            awayScore: 95,
+            status: "LIVE",
+            period: "Q3",
+            time: "5:30",
+            league: "NBA",
+            venue: "Crypto.com Arena",
+            stats: {
+              homeForm: [1, 0, 1, 1, 1],
+              awayForm: [1, 1, 1, 0, 1],
+              possession: { home: 52, away: 48 },
+              shots: { home: 45, away: 42 }
+            }
           }
-        },
-        {
-          id: "nba-1",
-          sport: "NBA",
-          homeTeam: "Los Angeles Lakers",
-          awayTeam: "Boston Celtics",
-          homeScore: 98,
-          awayScore: 95,
-          status: "LIVE",
-          period: "Q3",
-          time: "5:30",
-          league: "NBA",
-          venue: "Crypto.com Arena",
-          stats: {
-            homeForm: [1, 0, 1, 1, 1],
-            awayForm: [1, 1, 1, 0, 1],
-            possession: { home: 52, away: 48 },
-            shots: { home: 45, away: 42 }
-          }
-        }
-      ];
-      setMatches(sportFilter === "all" ? staticMatches : staticMatches.filter(m => m.sport === sportFilter));
-      setUsingStaticData(true);
-      setLastUpdate(new Date());
+        ];
+        setMatches(sportFilter === "all" ? staticMatches : staticMatches.filter(m => m.sport === sportFilter));
+        setUsingStaticData(true);
+        setLastUpdate(new Date());
+      } else {
+        // In production, set error and show error state
+        setError(err instanceof Error ? err.message : 'Failed to load live matches');
+        setMatches([]);
+      }
     } finally {
       setLoading(false);
     }
