@@ -6,7 +6,10 @@ import { useParams } from "next/navigation";
 import AuthModal from "../components/AuthModal";
 import UserMenu from "../components/UserMenu";
 import SettingsModal from "../components/SettingsModal";
+import FavoriteTeamsModal from "../components/FavoriteTeamsModal";
+import { useUserPreferences } from "../hook/useUserPreferences";
 import { motion } from "framer-motion";
+import { Star } from "lucide-react";
 
 // Assume these are defined elsewhere or imported
 const ErrorBoundary = ({ children }: { children: React.ReactNode }) => <>{children}</>;
@@ -53,7 +56,9 @@ export default function HomePage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [settingsModalOpen, setSettingsModalOpen] = useState(false);
+  const [favoritesModalOpen, setFavoritesModalOpen] = useState(false);
   const [user, setUser] = useState<{ name: string; email: string } | null>(null);
+  const { preferences, addFavoriteTeam, removeFavoriteTeam } = useUserPreferences();
   const [activeViewers, setActiveViewers] = useState(socialProofMetrics.activeUsers);
   const [recentActivity, setRecentActivity] = useState<string[]>([]);
   const liveRef = useRef<HTMLDivElement | null>(null);
@@ -157,6 +162,13 @@ export default function HomePage() {
 
         <div className={`navbar-right ${mobileMenuOpen ? 'mobile-open' : ''}`}>
           <div className="nav-icon" title="Search">🔍</div>
+          <div 
+            className="nav-icon" 
+            onClick={() => setFavoritesModalOpen(true)}
+            title="Favorite Teams"
+          >
+            <Star className="w-5 h-5" style={{ fill: preferences.favoriteTeams.length > 0 ? '#667eea' : 'none' }} />
+          </div>
           <div className="nav-icon" title="Help">❓</div>
           <div 
             className="nav-icon" 
@@ -212,6 +224,19 @@ export default function HomePage() {
         isOpen={settingsModalOpen}
         onClose={() => setSettingsModalOpen(false)}
         currentLocale={locale}
+      />
+
+      <FavoriteTeamsModal
+        isOpen={favoritesModalOpen}
+        onClose={() => setFavoritesModalOpen(false)}
+        favorites={preferences.favoriteTeams}
+        onToggleFavorite={(team) => {
+          if (preferences.favoriteTeams.includes(team)) {
+            removeFavoriteTeam(team);
+          } else {
+            addFavoriteTeam(team);
+          }
+        }}
       />
 
       {/* ✅ Drawer Overlay */}
@@ -287,6 +312,51 @@ export default function HomePage() {
                 {t("hero.subtitle")}
               </motion.p>
             </motion.div>
+
+            {/* Personalized Favorites Banner */}
+            {preferences.favoriteTeams.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                style={{
+                  background: "linear-gradient(135deg, rgba(102,126,234,0.15), rgba(118,75,162,0.15))",
+                  backdropFilter: "blur(10px)",
+                  borderRadius: "16px",
+                  padding: "16px 24px",
+                  marginBottom: "24px",
+                  border: "1px solid rgba(102,126,234,0.3)",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "12px"
+                }}
+              >
+                <Star className="w-5 h-5 text-purple-400 fill-purple-400" />
+                <div style={{ flex: 1 }}>
+                  <p style={{ color: "#fff", fontSize: "15px", fontWeight: "600", marginBottom: "4px" }}>
+                    Following {preferences.favoriteTeams.length} team{preferences.favoriteTeams.length !== 1 ? 's' : ''}
+                  </p>
+                  <p style={{ color: "rgba(255,255,255,0.7)", fontSize: "13px" }}>
+                    {preferences.favoriteTeams.slice(0, 3).join(', ')}
+                    {preferences.favoriteTeams.length > 3 && ` +${preferences.favoriteTeams.length - 3} more`}
+                  </p>
+                </div>
+                <button
+                  onClick={() => setFavoritesModalOpen(true)}
+                  style={{
+                    padding: "8px 16px",
+                    background: "rgba(255,255,255,0.2)",
+                    color: "#fff",
+                    border: "1px solid rgba(255,255,255,0.3)",
+                    borderRadius: "8px",
+                    fontSize: "14px",
+                    fontWeight: "600",
+                    cursor: "pointer"
+                  }}
+                >
+                  Manage
+                </button>
+              </motion.div>
+            )}
 
             {/* Social Proof Bar - Zuckerberg Style */}
             <motion.div

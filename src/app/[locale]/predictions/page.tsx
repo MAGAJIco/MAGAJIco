@@ -235,12 +235,12 @@ export default function AdvancedPredictionsPage() {
 
         // Merge predictions - at least one source must succeed
         const merged = mergePredictions(mybets, statarea, combined);
-        
+
         if (merged.length === 0) {
           // Check if all sources actually failed (not just empty)
           const allFailed = responses.every(r => r.status === 'rejected' || 
             (r.status === 'fulfilled' && r.value?.error));
-          
+
           if (allFailed) {
             throw new Error('All prediction sources are currently unavailable');
           }
@@ -260,7 +260,7 @@ export default function AdvancedPredictionsPage() {
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
-      
+
       // Amazon-style: Provide actionable error messages and show demo data
       if (errorMessage.includes('unavailable')) {
         setError("⚠️ Prediction services temporarily unavailable. Showing demo predictions below.");
@@ -269,9 +269,9 @@ export default function AdvancedPredictionsPage() {
       } else {
         setError("⚠️ Unable to load live predictions. Showing demo predictions below.");
       }
-      
+
       console.error('Fetch error:', err);
-      
+
       // Show demo data when there's an error (Amazon's approach - show what you can)
       setPredictions(DEMO_PREDICTIONS);
     } finally {
@@ -784,7 +784,7 @@ export default function AdvancedPredictionsPage() {
               >
                 {/* Glow effect on hover */}
                 <div className="absolute inset-0 bg-gradient-to-r from-purple-500/0 via-purple-500/5 to-purple-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
-                
+
                 <div className="relative z-10">
                   <div className="flex items-start justify-between mb-5">
                     <div className="flex-1">
