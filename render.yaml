@@ -5,7 +5,7 @@ services:
     env: node
     region: oregon
     plan: free
-    buildCommand: npm ci && npm run build --workspace=shared && npm run build --workspace=app
+    buildCommand: npm ci && npm run build --workspace=shared && npm run build --workspace=src/app
     startCommand: cd && npm start
     envVars:
       - key: NODE_ENV
@@ -51,7 +51,7 @@ services:
     env: python
     region: oregon
     plan: free
-    buildCommand: cd apps/api/ml && pip install -r requirements.txt
+    buildCommand: cd && pip install -r requirements.txt
     startCommand: cd apps/api/ml && uvicorn api:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: PYTHON_VERSION
