@@ -7,6 +7,14 @@ import "../styles/theme.css";
 import ThemeInitializer from "./components/ThemeInitializer";
 import { Analytics } from "@vercel/analytics/react";
 
+const inter = Inter({ subsets: ["latin"] });
+
+export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://magajico.com'),
+  title: "MagajiCo Sports - Live Predictions & Analytics",
+  description: "Advanced sports predictions with AI-powered analytics",
+};
+
 
 const inter = Inter({ subsets: ['latin'] });
 

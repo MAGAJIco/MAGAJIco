@@ -104,77 +104,96 @@ export default function AdvancedPredictionsPage() {
     setError(null);
 
     try {
-      // Wrap API calls with smart retry logic
+      // Amazon-style: Fetch from multiple sources with graceful degradation
       const result = await executeWithRetry(async () => {
-        // Fetch from multiple sources
-        const [mybetsResponse, statareaResponse, combinedResponse] = await Promise.all([
-          fetch(`${API_BASE_URL}/api/predictions/soccer?min_confidence=${minConfidence}&date=${date}`).then(r => r.json()),
-          fetch(`${API_BASE_URL}/api/predictions/statarea?min_odds=1.5`).then(r => r.json()),
-          fetch(`${API_BASE_URL}/api/predictions/combined?min_confidence=${minConfidence}&date=${date}`).then(r => r.json()),
-        ]);
+        const sources = [
+          { name: 'mybets', url: `${API_BASE_URL}/api/predictions/soccer?min_confidence=${minConfidence}&date=${date}` },
+          { name: 'statarea', url: `${API_BASE_URL}/api/predictions/statarea?min_odds=1.5` },
+          { name: 'combined', url: `${API_BASE_URL}/api/predictions/combined?min_confidence=${minConfidence}&date=${date}` }
+        ];
 
-        console.log('API Responses:', { mybetsResponse, statareaResponse, combinedResponse });
-        console.log('Response types:', {
-          mybets: typeof mybetsResponse,
-          statarea: typeof statareaResponse,
-          combined: typeof combinedResponse
-        });
+        // Fetch with individual error handling - don't let one failure block all
+        const responses = await Promise.allSettled(
+          sources.map(source => 
+            fetch(source.url, { 
+              headers: { 'Accept': 'application/json' },
+              signal: AbortSignal.timeout(8000) // 8 second timeout per request
+            })
+            .then(r => {
+              if (!r.ok) throw new Error(`${source.name} returned ${r.status}`);
+              return r.json();
+            })
+            .catch(err => {
+              console.warn(`Source ${source.name} failed:`, err.message);
+              return { predictions: [], data: [], error: err.message };
+            })
+          )
+        );
 
-        // Extract predictions arrays from response objects - handle all cases
-        let mybets = [];
-        let statarea = [];
-        let combined = [];
+        // Extract successful responses with Amazon-style fallback
+        const [mybetsResult, statareaResult, combinedResult] = responses.map(r => 
+          r.status === 'fulfilled' ? r.value : { predictions: [], data: [] }
+        );
 
-        // Handle mybets response
-        if (Array.isArray(mybetsResponse)) {
-          mybets = mybetsResponse;
-        } else if (mybetsResponse?.predictions && Array.isArray(mybetsResponse.predictions)) {
-          mybets = mybetsResponse.predictions;
-        } else if (mybetsResponse?.data && Array.isArray(mybetsResponse.data)) {
-          mybets = mybetsResponse.data;
-        }
+        console.log('API Responses:', { mybetsResult, statareaResult, combinedResult });
 
-        // Handle statarea response
-        if (Array.isArray(statareaResponse)) {
-          statarea = statareaResponse;
-        } else if (statareaResponse?.predictions && Array.isArray(statareaResponse.predictions)) {
-          statarea = statareaResponse.predictions;
-        } else if (statareaResponse?.data && Array.isArray(statareaResponse.data)) {
-          statarea = statareaResponse.data;
-        }
+        // Extract predictions arrays - prioritize combined, then individual sources
+        const extractPredictions = (response: any): any[] => {
+          if (Array.isArray(response)) return response;
+          if (response?.predictions && Array.isArray(response.predictions)) return response.predictions;
+          if (response?.data && Array.isArray(response.data)) return response.data;
+          return [];
+        };
 
-        // Handle combined response
-        if (Array.isArray(combinedResponse)) {
-          combined = combinedResponse;
-        } else if (combinedResponse?.predictions && Array.isArray(combinedResponse.predictions)) {
-          combined = combinedResponse.predictions;
-        } else if (combinedResponse?.data && Array.isArray(combinedResponse.data)) {
-          combined = combinedResponse.data;
-        }
+        const mybets = extractPredictions(mybetsResult);
+        const statarea = extractPredictions(statareaResult);
+        const combined = extractPredictions(combinedResult);
 
         console.log('Extracted arrays:', {
           mybetsCount: mybets.length,
           statareaCount: statarea.length,
-          combinedCount: combined.length,
-          mybetsSample: mybets[0],
-          statareaSample: statarea[0],
-          combinedSample: combined[0]
+          combinedCount: combined.length
         });
 
-        // Merge and enhance predictions
-        return mergePredictions(mybets, statarea, combined);
+        // Merge predictions - at least one source must succeed
+        const merged = mergePredictions(mybets, statarea, combined);
+        
+        if (merged.length === 0) {
+          // Check if all sources actually failed (not just empty)
+          const allFailed = responses.every(r => r.status === 'rejected' || 
+            (r.status === 'fulfilled' && r.value?.error));
+          
+          if (allFailed) {
+            throw new Error('All prediction sources are currently unavailable');
+          }
+        }
+
+        return merged;
       });
 
       console.log('Enhanced predictions:', result.length, result);
 
       if (result.length === 0) {
-        setError("No predictions available for the selected filters");
+        setError("No predictions match your current filters. Try adjusting the date or confidence level.");
+      } else {
+        setPredictions(result);
       }
-
-      setPredictions(result);
     } catch (err) {
-      setError("Failed to load predictions after multiple retries");
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+      
+      // Amazon-style: Provide actionable error messages
+      if (errorMessage.includes('unavailable')) {
+        setError("Our prediction services are temporarily unavailable. We're working to restore them. Please try again in a few minutes.");
+      } else if (errorMessage.includes('timeout')) {
+        setError("The request is taking longer than expected. Please check your connection and try again.");
+      } else {
+        setError("We encountered an issue loading predictions. Please try refreshing the page.");
+      }
+      
       console.error('Fetch error:', err);
+      
+      // Keep any existing predictions visible during error state
+      // This is Amazon's approach - show what you can
     } finally {
       setLoading(false);
     }
@@ -802,14 +821,45 @@ export default function AdvancedPredictionsPage() {
             <div className="relative z-10">
               <div className="text-7xl mb-6 animate-bounce">⚠️</div>
               <p className="text-red-400 text-2xl font-bold mb-3">{error}</p>
-              <p className="text-gray-400 text-sm mb-6">Please try again or adjust your filters</p>
-              <button
-                onClick={fetchEnhancedPredictions}
-                disabled={loading}
-                className="px-8 py-3 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold rounded-xl transition-all duration-200 shadow-lg shadow-red-500/30 hover:shadow-red-500/50 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loading ? "Retrying..." : "Retry Now"}
-              </button>
+              <div className="max-w-md mx-auto mb-6">
+                <p className="text-gray-400 text-sm mb-4">Having trouble? Try these steps:</p>
+                <ul className="text-left text-gray-300 text-sm space-y-2">
+                  <li className="flex items-center gap-2">
+                    <span className="text-purple-400">•</span>
+                    Check your internet connection
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="text-purple-400">•</span>
+                    Adjust date or confidence filters
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="text-purple-400">•</span>
+                    Try refreshing the page
+                  </li>
+                </ul>
+              </div>
+              <div className="flex gap-3 justify-center">
+                <button
+                  onClick={fetchEnhancedPredictions}
+                  disabled={loading}
+                  className="px-8 py-3 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold rounded-xl transition-all duration-200 shadow-lg shadow-red-500/30 hover:shadow-red-500/50 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {loading ? "Retrying..." : "Retry Now"}
+                </button>
+                <button
+                  onClick={() => {
+                    setFilterLeague("all");
+                    setFilterConfidence("all");
+                    setMinConfidence(86);
+                    setError(null);
+                    fetchEnhancedPredictions();
+                  }}
+                  disabled={loading}
+                  className="px-8 py-3 bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 font-semibold rounded-xl transition-all duration-200 border border-purple-500/30 hover:border-purple-500/50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Reset Filters
+                </button>
+              </div>
             </div>
           </div>
         )}
