@@ -1,7 +1,6 @@
-
 services:
   # Fastify Backend Service (Zero Cost - Free Tier)
-  - type: app
+  - type: web
     name: magajico-backend
     env: node
     region: oregon
@@ -45,9 +44,9 @@ services:
         sync: false
     healthCheckPath: /health
     autoDeploy: true
-    
+
   # FastAPI ML Service (Zero Cost - Free Tier)
-  - type: app
+  - type: web
     name: magajico-ml-service
     env: python
     region: oregon
