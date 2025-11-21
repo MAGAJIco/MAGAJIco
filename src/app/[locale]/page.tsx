@@ -122,27 +122,6 @@ export default function HomePage() {
 
   return (
     <>
-      {/* ✅ Mobile Bottom Navigation - Enhanced Touch Targets */}
-      <div className="mobile-bottom-nav">
-        <div className="flex justify-around items-center px-1 py-2 safe-area-inset-bottom">
-          {primaryApps.map((app) => (
-            <Link
-              key={app.id}
-              href={app.href}
-              className="touch-target flex flex-col items-center gap-1.5 px-2 py-2.5 rounded-2xl hover:bg-gray-100 active:bg-gray-200 transition-all active:scale-95 min-w-[68px] min-h-[68px]"
-              style={{ WebkitTapHighlightColor: 'transparent' }}
-            >
-              <div className="w-11 h-11 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl flex items-center justify-center text-xl shadow-md transition-transform active:scale-90">
-                {app.icon}
-              </div>
-              <span className="text-[10px] font-semibold text-gray-700 text-center leading-tight max-w-[64px] truncate">
-                {app.name}
-              </span>
-            </Link>
-          ))}
-        </div>
-      </div>
-
       {/* ✅ Navbar */}
       <nav className="navbar">
         <div className="navbar-left">
@@ -789,7 +768,7 @@ export default function HomePage() {
           font-size: 24px;
         }
         .container {
-          max-width: 1200px; margin: 0 auto; padding: 40px 20px 100px;
+          max-width: 1200px; margin: 0 auto; padding: 40px 20px;
         }
         header { text-align: center; margin-bottom: 40px; }
         header h1 {
@@ -828,9 +807,6 @@ export default function HomePage() {
         }
         footer {
           text-align: center; padding: 24px; color: rgba(255,255,255,0.8); font-size: 14px;
-        }
-        .mobile-bottom-nav {
-          display: none;
         }
         .mobile-menu-overlay {
           position: fixed;
@@ -894,40 +870,16 @@ export default function HomePage() {
         @media (max-width: 640px) {
           header h1 { font-size: 28px; }
           .carousel-card { flex: 0 0 260px; }
-          .container { padding-bottom: 100px; }
+          .container { padding-bottom: 40px; }
         }
         
         @media (min-width: 641px) and (max-width: 768px) {
           header h1 { font-size: 32px; }
           .carousel-card { flex: 0 0 300px; }
-          .container { padding-bottom: 110px; }
+          .container { padding-bottom: 40px; }
         }
         
         @media (max-width: 768px) {
-          .mobile-bottom-nav {
-            display: block;
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            z-index: 50;
-            background: rgba(255,255,255,0.98);
-            backdrop-filter: blur(16px);
-            box-shadow: 0 -2px 16px rgba(0,0,0,0.08);
-            border-top: 1px solid rgba(0,0,0,0.06);
-          }
-          
-          /* Prevent text selection on touch */
-          .mobile-bottom-nav * {
-            -webkit-user-select: none;
-            user-select: none;
-          }
-          
-          .mobile-bottom-nav .touch-target {
-            min-width: 68px;
-            min-height: 68pxth: 60px;
-            min-height: 60px;
-          }
           .drawer-overlay { backdrop-filter: blur(4px); }
           .app-drawer {
             width: 100% !important;
@@ -952,9 +904,6 @@ export default function HomePage() {
           .app-name {
             font-size: 12px !important;
             margin-top: 8px !important;
-          }ilter: blur(10px);
-            border-top: 1px solid #e5e7eb;
-            box-shadow: 0 -10px 30px rgba(0,0,0,0.1);
           }
         }
       `}</style>
