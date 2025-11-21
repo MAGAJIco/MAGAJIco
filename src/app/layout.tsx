@@ -11,14 +11,6 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://magajico.com'),
-  title: "MagajiCo Sports - Live Predictions & Analytics",
-  description: "Advanced sports predictions with AI-powered analytics",
-};
-
-
-const inter = Inter({ subsets: ['latin'] });
-
-export const metadata: Metadata = {
   title: "MagajiCo Sports Central - AI Sports Predictions & Live Matches",
   description: "Join 1.2M+ users! Get 87% accurate AI predictions, live match tracking, and earn rewards. Share with friends and earn 100 Pi!",
   keywords: ['sports predictions', 'live matches', 'AI sports', 'sports betting', 'sports hub', 'entertainment platform', 'sports social network'],
