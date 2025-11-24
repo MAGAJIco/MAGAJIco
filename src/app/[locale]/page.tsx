@@ -117,6 +117,7 @@ export default function HomePage() {
 
   const drawerApps = [
     { id: "home", icon: "🏠", name: "Portal", href: `/${locale}` },
+    { id: "bets", icon: "💰", name: "Today's Bets", href: `/${locale}/bets` },
     { id: "predictions", icon: "🤖", name: "Predictions", href: `/${locale}/predictions` },
     { id: "live", icon: "⚡", name: "Live", href: `/${locale}/live` },
     { id: "social", icon: "👥", name: "Social", href: `/${locale}/social` },
