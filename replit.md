@@ -153,6 +153,12 @@ python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload
    - Automatic switching respects their OS preference
 
 ## Recent Changes
+- **2025-11-24**: Health types moved to shared folder
+  - Created `shared/health.ts` with HealthData and HealthStatus interfaces
+  - Updated frontend components to import shared health types
+  - Backend `/health` and `/api/health` endpoints now have formal type definitions
+  - Both backend and frontend can use consistent health check types
+  
 - **2025-11-24**: Complete internationalization setup
   - Reorganized translation files from `shared/` to `src/locales/messages/` (frontend-only)
   - Expanded translation structure with feature-based organization (common, nav, settings, home, predictions, matches, leaderboard)
@@ -210,7 +216,7 @@ Styling:
 ### Shared Folder Organization
 ```
 shared/                         # Reserved for truly shared files
-└── (empty - for future backend + frontend shared code)
+└── health.ts                   # Health check types (HealthData, HealthStatus)
 
 src/
 ├── locales/

@@ -1,20 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-
-interface HealthData {
-  status: string;
-  summary?: {
-    healthy: number;
-    total: number;
-    percentage: number;
-  };
-  services?: Array<{
-    name: string;
-    status: string;
-    endpoint?: string;
-  }>;
-}
+import type { HealthData } from "../../../shared/health";
 
 export default function BackendHealthStatus() {
   const [health, setHealth] = useState<HealthData | null>(null);
