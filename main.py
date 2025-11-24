@@ -320,7 +320,6 @@ async def get_ai_suggestions(
             }
         
         # Use AI to analyze predictions and provide suggestions
-        # the newest OpenAI model is "gpt-5" which was released August 7, 2025. do not change this unless explicitly requested by the user
         client = OpenAI(api_key=openai_key)
         
         prediction_summary = "\n".join([
@@ -351,7 +350,7 @@ Provide a JSON response with the following structure:
 Focus on the highest confidence predictions and explain your reasoning clearly."""
 
         response = client.chat.completions.create(
-            model="gpt-5",
+            model="gpt-4-turbo",
             messages=[
                 {"role": "system", "content": "You are an expert sports betting analyst providing data-driven recommendations."},
                 {"role": "user", "content": prompt}
