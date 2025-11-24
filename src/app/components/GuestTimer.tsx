@@ -94,8 +94,9 @@ export default function GuestTimer({
               display: flex;
               align-items: center;
               gap: 10px;
-              font-size: 15px;
+              font-size: clamp(13px, 3vw, 15px);
               font-weight: 600;
+              line-height: 1.2;
             }
 
             .timer-icon {
@@ -119,9 +120,10 @@ export default function GuestTimer({
             }
 
             .timer-subtitle {
-              font-size: 13px;
+              font-size: clamp(12px, 2.5vw, 13px);
               color: rgba(255, 255, 255, 0.9);
               margin: 0;
+              line-height: 1.2;
             }
 
             .timer-actions {
@@ -131,16 +133,20 @@ export default function GuestTimer({
             }
 
             .timer-btn-signup {
-              padding: 8px 18px;
+              min-height: 44px;
+              min-width: 120px;
+              padding: 10px 18px;
               background: white;
               color: #667eea;
               border: none;
               border-radius: 8px;
-              font-size: 14px;
+              font-size: clamp(13px, 3vw, 14px);
               font-weight: 600;
               cursor: pointer;
               transition: all 0.2s;
               white-space: nowrap;
+              touch-action: manipulation;
+              -webkit-tap-highlight-color: transparent;
             }
 
             .timer-btn-signup:hover {
@@ -153,8 +159,10 @@ export default function GuestTimer({
             }
 
             .timer-btn-dismiss {
-              width: 32px;
-              height: 32px;
+              min-width: 44px;
+              min-height: 44px;
+              width: 44px;
+              height: 44px;
               border: none;
               background: rgba(255, 255, 255, 0.2);
               color: white;
@@ -165,6 +173,9 @@ export default function GuestTimer({
               align-items: center;
               justify-content: center;
               transition: all 0.2s;
+              touch-action: manipulation;
+              -webkit-tap-highlight-color: transparent;
+              flex-shrink: 0;
             }
 
             .timer-btn-dismiss:hover {
@@ -183,21 +194,61 @@ export default function GuestTimer({
               transition: width 1s linear;
             }
 
-            @media (max-width: 640px) {
+            @media (max-width: 768px) {
               .guest-timer-banner {
                 flex-direction: column;
                 gap: 12px;
-                padding: 12px 16px;
+                padding: clamp(12px, 3vw, 14px) clamp(12px, 4vw, 24px);
               }
 
               .timer-actions {
                 width: 100%;
                 justify-content: space-between;
+                gap: 10px;
               }
 
               .timer-btn-signup {
                 flex: 1;
-                padding: 10px 16px;
+                padding: 12px 16px;
+                min-height: 44px;
+              }
+
+              .timer-message {
+                flex-wrap: wrap;
+              }
+            }
+
+            @media (max-width: 480px) {
+              .guest-timer-container {
+                top: 56px;
+              }
+
+              .guest-timer-banner {
+                gap: 10px;
+                padding: 12px;
+              }
+
+              .timer-content {
+                gap: 4px;
+              }
+
+              .timer-actions {
+                gap: 8px;
+              }
+
+              .timer-btn-signup {
+                padding: 10px 14px;
+                font-size: 13px;
+                min-width: 90px;
+              }
+
+              .timer-btn-dismiss {
+                width: 40px;
+                height: 40px;
+              }
+
+              .timer-icon {
+                font-size: 18px;
               }
             }
           `}</style>

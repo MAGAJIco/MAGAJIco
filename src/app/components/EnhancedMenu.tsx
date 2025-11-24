@@ -381,15 +381,18 @@ export default function EnhancedMenu({ isOpen, onClose, currentPath = "" }: Enha
               align-items: center;
               gap: 6px;
               padding: 8px 16px;
+              min-height: 40px;
               border-radius: 20px;
               border: 1px solid #e5e7eb;
               background: white;
               color: #666;
-              font-size: 13px;
+              font-size: clamp(12px, 2.5vw, 13px);
               font-weight: 500;
               cursor: pointer;
               white-space: nowrap;
               transition: all 0.2s;
+              touch-action: manipulation;
+              -webkit-tap-highlight-color: transparent;
             }
 
             html.dark .category-chip {
@@ -428,11 +431,12 @@ export default function EnhancedMenu({ isOpen, onClose, currentPath = "" }: Enha
               align-items: center;
               gap: 8px;
               padding: 12px 20px 8px;
-              font-size: 13px;
+              font-size: clamp(12px, 2.5vw, 13px);
               font-weight: 600;
               color: #666;
               text-transform: uppercase;
               letter-spacing: 0.5px;
+              line-height: 1.2;
             }
 
             html.dark .section-header {
@@ -459,8 +463,9 @@ export default function EnhancedMenu({ isOpen, onClose, currentPath = "" }: Enha
               display: flex;
               align-items: center;
               gap: 8px;
-              font-size: 12px;
+              font-size: clamp(11px, 2vw, 12px);
               color: #999;
+              line-height: 1.2;
             }
 
             .divider {
@@ -545,11 +550,14 @@ function MenuItem({
           align-items: center;
           justify-content: space-between;
           padding: 14px 16px;
+          min-height: 48px;
           border-radius: 12px;
           text-decoration: none;
           color: #333;
           transition: all 0.2s;
           cursor: pointer;
+          touch-action: manipulation;
+          -webkit-tap-highlight-color: transparent;
         }
 
         html.dark .menu-item {
@@ -571,8 +579,9 @@ function MenuItem({
         }
 
         .item-label {
-          font-size: 15px;
+          font-size: clamp(14px, 3vw, 15px);
           font-weight: 500;
+          line-height: 1.2;
         }
 
         .new-badge {
@@ -580,9 +589,10 @@ function MenuItem({
           background: linear-gradient(135deg, #10b981, #059669);
           color: white;
           border-radius: 8px;
-          font-size: 10px;
+          font-size: clamp(9px, 1.5vw, 10px);
           font-weight: 700;
           letter-spacing: 0.5px;
+          white-space: nowrap;
         }
 
         .item-right {
@@ -592,22 +602,26 @@ function MenuItem({
         }
 
         .item-badge {
-          min-width: 24px;
-          height: 24px;
+          min-width: 28px;
+          min-height: 28px;
+          height: 28px;
           padding: 0 8px;
           background: linear-gradient(135deg, #ef4444, #dc2626);
           color: white;
           border-radius: 12px;
-          font-size: 12px;
+          font-size: clamp(11px, 2vw, 12px);
           font-weight: 600;
           display: flex;
           align-items: center;
           justify-content: center;
+          flex-shrink: 0;
         }
 
         .pin-button {
-          width: 32px;
-          height: 32px;
+          min-width: 40px;
+          min-height: 40px;
+          width: 40px;
+          height: 40px;
           border: none;
           background: transparent;
           font-size: 16px;
@@ -615,6 +629,9 @@ function MenuItem({
           border-radius: 8px;
           transition: background 0.2s;
           opacity: 0;
+          touch-action: manipulation;
+          -webkit-tap-highlight-color: transparent;
+          flex-shrink: 0;
         }
 
         .menu-item-wrapper:hover .pin-button {
