@@ -208,14 +208,14 @@ async def get_platform_stats():
 async def google_login(request: Request):
     """Initiate Google OAuth login"""
     redirect_uri = str(request.base_url).rstrip('/') + '/auth/google/callback'
-    return await oauth.google.authorize_redirect(request, redirect_uri)
+    return await oauth.google.authorize_redirect(request, redirect_uri)  # type: ignore
 
 
 @app.get("/auth/google/callback")
 async def google_callback(request: Request):
     """Handle Google OAuth callback"""
     try:
-        token = await oauth.google.authorize_access_token(request)
+        token = await oauth.google.authorize_access_token(request)  # type: ignore
         user_info = token.get('userinfo')
         
         if not user_info:
@@ -360,7 +360,10 @@ Focus on the highest confidence predictions and explain your reasoning clearly."
         )
         
         import json
-        ai_response = json.loads(response.choices[0].message.content)
+        message_content = response.choices[0].message.content
+        if not message_content:
+            raise ValueError("No response content from AI")
+        ai_response = json.loads(message_content)
         
         return {
             "success": True,
