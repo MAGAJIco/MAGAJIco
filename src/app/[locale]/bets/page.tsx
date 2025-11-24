@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { ArrowUpRight, Copy, Share2, ExternalLink, Zap, Target, TrendingUp } from "lucide-react";
+import { motion } from "framer-motion";
 import { API_BASE_URL } from "../../../lib/api";
 
 interface Bet {
@@ -140,60 +141,131 @@ export default function BetsPage() {
   const parlay = calculateParlay();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-24 pb-12">
-      <div className="max-w-6xl mx-auto px-4">
+    <div style={{
+      minHeight: "100vh",
+      background: "linear-gradient(135deg, #0f172a via-purple-900 to-slate-900)",
+      paddingTop: "96px",
+      paddingBottom: "48px"
+    }}>
+      <motion.main
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.6 }}
+        className="max-w-6xl mx-auto px-4"
+      >
         {/* Header */}
-        <div className="mb-8">
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="mb-8"
+        >
           <div className="flex items-center gap-3 mb-2">
             <Target className="w-8 h-8 text-purple-400" />
-            <h1 className="text-4xl font-bold text-white">Today's Bets</h1>
+            <h1 style={{
+              fontSize: "clamp(1.875rem, 5vw, 2.5rem)",
+              fontWeight: "700",
+              color: "#fff",
+              letterSpacing: "-0.02em"
+            }}>Today's Bets</h1>
           </div>
-          <p className="text-gray-400">Pick predictions and stake on Stake.com</p>
-        </div>
+          <p style={{ color: "rgba(255,255,255,0.6)", fontSize: "16px" }}>Pick predictions and stake on Stake.com</p>
+        </motion.div>
 
         {/* Stats Bar */}
-        <div className="grid grid-cols-3 gap-4 mb-8">
-          <div className="bg-white/5 backdrop-blur border border-white/10 rounded-lg p-4">
-            <div className="text-gray-400 text-sm mb-1">Available Bets</div>
-            <div className="text-3xl font-bold text-white">{bets.length}</div>
-          </div>
-          <div className="bg-white/5 backdrop-blur border border-white/10 rounded-lg p-4">
-            <div className="text-gray-400 text-sm mb-1">Selected</div>
-            <div className="text-3xl font-bold text-purple-400">{selectedBets.length}</div>
-          </div>
-          <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 backdrop-blur border border-purple-500/30 rounded-lg p-4">
-            <div className="text-gray-300 text-sm mb-1">Parlay Odds</div>
-            <div className="text-3xl font-bold text-pink-400">{parlay.odds}x</div>
-          </div>
-        </div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          className="grid grid-cols-3 gap-4 mb-8"
+        >
+          {[
+            { label: "Available Bets", value: bets.length, color: "text-blue-400" },
+            { label: "Selected", value: selectedBets.length, color: "text-purple-400" },
+            { label: "Parlay Odds", value: `${parlay.odds}x`, color: "text-pink-400" }
+          ].map((stat, idx) => (
+            <motion.div
+              key={idx}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: idx * 0.1 }}
+              style={{
+                background: "linear-gradient(135deg, rgba(102,126,234,0.1), rgba(118,75,162,0.1))",
+                backdropFilter: "blur(10px)",
+                border: "1px solid rgba(255,255,255,0.1)",
+                borderRadius: "12px",
+                padding: "16px"
+              }}
+            >
+              <div style={{ color: "rgba(255,255,255,0.6)", fontSize: "14px", marginBottom: "8px" }}>{stat.label}</div>
+              <div style={{ fontSize: "28px", fontWeight: "700", color: stat.color }}>{stat.value}</div>
+            </motion.div>
+          ))}
+        </motion.div>
 
         {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="grid grid-cols-1 lg:grid-cols-3 gap-6"
+        >
           {/* Bets List */}
           <div className="lg:col-span-2">
             {loading ? (
-              <div className="text-center py-12">
-                <div className="text-gray-400">Loading today's bets...</div>
-              </div>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-center py-12"
+              >
+                <div style={{ color: "rgba(255,255,255,0.6)" }}>Loading today's bets...</div>
+              </motion.div>
             ) : error ? (
-              <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-6 text-red-300">
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                style={{
+                  background: "linear-gradient(135deg, rgba(239,68,68,0.1), rgba(220,38,38,0.1))",
+                  backdropFilter: "blur(10px)",
+                  border: "1px solid rgba(239,68,68,0.3)",
+                  borderRadius: "12px",
+                  padding: "24px",
+                  color: "rgba(252,165,165,1)"
+                }}
+              >
                 {error}
-              </div>
+              </motion.div>
             ) : bets.length === 0 ? (
-              <div className="text-center py-12 text-gray-400">
+              <div className="text-center py-12" style={{ color: "rgba(255,255,255,0.6)" }}>
                 No bets available right now. Check back soon!
               </div>
             ) : (
               <div className="space-y-3">
-                {bets.map(bet => (
-                  <div
+                {bets.map((bet, idx) => (
+                  <motion.div
                     key={bet.id}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: idx * 0.05 }}
                     onClick={() => toggleBetSelection(bet)}
-                    className={`p-4 rounded-lg border cursor-pointer transition-all ${
-                      selectedBets.find(b => b.id === bet.id)
-                        ? 'bg-purple-500/20 border-purple-500 shadow-lg shadow-purple-500/30'
-                        : 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20'
-                    }`}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    style={{
+                      padding: "16px",
+                      borderRadius: "12px",
+                      border: selectedBets.find(b => b.id === bet.id)
+                        ? "1px solid rgba(168,85,247,1)"
+                        : "1px solid rgba(255,255,255,0.1)",
+                      background: selectedBets.find(b => b.id === bet.id)
+                        ? "linear-gradient(135deg, rgba(168,85,247,0.2), rgba(168,85,247,0.1))"
+                        : "rgba(255,255,255,0.05)",
+                      backdropFilter: "blur(10px)",
+                      cursor: "pointer",
+                      transition: "all 0.3s ease",
+                      boxShadow: selectedBets.find(b => b.id === bet.id)
+                        ? "0 0 20px rgba(168,85,247,0.3)"
+                        : "none"
+                    }}
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
@@ -238,8 +310,22 @@ export default function BetsPage() {
           </div>
 
           {/* Bet Slip */}
-          <div className="lg:col-span-1">
-            <div className="sticky top-24 bg-gradient-to-br from-purple-900/40 to-pink-900/40 backdrop-blur border border-purple-500/30 rounded-lg p-6">
+          <motion.div
+            initial={{ opacity: 0, x: 30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="lg:col-span-1"
+          >
+            <div
+              className="sticky top-24"
+              style={{
+                background: "linear-gradient(135deg, rgba(126,34,206,0.2), rgba(217,70,239,0.2))",
+                backdropFilter: "blur(10px)",
+                border: "1px solid rgba(168,85,247,0.3)",
+                borderRadius: "16px",
+                padding: "24px"
+              }}
+            >
               <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
                 <Zap className="w-5 h-5 text-yellow-400" />
                 Bet Slip
@@ -308,9 +394,9 @@ export default function BetsPage() {
                 </>
               )}
             </div>
-          </div>
-        </div>
-      </div>
+          </motion.div>
+        </motion.div>
+      </motion.main>
     </div>
   );
 }
