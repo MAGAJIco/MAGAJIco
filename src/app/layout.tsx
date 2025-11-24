@@ -24,8 +24,11 @@ export const metadata: Metadata = {
     title: 'MagajiCo'
   },
   icons: {
-    icon: '/favicon.svg',
-    apple: '/icons/icon-192x192.png'
+    icon: [
+      { url: '/favicon.png', sizes: '32x32', type: 'image/png' },
+      { url: '/favicon.png', sizes: '192x192', type: 'image/png' }
+    ],
+    apple: '/favicon.png'
   },
   openGraph: {
     type: 'website',
