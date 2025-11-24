@@ -23,7 +23,7 @@ import {
   Copy,
 } from "lucide-react";
 import { motion } from "framer-motion";
-import ThemeToggle from "../components/ThemeToggle";
+import ThemeToggle from "../../components/ThemeToggle";
 import { useSmartRetry } from "../../hook/useSmartRetry";
 import StatCard from "../../components/StatCard";
 import { API_BASE_URL } from "../../../lib/api";

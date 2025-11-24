@@ -11,22 +11,22 @@ const config: Config = {
     extend: {
       colors: {
         primary: {
-          50: '#f0f4ff',
-          100: '#e6edff',
-          400: '#818cf8',
-          500: '#667eea',
-          600: '#5568d3',
-          700: '#3d47a0',
+          50: '#e3f2fd',
+          100: '#bbdefb',
+          400: '#42a5f5',
+          500: '#0066cc',
+          600: '#0052a3',
+          700: '#00397a',
         },
         secondary: {
-          500: '#764ba2',
-          600: '#6b4096',
+          500: '#ff9900',
+          600: '#e68a00',
         },
-        accent: '#f093fb',
+        accent: '#146eb4',
       },
       backgroundImage: {
-        'gradient-brand': 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        'gradient-brand-hover': 'linear-gradient(135deg, #5568d3 0%, #6b4096 100%)',
+        'gradient-brand': 'linear-gradient(135deg, #0066cc 0%, #ff9900 100%)',
+        'gradient-brand-hover': 'linear-gradient(135deg, #0052a3 0%, #e68a00 100%)',
       },
       boxShadow: {
         'glow': '0 0 20px rgba(102, 126, 234, 0.3)',

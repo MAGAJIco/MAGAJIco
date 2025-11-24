@@ -1,75 +1,91 @@
-/* Enhanced Theme System - Light & Dark Mode */
+/* Enhanced Theme System - Amazon Consumer-Friendly Light + Apple Premium Dark */
 
 :root {
-  /* Color Variables */
+  /* LIGHT THEME - Amazon Consumer-Friendly */
   --bg-primary: #ffffff;
-  --bg-secondary: #f9fafb;
-  --bg-tertiary: #f3f4f6;
-  --text-primary: #1f2937;
-  --text-secondary: #6b7280;
-  --text-tertiary: #9ca3af;
-  --border-color: #e5e7eb;
-  --gradient-from: #667eea;
-  --gradient-to: #764ba2;
-  --gradient-accent: #f093fb;
+  --bg-secondary: #f8f9fa;
+  --bg-tertiary: #e8eaed;
+  --text-primary: #0a0e27;
+  --text-secondary: #565d66;
+  --text-tertiary: #8b92a0;
+  --border-color: #dadce0;
+  
+  /* Brand Colors - Amazon Inspired */
+  --gradient-from: #0066cc;
+  --gradient-to: #ff9900;
+  --gradient-accent: #146eb4;
   
   /* Semantic Colors */
-  --success: #10b981;
-  --warning: #f59e0b;
-  --error: #ef4444;
-  --info: #3b82f6;
+  --success: #0f9d58;
+  --warning: #f57c00;
+  --error: #c5221f;
+  --info: #1f73e7;
   
-  /* Shadows */
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  /* Shadows - Light mode soft shadows */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.12);
+  --shadow-xl: 0 12px 24px rgba(0, 0, 0, 0.15);
   
   color-scheme: light;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg-primary: #111827;
-    --bg-secondary: #1f2937;
+    --bg-primary: #0d1117;
+    --bg-secondary: #161b22;
     --bg-tertiary: #0f172a;
-    --text-primary: #f9fafb;
-    --text-secondary: #d1d5db;
-    --text-tertiary: #9ca3af;
-    --border-color: #374151;
+    --text-primary: #e6edf3;
+    --text-secondary: #8b949e;
+    --text-tertiary: #6e7681;
+    --border-color: #30363d;
+    --gradient-from: #667eea;
+    --gradient-to: #764ba2;
+    --gradient-accent: #f093fb;
   }
 }
 
+/* DARK THEME - Apple Premium */
 html.dark {
-  --bg-primary: #111827;
-  --bg-secondary: #1f2937;
+  --bg-primary: #0d1117;
+  --bg-secondary: #161b22;
   --bg-tertiary: #0f172a;
-  --text-primary: #f9fafb;
-  --text-secondary: #d1d5db;
-  --text-tertiary: #9ca3af;
-  --border-color: #374151;
+  --text-primary: #e6edf3;
+  --text-secondary: #8b949e;
+  --text-tertiary: #6e7681;
+  --border-color: #30363d;
+  --gradient-from: #667eea;
+  --gradient-to: #764ba2;
+  --gradient-accent: #f093fb;
   color-scheme: dark;
 }
 
 html[data-theme="dark"] {
-  --bg-primary: #111827;
-  --bg-secondary: #1f2937;
+  --bg-primary: #0d1117;
+  --bg-secondary: #161b22;
   --bg-tertiary: #0f172a;
-  --text-primary: #f9fafb;
-  --text-secondary: #d1d5db;
-  --text-tertiary: #9ca3af;
-  --border-color: #374151;
+  --text-primary: #e6edf3;
+  --text-secondary: #8b949e;
+  --text-tertiary: #6e7681;
+  --border-color: #30363d;
+  --gradient-from: #667eea;
+  --gradient-to: #764ba2;
+  --gradient-accent: #f093fb;
   color-scheme: dark;
 }
 
+/* LIGHT THEME - Amazon Consumer-Friendly */
 html[data-theme="light"] {
   --bg-primary: #ffffff;
-  --bg-secondary: #f9fafb;
-  --bg-tertiary: #f3f4f6;
-  --text-primary: #1f2937;
-  --text-secondary: #6b7280;
-  --text-tertiary: #9ca3af;
-  --border-color: #e5e7eb;
+  --bg-secondary: #f8f9fa;
+  --bg-tertiary: #e8eaed;
+  --text-primary: #0a0e27;
+  --text-secondary: #565d66;
+  --text-tertiary: #8b92a0;
+  --border-color: #dadce0;
+  --gradient-from: #0066cc;
+  --gradient-to: #ff9900;
+  --gradient-accent: #146eb4;
   color-scheme: light;
 }
 
@@ -98,15 +114,20 @@ body {
 
 /* Glass morphism with theme awareness */
 .glass-effect {
-  background: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 html.dark .glass-effect,
 html[data-theme="dark"] .glass-effect {
-  background: rgba(15, 23, 42, 0.6);
+  background: rgba(13, 17, 23, 0.7);
   border-color: rgba(255, 255, 255, 0.1);
+}
+
+html[data-theme="light"] .glass-effect {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(0, 0, 0, 0.08);
 }
 
 /* Cards */
@@ -119,12 +140,16 @@ html[data-theme="dark"] .glass-effect {
 
 .card:hover {
   border-color: var(--gradient-from);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 102, 204, 0.15);
 }
 
 html.dark .card:hover,
 html[data-theme="dark"] .card:hover {
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+}
+
+html[data-theme="light"] .card:hover {
+  box-shadow: 0 4px 12px rgba(0, 102, 204, 0.1);
 }
 
 /* Buttons */
@@ -141,6 +166,11 @@ html[data-theme="dark"] .card:hover {
 
 .btn-primary:hover {
   transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(0, 102, 204, 0.2);
+}
+
+html.dark .btn-primary:hover,
+html[data-theme="dark"] .btn-primary:hover {
   box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
 }
 
@@ -173,7 +203,7 @@ input, textarea, select {
 input:focus, textarea:focus, select:focus {
   outline: none;
   border-color: var(--gradient-from);
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
 }
 
 html.dark input:focus,
@@ -183,6 +213,12 @@ html[data-theme="dark"] input:focus,
 html[data-theme="dark"] textarea:focus,
 html[data-theme="dark"] select:focus {
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+}
+
+html[data-theme="light"] input:focus,
+html[data-theme="light"] textarea:focus,
+html[data-theme="light"] select:focus {
+  box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
 }
 
 /* Scrollbar styling */
@@ -196,10 +232,33 @@ html[data-theme="dark"] select:focus {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(102, 126, 234, 0.5);
+  background: rgba(0, 102, 204, 0.4);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 102, 204, 0.6);
+}
+
+html.dark ::-webkit-scrollbar-thumb,
+html[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: rgba(102, 126, 234, 0.5);
+}
+
+html.dark ::-webkit-scrollbar-thumb:hover,
+html[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
   background: rgba(102, 126, 234, 0.7);
+}
+
+/* Light theme scrollbar */
+html[data-theme="light"] ::-webkit-scrollbar-track {
+  background: #f8f9fa;
+}
+
+html[data-theme="light"] ::-webkit-scrollbar-thumb {
+  background: rgba(0, 102, 204, 0.3);
+}
+
+html[data-theme="light"] ::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 102, 204, 0.5);
 }
