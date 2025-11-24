@@ -45,13 +45,11 @@
 
 /* DARK THEME - Apple Premium */
 html.dark,
-html[data-theme="dark"],
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg-primary: #0d1117;
-    --bg-secondary: #161b22;
-    --bg-tertiary: #1f2937;
-    --bg-hover: #374151;
+html[data-theme="dark"] {
+  --bg-primary: #0d1117;
+  --bg-secondary: #161b22;
+  --bg-tertiary: #1f2937;
+  --bg-hover: #374151;
     
     --text-primary: #e6edf3;
     --text-secondary: #8b949e;
@@ -85,7 +83,8 @@ html[data-theme="dark"],
   }
 }
 
-html.dark {
+html.dark,
+html.dark body {
   --bg-primary: #0d1117;
   --bg-secondary: #161b22;
   --bg-tertiary: #1f2937;
@@ -108,6 +107,11 @@ html.dark {
   --glass-bg: rgba(13, 17, 23, 0.7);
   --glass-border: rgba(255, 255, 255, 0.1);
   color-scheme: dark;
+}
+
+html.dark body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
 }
 
 html[data-theme="dark"] {

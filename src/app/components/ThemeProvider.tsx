@@ -32,9 +32,36 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
     const resolved = resolveTheme();
     setResolvedTheme(resolved);
-    document.documentElement.classList.toggle('dark', resolved === 'dark');
-    document.documentElement.setAttribute('data-theme', resolved);
+    
+    // Apply theme classes properly
+    if (resolved === 'dark') {
+      document.documentElement.classList.add('dark');
+      document.documentElement.setAttribute('data-theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      document.documentElement.setAttribute('data-theme', 'light');
+    }
+    
     setMounted(true);
+
+    // Listen for system preference changes
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleChange = (e: MediaQueryListEvent) => {
+      if (stored === 'system') {
+        const newResolved = e.matches ? 'dark' : 'light';
+        setResolvedTheme(newResolved);
+        if (newResolved === 'dark') {
+          document.documentElement.classList.add('dark');
+          document.documentElement.setAttribute('data-theme', 'dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+          document.documentElement.setAttribute('data-theme', 'light');
+        }
+      }
+    };
+
+    mediaQuery.addEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
   }, []);
 
   const setTheme = (newTheme: Theme) => {
@@ -46,11 +73,21 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       : newTheme;
 
     setResolvedTheme(resolved);
-    document.documentElement.classList.toggle('dark', resolved === 'dark');
-    document.documentElement.setAttribute('data-theme', resolved);
+    
+    // Apply theme classes properly
+    if (resolved === 'dark') {
+      document.documentElement.classList.add('dark');
+      document.documentElement.setAttribute('data-theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      document.documentElement.setAttribute('data-theme', 'light');
+    }
   };
 
-  if (!mounted) return <>{children}</>;
+  if (!mounted) {
+    // Prevent flash of unstyled content
+    return null;
+  }
 
   return (
     <ThemeContext.Provider value={{ theme, setTheme, resolvedTheme }}>
