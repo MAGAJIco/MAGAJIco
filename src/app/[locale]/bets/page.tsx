@@ -303,7 +303,7 @@ export default function BetsPage() {
                         )}
                       </div>
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
             )}
