@@ -476,23 +476,33 @@ html {
 
   /* Hide desktop drawer on mobile */
   .app-drawer {
-    display: none;
+    display: none !important;
   }
 
   /* Hide drawer overlay on mobile */
   .app-drawer-overlay {
-    display: none;
+    display: none !important;
   }
 
-  /* Show enhanced menu on mobile */
+  /* Show enhanced menu on mobile - ensure full height for scrolling */
   .enhanced-menu {
-    display: flex;
+    display: flex !important;
     z-index: 2001;
+    height: 100vh;
+    max-height: 100vh;
+  }
+
+  /* Ensure menu items section scrolls properly on mobile */
+  .enhanced-menu .menu-items-section {
+    flex: 1;
+    overflow-y: scroll;
+    -webkit-overflow-scrolling: touch;
+    min-height: 0;
   }
 
   /* Ensure overlay is visible on mobile */
   .enhanced-menu-overlay {
-    display: block;
+    display: block !important;
     z-index: 2000;
   }
 }
