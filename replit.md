@@ -153,6 +153,21 @@ python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload
    - Automatic switching respects their OS preference
 
 ## Recent Changes
+- **2025-11-24**: ✅ Feature Enhancements & ML Integration Complete
+  - **Advanced Analytics Dashboard**: New AdvancedAnalytics component displaying ML model performance metrics
+  - **Analytics Page**: New `/analytics` page with theme support showing prediction statistics
+  - **ML Prediction Endpoints**: 
+    - `GET /api/ml/predict` - Real-time match outcome prediction using trained Random Forest model
+    - `GET /api/ml/status` - Check ML model availability and performance metrics
+  - **Backend Integration**: ML predictor loaded on startup with 90.3% test accuracy
+  - **Features Brainstormed**:
+    - User Performance Tracking (predict vs actual outcomes)
+    - Parlay Builder (multi-bet combinations)
+    - Social Sharing (share predictions with confidence)
+    - Push Notifications (live match alerts)
+    - Advanced Filtering (by odds, confidence, league)
+    - Model Retraining Dashboard
+
 - **2025-11-24**: ✅ ML Model Integration Complete
   - Added Random Forest model training script at `src/ml/train_model.py`
   - Installed scikit-learn (1.7.2) and numpy (2.3.5) dependencies
@@ -229,15 +244,24 @@ python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 Frontend (Next.js 16):
 ├── Layout with ThemeProvider wrapper
 ├── Pages with embedded ThemeToggle & i18n
+├── Analytics page with AdvancedAnalytics component
 ├── CSS theme variables for dynamic styling
 ├── i18n translations via next-intl
 └── Tailwind dark mode with `class` selector
 
-Backend (FastAPI):
-├── Sports data aggregation
+Backend (FastAPI + ML):
+├── Sports data aggregation API
+├── ML prediction service (Random Forest)
 ├── Real-time prediction APIs
 ├── Platform statistics endpoint
+├── ML health check & status endpoints
 └── Health monitoring
+
+ML Model Pipeline:
+├── src/ml/train_model.py (data generation & training)
+├── src/ml/ml_predictor.py (prediction service)
+├── model_data.pkl (trained model with 90.3% accuracy)
+└── 7 input features for match outcome prediction
 
 Internationalization:
 ├── src/locales/messages/ (JSON translation files)
@@ -246,7 +270,6 @@ Internationalization:
 └── 4 supported languages with localStorage persistence
 
 Styling:
-├── theme.css (original - kept for compatibility)
 ├── theme-enhanced.css (Amazon + Apple colors)
 ├── design-tokens.css (brand tokens)
 └── globals.css (Tailwind base styles)
