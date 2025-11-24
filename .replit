@@ -127,10 +127,6 @@ localPort = 46343
 externalPort = 3002
 
 [[ports]]
-localPort = 46675
-externalPort = 5173
-
-[[ports]]
 localPort = 46777
 externalPort = 3003
 
@@ -142,3 +138,7 @@ build = ["sh", "-c", "npm run build"]
 
 [userenv.shared]
 NEXT_PUBLIC_REPLIT_DEV_DOMAIN = "290510d2-bed5-4c68-b195-163ee38332e0-00-25g2r21kpri3p.picard.replit.dev"
+
+[userenv.development]
+BACKEND_URL = "http://127.0.0.1:8000"
+NEXT_PUBLIC_API_URL = "http://127.0.0.1:5000"
