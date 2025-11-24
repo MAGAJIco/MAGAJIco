@@ -208,14 +208,14 @@ async def get_platform_stats():
 async def google_login(request: Request):
     """Initiate Google OAuth login"""
     redirect_uri = str(request.base_url).rstrip('/') + '/auth/google/callback'
-    return await oauth.google.authorize_redirect(request, redirect_uri)
+    return await oauth.google.authorize_redirect(request, redirect_uri)  # type: ignore
 
 
 @app.get("/auth/google/callback")
 async def google_callback(request: Request):
     """Handle Google OAuth callback"""
     try:
-        token = await oauth.google.authorize_access_token(request)
+        token = await oauth.google.authorize_access_token(request)  # type: ignore
         user_info = token.get('userinfo')
         
         if not user_info:
@@ -320,7 +320,6 @@ async def get_ai_suggestions(
             }
         
         # Use AI to analyze predictions and provide suggestions
-        # the newest OpenAI model is "gpt-5" which was released August 7, 2025. do not change this unless explicitly requested by the user
         client = OpenAI(api_key=openai_key)
         
         prediction_summary = "\n".join([
@@ -351,7 +350,7 @@ Provide a JSON response with the following structure:
 Focus on the highest confidence predictions and explain your reasoning clearly."""
 
         response = client.chat.completions.create(
-            model="gpt-5",
+            model="gpt-4-turbo",
             messages=[
                 {"role": "system", "content": "You are an expert sports betting analyst providing data-driven recommendations."},
                 {"role": "user", "content": prompt}
@@ -360,7 +359,10 @@ Focus on the highest confidence predictions and explain your reasoning clearly."
         )
         
         import json
-        ai_response = json.loads(response.choices[0].message.content)
+        message_content = response.choices[0].message.content
+        if not message_content:
+            raise ValueError("No response content from AI")
+        ai_response = json.loads(message_content)
         
         return {
             "success": True,
