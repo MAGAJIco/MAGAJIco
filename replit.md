@@ -153,6 +153,12 @@ python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload
    - Automatic switching respects their OS preference
 
 ## Recent Changes
+- **2025-11-24**: Cleaned up unused theme files
+  - Deleted old `src/styles/theme.css` (legacy purple gradient theme)
+  - Removed theme.css import from layout.tsx
+  - Kept active theme: `theme-enhanced.css` (Amazon + Apple design)
+  - Retained supporting styles: `design-tokens.css`, `icons.css`
+  
 - **2025-11-24**: Health types moved to shared folder
   - Created `shared/health.ts` with HealthData and HealthStatus interfaces
   - Updated frontend components to import shared health types

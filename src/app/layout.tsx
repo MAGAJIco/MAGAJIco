@@ -3,7 +3,6 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import "../styles/design-tokens.css";
-import "../styles/theme.css";
 import "../styles/theme-enhanced.css";
 import { ThemeProvider } from "./components/ThemeProvider";
 import { Analytics } from "@vercel/analytics/react";
