@@ -34,16 +34,60 @@ export default function ChatPage() {
 
     // Simulate AI response
     setTimeout(() => {
-      const aiResponses = [
-        "🤖 Based on current stats, I predict a 78% chance of that outcome!",
-        "⚡ Great question! The live match data shows interesting trends...",
-        "🎯 According to our AI predictions, here's what to expect...",
-        "📊 Let me analyze that for you... The accuracy rate is looking strong!",
-        "🏆 That's a popular topic! Here's what our data shows..."
-      ];
+      let aiResponseText = "";
+      const userInput = userMessage.text.toLowerCase();
+
+      // Check if user is asking about current prediction/selection
+      if (
+        userInput.includes("prediction") ||
+        userInput.includes("current") ||
+        userInput.includes("selected") ||
+        userInput.includes("this match") ||
+        userInput.includes("analyze")
+      ) {
+        // Check if there's a selected prediction from localStorage or session
+        let selectedPredictionStr = "";
+        try {
+          if (typeof window !== "undefined" && window.localStorage) {
+            selectedPredictionStr = window.localStorage.getItem("selectedPrediction") || "";
+          }
+        } catch (e) {
+          console.warn("localStorage not available:", e);
+        }
+        
+        if (!selectedPredictionStr || selectedPredictionStr === "null" || selectedPredictionStr === "") {
+          // No current selection
+          aiResponseText = "You have no current selection. Please select a prediction first to get detailed analysis and recommendations.";
+        } else {
+          // Has selection
+          try {
+            const selectedPrediction = JSON.parse(selectedPredictionStr);
+            const responses = [
+              `📊 Analyzing ${selectedPrediction.homeTeam || "this match"}: The consensus prediction is ${selectedPrediction.prediction || "favorable"} with ${selectedPrediction.consensus?.avgConfidence || "high"}% confidence. Based on multi-source data, this looks promising!`,
+              `🎯 For this ${selectedPrediction.league || "match"}, I recommend ${selectedPrediction.consensus?.prediction || "going with the consensus"}. The odds are solid and multiple sources agree.`,
+              `⚡ This match has ${selectedPrediction.consensus?.agreement || "strong"}% consensus among prediction sources. ${selectedPrediction.homeTeam || "The home team"} looks likely to ${selectedPrediction.consensus?.prediction || "perform well"}.`,
+              `🏆 According to AI analysis, this ${selectedPrediction.consensus?.prediction || "prediction"} has a strong basis. Risk assessment is ${(100 - (selectedPrediction.consensus?.avgConfidence || 80)) > 50 ? "low" : "moderate"}.`
+            ];
+            aiResponseText = responses[Math.floor(Math.random() * responses.length)];
+          } catch (e) {
+            console.warn("Error parsing prediction:", e);
+            aiResponseText = "I found a selection but had trouble analyzing it. Please try again or select a different prediction.";
+          }
+        }
+      } else {
+        // General sports questions
+        const aiResponses = [
+          "🤖 Based on current stats, I predict a 78% chance of that outcome!",
+          "⚡ Great question! The live match data shows interesting trends...",
+          "🎯 According to our AI predictions, here's what to expect...",
+          "📊 Let me analyze that for you... The accuracy rate is looking strong!",
+          "🏆 That's a popular topic! Here's what our data shows..."
+        ];
+        aiResponseText = aiResponses[Math.floor(Math.random() * aiResponses.length)];
+      }
       
       const aiMessage = {
-        text: aiResponses[Math.floor(Math.random() * aiResponses.length)],
+        text: aiResponseText,
         sender: "ai" as const,
         timestamp: new Date()
       };
