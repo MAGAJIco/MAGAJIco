@@ -93,6 +93,57 @@
   scrollbar-width: none;
 }
 
+/* Navbar and Navigation - Theme Aware */
+.navbar {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.navbar-left, .navbar-right {
+  color: var(--text-primary);
+}
+
+.logo {
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.nav-icon {
+  color: var(--text-primary) !important;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.nav-icon:hover {
+  color: var(--gradient-from) !important;
+}
+
+/* Drawer Styles */
+.app-drawer {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border-right: 1px solid var(--border-color);
+}
+
+.app-drawer-header {
+  color: var(--text-primary);
+  background: var(--bg-tertiary);
+  border-bottom: 1px solid var(--border-color);
+  font-weight: 600;
+}
+
+.app-drawer-item, .drawer-item {
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border-color);
+  transition: all 0.2s ease;
+}
+
+.app-drawer-item:hover, .drawer-item:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
 /* App Drawer Glow Effect */
 .app-drawer-glow::before {
   content: '';

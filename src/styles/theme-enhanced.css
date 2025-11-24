@@ -262,3 +262,88 @@ html[data-theme="light"] ::-webkit-scrollbar-thumb {
 html[data-theme="light"] ::-webkit-scrollbar-thumb:hover {
   background: rgba(0, 102, 204, 0.5);
 }
+
+/* Navbar & Menu Theme Fixes */
+.navbar {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.navbar-left, .navbar-right {
+  color: var(--text-primary);
+}
+
+.nav-icon {
+  color: var(--text-primary) !important;
+}
+
+.nav-icon:hover {
+  color: var(--gradient-from) !important;
+}
+
+/* App Drawer Styles */
+.app-drawer {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border-right: 1px solid var(--border-color);
+}
+
+.app-drawer-header {
+  color: var(--text-primary);
+  background: var(--bg-tertiary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.app-drawer-item {
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-color);
+  transition: all 0.2s ease;
+}
+
+.app-drawer-item:hover {
+  background: var(--bg-tertiary);
+  color: var(--gradient-from);
+}
+
+/* Menu Overlay */
+.mobile-menu-overlay {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+html[data-theme="light"] .mobile-menu-overlay {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+/* Settings Modal & Modals */
+.modal-backdrop {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+.modal-header {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+/* Logo text */
+.logo {
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+/* Menu items in drawer */
+.drawer-item {
+  color: var(--text-secondary);
+}
+
+.drawer-item:hover {
+  color: var(--text-primary);
+  background: var(--bg-tertiary);
+}
