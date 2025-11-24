@@ -69,6 +69,7 @@ export default function AdvancedPredictionsPage() {
   const [predictions, setPredictions] = useState<EnhancedPrediction[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [viewType, setViewType] = useState<"predictions" | "leaderboard" | "consensus" | "history">("predictions");
 
   // Filters
   const [sortBy, setSortBy] = useState<SortBy>("confidence");
