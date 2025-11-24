@@ -527,3 +527,48 @@ html {
     display: block;
   }
 }
+
+/* Enhanced Menu Theme Quick Application */
+/* Light theme (default) */
+.enhanced-menu {
+  background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%) !important;
+  color: #333333;
+}
+
+.enhanced-menu .menu-search {
+  background: #ffffff;
+  border-color: #e5e7eb;
+  color: #333;
+}
+
+.enhanced-menu .search-input {
+  color: #333;
+}
+
+.enhanced-menu .category-chip {
+  background: #ffffff;
+  border-color: #e5e7eb;
+  color: #666;
+}
+
+/* Dark theme */
+html.dark .enhanced-menu {
+  background: linear-gradient(180deg, #1a1d2e 0%, #0f1117 100%) !important;
+  color: #e0e0e0;
+}
+
+html.dark .enhanced-menu .menu-search {
+  background: #1e2235;
+  border-color: #2a2f45;
+  color: #e0e0e0;
+}
+
+html.dark .enhanced-menu .search-input {
+  color: #e0e0e0;
+}
+
+html.dark .enhanced-menu .category-chip {
+  background: #1e2235;
+  border-color: #2a2f45;
+  color: #999;
+}
