@@ -33,13 +33,18 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     const resolved = resolveTheme();
     setResolvedTheme(resolved);
     
-    // Apply theme classes properly
+    // Apply theme classes and attributes immediately
+    const root = document.documentElement;
     if (resolved === 'dark') {
-      document.documentElement.classList.add('dark');
-      document.documentElement.setAttribute('data-theme', 'dark');
+      root.classList.add('dark');
+      root.setAttribute('data-theme', 'dark');
+      document.body.style.backgroundColor = '#0d1117';
+      document.body.style.color = '#e6edf3';
     } else {
-      document.documentElement.classList.remove('dark');
-      document.documentElement.setAttribute('data-theme', 'light');
+      root.classList.remove('dark');
+      root.setAttribute('data-theme', 'light');
+      document.body.style.backgroundColor = '#ffffff';
+      document.body.style.color = '#0a0e27';
     }
     
     setMounted(true);
