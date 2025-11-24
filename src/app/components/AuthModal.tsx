@@ -120,9 +120,11 @@ export default function AuthModal({ isOpen, onClose, onSignIn, onSignUp }: AuthM
           transform: translate(-50%, -50%);
           background: white;
           border-radius: 16px;
-          padding: 32px;
-          width: 90%;
-          max-width: 420px;
+          padding: clamp(20px, 5vw, 32px);
+          width: clamp(280px, 90vw, 420px);
+          max-height: 90vh;
+          overflow-y: auto;
+          -webkit-overflow-scrolling: touch;
           z-index: 2001;
           box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
         }
@@ -135,15 +137,18 @@ export default function AuthModal({ isOpen, onClose, onSignIn, onSignUp }: AuthM
         }
         
         .auth-modal-header h2 {
-          font-size: 24px;
+          font-size: clamp(20px, 5vw, 24px);
           font-weight: bold;
           color: #333;
           margin: 0;
+          line-height: 1.2;
         }
         
         .close-btn {
-          width: 36px;
-          height: 36px;
+          min-width: 48px;
+          min-height: 48px;
+          width: 48px;
+          height: 48px;
           border: none;
           background: #f5f5f5;
           border-radius: 50%;
@@ -153,6 +158,8 @@ export default function AuthModal({ isOpen, onClose, onSignIn, onSignUp }: AuthM
           align-items: center;
           justify-content: center;
           transition: background 0.2s;
+          touch-action: manipulation;
+          flex-shrink: 0;
         }
         
         .close-btn:hover {
@@ -172,12 +179,13 @@ export default function AuthModal({ isOpen, onClose, onSignIn, onSignUp }: AuthM
         }
         
         .form-group label {
-          font-size: 14px;
+          font-size: clamp(13px, 3vw, 14px);
           font-weight: 600;
           color: #555;
         }
         
         .form-group input {
+          min-height: 48px;
           padding: 12px 16px;
           border: 2px solid #e5e7eb;
           border-radius: 8px;
@@ -205,15 +213,18 @@ export default function AuthModal({ isOpen, onClose, onSignIn, onSignUp }: AuthM
         }
         
         .submit-btn {
-          padding: 12px 24px;
+          min-height: 48px;
+          padding: 14px 24px;
           background: linear-gradient(135deg, #667eea, #764ba2);
           color: white;
           border: none;
           border-radius: 8px;
-          font-size: 16px;
+          font-size: clamp(15px, 3vw, 16px);
           font-weight: 600;
           cursor: pointer;
           transition: transform 0.2s, box-shadow 0.2s;
+          touch-action: manipulation;
+          -webkit-tap-highlight-color: transparent;
         }
         
         .submit-btn:hover {
@@ -237,16 +248,38 @@ export default function AuthModal({ isOpen, onClose, onSignIn, onSignUp }: AuthM
         }
         
         .toggle-mode-btn {
+          min-height: 48px;
           background: none;
           border: none;
           color: #667eea;
-          font-size: 14px;
+          font-size: clamp(13px, 3vw, 14px);
           cursor: pointer;
           text-decoration: underline;
+          padding: 12px 0;
+          touch-action: manipulation;
+          -webkit-tap-highlight-color: transparent;
         }
         
         .toggle-mode-btn:hover {
           color: #764ba2;
+        }
+
+        @media (max-width: 480px) {
+          .auth-modal {
+            top: auto;
+            bottom: 0;
+            transform: translate(-50%, 0);
+            border-radius: 16px 16px 0 0;
+            max-height: 95vh;
+          }
+
+          .auth-modal-header {
+            margin-bottom: 16px;
+          }
+
+          .auth-form {
+            gap: 16px;
+          }
         }
       `}</style>
     </>

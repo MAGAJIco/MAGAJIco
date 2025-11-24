@@ -17,3 +17,9 @@ itsdangerous
 pyjwt
 starlette
 openai
+beautifulsoup4
+fastapi
+lxml
+python-dotenv
+requests
+uvicorn

@@ -1,0 +1,75 @@
+{
+  "common": {
+    "welcome": "Bienvenue sur MagajiCo Sports",
+    "loading": "Chargement...",
+    "error": "Une erreur s'est produite",
+    "retry": "Réessayer",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "close": "Fermer"
+  },
+  "nav": {
+    "home": "Accueil",
+    "predictions": "Prédictions",
+    "matches": "Matchs",
+    "live": "En Direct",
+    "settings": "Paramètres",
+    "back": "Retour"
+  },
+  "settings": {
+    "title": "Paramètres",
+    "language": "Langue",
+    "languageDesc": "Choisissez votre langue préférée",
+    "english": "English",
+    "spanish": "Español",
+    "french": "Français",
+    "german": "Deutsch",
+    "notifications": "Notifications",
+    "notificationsDesc": "Recevez les mises à jour des matchs et prédictions",
+    "darkMode": "Mode Sombre",
+    "darkModeDesc": "Activez le thème sombre pour une meilleure visibilité",
+    "autoplay": "Lecture Automatique",
+    "autoplayDesc": "Lire automatiquement les vidéos de matchs",
+    "saveChanges": "Enregistrer les Modifications",
+    "about": "À Propos de MagajiCo Sports",
+    "version": "Version",
+    "description": "Votre centre ultime de sports et divertissement avec prédictions alimentées par l'IA",
+    "enabled": "Activé",
+    "disabled": "Désactivé"
+  },
+  "theme": {
+    "light": "Clair",
+    "dark": "Sombre",
+    "system": "Système",
+    "preview": "Aperçu du Thème"
+  },
+  "home": {
+    "title": "Accueil",
+    "liveMatches": "Matchs en Direct",
+    "upcomingMatches": "Matchs à Venir",
+    "topPredictions": "Meilleures Prédictions",
+    "noMatches": "Aucun match disponible"
+  },
+  "predictions": {
+    "title": "Prédictions",
+    "accuracy": "Précision",
+    "makeAPrediction": "Faire une Prédiction",
+    "yourPredictions": "Vos Prédictions",
+    "noPredictions": "Pas encore de prédictions"
+  },
+  "matches": {
+    "title": "Matchs",
+    "live": "En Direct",
+    "upcoming": "À Venir",
+    "completed": "Terminés",
+    "score": "Score",
+    "time": "Heure"
+  },
+  "leaderboard": {
+    "title": "Classement",
+    "rank": "Classement",
+    "player": "Joueur",
+    "points": "Points",
+    "predictions": "Prédictions"
+  }
+}

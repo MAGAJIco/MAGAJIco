@@ -5,6 +5,7 @@ import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { motion } from "framer-motion";
+import AISuggestions from "../../components/AISuggestions";
 
 export default function ChatPage() {
   const [messages, setMessages] = useState<Array<{ text: string; sender: "user" | "ai"; timestamp: Date }>>([
@@ -12,6 +13,7 @@ export default function ChatPage() {
   ]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const params = useParams();
   const locale = (params?.locale as string) || "en";
@@ -34,16 +36,60 @@ export default function ChatPage() {
 
     // Simulate AI response
     setTimeout(() => {
-      const aiResponses = [
-        "🤖 Based on current stats, I predict a 78% chance of that outcome!",
-        "⚡ Great question! The live match data shows interesting trends...",
-        "🎯 According to our AI predictions, here's what to expect...",
-        "📊 Let me analyze that for you... The accuracy rate is looking strong!",
-        "🏆 That's a popular topic! Here's what our data shows..."
-      ];
+      let aiResponseText = "";
+      const userInput = userMessage.text.toLowerCase();
+
+      // Check if user is asking about current prediction/selection
+      if (
+        userInput.includes("prediction") ||
+        userInput.includes("current") ||
+        userInput.includes("selected") ||
+        userInput.includes("this match") ||
+        userInput.includes("analyze")
+      ) {
+        // Check if there's a selected prediction from localStorage or session
+        let selectedPredictionStr = "";
+        try {
+          if (typeof window !== "undefined" && window.localStorage) {
+            selectedPredictionStr = window.localStorage.getItem("selectedPrediction") || "";
+          }
+        } catch (e) {
+          console.warn("localStorage not available:", e);
+        }
+        
+        if (!selectedPredictionStr || selectedPredictionStr === "null" || selectedPredictionStr === "") {
+          // No current selection
+          aiResponseText = "You have no current selection. Please select a prediction first to get detailed analysis and recommendations.";
+        } else {
+          // Has selection
+          try {
+            const selectedPrediction = JSON.parse(selectedPredictionStr);
+            const responses = [
+              `📊 Analyzing ${selectedPrediction.homeTeam || "this match"}: The consensus prediction is ${selectedPrediction.prediction || "favorable"} with ${selectedPrediction.consensus?.avgConfidence || "high"}% confidence. Based on multi-source data, this looks promising!`,
+              `🎯 For this ${selectedPrediction.league || "match"}, I recommend ${selectedPrediction.consensus?.prediction || "going with the consensus"}. The odds are solid and multiple sources agree.`,
+              `⚡ This match has ${selectedPrediction.consensus?.agreement || "strong"}% consensus among prediction sources. ${selectedPrediction.homeTeam || "The home team"} looks likely to ${selectedPrediction.consensus?.prediction || "perform well"}.`,
+              `🏆 According to AI analysis, this ${selectedPrediction.consensus?.prediction || "prediction"} has a strong basis. Risk assessment is ${(100 - (selectedPrediction.consensus?.avgConfidence || 80)) > 50 ? "low" : "moderate"}.`
+            ];
+            aiResponseText = responses[Math.floor(Math.random() * responses.length)];
+          } catch (e) {
+            console.warn("Error parsing prediction:", e);
+            aiResponseText = "I found a selection but had trouble analyzing it. Please try again or select a different prediction.";
+          }
+        }
+      } else {
+        // General sports questions
+        const aiResponses = [
+          "🤖 Based on current stats, I predict a 78% chance of that outcome!",
+          "⚡ Great question! The live match data shows interesting trends...",
+          "🎯 According to our AI predictions, here's what to expect...",
+          "📊 Let me analyze that for you... The accuracy rate is looking strong!",
+          "🏆 That's a popular topic! Here's what our data shows..."
+        ];
+        aiResponseText = aiResponses[Math.floor(Math.random() * aiResponses.length)];
+      }
       
       const aiMessage = {
-        text: aiResponses[Math.floor(Math.random() * aiResponses.length)],
+        text: aiResponseText,
         sender: "ai" as const,
         timestamp: new Date()
       };
@@ -70,9 +116,38 @@ export default function ChatPage() {
       <nav className="navbar">
         <div className="navbar-left">
           <Link href={`/${locale}`} className="nav-icon">←</Link>
-          <div className="logo">💬 Sports Chat</div>
+          <div className="logo">💬 Sports Chat AI</div>
+        </div>
+        <div className="navbar-right">
+          <button
+            onClick={() => setShowSuggestions(!showSuggestions)}
+            style={{
+              padding: "8px 16px",
+              background: showSuggestions ? "linear-gradient(135deg, #667eea, #764ba2)" : "#f5f5f5",
+              color: showSuggestions ? "#fff" : "#333",
+              border: "none",
+              borderRadius: "8px",
+              fontSize: "14px",
+              fontWeight: "600",
+              cursor: "pointer",
+              transition: "all 0.2s"
+            }}
+          >
+            🤖 AI Suggestions
+          </button>
         </div>
       </nav>
+
+      {/* AI Suggestions Panel */}
+      {showSuggestions && (
+        <div style={{
+          maxWidth: "900px",
+          margin: "20px auto",
+          padding: "0 20px"
+        }}>
+          <AISuggestions />
+        </div>
+      )}
 
       {/* Chat Container */}
       <motion.div
@@ -82,7 +157,7 @@ export default function ChatPage() {
           maxWidth: "900px",
           margin: "0 auto",
           padding: "20px",
-          height: "calc(100vh - 64px - 80px)",
+          height: showSuggestions ? "auto" : "calc(100vh - 64px - 80px)",
           display: "flex",
           flexDirection: "column"
         }}
@@ -226,6 +301,11 @@ export default function ChatPage() {
           display: flex; 
           align-items: center; 
           gap: 16px; 
+        }
+        .navbar-right {
+          display: flex;
+          align-items: center;
+          gap: 12px;
         }
         .logo { 
           font-size: 20px; 

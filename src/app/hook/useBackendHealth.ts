@@ -1,12 +1,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { API_BASE_URL } from '../../lib/api';
-
-interface HealthStatus {
-  isHealthy: boolean;
-  lastChecked: Date;
-  error?: string;
-}
+import type { HealthStatus } from '../../../shared/health';
 
 export function useBackendHealth(checkInterval = 60000) {
   const [health, setHealth] = useState<HealthStatus>({

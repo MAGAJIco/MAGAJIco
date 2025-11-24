@@ -88,6 +88,21 @@ export default function AdvancedPredictionsPage() {
   // View mode: table or cards
   const [viewMode, setViewMode] = useState<"table" | "cards">("table");
 
+  // Save selected prediction to localStorage whenever it changes
+  useEffect(() => {
+    try {
+      if (typeof window !== "undefined" && window.localStorage) {
+        if (selectedPrediction) {
+          window.localStorage.setItem("selectedPrediction", JSON.stringify(selectedPrediction));
+        } else {
+          window.localStorage.removeItem("selectedPrediction");
+        }
+      }
+    } catch (e) {
+      console.warn("localStorage not available:", e);
+    }
+  }, [selectedPrediction]);
+
   // Smart retry hook with custom configuration
   const { executeWithRetry, isRetrying, retryCount } = useSmartRetry({
     maxRetries: 3,

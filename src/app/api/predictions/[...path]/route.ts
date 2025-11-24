@@ -5,12 +5,21 @@ const BACKEND_URL = process.env.BACKEND_URL || 'http://127.0.0.1:8000';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { path: string[] } }
+  { params }: { params: Promise<{ path?: string[] }> }
 ) {
   try {
+    const resolvedParams = await params;
     const searchParams = request.nextUrl.searchParams;
     const queryString = searchParams.toString();
-    const path = params.path.join('/');
+    const pathArray = resolvedParams.path || [];
+    const path = Array.isArray(pathArray) ? pathArray.join('/') : '';
+    
+    if (!path) {
+      return NextResponse.json(
+        { error: 'No prediction endpoint specified' },
+        { status: 400 }
+      );
+    }
     
     const backendUrl = `${BACKEND_URL}/api/predictions/${path}${queryString ? `?${queryString}` : ''}`;
     

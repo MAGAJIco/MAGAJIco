@@ -2,6 +2,29 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Mobile-First Responsive Base Styles */
+html {
+  font-size: clamp(14px, 2.5vw, 16px);
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+}
+
+body {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Touch Target Minimum Size - 48x48px for accessibility */
+button, a, input[type="button"], input[type="submit"] {
+  min-height: 48px;
+  min-width: 48px;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
 @layer utilities {
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
@@ -10,6 +33,29 @@
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
+  }
+
+  /* Mobile-First Utilities */
+  .touch-target {
+    min-height: 48px;
+    min-width: 48px;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .safe-area-left {
+    padding-left: env(safe-area-inset-left);
+  }
+
+  .safe-area-right {
+    padding-right: env(safe-area-inset-right);
   }
 }
 
@@ -98,25 +144,44 @@
   background: var(--bg-primary);
   color: var(--text-primary);
   border-bottom: 1px solid var(--border-color);
+  min-height: 56px;
+  display: flex;
+  align-items: center;
 }
 
 .navbar-left, .navbar-right {
   color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .logo {
   color: var(--text-primary);
   font-weight: 700;
+  font-size: clamp(16px, 4vw, 20px);
+  line-height: 1.2;
 }
 
 .nav-icon {
+  min-width: 44px;
+  min-height: 44px;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: var(--text-primary) !important;
   cursor: pointer;
   transition: color 0.2s ease;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  border-radius: 8px;
 }
 
 .nav-icon:hover {
   color: var(--gradient-from) !important;
+  background: rgba(102, 126, 234, 0.1);
 }
 
 /* Drawer Styles */
@@ -473,4 +538,102 @@ html {
   .safe-area-inset-top {
     padding-top: env(safe-area-inset-top);
   }
+
+  /* Hide desktop drawer on mobile */
+  .app-drawer {
+    display: none !important;
+  }
+
+  /* Hide drawer overlay on mobile */
+  .app-drawer-overlay {
+    display: none !important;
+  }
+
+  /* Show enhanced menu on mobile - ensure full height for scrolling */
+  .enhanced-menu {
+    display: flex !important;
+    z-index: 2001;
+    height: 100vh;
+    max-height: 100vh;
+  }
+
+  /* Ensure menu items section scrolls properly on mobile */
+  .enhanced-menu .menu-items-section {
+    flex: 1;
+    overflow-y: scroll;
+    -webkit-overflow-scrolling: touch;
+    min-height: 0;
+  }
+
+  /* Ensure overlay is visible on mobile */
+  .enhanced-menu-overlay {
+    display: block !important;
+    z-index: 2000;
+  }
+}
+
+/* Desktop view - hide mobile menu */
+@media (min-width: 769px) {
+  /* Hide mobile menu overlay and menu on desktop */
+  .enhanced-menu-overlay {
+    display: none !important;
+  }
+
+  .enhanced-menu {
+    display: none !important;
+  }
+
+  /* Show desktop drawer on desktop */
+  .app-drawer {
+    display: flex;
+  }
+
+  .app-drawer-overlay {
+    display: block;
+  }
+}
+
+/* Enhanced Menu Theme Quick Application */
+/* Light theme (default) */
+.enhanced-menu {
+  background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%) !important;
+  color: #333333;
+}
+
+.enhanced-menu .menu-search {
+  background: #ffffff;
+  border-color: #e5e7eb;
+  color: #333;
+}
+
+.enhanced-menu .search-input {
+  color: #333;
+}
+
+.enhanced-menu .category-chip {
+  background: #ffffff;
+  border-color: #e5e7eb;
+  color: #666;
+}
+
+/* Dark theme */
+html.dark .enhanced-menu {
+  background: linear-gradient(180deg, #1a1d2e 0%, #0f1117 100%) !important;
+  color: #e0e0e0;
+}
+
+html.dark .enhanced-menu .menu-search {
+  background: #1e2235;
+  border-color: #2a2f45;
+  color: #e0e0e0;
+}
+
+html.dark .enhanced-menu .search-input {
+  color: #e0e0e0;
+}
+
+html.dark .enhanced-menu .category-chip {
+  background: #1e2235;
+  border-color: #2a2f45;
+  color: #999;
 }

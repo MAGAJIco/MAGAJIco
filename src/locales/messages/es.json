@@ -1,0 +1,75 @@
+{
+  "common": {
+    "welcome": "Bienvenido a MagajiCo Sports",
+    "loading": "Cargando...",
+    "error": "Ocurrió un error",
+    "retry": "Reintentar",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "close": "Cerrar"
+  },
+  "nav": {
+    "home": "Inicio",
+    "predictions": "Predicciones",
+    "matches": "Partidos",
+    "live": "En Vivo",
+    "settings": "Configuración",
+    "back": "Atrás"
+  },
+  "settings": {
+    "title": "Configuración",
+    "language": "Idioma",
+    "languageDesc": "Elige tu idioma preferido",
+    "english": "English",
+    "spanish": "Español",
+    "french": "Français",
+    "german": "Deutsch",
+    "notifications": "Notificaciones",
+    "notificationsDesc": "Recibe actualizaciones de partidos y predicciones",
+    "darkMode": "Modo Oscuro",
+    "darkModeDesc": "Activa el tema oscuro para mejor visibilidad",
+    "autoplay": "Reproducir Videos",
+    "autoplayDesc": "Reproduce automáticamente videos de partidos",
+    "saveChanges": "Guardar Cambios",
+    "about": "Acerca de MagajiCo Sports",
+    "version": "Versión",
+    "description": "Tu centro definitivo de deportes y entretenimiento con predicciones impulsadas por IA",
+    "enabled": "Activado",
+    "disabled": "Desactivado"
+  },
+  "theme": {
+    "light": "Claro",
+    "dark": "Oscuro",
+    "system": "Sistema",
+    "preview": "Vista Previa del Tema"
+  },
+  "home": {
+    "title": "Inicio",
+    "liveMatches": "Partidos en Vivo",
+    "upcomingMatches": "Próximos Partidos",
+    "topPredictions": "Predicciones Destacadas",
+    "noMatches": "No hay partidos disponibles"
+  },
+  "predictions": {
+    "title": "Predicciones",
+    "accuracy": "Precisión",
+    "makeAPrediction": "Hacer una Predicción",
+    "yourPredictions": "Tus Predicciones",
+    "noPredictions": "Sin predicciones aún"
+  },
+  "matches": {
+    "title": "Partidos",
+    "live": "En Vivo",
+    "upcoming": "Próximos",
+    "completed": "Completados",
+    "score": "Marcador",
+    "time": "Hora"
+  },
+  "leaderboard": {
+    "title": "Tabla de Clasificación",
+    "rank": "Puesto",
+    "player": "Jugador",
+    "points": "Puntos",
+    "predictions": "Predicciones"
+  }
+}
