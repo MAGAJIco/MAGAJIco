@@ -7,6 +7,7 @@ import AuthModal from "../components/AuthModal";
 import UserMenu from "../components/UserMenu";
 import SettingsModal from "../components/SettingsModal";
 import FavoriteTeamsModal from "../components/FavoriteTeamsModal";
+import ThemeToggle from "../components/ThemeToggle";
 import BackendHealthStatus from "../components/BackendHealthStatus";
 import AISuggestions from "../components/AISuggestions";
 import { useUserPreferences } from "../hook/useUserPreferences";
@@ -167,6 +168,7 @@ export default function HomePage() {
             <Star className="w-5 h-5" style={{ fill: preferences.favoriteTeams.length > 0 ? '#667eea' : 'none' }} />
           </div>
           <div className="nav-icon" title="Help">❓</div>
+          <ThemeToggle />
           <div 
             className="nav-icon" 
             onClick={() => setSettingsModalOpen(true)}

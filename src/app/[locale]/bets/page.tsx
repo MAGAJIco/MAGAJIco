@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { ArrowUpRight, Copy, Share2, ExternalLink, Zap, Target, TrendingUp } from "lucide-react";
 import { motion } from "framer-motion";
+import ThemeToggle from "../components/ThemeToggle";
 import { API_BASE_URL } from "../../../lib/api";
 
 interface Bet {
@@ -147,6 +148,9 @@ export default function BetsPage() {
       paddingTop: "96px",
       paddingBottom: "48px"
     }}>
+      <div style={{ position: "fixed", top: "20px", right: "20px", zIndex: 40 }}>
+        <ThemeToggle />
+      </div>
       <motion.main
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
