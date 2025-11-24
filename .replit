@@ -120,3 +120,8 @@ externalPort = 3003
 [deployment]
 run = ["sh", "-c", "npm run start"]
 build = ["sh", "-c", "npm run build"]
+
+[userenv]
+
+[userenv.shared]
+NEXT_PUBLIC_REPLIT_DEV_DOMAIN = "290510d2-bed5-4c68-b195-163ee38332e0-00-25g2r21kpri3p.picard.replit.dev"

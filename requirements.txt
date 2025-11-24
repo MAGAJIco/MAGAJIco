@@ -12,3 +12,7 @@ fastapi
 python-dotenv
 requests
 uvicorn
+authlib
+itsdangerous
+pyjwt
+starlette

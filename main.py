@@ -1,8 +1,12 @@
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
-from typing import List, Optional
+from fastapi.responses import JSONResponse, RedirectResponse
+from starlette.middleware.sessions import SessionMiddleware
+from authlib.integrations.starlette_client import OAuth, OAuthError
+from typing import List, Optional, Dict, Any
 import os
+import jwt
+from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from sports_api import create_sports_api_service, LiveMatch, OddsData
 
@@ -14,13 +18,40 @@ app = FastAPI(
     version="1.0.0",
 )
 
+# Add session middleware for OAuth
+app.add_middleware(SessionMiddleware, secret_key=os.getenv("SECRET_KEY", "your-secret-key-change-in-production"))
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=False,
+    allow_credentials=True,
     allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],
 )
+
+# Configure OAuth
+oauth = OAuth()
+oauth.register(
+    name='google',
+    client_id=os.getenv('GOOGLE_CLIENT_ID'),
+    client_secret=os.getenv('GOOGLE_CLIENT_SECRET'),
+    server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
+    client_kwargs={
+        'scope': 'openid email profile'
+    }
+)
+
+# JWT Configuration
+JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "your-jwt-secret-change-in-production")
+JWT_ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 30 * 24 * 60  # 30 days
+
+def create_access_token(data: dict) -> str:
+    to_encode = data.copy()
+    expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, JWT_SECRET_KEY, algorithm=JWT_ALGORITHM)
+    return encoded_jwt
 
 service = create_sports_api_service()
 
@@ -76,6 +107,50 @@ async def api_health():
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/auth/google/login")
+async def google_login(request: Request):
+    """Initiate Google OAuth login"""
+    redirect_uri = str(request.base_url).rstrip('/') + '/auth/google/callback'
+    return await oauth.google.authorize_redirect(request, redirect_uri)
+
+
+@app.get("/auth/google/callback")
+async def google_callback(request: Request):
+    """Handle Google OAuth callback"""
+    try:
+        token = await oauth.google.authorize_access_token(request)
+        user_info = token.get('userinfo')
+        
+        if not user_info:
+            raise HTTPException(status_code=400, detail="Failed to get user info")
+        
+        # Create JWT token for the user
+        access_token = create_access_token(
+            data={
+                "sub": user_info.get("email"),
+                "name": user_info.get("name"),
+                "email": user_info.get("email"),
+                "picture": user_info.get("picture"),
+                "google_id": user_info.get("sub")
+            }
+        )
+        
+        return {
+            "access_token": access_token,
+            "token_type": "bearer",
+            "user": {
+                "name": user_info.get("name"),
+                "email": user_info.get("email"),
+                "picture": user_info.get("picture"),
+                "google_id": user_info.get("sub")
+            }
+        }
+    except OAuthError as error:
+        raise HTTPException(status_code=400, detail=f"OAuth error: {error.error}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Authentication failed: {str(e)}")
 
 
 @app.get("/api/matches")

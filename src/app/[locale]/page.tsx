@@ -7,6 +7,7 @@ import AuthModal from "../components/AuthModal";
 import UserMenu from "../components/UserMenu";
 import SettingsModal from "../components/SettingsModal";
 import FavoriteTeamsModal from "../components/FavoriteTeamsModal";
+import BackendHealthStatus from "../components/BackendHealthStatus";
 import { useUserPreferences } from "../hook/useUserPreferences";
 import { motion } from "framer-motion";
 import { Star } from "lucide-react";
@@ -290,6 +291,18 @@ export default function HomePage() {
               >
                 {t("hero.subtitle")}
               </motion.p>
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.6 }}
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  marginTop: "20px"
+                }}
+              >
+                <BackendHealthStatus />
+              </motion.div>
             </motion.div>
 
             {/* Personalized Favorites Banner */}
