@@ -40,3 +40,8 @@ venv/
 ENV/
 .venv
 *.log
+.pythonlibs/
+
+# ML Model artifacts
+model_data.pkl
+*.pkl

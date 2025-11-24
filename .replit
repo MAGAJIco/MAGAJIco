@@ -4,7 +4,7 @@ expertMode = true
 
 [nix]
 channel = "stable-25_05"
-packages = ["xcodebuild", "zlib"]
+packages = ["glibcLocales", "xcodebuild", "zlib"]
 
 [workflows]
 runButton = "Start Full Stack"

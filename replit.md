@@ -153,6 +153,14 @@ python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload
    - Automatic switching respects their OS preference
 
 ## Recent Changes
+- **2025-11-24**: ✅ ML Model Integration Complete
+  - Added Random Forest model training script at `src/ml/train_model.py`
+  - Installed scikit-learn (1.7.2) and numpy (2.3.5) dependencies
+  - Model trained successfully with 90.3% test accuracy on 10,000 samples
+  - Model artifacts saved to `model_data.pkl` (includes model, scaler, accuracy, version, date)
+  - Features: 7 input features (home strength, away strength, home advantage, recent form, head-to-head, injuries)
+  - Predicts match outcomes: 0=home win, 1=draw, 2=away win
+
 - **2025-11-24**: ✅ Backend Connected & Fully Operational
   - Environment variables set: BACKEND_URL, NEXT_PUBLIC_API_URL (development)
   - **Connection Status**: Full end-to-end connectivity verified ✅
