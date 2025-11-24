@@ -93,6 +93,57 @@
   scrollbar-width: none;
 }
 
+/* Navbar and Navigation - Theme Aware */
+.navbar {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.navbar-left, .navbar-right {
+  color: var(--text-primary);
+}
+
+.logo {
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.nav-icon {
+  color: var(--text-primary) !important;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.nav-icon:hover {
+  color: var(--gradient-from) !important;
+}
+
+/* Drawer Styles */
+.app-drawer {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border-right: 1px solid var(--border-color);
+}
+
+.app-drawer-header {
+  color: var(--text-primary);
+  background: var(--bg-tertiary);
+  border-bottom: 1px solid var(--border-color);
+  font-weight: 600;
+}
+
+.app-drawer-item, .drawer-item {
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border-color);
+  transition: all 0.2s ease;
+}
+
+.app-drawer-item:hover, .drawer-item:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
 /* App Drawer Glow Effect */
 .app-drawer-glow::before {
   content: '';
@@ -218,57 +269,8 @@
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
-/* Dark Mode Global Styles */
-.dark {
-  color-scheme: dark;
-}
-
-.dark body {
-  background-color: #111827;
-  color: #f9fafb;
-}
-
-.dark .navbar {
-  background: #1f2937;
-  border-bottom: 1px solid #374151;
-}
-
-.dark .nav-icon {
-  color: #d1d5db;
-}
-
-.dark .nav-icon:hover {
-  background: #374151;
-}
-
-.dark .logo {
-  color: #818cf8;
-}
-
-.dark .mobile-bottom-nav {
-  background: rgba(31, 41, 55, 0.98);
-  border-top-color: #374151;
-}
-
-.dark .app-drawer {
-  background: #1f2937;
-}
-
-.dark .drawer-header {
-  border-bottom-color: #374151;
-}
-
-.dark .app-item {
-  background: #374151;
-}
-
-.dark .app-item:hover {
-  background: #4b5563;
-}
-
-.dark .app-name {
-  color: #d1d5db;
-}
+/* All theme styles now handled by theme-enhanced.css CSS variables */
+/* This ensures uniform theming across entire app */
 
 /* Hover Effects */
 .hover-lift {

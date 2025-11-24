@@ -7,6 +7,10 @@ import AuthModal from "../components/AuthModal";
 import UserMenu from "../components/UserMenu";
 import SettingsModal from "../components/SettingsModal";
 import FavoriteTeamsModal from "../components/FavoriteTeamsModal";
+import ThemeToggle from "../components/ThemeToggle";
+import BackendHealthStatus from "../components/BackendHealthStatus";
+import AISuggestions from "../components/AISuggestions";
+import EnhancedMenu from "../components/EnhancedMenu";
 import { useUserPreferences } from "../hook/useUserPreferences";
 import { motion } from "framer-motion";
 import { Star } from "lucide-react";
@@ -37,20 +41,6 @@ const featuredMatches = [
   { title: "Rewards Earned", value: "50K Pi", icon: "🏆", trend: "+2% daily", color: "#805ad5" },
 ];
 
-// Social Proof Data
-const socialProofMetrics = {
-  activeUsers: 24567,
-  totalPredictions: 892341,
-  accuracyRate: 87,
-  sharesLast24h: 15234,
-  topPredictors: [
-    { name: "SportsFan2024", accuracy: 94, predictions: 156 },
-    { name: "AIPredictor", accuracy: 91, predictions: 203 },
-    { name: "MatchGuru", accuracy: 89, predictions: 187 }
-  ]
-};
-
-
 export default function HomePage() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -59,13 +49,42 @@ export default function HomePage() {
   const [favoritesModalOpen, setFavoritesModalOpen] = useState(false);
   const [user, setUser] = useState<{ name: string; email: string } | null>(null);
   const { preferences, addFavoriteTeam, removeFavoriteTeam } = useUserPreferences();
-  const [activeViewers, setActiveViewers] = useState(socialProofMetrics.activeUsers);
+  const [socialProofMetrics, setSocialProofMetrics] = useState({
+    activeUsers: 0,
+    totalPredictions: 0,
+    accuracyRate: 0,
+    sharesLast24h: 0,
+    topPredictors: []
+  });
+  const [activeViewers, setActiveViewers] = useState(0);
   const [recentActivity, setRecentActivity] = useState<string[]>([]);
   const liveRef = useRef<HTMLDivElement | null>(null);
   const params = useParams();
   const locale = (params?.locale as string) || "en";
 
-  // Simulate real-time viewer updates (Zuckerberg's FOMO tactic)
+  const API_BASE = `https://${process.env.NEXT_PUBLIC_REPLIT_DEV_DOMAIN?.split(',')[0]}:8000`;
+
+  // Fetch real platform statistics from backend
+  React.useEffect(() => {
+    const fetchPlatformStats = async () => {
+      try {
+        const response = await fetch(`${API_BASE}/api/stats/platform`);
+        const data = await response.json();
+        setSocialProofMetrics(data);
+        setActiveViewers(data.activeUsers);
+      } catch (error) {
+        console.error('Failed to fetch platform stats:', error);
+      }
+    };
+
+    fetchPlatformStats();
+    // Refresh stats every 30 seconds
+    const statsInterval = setInterval(fetchPlatformStats, 30000);
+    
+    return () => clearInterval(statsInterval);
+  }, [API_BASE]);
+
+  // Real-time viewer updates based on actual data
   React.useEffect(() => {
     const interval = setInterval(() => {
       setActiveViewers(prev => prev + Math.floor(Math.random() * 20) - 8);
@@ -100,6 +119,7 @@ export default function HomePage() {
 
   const drawerApps = [
     { id: "home", icon: "🏠", name: "Portal", href: `/${locale}` },
+    { id: "bets", icon: "💰", name: "Today's Bets", href: `/${locale}/bets` },
     { id: "predictions", icon: "🤖", name: "Predictions", href: `/${locale}/predictions` },
     { id: "live", icon: "⚡", name: "Live", href: `/${locale}/live` },
     { id: "social", icon: "👥", name: "Social", href: `/${locale}/social` },
@@ -122,6 +142,13 @@ export default function HomePage() {
 
   return (
     <>
+      {/* Enhanced Menu Component */}
+      <EnhancedMenu 
+        isOpen={mobileMenuOpen} 
+        onClose={() => setMobileMenuOpen(false)}
+        currentPath={`/${locale}`}
+      />
+
       {/* ✅ Navbar */}
       <nav className="navbar">
         <div className="navbar-left">
@@ -149,6 +176,7 @@ export default function HomePage() {
             <Star className="w-5 h-5" style={{ fill: preferences.favoriteTeams.length > 0 ? '#667eea' : 'none' }} />
           </div>
           <div className="nav-icon" title="Help">❓</div>
+          <ThemeToggle />
           <div 
             className="nav-icon" 
             onClick={() => setSettingsModalOpen(true)}
@@ -184,14 +212,6 @@ export default function HomePage() {
           )}
         </div>
       </nav>
-
-      {/* Mobile Menu Overlay */}
-      {mobileMenuOpen && (
-        <div 
-          className="mobile-menu-overlay"
-          onClick={() => setMobileMenuOpen(false)}
-        />
-      )}
 
       <AuthModal 
         isOpen={authModalOpen}
@@ -290,6 +310,18 @@ export default function HomePage() {
               >
                 {t("hero.subtitle")}
               </motion.p>
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.6 }}
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  marginTop: "20px"
+                }}
+              >
+                <BackendHealthStatus />
+              </motion.div>
             </motion.div>
 
             {/* Personalized Favorites Banner */}
@@ -403,6 +435,9 @@ export default function HomePage() {
                 </motion.div>
               </motion.div>
             )}
+
+            {/* AI-Powered Next Move Suggestions */}
+            <AISuggestions />
 
             {/* ✅ Horizontal Scrolling Cards - Jobs-style polish */}
             <section style={{ marginBottom: "60px" }}>

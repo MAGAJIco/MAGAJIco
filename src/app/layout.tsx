@@ -4,7 +4,8 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import "../styles/design-tokens.css";
 import "../styles/theme.css";
-import ThemeInitializer from "./components/ThemeInitializer";
+import "../styles/theme-enhanced.css";
+import { ThemeProvider } from "./components/ThemeProvider";
 import { Analytics } from "@vercel/analytics/react";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -12,7 +13,7 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://magajico.com'),
   title: "MagajiCo Sports Central - AI Sports Predictions & Live Matches",
-  description: "Join 1.2M+ users! Get 87% accurate AI predictions, live match tracking, and earn rewards. Share with friends and earn 100 Pi!",
+  description: "Get AI-powered sports predictions, live match tracking, and earn rewards. Real-time data from FlashScore, MyBetsToday & StatArea!",
   keywords: ['sports predictions', 'live matches', 'AI sports', 'sports betting', 'sports hub', 'entertainment platform', 'sports social network'],
   authors: [{ name: 'MagajiCo Team' }],
   creator: 'MagajiCo',
@@ -24,13 +25,16 @@ export const metadata: Metadata = {
     title: 'MagajiCo'
   },
   icons: {
-    icon: '/favicon.svg',
-    apple: '/icons/icon-192x192.png'
+    icon: [
+      { url: '/favicon.png', sizes: '32x32', type: 'image/png' },
+      { url: '/favicon.png', sizes: '192x192', type: 'image/png' }
+    ],
+    apple: '/favicon.png'
   },
   openGraph: {
     type: 'website',
     title: "MagajiCo Sports Central - AI Sports Predictions",
-    description: "87% accurate AI predictions • 1.2M+ active users • Earn rewards by sharing",
+    description: "AI-powered predictions from multiple sources • Live tracking • Earn rewards",
     siteName: 'MagajiCo',
     images: [
       {
@@ -44,7 +48,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Sports Central - AI Sports Predictions",
-    description: "87% accuracy • Join 1.2M+ users • Earn rewards",
+    description: "Real-time predictions • Multi-source data • Earn rewards",
   },
   robots: {
     index: true,
@@ -71,17 +75,21 @@ export default function RootLayout({
   children: ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
-        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-        <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="alternate icon" type="image/png" href="/favicon.png" />
+        <link rel="apple-touch-icon" href="/favicon.png" />
+        <link rel="apple-touch-icon" sizes="192x192" href="/icon-192x192.png" />
+        <link rel="apple-touch-icon" sizes="512x512" href="/icon-512x512.png" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="format-detection" content="telephone=no" />
       </head>
       <body className={inter.className}>
-        <ThemeInitializer />
-        {children}
+        <ThemeProvider>
+          {children}
+        </ThemeProvider>
         <Analytics />
       </body>
     </html>

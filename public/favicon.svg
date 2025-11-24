@@ -1,5 +1,37 @@
 
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-  <circle cx="50" cy="50" r="40" fill="#00D9FF"/>
-  <text x="50" y="65" font-size="50" text-anchor="middle" fill="#000">M</text>
+  <defs>
+    <linearGradient id="powerGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#764ba2;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f093fb;stop-opacity:1" />
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2.5" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background circle with gradient -->
+  <circle cx="50" cy="50" r="48" fill="url(#powerGradient)"/>
+  
+  <!-- Inner shield/power symbol -->
+  <path d="M 50 20 L 68 28 L 68 50 Q 68 68 50 78 Q 32 68 32 50 L 32 28 Z" 
+        fill="white" opacity="0.95"/>
+  
+  <!-- Lightning bolt for power -->
+  <path d="M 52 32 L 44 50 L 50 50 L 47 65 L 56 47 L 50 47 Z" 
+        fill="url(#powerGradient)" filter="url(#glow)"/>
+  
+  <!-- M letter at bottom -->
+  <text x="50" y="92" 
+        font-family="Arial, sans-serif" 
+        font-size="26" 
+        font-weight="bold" 
+        text-anchor="middle" 
+        fill="white" 
+        filter="url(#glow)">M</text>
 </svg>

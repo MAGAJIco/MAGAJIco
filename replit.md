@@ -1,118 +1,190 @@
-# Sports API Service
+# MagajiCo Sports Platform - Amazon Consumer-Friendly + Apple Premium Design
 
 ## Overview
-A multi-language sports data aggregation service with REST API that integrates with multiple sports APIs to fetch live match data, odds, and predictions across various sports (NFL, NBA, MLB, Soccer).
+A multi-language sports data aggregation service with REST API integrated with real-time predictions from FlashScore, MyBetsToday, and StatArea. Now featuring enterprise-grade light/dark theme system matching **Amazon's consumer-friendly design** + **Apple's premium dark aesthetic**.
 
 ## Project Structure
-- `main.py` - FastAPI REST API server
-- `sports_api.py` - Python sports API service with data aggregation logic
-- `sports.ts` - TypeScript version of sports API library (legacy)
-- `index.ts` - TypeScript demo application (legacy)
-- `tsconfig.json` - TypeScript configuration
-- `package.json` - Node.js dependencies
-- `pyproject.toml` - Python dependencies
+- `main.py` - FastAPI REST API server (Port 8000)
+- `src/app/[locale]/page.tsx` - Homepage with theme toggle
+- `src/app/[locale]/bets/page.tsx` - Today's Bets page with theme support
+- `src/app/[locale]/predictions/page.tsx` - Advanced Predictions Hub (fixed import path)
+- `src/app/components/ThemeProvider.tsx` - React Context-based theme system
+- `src/app/components/ThemeToggle.tsx` - Beautiful animated theme switcher
+- `src/styles/theme-enhanced.css` - Complete light/dark theme variables
+- `tailwind.config.ts` - Tailwind with Amazon-inspired color palette
 
-## Current State
-- **Language**: Python 3.11 with FastAPI (Primary), TypeScript/Node.js 20 (Legacy)
-- **Status**: Fully functional REST API server
-- **Workflow**: FastAPI server running on port 5000
-- **API Documentation**: Available at `/docs` (Swagger UI)
+## Current State (November 24, 2025)
+- **Language**: Python 3.11 FastAPI + Next.js 16 Frontend
+- **Status**: Fully functional with new theme system
+- **Frontend Port**: 5000 (Nginx proxy)
+- **Backend Port**: 8000 (Direct)
+- **Workflow Status**: Both running successfully
+
+## New Theme System - "Amazon + Apple" Design Philosophy
+
+### Light Theme (Amazon Consumer-Friendly) ☀️
+```css
+Primary Colors:
+- Background: #ffffff (Clean white)
+- Secondary Background: #f8f9fa (Warm light gray)
+- Primary Brand: #0066cc (Amazon Blue)
+- Secondary Brand: #ff9900 (Amazon Orange)
+- Text: #0a0e27 (Deep navy - high contrast)
+- Accent: #146eb4 (Professional blue)
+```
+**Psychology**: Trust, approachability, e-commerce established pattern
+**Use Case**: Day trading, casual browsing, consumer-friendly sports betting
+
+### Dark Theme (Apple Premium) 🌙
+```css
+Primary Colors:
+- Background: #0d1117 (Deep charcoal)
+- Secondary Background: #161b22 (Premium dark)
+- Primary Brand: #667eea (Purple gradient start)
+- Secondary Brand: #764ba2 (Purple gradient end)
+- Accent: #f093fb (Pink accent - premium feel)
+- Text: #e6edf3 (Soft white for reduced eye strain)
+```
+**Psychology**: Premium, sophisticated, reduced eye strain
+**Use Case**: Late-night trading, professional viewing, OLED displays
 
 ## Features
 
+### Theme System
+- **Automatic System Detection** - Respects OS light/dark preference
+- **Persistent Storage** - Saves user theme choice to localStorage
+- **Smooth Transitions** - 0.3s color transitions on all elements
+- **Consumer-Friendly Light Mode** - Amazon-style clean and approachable
+- **Premium Dark Mode** - Apple-style minimal and sophisticated
+- **3 Selection Modes**: Light / Dark / System (auto)
+
 ### Free APIs (No keys required)
 - ESPN APIs for NFL, NBA, and MLB scores
-- No authentication required
 - Live scores and game status
 
 ### Premium APIs (API keys required)
 - **RapidAPI**: NFL, NBA, MLB detailed data
-  - Requires: `RAPIDAPI_KEY` environment variable
 - **The Odds API**: Betting odds and spreads
-  - Requires: `ODDS_API_KEY` environment variable
-- **Football-Data.org**: Soccer/football matches (Premier League)
-  - Requires: `FOOTBALL_DATA_API_KEY` environment variable
+- **Football-Data.org**: Soccer/football matches
 
-### Legacy Features (TypeScript only)
-- FlashScore integration (web scraping) - Available in `sports.ts`
-- StatArea predictions (web scraping) - Available in `sports.ts`
+### Real Data Features
+- Multi-source prediction aggregation (FlashScore, MyBetsToday, StatArea)
+- Platform statistics with real API metrics
+- Live match tracking with real odds
+- Parlay builder with real calculations
+- Stake.com betting integration
 
 ## Usage
 
-### Running the API Server
-The FastAPI server runs automatically when you start the Repl on port 5000. Access it at:
-- **Root**: `/` - API information and available endpoints
-- **Documentation**: `/docs` - Interactive Swagger UI
-- **Health Check**: `/health` - Server health status
-
-### REST API Endpoints
-
-#### Core Endpoints
-- `GET /` - API information and endpoint listing
-- `GET /health` - Server health check
-- `GET /api/health` - Check status of all integrated sports APIs
-- `GET /api/config` - View configured API keys status
-
-#### Sports Data Endpoints
-- `GET /api/matches` - Fetch all live matches from all sources
-- `GET /api/nfl?source=espn` - NFL matches (source: espn or rapidapi)
-- `GET /api/nba?source=espn` - NBA matches (source: espn or rapidapi)
-- `GET /api/mlb?source=espn` - MLB matches (source: espn or rapidapi)
-- `GET /api/soccer` - Premier League soccer matches (requires API key)
-
-#### ESPN Free Endpoints
-- `GET /api/espn/nfl` - NFL scores from ESPN (no key required)
-- `GET /api/espn/nba` - NBA scores from ESPN (no key required)
-- `GET /api/espn/mlb` - MLB scores from ESPN (no key required)
-
-#### Betting Odds Endpoint
-- `GET /api/odds/{sport}` - Get betting odds for NFL, NBA, or MLB (requires API key)
-
-### Adding API Keys
-To enable premium features, add these secrets in the Replit Secrets pane:
-- `RAPIDAPI_KEY` - For RapidAPI sports data
-- `ODDS_API_KEY` - For The Odds API betting data
-- `FOOTBALL_DATA_API_KEY` - For Football-Data.org soccer data
-
-### Example API Calls
+### Running the Platform
 ```bash
-# Get all live matches
-curl http://localhost:5000/api/matches
+# Frontend (Nginx proxy on 5000)
+npm run dev
 
-# Get NFL scores from ESPN (free)
-curl http://localhost:5000/api/espn/nfl
-
-# Check API health
-curl http://localhost:5000/api/health
-
-# Get NBA matches with source selection
-curl http://localhost:5000/api/nba?source=espn
+# Backend (Direct on 8000)
+python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-## Architecture
-- **RESTful API**: FastAPI with auto-generated OpenAPI documentation
-- **Type-safe**: Python type hints and Pydantic models
-- **Multi-source**: Aggregates data from 7+ different sources
-- **Fallback strategy**: Free ESPN APIs as default, premium APIs optional
-- **Error handling**: Graceful degradation when APIs are unavailable
-- **CORS enabled**: Supports cross-origin requests for web clients
+### REST API Endpoints
+- `GET /` - API information
+- `GET /api/health` - Server health check
+- `GET /api/stats/platform` - Real platform statistics
+- `GET /api/matches` - All live matches
+- `GET /api/nfl|nba|mlb` - Sport-specific matches
+- `GET /api/soccer` - Premier League matches
+- `GET /api/predictions/soccer` - Soccer predictions
+- `GET /api/predictions/statarea` - StatArea predictions
+- `GET /api/predictions/flashscore/over45` - FlashScore predictions
 
-## Development
-- **Python/FastAPI**:
-  - Start server: `python main.py` (runs on port 5000)
-  - API docs available at `/docs` when server is running
-  
-- **TypeScript (Legacy)**:
-  - Build: `npm run build` - Compiles TypeScript to JavaScript
-  - Start: `npm start` - Builds and runs the demo application
+### Theme Toggle Usage
+1. Click the **sun/moon icon** (☀️/🌙) in the navbar (top-right)
+2. Select from: **Light** / **Dark** / **System**
+3. Your preference automatically saves
+4. All pages smoothly transition colors
+
+## Design Architecture
+
+### Theme System Stack
+- **React Context API** - Global theme state management
+- **localStorage** - Persistent user preference
+- **CSS Variables** - Dynamic theming across entire app
+- **Tailwind Dark Mode** - `class` + `data-theme` attribute selectors
+- **Framer Motion** - Smooth theme transition animations
+
+### Design Decision: Why "Amazon + Apple"?
+1. **Amazon Light Mode**: 
+   - Proven consumer trust pattern (e-commerce leader)
+   - Blue + Orange = high contrast, accessible
+   - Perfect for sports betting platform (approachable, not intimidating)
+
+2. **Apple Dark Mode**:
+   - Premium, sophisticated aesthetic
+   - Reduced eye strain for late-night viewing
+   - Purple gradients feel modern and tech-forward
+   - Proven on 1B+ iOS devices
+
+3. **Result**:
+   - Users during day = trustworthy Amazon UX
+   - Users at night = premium Apple experience
+   - Automatic switching respects their OS preference
 
 ## Recent Changes
-- **2025-10-29**: Added FastAPI REST API layer
-  - Created Python sports API service (`sports_api.py`)
-  - Built comprehensive REST API with FastAPI (`main.py`)
-  - Added 10+ API endpoints for sports data access
-  - Configured workflow to run FastAPI server on port 5000
-  - Enabled CORS for cross-origin access
-  - Added interactive API documentation at `/docs`
-  - Verified all free ESPN endpoints are working (NFL, NBA, MLB)
-  - Original TypeScript library maintained for reference
+- **2025-11-24**: Complete theme system redesign
+  - Replaced purple-pink gradients with Amazon Blue + Orange (light) and Apple Purple (dark)
+  - Implemented ThemeProvider with React Context
+  - Added ThemeToggle component to all pages
+  - Created theme-enhanced.css with full light/dark palette
+  - Fixed Predictions page import path (../../components/ThemeToggle)
+  - Updated Tailwind colors to match new brand
+  - Ensured smooth 0.3s transitions on all theme changes
+  - System preference detection with localStorage fallback
+
+## User Preferences
+- **Theme System**: Light/Dark/System with automatic detection
+- **Persistence**: localStorage key: `theme` 
+- **Color Priority**: Amazon Blue (#0066cc) for trust, Purple gradients for premium
+- **Accessibility**: High contrast in light mode, reduced eye strain in dark mode
+- **Animation**: Smooth transitions, no jarring color changes
+
+## Project Architecture
+```
+Frontend (Next.js 16):
+├── Layout with ThemeProvider wrapper
+├── Pages with embedded ThemeToggle
+├── CSS theme variables for dynamic styling
+└── Tailwind dark mode with `class` selector
+
+Backend (FastAPI):
+├── Sports data aggregation
+├── Real-time prediction APIs
+├── Platform statistics endpoint
+└── Health monitoring
+
+Styling:
+├── theme.css (original - kept for compatibility)
+├── theme-enhanced.css (NEW - Amazon + Apple colors)
+├── design-tokens.css (brand tokens)
+└── globals.css (Tailwind base styles)
+```
+
+## Deployment
+
+### Frontend Build
+```bash
+npm run build
+npm run start
+```
+
+### Backend Deployment
+```bash
+python -m uvicorn main:app --host 0.0.0.0 --port 8000
+```
+
+The platform is production-ready with enterprise-grade theming and real sports data integration.
+
+## Next Steps (Optional Enhancements)
+- Add more theme variants (e.g., "High Contrast" accessibility mode)
+- Implement per-component theme overrides for special sections
+- Add theme preview animations in settings modal
+- Extend to more pages (settings, social, analytics)
+- A/B test Amazon vs Apple theme adoption rates

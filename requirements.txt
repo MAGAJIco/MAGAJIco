@@ -7,3 +7,13 @@ lxml==5.3.0
 fastapi
 python-dotenv
 uvicorn
+beautifulsoup4
+fastapi
+python-dotenv
+requests
+uvicorn
+authlib
+itsdangerous
+pyjwt
+starlette
+openai
