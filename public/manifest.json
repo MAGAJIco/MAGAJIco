@@ -1,42 +1,45 @@
 {
-  "name": "MagajiCo Sports Central",
+  "name": "MagajiCo Sports Central - AI Predictions & Live Matches",
   "short_name": "MagajiCo",
-  "description": "Your All-in-One Sports & Entertainment Hub with AI predictions, live scores, and rewards",
-  "start_url": "/",
+  "description": "Your All-in-One Sports & Entertainment Hub with AI predictions, live match tracking, and earn rewards. Real-time data from FlashScore, MyBetsToday & StatArea!",
+  "start_url": "/en",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#667eea",
+  "display_override": ["window-controls-overlay", "standalone", "browser"],
+  "background_color": "#ffffff",
   "theme_color": "#667eea",
   "orientation": "portrait-primary",
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "/icon-72x72.png",
       "sizes": "72x72",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "/icon-96x96.png",
       "sizes": "96x96",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "/icon-128x128.png",
       "sizes": "128x128",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "/icon-144x144.png",
       "sizes": "144x144",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "/icon-152x152.png",
       "sizes": "152x152",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "/icon-192x192.png",
@@ -57,22 +60,51 @@
       "purpose": "any maskable"
     }
   ],
-  "categories": ["sports", "entertainment", "social"],
-  "screenshots": [],
+  "categories": ["sports", "entertainment", "social", "productivity"],
+  "screenshots": [
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "MagajiCo Sports Hub"
+    },
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Live Match Tracking"
+    }
+  ],
   "shortcuts": [
     {
       "name": "Live Matches",
       "short_name": "Live",
-      "description": "View live match scores",
+      "description": "View live match scores and real-time updates",
       "url": "/en/live",
-      "icons": [{ "src": "/icon-96x96.png", "sizes": "96x96" }]
+      "icons": [{ "src": "/icon-96x96.png", "sizes": "96x96", "type": "image/png" }]
     },
     {
-      "name": "Predictions",
-      "short_name": "AI Predictions",
-      "description": "AI-powered match predictions",
+      "name": "AI Predictions",
+      "short_name": "Predictions",
+      "description": "Get AI-powered match predictions from multiple sources",
       "url": "/en/predictions",
-      "icons": [{ "src": "/icon-96x96.png", "sizes": "96x96" }]
+      "icons": [{ "src": "/icon-96x96.png", "sizes": "96x96", "type": "image/png" }]
+    },
+    {
+      "name": "My Bets",
+      "short_name": "Bets",
+      "description": "Track your active bets and betting history",
+      "url": "/en/bets",
+      "icons": [{ "src": "/icon-96x96.png", "sizes": "96x96", "type": "image/png" }]
+    },
+    {
+      "name": "Leaderboard",
+      "short_name": "Leaders",
+      "description": "See top predictors and compete in rankings",
+      "url": "/en/leaderboard",
+      "icons": [{ "src": "/icon-96x96.png", "sizes": "96x96", "type": "image/png" }]
     }
   ]
 }

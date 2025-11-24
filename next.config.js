@@ -21,6 +21,7 @@ module.exports = {
   images: {
     domains: [],
     unoptimized: true,
+    formats: ['image/avif', 'image/webp'],
   },
   
   // Allow cross-origin requests from Replit domains
@@ -35,7 +36,7 @@ module.exports = {
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000',
   },
   
-  // Headers for security and cache control
+  // Headers for security, PWA, and cache control
   async headers() {
     return [
       {
@@ -64,6 +65,32 @@ module.exports = {
           {
             key: 'Expires',
             value: '0'
+          },
+          {
+            key: 'X-UA-Compatible',
+            value: 'IE=edge'
+          },
+        ],
+      },
+      {
+        source: '/manifest.json',
+        headers: [
+          {
+            key: 'Content-Type',
+            value: 'application/manifest+json'
+          },
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=3600'
+          },
+        ],
+      },
+      {
+        source: '/icon-:width(\\d+)x:height(\\d+).(png|svg)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable'
           },
         ],
       },
