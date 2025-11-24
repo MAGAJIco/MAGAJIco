@@ -8,6 +8,8 @@ import UserMenu from "../components/UserMenu";
 import SettingsModal from "../components/SettingsModal";
 import FavoriteTeamsModal from "../components/FavoriteTeamsModal";
 import BackendHealthStatus from "../components/BackendHealthStatus";
+import PredictionsDashboard from "../components/PredictionsDashboard";
+import AISuggestions from "../components/AISuggestions";
 import { useUserPreferences } from "../hook/useUserPreferences";
 import { motion } from "framer-motion";
 import { Star } from "lucide-react";
@@ -416,6 +418,12 @@ export default function HomePage() {
                 </motion.div>
               </motion.div>
             )}
+
+            {/* Real Predictions from FlashScore, MyBetsToday & StatArea */}
+            <PredictionsDashboard />
+
+            {/* AI-Powered Next Move Suggestions */}
+            <AISuggestions />
 
             {/* ✅ Horizontal Scrolling Cards - Jobs-style polish */}
             <section style={{ marginBottom: "60px" }}>

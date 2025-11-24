@@ -16,3 +16,4 @@ authlib
 itsdangerous
 pyjwt
 starlette
+openai

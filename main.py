@@ -9,6 +9,7 @@ import jwt
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from sports_api import create_sports_api_service, LiveMatch, OddsData
+from openai import OpenAI
 
 load_dotenv()
 
@@ -151,6 +152,135 @@ async def google_callback(request: Request):
         raise HTTPException(status_code=400, detail=f"OAuth error: {error.error}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Authentication failed: {str(e)}")
+
+
+@app.get("/api/ai/suggestions")
+async def get_ai_suggestions(
+    min_confidence: int = Query(86, description="Minimum confidence for predictions", ge=50, le=100),
+    max_predictions: int = Query(5, description="Number of predictions to analyze", ge=1, le=20)
+):
+    """
+    Get AI-powered next move suggestions based on current predictions
+    
+    The AI analyzes top predictions from multiple sources and provides:
+    - Recommended bets with reasoning
+    - Risk assessment
+    - Betting strategy suggestions
+    - Bankroll management tips
+    """
+    try:
+        openai_key = os.getenv("OPENAI_API_KEY")
+        if not openai_key:
+            return {
+                "error": "AI suggestions unavailable",
+                "message": "OpenAI API key not configured. Add OPENAI_API_KEY to enable AI-powered suggestions.",
+                "suggestions": []
+            }
+        
+        # Fetch predictions from multiple sources
+        mybets_predictions = service.fetch_mybetstoday_predictions(min_confidence=min_confidence, date="today")
+        statarea_predictions = service.fetch_statarea_predictions(min_odds=1.5, max_odds=3.0)
+        flashscore_predictions = service.fetch_flashscore_over45_predictions(exclude_african=True)
+        
+        # Combine all sources and sort by confidence
+        all_predictions = []
+        
+        # Add MyBetsToday predictions
+        for pred in mybets_predictions[:max_predictions]:
+            all_predictions.append({
+                "match": f"{pred['home_team']} vs {pred['away_team']}",
+                "prediction": pred['prediction'],
+                "confidence": pred['confidence'],
+                "odds": pred.get('implied_odds', 0),
+                "source": "MyBetsToday"
+            })
+        
+        # Add StatArea predictions
+        for pred in statarea_predictions[:max_predictions]:
+            all_predictions.append({
+                "match": f"{pred['home_team']} vs {pred['away_team']}",
+                "prediction": pred['prediction'],
+                "confidence": pred['confidence'],
+                "odds": pred.get('odds', 0),
+                "source": "StatArea"
+            })
+        
+        # Add FlashScore predictions
+        for pred in flashscore_predictions[:max_predictions]:
+            all_predictions.append({
+                "match": f"{pred['home_team']} vs {pred['away_team']}",
+                "prediction": pred['prediction'],
+                "confidence": pred.get('confidence', 0),
+                "odds": pred.get('odds', 0),
+                "source": "FlashScore"
+            })
+        
+        # Sort by confidence (highest first) and limit
+        all_predictions.sort(key=lambda x: x['confidence'], reverse=True)
+        all_predictions = all_predictions[:max_predictions]
+        
+        if not all_predictions:
+            return {
+                "suggestions": [],
+                "message": "No high-confidence predictions available at this time"
+            }
+        
+        # Use AI to analyze predictions and provide suggestions
+        # the newest OpenAI model is "gpt-5" which was released August 7, 2025. do not change this unless explicitly requested by the user
+        client = OpenAI(api_key=openai_key)
+        
+        prediction_summary = "\n".join([
+            f"- {p['match']}: Predict {p['prediction']} (Confidence: {p['confidence']}%, Odds: {p['odds']}, Source: {p['source']})"
+            for p in all_predictions
+        ])
+        
+        prompt = f"""You are an expert sports betting analyst. Analyze these predictions and provide actionable next move suggestions:
+
+{prediction_summary}
+
+Provide a JSON response with the following structure:
+{{
+  "top_picks": [
+    {{
+      "match": "Team A vs Team B",
+      "recommendation": "Bet on X",
+      "confidence": 90,
+      "reasoning": "Why this is a good bet",
+      "risk_level": "low|medium|high"
+    }}
+  ],
+  "strategy": "Overall betting strategy recommendation",
+  "bankroll_tip": "Specific bankroll management advice",
+  "warnings": ["Any concerns or red flags"]
+}}
+
+Focus on the highest confidence predictions and explain your reasoning clearly."""
+
+        response = client.chat.completions.create(
+            model="gpt-5",
+            messages=[
+                {"role": "system", "content": "You are an expert sports betting analyst providing data-driven recommendations."},
+                {"role": "user", "content": prompt}
+            ],
+            response_format={"type": "json_object"}
+        )
+        
+        import json
+        ai_response = json.loads(response.choices[0].message.content)
+        
+        return {
+            "success": True,
+            "predictions_analyzed": len(all_predictions),
+            "ai_suggestions": ai_response,
+            "source_data": all_predictions
+        }
+        
+    except Exception as e:
+        return {
+            "error": str(e),
+            "message": "Failed to generate AI suggestions",
+            "suggestions": []
+        }
 
 
 @app.get("/api/matches")
