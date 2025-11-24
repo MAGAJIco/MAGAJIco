@@ -7,7 +7,7 @@ channel = "stable-25_05"
 packages = ["xcodebuild", "zlib"]
 
 [workflows]
-runButton = "Project"
+runButton = "Start Full Stack"
 
 [[workflows.workflow]]
 name = "Project"
@@ -84,6 +84,19 @@ waitForPort = 8000
 
 [workflows.workflow.metadata]
 outputType = "console"
+
+[[workflows.workflow]]
+name = "Start Full Stack"
+author = 50156485
+mode = "parallel"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run dev"
 
 [[ports]]
 localPort = 3000
