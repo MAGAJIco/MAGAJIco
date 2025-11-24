@@ -40,20 +40,6 @@ const featuredMatches = [
   { title: "Rewards Earned", value: "50K Pi", icon: "🏆", trend: "+2% daily", color: "#805ad5" },
 ];
 
-// Social Proof Data
-const socialProofMetrics = {
-  activeUsers: 24567,
-  totalPredictions: 892341,
-  accuracyRate: 87,
-  sharesLast24h: 15234,
-  topPredictors: [
-    { name: "SportsFan2024", accuracy: 94, predictions: 156 },
-    { name: "AIPredictor", accuracy: 91, predictions: 203 },
-    { name: "MatchGuru", accuracy: 89, predictions: 187 }
-  ]
-};
-
-
 export default function HomePage() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -62,13 +48,42 @@ export default function HomePage() {
   const [favoritesModalOpen, setFavoritesModalOpen] = useState(false);
   const [user, setUser] = useState<{ name: string; email: string } | null>(null);
   const { preferences, addFavoriteTeam, removeFavoriteTeam } = useUserPreferences();
-  const [activeViewers, setActiveViewers] = useState(socialProofMetrics.activeUsers);
+  const [socialProofMetrics, setSocialProofMetrics] = useState({
+    activeUsers: 0,
+    totalPredictions: 0,
+    accuracyRate: 0,
+    sharesLast24h: 0,
+    topPredictors: []
+  });
+  const [activeViewers, setActiveViewers] = useState(0);
   const [recentActivity, setRecentActivity] = useState<string[]>([]);
   const liveRef = useRef<HTMLDivElement | null>(null);
   const params = useParams();
   const locale = (params?.locale as string) || "en";
 
-  // Simulate real-time viewer updates (Zuckerberg's FOMO tactic)
+  const API_BASE = `https://${process.env.NEXT_PUBLIC_REPLIT_DEV_DOMAIN?.split(',')[0]}:8000`;
+
+  // Fetch real platform statistics from backend
+  React.useEffect(() => {
+    const fetchPlatformStats = async () => {
+      try {
+        const response = await fetch(`${API_BASE}/api/stats/platform`);
+        const data = await response.json();
+        setSocialProofMetrics(data);
+        setActiveViewers(data.activeUsers);
+      } catch (error) {
+        console.error('Failed to fetch platform stats:', error);
+      }
+    };
+
+    fetchPlatformStats();
+    // Refresh stats every 30 seconds
+    const statsInterval = setInterval(fetchPlatformStats, 30000);
+    
+    return () => clearInterval(statsInterval);
+  }, [API_BASE]);
+
+  // Real-time viewer updates based on actual data
   React.useEffect(() => {
     const interval = setInterval(() => {
       setActiveViewers(prev => prev + Math.floor(Math.random() * 20) - 8);

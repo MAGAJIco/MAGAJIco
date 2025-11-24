@@ -64,83 +64,6 @@ type SortBy = "time" | "confidence" | "odds" | "consensus";
 type FilterLeague = "all" | "Premier League" | "La Liga" | "Bundesliga" | "Serie A";
 type FilterConfidence = "all" | "high" | "medium" | "low";
 
-// Demo/Sample data for when API returns empty results
-const DEMO_PREDICTIONS: EnhancedPrediction[] = [
-  {
-    id: "demo-1",
-    homeTeam: "Manchester City",
-    awayTeam: "Liverpool",
-    league: "Premier League",
-    gameTime: new Date(Date.now() + 3600000 * 2).toISOString(),
-    status: "upcoming",
-    sources: [
-      { name: "MyBets", prediction: "Over 2.5", confidence: 89, odds: 1.12 },
-      { name: "StatArea", prediction: "Over 2.5", confidence: 87, odds: 1.15 },
-      { name: "FlashScore", prediction: "Over 2.5", confidence: 91, odds: 1.10 }
-    ],
-    consensus: { prediction: "Over 2.5 Goals", avgConfidence: 89, agreement: 100 },
-    stats: {
-      homeForm: [1, 1, 0, 1, 1],
-      awayForm: [1, 1, 1, 0, 1],
-      h2hLast5: { homeWins: 2, draws: 1, awayWins: 2 },
-      goalsAvg: { home: 2.8, away: 2.4 }
-    },
-    aiPrediction: {
-      prediction: "Over 2.5 Goals",
-      confidence: 92,
-      probabilities: { home: 45, draw: 25, away: 30 }
-    }
-  },
-  {
-    id: "demo-2",
-    homeTeam: "Real Madrid",
-    awayTeam: "Barcelona",
-    league: "La Liga",
-    gameTime: new Date(Date.now() + 7200000).toISOString(),
-    status: "upcoming",
-    sources: [
-      { name: "MyBets", prediction: "BTTS Yes", confidence: 88, odds: 1.14 },
-      { name: "StatArea", prediction: "BTTS Yes", confidence: 86, odds: 1.16 }
-    ],
-    consensus: { prediction: "Both Teams To Score", avgConfidence: 87, agreement: 100 },
-    stats: {
-      homeForm: [1, 1, 1, 0, 1],
-      awayForm: [1, 0, 1, 1, 1],
-      h2hLast5: { homeWins: 3, draws: 1, awayWins: 1 },
-      goalsAvg: { home: 2.6, away: 2.3 }
-    },
-    aiPrediction: {
-      prediction: "BTTS Yes",
-      confidence: 88,
-      probabilities: { home: 50, draw: 20, away: 30 }
-    }
-  },
-  {
-    id: "demo-3",
-    homeTeam: "Bayern Munich",
-    awayTeam: "Borussia Dortmund",
-    league: "Bundesliga",
-    gameTime: new Date(Date.now() + 10800000).toISOString(),
-    status: "upcoming",
-    sources: [
-      { name: "MyBets", prediction: "Home Win", confidence: 91, odds: 1.10 },
-      { name: "StatArea", prediction: "Home Win", confidence: 89, odds: 1.11 },
-      { name: "FlashScore", prediction: "Home Win", confidence: 93, odds: 1.07 }
-    ],
-    consensus: { prediction: "Bayern Munich Win", avgConfidence: 91, agreement: 100 },
-    stats: {
-      homeForm: [1, 1, 1, 1, 1],
-      awayForm: [1, 0, 1, 0, 1],
-      h2hLast5: { homeWins: 4, draws: 0, awayWins: 1 },
-      goalsAvg: { home: 3.2, away: 1.8 }
-    },
-    aiPrediction: {
-      prediction: "Bayern Win",
-      confidence: 94,
-      probabilities: { home: 70, draw: 18, away: 12 }
-    }
-  }
-];
 
 export default function AdvancedPredictionsPage() {
   const [predictions, setPredictions] = useState<EnhancedPrediction[]>([]);
@@ -252,28 +175,25 @@ export default function AdvancedPredictionsPage() {
       console.log('Enhanced predictions:', result.length, result);
 
       if (result.length === 0) {
-        // Use demo data when API returns empty results
-        setPredictions(DEMO_PREDICTIONS);
-        setError("⚠️ Live predictions temporarily unavailable. Showing demo predictions below.");
+        setPredictions([]);
+        setError("No predictions available at the moment. Please try adjusting your filters or check back later.");
       } else {
         setPredictions(result);
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
 
-      // Amazon-style: Provide actionable error messages and show demo data
+      // Provide actionable error messages
       if (errorMessage.includes('unavailable')) {
-        setError("⚠️ Prediction services temporarily unavailable. Showing demo predictions below.");
+        setError("⚠️ Prediction services temporarily unavailable. Please check back in a few moments.");
       } else if (errorMessage.includes('timeout')) {
-        setError("⚠️ Request timeout. Showing demo predictions below.");
+        setError("⚠️ Request timeout. Please refresh the page or try again later.");
       } else {
-        setError("⚠️ Unable to load live predictions. Showing demo predictions below.");
+        setError("⚠️ Unable to load live predictions. Please refresh the page.");
       }
 
       console.error('Fetch error:', err);
-
-      // Show demo data when there's an error (Amazon's approach - show what you can)
-      setPredictions(DEMO_PREDICTIONS);
+      setPredictions([]);
     } finally {
       setLoading(false);
     }

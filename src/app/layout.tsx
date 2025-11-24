@@ -12,7 +12,7 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://magajico.com'),
   title: "MagajiCo Sports Central - AI Sports Predictions & Live Matches",
-  description: "Join 1.2M+ users! Get 87% accurate AI predictions, live match tracking, and earn rewards. Share with friends and earn 100 Pi!",
+  description: "Get AI-powered sports predictions, live match tracking, and earn rewards. Real-time data from FlashScore, MyBetsToday & StatArea!",
   keywords: ['sports predictions', 'live matches', 'AI sports', 'sports betting', 'sports hub', 'entertainment platform', 'sports social network'],
   authors: [{ name: 'MagajiCo Team' }],
   creator: 'MagajiCo',
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     title: "MagajiCo Sports Central - AI Sports Predictions",
-    description: "87% accurate AI predictions • 1.2M+ active users • Earn rewards by sharing",
+    description: "AI-powered predictions from multiple sources • Live tracking • Earn rewards",
     siteName: 'MagajiCo',
     images: [
       {
@@ -44,7 +44,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Sports Central - AI Sports Predictions",
-    description: "87% accuracy • Join 1.2M+ users • Earn rewards",
+    description: "Real-time predictions • Multi-source data • Earn rewards",
   },
   robots: {
     index: true,
