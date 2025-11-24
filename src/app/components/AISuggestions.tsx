@@ -23,7 +23,7 @@ export default function AISuggestions() {
   const [error, setError] = useState<string | null>(null);
   const [showPanel, setShowPanel] = useState(false);
 
-  const API_BASE = `https://${process.env.NEXT_PUBLIC_REPLIT_DEV_DOMAIN?.split(',')[0]}:8000`;
+  const API_BASE = `http://${process.env.NEXT_PUBLIC_REPLIT_DEV_DOMAIN?.split(',')[0]}:8000`;
 
   const fetchSuggestions = async () => {
     setLoading(true);

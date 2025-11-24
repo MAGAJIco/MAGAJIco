@@ -9,12 +9,19 @@ const getApiBaseUrl = (): string => {
   if (process.env.NEXT_PUBLIC_API_URL) {
     return process.env.NEXT_PUBLIC_API_URL;
   }
-  
-  // In development, use localhost:8000
+
+  // In development, use localhost:8000 with HTTP
+  // The original code was attempting to use HTTPS with Replit dev domain,
+  // which is incorrect as the backend runs on HTTP.
   if (typeof window !== 'undefined') {
+    const replitDevDomain = process.env.NEXT_PUBLIC_REPLIT_DEV_DOMAIN;
+    if (replitDevDomain) {
+      return `http://${replitDevDomain.split(',')[0]}:8000`;
+    }
     return 'http://localhost:8000';
   }
-  
+
+  // For SSR or other non-browser environments, default to localhost:8000
   return 'http://localhost:8000';
 };
 
@@ -25,7 +32,7 @@ export const API_BASE_URL = getApiBaseUrl();
  */
 export async function fetchFromBackend(endpoint: string, options?: RequestInit) {
   const url = `${API_BASE_URL}${endpoint}`;
-  
+
   try {
     const response = await fetch(url, {
       ...options,
@@ -34,11 +41,11 @@ export async function fetchFromBackend(endpoint: string, options?: RequestInit) 
         ...options?.headers,
       },
     });
-    
+
     if (!response.ok) {
       throw new Error(`API request failed: ${response.status} ${response.statusText}`);
     }
-    
+
     return await response.json();
   } catch (error) {
     console.error(`Failed to fetch ${endpoint}:`, error);

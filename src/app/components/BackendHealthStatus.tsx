@@ -24,7 +24,7 @@ export default function BackendHealthStatus() {
   useEffect(() => {
     const checkHealth = async () => {
       try {
-        const response = await fetch(`https://${process.env.NEXT_PUBLIC_REPLIT_DEV_DOMAIN?.split(',')[0]}:8000/api/health`, {
+        const response = await fetch(`http://${process.env.NEXT_PUBLIC_REPLIT_DEV_DOMAIN?.split(',')[0]}:8000/api/health`, {
           method: 'GET',
           headers: { 'Accept': 'application/json' },
         });
