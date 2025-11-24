@@ -473,4 +473,47 @@ html {
   .safe-area-inset-top {
     padding-top: env(safe-area-inset-top);
   }
+
+  /* Hide desktop drawer on mobile */
+  .app-drawer {
+    display: none;
+  }
+
+  /* Hide drawer overlay on mobile */
+  .app-drawer-overlay {
+    display: none;
+  }
+
+  /* Show enhanced menu on mobile */
+  .enhanced-menu {
+    display: flex;
+    z-index: 2001;
+  }
+
+  /* Ensure overlay is visible on mobile */
+  .enhanced-menu-overlay {
+    display: block;
+    z-index: 2000;
+  }
+}
+
+/* Desktop view - hide mobile menu */
+@media (min-width: 769px) {
+  /* Hide mobile menu overlay and menu on desktop */
+  .enhanced-menu-overlay {
+    display: none !important;
+  }
+
+  .enhanced-menu {
+    display: none !important;
+  }
+
+  /* Show desktop drawer on desktop */
+  .app-drawer {
+    display: flex;
+  }
+
+  .app-drawer-overlay {
+    display: block;
+  }
 }

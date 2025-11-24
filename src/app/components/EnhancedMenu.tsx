@@ -75,8 +75,15 @@ export default function EnhancedMenu({ isOpen, onClose, currentPath = "" }: Enha
   };
 
   useEffect(() => {
-    if (currentPath && !recentPages.includes(currentPath)) {
-      setRecentPages((prev) => [currentPath, ...prev.slice(0, 4)]);
+    if (currentPath) {
+      setRecentPages((prev) => {
+        // Filter out the current path to avoid duplicates
+        const filtered = prev.filter((page) => page !== currentPath);
+        // Add current path to the front, keep only last 4 pages
+        const updated = [currentPath, ...filtered.slice(0, 3)];
+        // Deduplicate by keeping only unique paths
+        return Array.from(new Set(updated));
+      });
     }
   }, [currentPath]);
 
