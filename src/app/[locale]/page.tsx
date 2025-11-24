@@ -10,6 +10,7 @@ import FavoriteTeamsModal from "../components/FavoriteTeamsModal";
 import ThemeToggle from "../components/ThemeToggle";
 import BackendHealthStatus from "../components/BackendHealthStatus";
 import AISuggestions from "../components/AISuggestions";
+import EnhancedMenu from "../components/EnhancedMenu";
 import { useUserPreferences } from "../hook/useUserPreferences";
 import { motion } from "framer-motion";
 import { Star } from "lucide-react";
@@ -141,6 +142,13 @@ export default function HomePage() {
 
   return (
     <>
+      {/* Enhanced Menu Component */}
+      <EnhancedMenu 
+        isOpen={mobileMenuOpen} 
+        onClose={() => setMobileMenuOpen(false)}
+        currentPath={`/${locale}`}
+      />
+
       {/* ✅ Navbar */}
       <nav className="navbar">
         <div className="navbar-left">
@@ -204,14 +212,6 @@ export default function HomePage() {
           )}
         </div>
       </nav>
-
-      {/* Mobile Menu Overlay */}
-      {mobileMenuOpen && (
-        <div 
-          className="mobile-menu-overlay"
-          onClick={() => setMobileMenuOpen(false)}
-        />
-      )}
 
       <AuthModal 
         isOpen={authModalOpen}
