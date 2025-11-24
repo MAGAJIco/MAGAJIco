@@ -11,6 +11,7 @@ import ThemeToggle from "../components/ThemeToggle";
 import BackendHealthStatus from "../components/BackendHealthStatus";
 import AISuggestions from "../components/AISuggestions";
 import EnhancedMenu from "../components/EnhancedMenu";
+import GuestTimer from "../components/GuestTimer";
 import { useUserPreferences } from "../hook/useUserPreferences";
 import { motion } from "framer-motion";
 import { Star } from "lucide-react";
@@ -48,6 +49,9 @@ export default function HomePage() {
   const [settingsModalOpen, setSettingsModalOpen] = useState(false);
   const [favoritesModalOpen, setFavoritesModalOpen] = useState(false);
   const [user, setUser] = useState<{ name: string; email: string } | null>(null);
+  const [guestTimeRemaining, setGuestTimeRemaining] = useState(600); // 10 minutes
+  const [showGuestTimer, setShowGuestTimer] = useState(false);
+  const [guestTimerDismissed, setGuestTimerDismissed] = useState(false);
   const { preferences, addFavoriteTeam, removeFavoriteTeam } = useUserPreferences();
   const [socialProofMetrics, setSocialProofMetrics] = useState({
     activeUsers: 0,
@@ -108,6 +112,32 @@ export default function HomePage() {
     };
   }, []);
 
+  // Guest session timer - only for non-authenticated users
+  React.useEffect(() => {
+    if (user || guestTimerDismissed) return;
+
+    const timer = setInterval(() => {
+      setGuestTimeRemaining(prev => {
+        const newTime = prev - 1;
+        
+        // Show timer when 5 minutes (300s) remaining
+        if (newTime <= 300 && newTime > 0) {
+          setShowGuestTimer(true);
+        }
+
+        // Auto-open auth modal when time expires
+        if (newTime <= 0) {
+          setAuthModalOpen(true);
+          return 0;
+        }
+
+        return newTime;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [user, guestTimerDismissed]);
+
   const handleSignIn = (email: string, password: string) => {
     setUser({ name: email.split("@")[0], email });
     setAuthModalOpen(false);
@@ -142,6 +172,17 @@ export default function HomePage() {
 
   return (
     <>
+      {/* Guest Timer Banner */}
+      <GuestTimer
+        isVisible={showGuestTimer}
+        timeRemaining={guestTimeRemaining}
+        onSignUpClick={() => {
+          setAuthModalOpen(true);
+          setGuestTimerDismissed(true);
+        }}
+        onDismiss={() => setGuestTimerDismissed(true)}
+      />
+
       {/* Enhanced Menu Component */}
       <EnhancedMenu 
         isOpen={mobileMenuOpen} 
