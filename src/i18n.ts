@@ -14,7 +14,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
   const locale = (await requestLocale) || "en";
   const validLocale = locales.includes(locale as Locale) ? locale : "en";
 
-  const messages = (await import(`../messages/${validLocale}.json`))
+  const messages = (await import(`./locales/messages/${validLocale}.json`))
     .default;
 
   return {
