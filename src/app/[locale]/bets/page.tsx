@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from "react";
 import { ArrowUpRight, Copy, Share2, ExternalLink, Zap, Target, TrendingUp } from "lucide-react";
 import { motion } from "framer-motion";
-import ThemeToggle from "../components/ThemeToggle";
 import { API_BASE_URL } from "../../../lib/api";
 
 interface Bet {
@@ -23,6 +22,9 @@ export default function BetsPage() {
   const [loading, setLoading] = useState(true);
   const [selectedBets, setSelectedBets] = useState<Bet[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [stakeAmount, setStakeAmount] = useState(10);
+  const [minConfidence, setMinConfidence] = useState(0);
+  const [sourceFilter, setSourceFilter] = useState<string>("all");
 
   useEffect(() => {
     fetchTodaysBets();
@@ -116,10 +118,20 @@ export default function BetsPage() {
   };
 
   const calculateParlay = () => {
-    if (selectedBets.length === 0) return { odds: 0, count: 0 };
+    if (selectedBets.length === 0) return { odds: 0, count: 0, payout: 0 };
     const totalOdds = selectedBets.reduce((acc, bet) => acc * bet.odds, 1);
-    return { odds: totalOdds.toFixed(2), count: selectedBets.length };
+    return { 
+      odds: totalOdds.toFixed(2), 
+      count: selectedBets.length,
+      payout: (stakeAmount * totalOdds).toFixed(2)
+    };
   };
+
+  const filteredBets = bets.filter(bet => {
+    if (minConfidence > 0 && bet.confidence < minConfidence) return false;
+    if (sourceFilter !== "all" && bet.source !== sourceFilter) return false;
+    return true;
+  });
 
   const getStakeBetSlip = () => {
     if (selectedBets.length === 0) return "";
@@ -148,9 +160,6 @@ export default function BetsPage() {
       paddingTop: "96px",
       paddingBottom: "48px"
     }}>
-      <div style={{ position: "fixed", top: "20px", right: "20px", zIndex: 40 }}>
-        <ThemeToggle />
-      </div>
       <motion.main
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -184,9 +193,9 @@ export default function BetsPage() {
           className="grid grid-cols-3 gap-4 mb-8"
         >
           {[
-            { label: "Available Bets", value: bets.length, color: "text-blue-400" },
+            { label: "Available Bets", value: filteredBets.length, color: "text-blue-400" },
             { label: "Selected", value: selectedBets.length, color: "text-purple-400" },
-            { label: "Parlay Odds", value: `${parlay.odds}x`, color: "text-pink-400" }
+            { label: "Potential Win", value: `$${parlay.payout}`, color: "text-green-400" }
           ].map((stat, idx) => (
             <motion.div
               key={idx}
@@ -205,6 +214,60 @@ export default function BetsPage() {
               <div style={{ fontSize: "28px", fontWeight: "700", color: stat.color }}>{stat.value}</div>
             </motion.div>
           ))}
+        </motion.div>
+
+        {/* Filters */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.15 }}
+          style={{
+            background: "rgba(255,255,255,0.05)",
+            backdropFilter: "blur(10px)",
+            border: "1px solid rgba(255,255,255,0.1)",
+            borderRadius: "12px",
+            padding: "16px",
+            marginBottom: "24px"
+          }}
+        >
+          <div className="flex flex-wrap gap-4 items-center">
+            <div className="flex items-center gap-2">
+              <Target className="w-4 h-4 text-purple-400" />
+              <span className="text-sm text-gray-300">Filters:</span>
+            </div>
+            
+            {/* Source Filter */}
+            <div className="flex gap-2">
+              {["all", "MyBetsToday", "StatArea", "FlashScore"].map((source) => (
+                <button
+                  key={source}
+                  onClick={() => setSourceFilter(source)}
+                  className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-all ${
+                    sourceFilter === source
+                      ? 'bg-purple-500 text-white'
+                      : 'bg-white/10 text-gray-300 hover:bg-white/20'
+                  }`}
+                >
+                  {source === "all" ? "All" : source}
+                </button>
+              ))}
+            </div>
+
+            {/* Confidence Filter */}
+            <div className="flex items-center gap-2">
+              <label className="text-sm text-gray-300">Min Confidence:</label>
+              <select
+                value={minConfidence}
+                onChange={(e) => setMinConfidence(Number(e.target.value))}
+                className="bg-white/10 border border-white/20 rounded-lg px-3 py-1.5 text-sm text-white"
+              >
+                <option value={0}>All</option>
+                <option value={70}>70%+</option>
+                <option value={80}>80%+</option>
+                <option value={90}>90%+</option>
+              </select>
+            </div>
+          </div>
         </motion.div>
 
         {/* Main Content */}
@@ -239,13 +302,13 @@ export default function BetsPage() {
               >
                 {error}
               </motion.div>
-            ) : bets.length === 0 ? (
+            ) : filteredBets.length === 0 ? (
               <div className="text-center py-12" style={{ color: "rgba(255,255,255,0.6)" }}>
-                No bets available right now. Check back soon!
+                No bets match your filters. Try adjusting them!
               </div>
             ) : (
               <div className="space-y-3">
-                {bets.map((bet, idx) => (
+                {filteredBets.map((bet, idx) => (
                   <motion.div
                     key={bet.id}
                     initial={{ opacity: 0, x: -20 }}
@@ -341,6 +404,34 @@ export default function BetsPage() {
                 </div>
               ) : (
                 <>
+                  {/* Quick Stake Amounts */}
+                  <div className="mb-4">
+                    <label className="text-sm text-gray-300 mb-2 block">Quick Stake</label>
+                    <div className="grid grid-cols-4 gap-2">
+                      {[10, 25, 50, 100].map((amount) => (
+                        <button
+                          key={amount}
+                          onClick={() => setStakeAmount(amount)}
+                          className={`py-2 rounded-lg text-sm font-semibold transition-all ${
+                            stakeAmount === amount
+                              ? 'bg-purple-500 text-white'
+                              : 'bg-white/10 text-gray-300 hover:bg-white/20'
+                          }`}
+                        >
+                          ${amount}
+                        </button>
+                      ))}
+                    </div>
+                    <input
+                      type="number"
+                      value={stakeAmount}
+                      onChange={(e) => setStakeAmount(Number(e.target.value))}
+                      className="w-full mt-2 bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white text-center"
+                      placeholder="Custom amount"
+                      min="1"
+                    />
+                  </div>
+
                   <div className="space-y-2 mb-6 max-h-64 overflow-y-auto">
                     {selectedBets.map((bet, idx) => (
                       <div
@@ -359,12 +450,24 @@ export default function BetsPage() {
 
                   {/* Total Parlay */}
                   <div className="bg-gradient-to-r from-purple-500/30 to-pink-500/30 border border-purple-500/50 rounded-lg p-4 mb-6">
-                    <div className="text-gray-300 text-sm mb-2">Total Parlay Odds</div>
-                    <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
-                      {parlay.odds}x
+                    <div className="flex justify-between items-start mb-3">
+                      <div>
+                        <div className="text-gray-300 text-sm mb-1">Stake</div>
+                        <div className="text-2xl font-bold text-white">${stakeAmount}</div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-gray-300 text-sm mb-1">Odds</div>
+                        <div className="text-2xl font-bold text-purple-300">{parlay.odds}x</div>
+                      </div>
                     </div>
-                    <div className="text-xs text-gray-400 mt-1">
-                      ({parlay.count} selections)
+                    <div className="border-t border-white/20 pt-3">
+                      <div className="text-gray-300 text-sm mb-1">Potential Payout</div>
+                      <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-400">
+                        ${parlay.payout}
+                      </div>
+                      <div className="text-xs text-gray-400 mt-1">
+                        Profit: ${(Number(parlay.payout) - stakeAmount).toFixed(2)} ({parlay.count} picks)
+                      </div>
                     </div>
                   </div>
 
