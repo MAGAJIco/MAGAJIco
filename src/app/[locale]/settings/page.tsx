@@ -4,8 +4,10 @@
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
-export default function SettingsPage() {
+function SettingsContent() {
+  const t = useTranslations();
   const router = useRouter();
   const params = useParams();
   const locale = (params?.locale as string) || "en";
@@ -116,7 +118,7 @@ export default function SettingsPage() {
             fontWeight: "700",
             margin: 0
           }}>
-            ⚙️ Settings
+            ⚙️ {t("settings.title")}
           </h1>
         </div>
 
@@ -143,7 +145,7 @@ export default function SettingsPage() {
                 alignItems: "center",
                 gap: "8px"
               }}>
-                🌐 Language
+                🌐 {t("settings.language")}
               </h3>
               <select 
                 value={language} 
@@ -159,10 +161,10 @@ export default function SettingsPage() {
                   cursor: "pointer"
                 }}
               >
-                <option value="en">English</option>
-                <option value="es">Español</option>
-                <option value="fr">Français</option>
-                <option value="de">Deutsch</option>
+                <option value="en">{t("settings.english")}</option>
+                <option value="es">{t("settings.spanish")}</option>
+                <option value="fr">{t("settings.french")}</option>
+                <option value="de">{t("settings.german")}</option>
               </select>
             </div>
 
@@ -184,14 +186,14 @@ export default function SettingsPage() {
                   alignItems: "center",
                   gap: "8px"
                 }}>
-                  🔔 Notifications
+                  🔔 {t("settings.notifications")}
                 </h3>
                 <p style={{
                   fontSize: "14px",
                   color: "#888",
                   margin: 0
                 }}>
-                  Get alerts for live matches and predictions
+                  {t("settings.notificationsDesc")}
                 </p>
               </div>
               <label style={{
@@ -250,14 +252,14 @@ export default function SettingsPage() {
                   alignItems: "center",
                   gap: "8px"
                 }}>
-                  🌙 Dark Mode
+                  🌙 {t("settings.darkMode")}
                 </h3>
                 <p style={{
                   fontSize: "14px",
                   color: "#888",
                   margin: 0
                 }}>
-                  Switch to dark theme
+                  {t("settings.darkModeDesc")}
                 </p>
               </div>
               <label style={{
@@ -316,14 +318,14 @@ export default function SettingsPage() {
                   alignItems: "center",
                   gap: "8px"
                 }}>
-                  ▶️ Auto-play
+                  ▶️ {t("settings.autoplay")}
                 </h3>
                 <p style={{
                   fontSize: "14px",
                   color: "#888",
                   margin: 0
                 }}>
-                  Automatically play videos
+                  {t("settings.autoplayDesc")}
                 </p>
               </div>
               <label style={{
@@ -376,21 +378,21 @@ export default function SettingsPage() {
                 color: "#333",
                 margin: "0 0 4px 0"
               }}>
-                MagajiCo Sports Central
+                {t("settings.about")}
               </p>
               <p style={{
                 fontSize: "14px",
                 color: "#667eea",
                 margin: "0 0 8px 0"
               }}>
-                Version 2.0.0
+                {t("settings.version")} 2.0.0
               </p>
               <p style={{
                 fontSize: "14px",
                 color: "#888",
                 margin: 0
               }}>
-                Your all-in-one sports platform
+                {t("settings.description")}
               </p>
             </div>
           </div>
@@ -420,10 +422,14 @@ export default function SettingsPage() {
               e.currentTarget.style.boxShadow = "none";
             }}
           >
-            Save Changes
+            {t("settings.saveChanges")}
           </button>
         </div>
       </div>
     </div>
   );
+}
+
+export default function SettingsPage() {
+  return <SettingsContent />;
 }

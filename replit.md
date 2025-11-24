@@ -15,10 +15,11 @@ A multi-language sports data aggregation service with REST API integrated with r
 
 ## Current State (November 24, 2025)
 - **Language**: Python 3.11 FastAPI + Next.js 16 Frontend
-- **Status**: Fully functional with new theme system
+- **Status**: Fully functional with theme system & i18n
 - **Frontend Port**: 5000 (Nginx proxy)
 - **Backend Port**: 8000 (Direct)
 - **Workflow Status**: Both running successfully
+- **i18n**: Full internationalization with 4 languages (English, Spanish, French, German)
 
 ## New Theme System - "Amazon + Apple" Design Philosophy
 
@@ -49,6 +50,29 @@ Primary Colors:
 **Use Case**: Late-night trading, professional viewing, OLED displays
 
 ## Features
+
+### Internationalization (i18n) System ✨
+- **4 Languages**: English, Spanish, French, German
+- **Feature-Based Organization**: Settings, Navigation, Home, Predictions, Matches, Leaderboard
+- **Settings Translation**: Full i18n on Settings page
+- **Dynamic Language Switching**: Language preference saved to localStorage
+- **Easy Extensibility**: Add new languages by creating new JSON files in `src/locales/messages/`
+
+### Translation File Structure
+```
+src/locales/messages/
+├── en.json          # English
+├── es.json          # Español
+├── fr.json          # Français
+└── de.json          # Deutsch
+
+Each file contains:
+- common: Shared UI strings (loading, error, retry, save, cancel, close)
+- nav: Navigation items
+- settings: All settings-related strings
+- theme: Theme selection options
+- home, predictions, matches, leaderboard: Feature-specific strings
+```
 
 ### Theme System
 - **Automatic System Detection** - Respects OS light/dark preference
@@ -129,6 +153,15 @@ python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload
    - Automatic switching respects their OS preference
 
 ## Recent Changes
+- **2025-11-24**: Complete internationalization setup
+  - Reorganized translation files from `shared/` to `src/locales/messages/` (frontend-only)
+  - Expanded translation structure with feature-based organization (common, nav, settings, home, predictions, matches, leaderboard)
+  - Added full i18n support to Settings page with `useTranslations()` hook
+  - Settings page now displays in 4 languages: English, Spanish, French, German
+  - Translated all settings labels: Language, Notifications, Dark Mode, Autoplay, About section
+  - Cleaned up shared folder - now reserved for truly shared files (both backend + frontend)
+  - Settings modal kept with hardcoded strings for compatibility
+  
 - **2025-11-24**: Complete theme system redesign
   - Replaced purple-pink gradients with Amazon Blue + Orange (light) and Apple Purple (dark)
   - Implemented ThemeProvider with React Context
@@ -150,8 +183,9 @@ python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 ```
 Frontend (Next.js 16):
 ├── Layout with ThemeProvider wrapper
-├── Pages with embedded ThemeToggle
+├── Pages with embedded ThemeToggle & i18n
 ├── CSS theme variables for dynamic styling
+├── i18n translations via next-intl
 └── Tailwind dark mode with `class` selector
 
 Backend (FastAPI):
@@ -160,11 +194,32 @@ Backend (FastAPI):
 ├── Platform statistics endpoint
 └── Health monitoring
 
+Internationalization:
+├── src/locales/messages/ (JSON translation files)
+├── src/i18n.ts (i18n configuration)
+├── useTranslations() hook for client components
+└── 4 supported languages with localStorage persistence
+
 Styling:
 ├── theme.css (original - kept for compatibility)
-├── theme-enhanced.css (NEW - Amazon + Apple colors)
+├── theme-enhanced.css (Amazon + Apple colors)
 ├── design-tokens.css (brand tokens)
 └── globals.css (Tailwind base styles)
+```
+
+### Shared Folder Organization
+```
+shared/                         # Reserved for truly shared files
+└── (empty - for future backend + frontend shared code)
+
+src/
+├── locales/
+│   └── messages/              # Frontend translations (ONLY)
+│       ├── en.json
+│       ├── es.json
+│       ├── fr.json
+│       └── de.json
+└── ...rest of frontend code...
 ```
 
 ## Deployment

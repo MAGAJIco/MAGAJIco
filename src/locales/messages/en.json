@@ -3,12 +3,73 @@
     "welcome": "Welcome to MagajiCo Sports",
     "loading": "Loading...",
     "error": "An error occurred",
-    "retry": "Retry"
+    "retry": "Retry",
+    "save": "Save",
+    "cancel": "Cancel",
+    "close": "Close"
   },
   "nav": {
     "home": "Home",
     "predictions": "Predictions",
     "matches": "Matches",
-    "live": "Live"
+    "live": "Live",
+    "settings": "Settings",
+    "back": "Back"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "languageDesc": "Choose your preferred language",
+    "english": "English",
+    "spanish": "Español",
+    "french": "Français",
+    "german": "Deutsch",
+    "notifications": "Notifications",
+    "notificationsDesc": "Receive match updates and predictions",
+    "darkMode": "Dark Mode",
+    "darkModeDesc": "Enable dark theme for better visibility",
+    "autoplay": "Autoplay Videos",
+    "autoplayDesc": "Automatically play match videos",
+    "saveChanges": "Save Changes",
+    "about": "About MagajiCo Sports",
+    "version": "Version",
+    "description": "Your ultimate sports and entertainment hub with AI-powered predictions",
+    "enabled": "Enabled",
+    "disabled": "Disabled"
+  },
+  "theme": {
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System",
+    "preview": "Theme Preview"
+  },
+  "home": {
+    "title": "Home",
+    "liveMatches": "Live Matches",
+    "upcomingMatches": "Upcoming Matches",
+    "topPredictions": "Top Predictions",
+    "noMatches": "No matches available"
+  },
+  "predictions": {
+    "title": "Predictions",
+    "accuracy": "Accuracy",
+    "makeAPrediction": "Make a Prediction",
+    "yourPredictions": "Your Predictions",
+    "noPredictions": "No predictions yet"
+  },
+  "matches": {
+    "title": "Matches",
+    "live": "Live",
+    "upcoming": "Upcoming",
+    "completed": "Completed",
+    "score": "Score",
+    "time": "Time"
+  },
+  "leaderboard": {
+    "title": "Leaderboard",
+    "rank": "Rank",
+    "player": "Player",
+    "points": "Points",
+    "predictions": "Predictions"
   }
 }
