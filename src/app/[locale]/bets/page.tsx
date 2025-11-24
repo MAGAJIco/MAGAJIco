@@ -34,67 +34,67 @@ export default function BetsPage() {
     setLoading(true);
     setError(null);
     try {
-      const [mybetsRes, statareaRes, flashscoreRes] = await Promise.all([
-        fetch(`${API_BASE_URL}/api/predictions/soccer?min_confidence=86&date=today`),
-        fetch(`${API_BASE_URL}/api/predictions/statarea?min_odds=1.5&max_odds=3.0`),
-        fetch(`${API_BASE_URL}/api/predictions/flashscore/over45?exclude_african=true&min_odds=1.5`)
+      const [nflRes, nbaRes, soccerRes] = await Promise.all([
+        fetch(`${API_BASE_URL}/api/nfl`),
+        fetch(`${API_BASE_URL}/api/nba`),
+        fetch(`${API_BASE_URL}/api/soccer`)
       ]);
 
-      const [mybetsData, statareaData, flashscoreData] = await Promise.all([
-        mybetsRes.json(),
-        statareaRes.json(),
-        flashscoreRes.json()
+      const [nflData, nbaData, soccerData] = await Promise.all([
+        nflRes.json(),
+        nbaRes.json(),
+        soccerRes.json()
       ]);
 
       const allBets: Bet[] = [];
 
-      // MyBets predictions
-      if (mybetsData.predictions) {
-        mybetsData.predictions.forEach((pred: any, idx: number) => {
+      // NFL Live Matches
+      if (nflData.matches) {
+        nflData.matches.forEach((match: any, idx: number) => {
           allBets.push({
-            id: `mybets-${idx}`,
-            homeTeam: pred.home_team || "TBD",
-            awayTeam: pred.away_team || "TBD",
-            prediction: pred.prediction || "Unknown",
-            odds: pred.implied_odds || 1.5,
-            confidence: pred.confidence || 0,
-            source: "MyBetsToday",
-            league: "Premier League",
-            gameTime: pred.game_time || "Today"
+            id: `nfl-${idx}`,
+            homeTeam: match.home_team || "TBD",
+            awayTeam: match.away_team || "TBD",
+            prediction: match.status || "Scheduled",
+            odds: match.home_odds || 1.9,
+            confidence: match.status === "live" ? 85 : 70,
+            source: "ESPN",
+            league: "NFL",
+            gameTime: match.game_time || "Today"
           });
         });
       }
 
-      // StatArea predictions
-      if (statareaData.predictions) {
-        statareaData.predictions.forEach((pred: any, idx: number) => {
+      // NBA Live Matches
+      if (nbaData.matches) {
+        nbaData.matches.forEach((match: any, idx: number) => {
           allBets.push({
-            id: `statarea-${idx}`,
-            homeTeam: pred.home_team || "TBD",
-            awayTeam: pred.away_team || "TBD",
-            prediction: pred.prediction || "Unknown",
-            odds: pred.odds || 1.8,
-            confidence: pred.confidence || 0,
-            source: "StatArea",
-            league: "Top 5 Leagues",
-            gameTime: pred.game_time || "Today"
+            id: `nba-${idx}`,
+            homeTeam: match.home_team || "TBD",
+            awayTeam: match.away_team || "TBD",
+            prediction: match.status || "Scheduled",
+            odds: match.home_odds || 1.85,
+            confidence: match.status === "live" ? 85 : 70,
+            source: "ESPN",
+            league: "NBA",
+            gameTime: match.game_time || "Today"
           });
         });
       }
 
-      // FlashScore predictions
-      if (flashscoreData.predictions) {
-        flashscoreData.predictions.forEach((pred: any, idx: number) => {
+      // Soccer Live Matches
+      if (soccerData.matches) {
+        soccerData.matches.forEach((match: any, idx: number) => {
           allBets.push({
-            id: `flashscore-${idx}`,
-            homeTeam: pred.home_team || "TBD",
-            awayTeam: pred.away_team || "TBD",
-            prediction: pred.prediction || "Over 4.5",
-            odds: pred.odds || 1.9,
-            confidence: pred.confidence || 0,
-            source: "FlashScore",
+            id: `soccer-${idx}`,
+            homeTeam: match.home_team || "TBD",
+            awayTeam: match.away_team || "TBD",
+            prediction: match.status || "Scheduled",
+            odds: match.home_odds || 1.8,
+            confidence: match.status === "live" ? 85 : 70,
+            source: "ESPN",
             league: "Soccer",
-            gameTime: pred.game_time || "Today"
+            gameTime: match.game_time || "Today"
           });
         });
       }
