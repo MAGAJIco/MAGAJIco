@@ -269,57 +269,8 @@
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
-/* Dark Mode Global Styles */
-.dark {
-  color-scheme: dark;
-}
-
-.dark body {
-  background-color: #111827;
-  color: #f9fafb;
-}
-
-.dark .navbar {
-  background: #1f2937;
-  border-bottom: 1px solid #374151;
-}
-
-.dark .nav-icon {
-  color: #d1d5db;
-}
-
-.dark .nav-icon:hover {
-  background: #374151;
-}
-
-.dark .logo {
-  color: #818cf8;
-}
-
-.dark .mobile-bottom-nav {
-  background: rgba(31, 41, 55, 0.98);
-  border-top-color: #374151;
-}
-
-.dark .app-drawer {
-  background: #1f2937;
-}
-
-.dark .drawer-header {
-  border-bottom-color: #374151;
-}
-
-.dark .app-item {
-  background: #374151;
-}
-
-.dark .app-item:hover {
-  background: #4b5563;
-}
-
-.dark .app-name {
-  color: #d1d5db;
-}
+/* All theme styles now handled by theme-enhanced.css CSS variables */
+/* This ensures uniform theming across entire app */
 
 /* Hover Effects */
 .hover-lift {
