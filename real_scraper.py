@@ -756,7 +756,7 @@ class RealSportsScraperService:
     def scrape_scoreprediction(self) -> List[Dict[str, Any]]:
         """
         Scrape predictions from ScorePredictor.net (scorepredictor.net)
-        Returns: Match score predictions with total goals > 1 (filters out 1:0 and 0:1 scores)
+        Returns: ALL available match score predictions (no filtering)
         """
         predictions = []
         seen = set()
@@ -785,11 +785,6 @@ class RealSportsScraperService:
                                 away_score = int(cells[2].get_text(strip=True))
                                 away_team = cells[3].get_text(strip=True)
                                 total_goals = home_score + away_score
-                                
-                                # FILTER: Skip scores of 1:0 or 0:1 (total_goals == 1)
-                                # Only return predictions with total_goals > 1
-                                if total_goals <= 1:
-                                    continue
                                 
                                 # Validate: team names should be real (not numbers/empty)
                                 if not home_team or not away_team or len(home_team) < 2 or len(away_team) < 2:
