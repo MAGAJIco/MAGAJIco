@@ -189,6 +189,20 @@ python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 
 ## Recent Changes
 
+- **2025-11-25**: ✅ Private Predictions Page Protected with Authentication
+  - **Protection Added**: `/en/predictions` now requires user authentication
+  - **User Experience**:
+    - Loading state shown while checking authentication status
+    - Non-authenticated users see login prompt with "Sign In" button
+    - Authenticated users see personalized header: "Private Predictions - Welcome {FirstName}"
+  - **Code Cleanup**: Removed 146 lines of leftover/duplicate code from predictions page
+  - **Personalization**: Dynamic greeting with user's first name when logged in
+  - **Implementation Details**:
+    - useAuth hook checks authentication status on component mount
+    - If loading: shows spinner and "Loading..." message
+    - If not authenticated: shows lock icon + login prompt + Sign In button
+    - If authenticated: loads full predictions page with user data
+
 - **2025-11-25**: ✅ Authenticated User Login Complete
   - **Provider Integration**: Replit Auth (OpenID Connect) with 5 login methods
   - **Database Setup**: PostgreSQL with users and sessions tables
