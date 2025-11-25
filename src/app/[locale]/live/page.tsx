@@ -108,36 +108,71 @@ export default function LivePage() {
         </div>
       </div>
 
-      {/* Matches */}
+      {/* Matches - Grouped by League */}
       <div className="max-w-7xl mx-auto px-4 py-6">
         {loading ? (
           <div className="flex justify-center py-12">
             <RefreshCw className="w-8 h-8 animate-spin text-red-600" />
           </div>
         ) : filtered.length > 0 ? (
-          <div className="space-y-2">
-            {filtered.map((match, idx) => (
+          <div className="space-y-6">
+            {/* Group matches by league */}
+            {Object.entries(
+              filtered.reduce((acc, match) => {
+                if (!acc[match.league]) acc[match.league] = [];
+                acc[match.league].push(match);
+                return acc;
+              }, {} as Record<string, LiveMatch[]>)
+            ).map(([league, leagueMatches], leagueIdx) => (
               <motion.div
-                key={idx}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: idx * 0.05 }}
-                className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-md transition cursor-pointer"
+                key={league}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: leagueIdx * 0.1 }}
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <div className="text-xs text-gray-500 dark:text-gray-400 mb-1 font-semibold">{match.league}</div>
-                    <div className="font-semibold text-gray-900 dark:text-white">
-                      {match.homeTeam} <span className="text-gray-600 dark:text-gray-400">vs</span> {match.awayTeam}
-                    </div>
-                  </div>
+                {/* League Header */}
+                <div className="bg-gradient-to-r from-red-100 to-red-50 dark:from-red-900/30 dark:to-red-800/20 px-4 py-2 rounded-lg mb-3 border border-red-200 dark:border-red-800/50">
+                  <p className="font-bold text-red-900 dark:text-red-300">{league}</p>
+                </div>
 
-                  <div className="text-right">
-                    <div className="font-bold text-2xl text-gray-900 dark:text-white">
-                      {match.homeScore} - {match.awayScore}
-                    </div>
-                    <div className="text-xs text-red-600 font-bold animate-pulse mt-1">● LIVE</div>
-                  </div>
+                {/* Matches in this league */}
+                <div className="space-y-2">
+                  {leagueMatches.map((match, idx) => (
+                    <motion.div
+                      key={idx}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: leagueIdx * 0.1 + idx * 0.05 }}
+                      className="bg-white dark:bg-gray-800 border-2 border-red-200 dark:border-red-900/50 rounded-lg p-4 hover:shadow-md transition cursor-pointer"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <div className="font-semibold text-gray-900 dark:text-white">
+                            {match.homeTeam}
+                          </div>
+                          <div className="font-semibold text-gray-900 dark:text-white">
+                            {match.awayTeam}
+                          </div>
+                        </div>
+
+                        <div className="text-right mx-4">
+                          <div className="font-bold text-3xl text-gray-900 dark:text-white leading-none">
+                            {match.homeScore}
+                          </div>
+                          <div className="text-sm text-gray-500 dark:text-gray-400 my-1">-</div>
+                          <div className="font-bold text-3xl text-gray-900 dark:text-white leading-none">
+                            {match.awayScore}
+                          </div>
+                        </div>
+
+                        <div className="text-right">
+                          <div className="px-3 py-2 bg-red-500 text-white rounded font-bold text-sm animate-pulse whitespace-nowrap">
+                            ● LIVE
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
                 </div>
               </motion.div>
             ))}

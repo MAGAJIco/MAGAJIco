@@ -1,6 +1,10 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { RefreshCw, TrendingUp, AlertCircle, Zap, ChevronDown } from 'lucide-react';
+import { RefreshCw, TrendingUp, AlertCircle, Zap } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { StatAreaCard } from '@/app/components/cards/StatAreaCard';
+import { ScorePredictionCard } from '@/app/components/cards/ScorePredictionCard';
+import { MyBetsCard } from '@/app/components/cards/MyBetsCard';
 
 export default function PredictionsPage() {
   const [data, setData] = useState({
@@ -149,107 +153,31 @@ export default function PredictionsPage() {
           </div>
         </div>
 
-        {/* Predictions Sections */}
-        <div className="space-y-6">
-          {/* Statarea */}
-          {data.statarea.length > 0 && (
-            <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
-              <button
-                onClick={() => toggleSection('statarea')}
-                className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 transition"
-              >
-                <h2 className="text-lg font-bold text-gray-900 dark:text-white">
-                  Statarea ({data.statarea.length})
-                </h2>
-                <ChevronDown
-                  className={`w-5 h-5 text-gray-600 dark:text-gray-400 transition-transform ${
-                    expandedSections.statarea ? '' : '-rotate-90'
-                  }`}
-                />
-              </button>
-              {expandedSections.statarea && (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead className="bg-gray-50 dark:bg-gray-700">
-                      <tr>
-                        <th className="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Match</th>
-                        <th className="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Prediction</th>
-                        <th className="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Confidence</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                      {data.statarea.slice(0, 15).map((pred: any, idx: number) => (
-                        <tr key={idx} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition">
-                          <td className="px-4 py-3 text-gray-900 dark:text-white whitespace-nowrap">
-                            {pred.home_team} vs {pred.away_team}
-                          </td>
-                          <td className="px-4 py-3 text-gray-700 dark:text-gray-300">{pred.prediction_label || '—'}</td>
-                          <td className="px-4 py-3">
-                            <div className="flex items-center gap-2">
-                              <div className="w-16 h-2 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
-                                <div className="h-full bg-blue-600" style={{ width: `${pred.confidence}%` }} />
-                              </div>
-                              <span className="text-sm font-semibold text-gray-900 dark:text-white">{pred.confidence}%</span>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
-          )}
+        {/* Predictions Sections - Using Card Components */}
+        <motion.div className="space-y-6">
+          {/* Statarea Card */}
+          <StatAreaCard
+            predictions={data.statarea}
+            isLoading={loading && data.statarea.length === 0}
+            error={error && data.statarea.length === 0 ? error : null}
+            onRetry={fetchData}
+          />
 
-          {/* ScorePrediction */}
-          {data.scorePred.length > 0 && (
-            <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
-              <button
-                onClick={() => toggleSection('scorePred')}
-                className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 transition"
-              >
-                <h2 className="text-lg font-bold text-gray-900 dark:text-white">
-                  ScorePrediction ({data.scorePred.length})
-                </h2>
-                <ChevronDown
-                  className={`w-5 h-5 text-gray-600 dark:text-gray-400 transition-transform ${
-                    expandedSections.scorePred ? '' : '-rotate-90'
-                  }`}
-                />
-              </button>
-              {expandedSections.scorePred && (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead className="bg-gray-50 dark:bg-gray-700">
-                      <tr>
-                        <th className="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Match</th>
-                        <th className="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Prediction</th>
-                        <th className="px-4 py-3 text-left font-semibold text-gray-900 dark:text-white">Confidence</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                      {data.scorePred.slice(0, 15).map((pred: any, idx: number) => (
-                        <tr key={idx} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition">
-                          <td className="px-4 py-3 text-gray-900 dark:text-white whitespace-nowrap">
-                            {pred.home_team} vs {pred.away_team}
-                          </td>
-                          <td className="px-4 py-3 text-gray-700 dark:text-gray-300">{pred.prediction_label || pred.score || '—'}</td>
-                          <td className="px-4 py-3">
-                            <div className="flex items-center gap-2">
-                              <div className="w-16 h-2 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
-                                <div className="h-full bg-purple-600" style={{ width: `${pred.confidence}%` }} />
-                              </div>
-                              <span className="text-sm font-semibold text-gray-900 dark:text-white">{pred.confidence}%</span>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
-          )}
+          {/* ScorePrediction Card */}
+          <ScorePredictionCard
+            predictions={data.scorePred}
+            isLoading={loading && data.scorePred.length === 0}
+            error={error && data.scorePred.length === 0 ? error : null}
+            onRetry={fetchData}
+          />
+
+          {/* MyBets Card */}
+          <MyBetsCard
+            predictions={data.myBets}
+            isLoading={loading && data.myBets.length === 0}
+            error={error && data.myBets.length === 0 ? error : null}
+            onRetry={fetchData}
+          />
 
           {/* No Data State */}
           {data.statarea.length === 0 && data.scorePred.length === 0 && data.myBets.length === 0 && !loading && (
@@ -267,7 +195,7 @@ export default function PredictionsPage() {
               </button>
             </div>
           )}
-        </div>
+        </motion.div>
       </div>
     </div>
   );
