@@ -1,0 +1,5 @@
+.match-card.live {
+  background: linear-gradient(135deg, var(--gradient-red-from), var(--gradient-red-to));
+  color: #fff;
+  animation: gradientShift 3s ease infinite;
+}
