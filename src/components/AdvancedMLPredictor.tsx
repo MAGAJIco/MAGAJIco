@@ -37,13 +37,32 @@ export default function AdvancedMLPredictor() {
   const [predicting, setPredicting] = useState(false);
   const [result, setResult] = useState<PredictionResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [connectionStatus, setConnectionStatus] = useState<"idle" | "connecting" | "connected" | "predicting" | "success">("idle");
 
   const API_BASE = "http://localhost:8000";
+
+  // Determine status color and label
+  const getStatusIndicator = () => {
+    if (connectionStatus === "predicting") {
+      return { color: "#FFEB3B", label: "Fetching Prediction", lightBg: "#FFF9C4", darkBg: "#FBC02D" };
+    }
+    if (connectionStatus === "success") {
+      return { color: "#4CAF50", label: "Successfully Displayed", lightBg: "#E8F5E9", darkBg: "#2E7D32" };
+    }
+    if (connectionStatus === "connected") {
+      return { color: "#81C784", label: "Connected", lightBg: "#E8F5E9", darkBg: "#66BB6A" };
+    }
+    if (connectionStatus === "connecting") {
+      return { color: "#FFEB3B", label: "Connecting", lightBg: "#FFF9C4", darkBg: "#FBC02D" };
+    }
+    return { color: "#999999", label: "Idle", lightBg: "#F5F5F5", darkBg: "#757575" };
+  };
 
   // Fetch matches when sport changes
   useEffect(() => {
     const fetchMatches = async () => {
       setLoading(true);
+      setConnectionStatus("connecting");
       setError(null);
       setSelectedMatch("");
       setResult(null);
@@ -72,13 +91,16 @@ export default function AdvancedMLPredictor() {
             })
           );
           setMatches(formattedMatches);
+          setConnectionStatus("connected");
         } else {
           setError("No live matches available for this sport");
           setMatches([]);
+          setConnectionStatus("idle");
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to load matches");
         setMatches([]);
+        setConnectionStatus("idle");
       } finally {
         setLoading(false);
       }
@@ -141,6 +163,7 @@ export default function AdvancedMLPredictor() {
     }
 
     setPredicting(true);
+    setConnectionStatus("predicting");
     setError(null);
 
     try {
@@ -162,8 +185,10 @@ export default function AdvancedMLPredictor() {
 
       const data = await response.json();
       setResult(data);
+      setConnectionStatus("success");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Prediction error");
+      setConnectionStatus("connected");
     } finally {
       setPredicting(false);
     }
@@ -198,6 +223,8 @@ export default function AdvancedMLPredictor() {
   const currentMatch = matches.find((m) => m.id === selectedMatch);
   const features = generateFeatures();
 
+  const status = getStatusIndicator();
+
   return (
     <div className="w-full max-w-4xl mx-auto p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
       <div className="flex items-center gap-3 mb-6">
@@ -205,9 +232,19 @@ export default function AdvancedMLPredictor() {
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
           AI Match Predictor
         </h2>
-        <span className="ml-auto text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-3 py-1 rounded-full">
-          Live Data
-        </span>
+        <div className="ml-auto flex items-center gap-2">
+          {/* Status Indicator */}
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600">
+            <div
+              className="w-2.5 h-2.5 rounded-full animate-pulse"
+              style={{ backgroundColor: status.color }}
+              title={status.label}
+            />
+            <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
+              {status.label}
+            </span>
+          </div>
+        </div>
       </div>
 
       <div className="space-y-6">
