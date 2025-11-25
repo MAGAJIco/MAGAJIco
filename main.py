@@ -205,7 +205,7 @@ async def get_sport_predictions(sport: str):
             "status": "success",
             "sport": sport,
             "count": len(formatted),
-            "matches": formatted,
+            "predictions": formatted,
             "source": "ScorePredictor",
             "timestamp": datetime.now().isoformat()
         }

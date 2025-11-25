@@ -6,7 +6,6 @@ import { RefreshCw, ChevronDown } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useFavorites } from '@/hooks/useFavorites';
-import { cachedFetch } from '@/lib/performance';
 
 interface Match {
   id: string;
@@ -47,8 +46,10 @@ export default function HomePage() {
   const fetchMatches = async () => {
     try {
       setLoading(true);
-      const data = await cachedFetch(`/api/predictions/sport/soccer`);
-      const espnMatches = data.matches || [];
+      // Use direct fetch to bypass cache for real-time predictions
+      const response = await fetch(`/api/predictions/sport/soccer`, { cache: 'no-store' });
+      const data = await response.json();
+      const espnMatches = data.predictions || [];
 
       const groupedByLeague: { [key: string]: Competition } = {};
       const live: Match[] = [];
@@ -67,13 +68,13 @@ export default function HomePage() {
           status: m.status || 'scheduled',
           homeScore: m.home_score,
           awayScore: m.away_score,
+          prediction: m.prediction,
+          dayOfWeek: m.day_of_week,
+          predictedScore: m.predicted_score,
+          source: m.source,
         };
 
-        if (isLive) {
-          live.push(match);
-          liveCount++;
-        }
-
+        // Show all predictions, not just live
         if (!groupedByLeague[league]) {
           groupedByLeague[league] = {
             name: league,
