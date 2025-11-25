@@ -262,6 +262,45 @@ export default function PrivatePredictionsPage() {
     </motion.div>
   );
 
+  // Render 2-day bet card (betting-focused)
+  const renderStatarea2DayBetCard = (pred) => (
+    <motion.div
+      whileHover={{ scale: 1.03, y: -8 }}
+      className="w-full rounded-2xl bg-gradient-to-br from-red-500 to-red-600 p-5 text-white shadow-lg cursor-pointer border-2 border-yellow-300"
+    >
+      <div className="flex items-start justify-between mb-3">
+        <div className="flex-1">
+          <p className="text-xs font-bold text-yellow-100 mb-1">🎯 TOP BET</p>
+          <p className="text-sm font-bold line-clamp-1">{pred.teams}</p>
+        </div>
+        <span className="text-2xl font-bold text-yellow-200">{pred.confidence}%</span>
+      </div>
+
+      <div className="bg-black/30 rounded-lg p-3 mb-3">
+        <p className="text-2xl font-bold text-center">{pred.prediction_label}</p>
+      </div>
+
+      <div className="grid grid-cols-3 gap-2 text-xs mb-3">
+        <div className="bg-white/10 rounded p-2 text-center">
+          <p className="text-white/70">1</p>
+          <p className="font-bold text-lg">{pred.home_pct}%</p>
+        </div>
+        <div className="bg-white/10 rounded p-2 text-center">
+          <p className="text-white/70">X</p>
+          <p className="font-bold text-lg">{pred.draw_pct}%</p>
+        </div>
+        <div className="bg-white/10 rounded p-2 text-center">
+          <p className="text-white/70">2</p>
+          <p className="font-bold text-lg">{pred.away_pct}%</p>
+        </div>
+      </div>
+
+      <button className="w-full bg-yellow-300 text-red-700 font-bold py-2 rounded-lg hover:bg-yellow-200 transition-all text-sm">
+        💰 Place Bet
+      </button>
+    </motion.div>
+  );
+
   // Render mybets card
   const renderMyBetsCard = (pred) => (
     <motion.div
@@ -372,6 +411,38 @@ export default function PrivatePredictionsPage() {
             />
           )}
         </motion.div>
+
+        {/* 2-Day Statarea Bets Section */}
+        {statareaPredictions.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            className="mt-8 mb-8"
+          >
+            <div className="flex items-center gap-3 mb-4">
+              <span className="text-2xl">🚀</span>
+              <h2 className="text-xl font-bold text-gray-900">2-Day Statarea Bets</h2>
+              <div className="h-1 flex-1 rounded-full bg-gradient-to-r from-red-500 to-red-600" />
+            </div>
+            <p className="text-sm text-gray-600 mb-4">Top betting opportunities for next 48 hours</p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {statareaPredictions
+                .sort((a, b) => (b.confidence || 0) - (a.confidence || 0))
+                .slice(0, 6)
+                .map((pred, idx) => (
+                  <motion.div
+                    key={idx}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: idx * 0.1 }}
+                  >
+                    {renderStatarea2DayBetCard(pred)}
+                  </motion.div>
+                ))}
+            </div>
+          </motion.div>
+        )}
 
         {/* Section 3: ScorePrediction */}
         <HorizontalCarousel

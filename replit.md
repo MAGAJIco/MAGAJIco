@@ -154,7 +154,7 @@ python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 
 ## Recent Changes
 
-- **2025-11-25**: ✅ Statarea Scraper & Live Carousel Implementation Complete
+- **2025-11-25**: ✅ Statarea Scraper + 2-Day Betting Section Complete
   - **Scraper Implementation**: Added `scrape_statarea()` method to `real_scraper.py`
     - Scrapes match predictions from https://www.statarea.com/predictions
     - Extracts home/draw/away prediction percentages (1-3 format)
@@ -165,13 +165,36 @@ python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload
     - Ensures API always returns data (live OR fallback)
   - **API Endpoint**: Added `/api/predictions/statarea` in `main.py`
     - Returns Statarea predictions with source, timestamp, status
-  - **Frontend Integration**: Updated `/en/predictions` page
+  
+  - **Frontend Integration - Part 1: Statarea Analytics Carousel**
     - New state: `statareaPredictions` and `loadingStatarea`
-    - New fetch function: `fetchStatareaData()`
+    - New fetch function: `fetchStatareaData()` with auto-refresh every 60 seconds
     - New render function: `renderStatareCard()` with 3-column percentage display
     - Dynamic Statarea carousel replaces static card
     - Shows home/draw/away percentages in grid layout
     - Displays confidence scores and prediction labels with emojis (🏠/🤝/✈️)
+    - Features: Horizontal scrollable, hover animations (1.05x scale), navigation arrows
+    - Design: Purple gradient cards (from-purple-500 to-purple-600)
+  
+  - **Frontend Integration - Part 2: 2-Day Statarea Bets Section** ✨
+    - New special section emphasizing top betting opportunities
+    - New render function: `renderStatarea2DayBetCard()` - betting-focused design
+    - Displays top 6 predictions sorted by confidence
+    - Visual Design:
+      - Red gradient background (from-red-500 to-red-600)
+      - Yellow/gold border and accents for emphasis
+      - 🎯 "TOP BET" label on each card
+      - Large confidence score badge (text-2xl, yellow-200)
+      - 3-column percentage grid (1/X/2 format)
+      - Yellow "💰 Place Bet" button with hover effects
+    - Layout: Responsive grid (1 col mobile, 2 md, 3 lg)
+    - Animations: Scale-in on scroll, staggered entrance (0.1s delays)
+    - Section Features:
+      - 🚀 "2-Day Statarea Bets" header with red gradient underline
+      - Subtitle: "Top betting opportunities for next 48 hours"
+      - Shows top 6 predictions only (filtered for quality)
+      - Auto-sorts by confidence (highest first)
+  
   - **Data Format**: Each prediction includes:
     ```json
     {
@@ -179,7 +202,7 @@ python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload
       "away_team": "Barcelona",
       "teams": "Chelsea - Barcelona",
       "time": "15:00",
-      "prediction": "1",  // "1" (home), "X" (draw), "2" (away)
+      "prediction": "1",
       "prediction_label": "🏠 Home 46%",
       "home_pct": 46,
       "draw_pct": 25,
@@ -188,13 +211,6 @@ python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload
       "source": "statarea.com"
     }
     ```
-  - **Carousel Features**:
-    - Horizontal scrollable cards
-    - Hover animations (scale 1.05, lift effect)
-    - Left/right navigation arrows
-    - Purple gradient design (from-purple-500 to-purple-600)
-    - Loading spinner during data fetch
-    - Auto-refresh every 60 seconds
 
 - **2025-11-24**: ✅ Feature Enhancements & ML Integration Complete
   - **Advanced Analytics Dashboard**: New AdvancedAnalytics component displaying ML model performance metrics
