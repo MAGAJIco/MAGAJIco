@@ -7,6 +7,7 @@ import { notFound } from "next/navigation";
 import TopNav from "../components/TopNav";
 import BottomNav from "../components/BottomNav";
 import GuestSessionWrapper from "../components/GuestSessionWrapper";
+import { EngagementNotifications } from "../components/EngagementNotifications";
 
 export async function generateStaticParams() {
   return [
@@ -32,6 +33,7 @@ export default async function LocaleLayout({ children, params }: { children: Rea
         </main>
       </GuestSessionWrapper>
       <BottomNav />
+      <EngagementNotifications />
     </div>
   );
 }

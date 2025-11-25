@@ -57,9 +57,9 @@ export const debounce = (func: Function, wait: number) => {
  * Request animation frame throttle for smooth animations
  */
 export const rafThrottle = (callback: () => void) => {
-  let frameId: number;
+  let frameId: number | null = null;
   return () => {
-    if (frameId) cancelAnimationFrame(frameId);
+    if (frameId !== null) cancelAnimationFrame(frameId);
     frameId = requestAnimationFrame(callback);
   };
 };

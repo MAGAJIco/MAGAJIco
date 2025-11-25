@@ -3,9 +3,12 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { getApiBaseUrl } from '@/lib/api';
-import { RefreshCw, Zap, TrendingUp, ChevronRight } from 'lucide-react';
+import { RefreshCw, Zap, TrendingUp, ChevronRight, Heart } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import { useFavorites } from '@/hooks/useFavorites';
+import { useRecommendations } from '@/hooks/useRecommendations';
+import { cachedFetch } from '@/lib/performance';
 
 interface Match {
   id: string;
@@ -33,6 +36,9 @@ export default function HomePage() {
   const [competitions, setCompetitions] = useState<Competition[]>([]);
   const [loading, setLoading] = useState(false);
   const [totalLive, setTotalLive] = useState(0);
+  const { favorites, toggleFavorite, isFavorite } = useFavorites();
+  const { trackView, generateRecommendations } = useRecommendations();
+  const [recommendations, setRecommendations] = useState<any[]>([]);
 
   useEffect(() => {
     fetchMatches();
@@ -43,12 +49,8 @@ export default function HomePage() {
   const fetchMatches = async () => {
     try {
       setLoading(true);
-      // Use Next.js API proxy
-      const response = await fetch(`/api/predictions/live`, { timeout: 5000 });
-      
-      if (!response.ok) throw new Error('API error');
-      
-      const data = await response.json();
+      // Use cached fetch for performance (Tesla/SpaceX philosophy)
+      const data = await cachedFetch(`/api/predictions/live`);
       const predictions = data.predictions || [];
       
       const groupedByLeague: { [key: string]: Competition } = {};
@@ -89,6 +91,10 @@ export default function HomePage() {
       const competitionsArray = Object.values(groupedByLeague).sort((a, b) => b.live - a.live);
       setCompetitions(competitionsArray);
       setTotalLive(liveCount);
+      
+      // Generate smart recommendations (Amazon philosophy)
+      const recs = generateRecommendations(competitionsArray);
+      setRecommendations(recs);
     } catch (err) {
       console.log('Using sample data');
       setSampleData();
@@ -225,39 +231,58 @@ export default function HomePage() {
 
                 {/* Matches */}
                 <div className="space-y-1 mt-2">
-                  {comp.matches.slice(0, 5).map((match, midx) => (
-                    <motion.div
-                      key={midx}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: idx * 0.1 + midx * 0.05 }}
-                      className={`flex items-center justify-between px-4 py-3 rounded-lg border ${
-                        match.status === 'live'
-                          ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
-                          : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700'
-                      } hover:bg-gray-50 dark:hover:bg-gray-700/50 transition cursor-pointer`}
-                    >
-                      <div className="flex-1">
-                        <div className="font-semibold text-gray-900 dark:text-white">
-                          {match.homeTeam} <span className="text-gray-600 dark:text-gray-400">vs</span> {match.awayTeam}
-                        </div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">{match.time}</div>
-                      </div>
-
-                      <div className="text-right">
-                        {match.status === 'live' ? (
-                          <div>
-                            <div className="font-bold text-lg text-gray-900 dark:text-white">
-                              {match.homeScore} - {match.awayScore}
-                            </div>
-                            <div className="text-xs text-red-600 font-semibold animate-pulse">LIVE</div>
+                  {comp.matches.slice(0, 5).map((match, midx) => {
+                    const matchId = match.id;
+                    const isFav = isFavorite(matchId);
+                    return (
+                      <motion.div
+                        key={midx}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: idx * 0.1 + midx * 0.05 }}
+                        className={`flex items-center justify-between px-4 py-3 rounded-lg border ${
+                          match.status === 'live'
+                            ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
+                            : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700'
+                        } hover:bg-gray-50 dark:hover:bg-gray-700/50 transition cursor-pointer group`}
+                      >
+                        <div className="flex-1">
+                          <div className="font-semibold text-gray-900 dark:text-white">
+                            {match.homeTeam} <span className="text-gray-600 dark:text-gray-400">vs</span> {match.awayTeam}
                           </div>
-                        ) : (
-                          <div className="text-sm text-gray-600 dark:text-gray-400">{match.time}</div>
-                        )}
-                      </div>
-                    </motion.div>
-                  ))}
+                          <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">{match.time}</div>
+                        </div>
+
+                        <div className="flex items-center gap-3">
+                          <div className="text-right">
+                            {match.status === 'live' ? (
+                              <div>
+                                <div className="font-bold text-lg text-gray-900 dark:text-white">
+                                  {match.homeScore} - {match.awayScore}
+                                </div>
+                                <div className="text-xs text-red-600 font-semibold animate-pulse">LIVE</div>
+                              </div>
+                            ) : (
+                              <div className="text-sm text-gray-600 dark:text-gray-400">{match.time}</div>
+                            )}
+                          </div>
+                          {/* Favorite button */}
+                          <motion.button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleFavorite(matchId, 'match', `${match.homeTeam} vs ${match.awayTeam}`);
+                              trackView(matchId, 'match', `${match.homeTeam} vs ${match.awayTeam}`, 0.8);
+                            }}
+                            whileHover={{ scale: 1.15 }}
+                            whileTap={{ scale: 0.95 }}
+                            className="opacity-0 group-hover:opacity-100 transition"
+                          >
+                            <Heart className={`w-5 h-5 ${isFav ? 'fill-red-500 text-red-500' : 'text-gray-400'}`} />
+                          </motion.button>
+                        </div>
+                      </motion.div>
+                    );
+                  })}
                   {comp.matches.length > 5 && (
                     <button
                       onClick={() => router.push(`/${locale}/matches?league=${encodeURIComponent(comp.name)}`)}
@@ -274,6 +299,39 @@ export default function HomePage() {
           <div className="text-center py-12">
             <p className="text-gray-500 dark:text-gray-400">No matches available</p>
           </div>
+        )}
+
+        {/* Recommendations Section (Amazon philosophy) */}
+        {recommendations.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700"
+          >
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Recommended for You</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {recommendations.map((rec, idx) => (
+                <motion.div
+                  key={idx}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: idx * 0.1 }}
+                  className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-4 rounded-lg border border-blue-100 dark:border-blue-800 cursor-pointer hover:shadow-lg transition"
+                  onClick={() => {
+                    trackView(rec.id, 'recommendation', rec.name, 0.6);
+                  }}
+                >
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="font-semibold text-gray-900 dark:text-white">{rec.name}</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{rec.reason}</p>
+                    </div>
+                    <div className="text-2xl font-bold text-blue-600">⭐ {(rec.score * 100).toFixed(0)}%</div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
         )}
       </div>
     </div>
