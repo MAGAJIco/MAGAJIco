@@ -611,7 +611,7 @@ class RealSportsScraperService:
         """
         Scrape predictions from MyBets.today/recommended-soccer-predictions/
         Returns: List of matches with predictions and confidence
-        Format: Time HH:MM | Home Team vs Away Team | Prediction (1/X/2) Confidence%
+        Uses proper HTML selectors to parse structured data
         """
         predictions = []
         
@@ -620,28 +620,38 @@ class RealSportsScraperService:
             response = requests.get(url, headers=self.headers, timeout=10)
             soup = BeautifulSoup(response.text, 'html.parser')
             
-            # Find all rows/divs containing match data
-            # Look for pattern: time, teams, and odds with confidence
-            for elem in soup.find_all(['div', 'tr', 'li']):
+            # Find all match events (class='event-fixtures')
+            for event in soup.find_all('div', class_='event-fixtures'):
                 try:
-                    text = elem.get_text(strip=True)
+                    # Extract time from <div class='timediv'><time>HH:MM</time></div>
+                    time_elem = event.find('div', class_='timediv')
+                    if not time_elem:
+                        continue
+                    time_text = time_elem.get_text(strip=True)
                     
-                    # Pattern: "HH:MM Team1 vs Team2 1 (XX%)"
-                    # Example: "17:30 Orlando Pirates vs Chippa United 1 (79%)"
-                    match_pattern = re.search(
-                        r'(\d{1,2}):(\d{2})\s+(.+?)\s+vs\s+(.+?)\s+([1X2])\s+\((\d+)%\)',
-                        text,
-                        re.IGNORECASE
-                    )
+                    # Extract home team from <div class='homediv'><span class='homespan'>Name</span></div>
+                    home_elem = event.find('span', class_='homespan')
+                    if not home_elem:
+                        continue
+                    home_team = home_elem.get_text(strip=True)
                     
-                    if not match_pattern:
+                    # Extract away team from <div class='awaydiv'><span class='awayTeam'>Name</span></div>
+                    away_elem = event.find('span', class_='awayTeam')
+                    if not away_elem:
+                        continue
+                    away_team = away_elem.get_text(strip=True)
+                    
+                    # Look for prediction and confidence in the event
+                    # Usually in format like "1 (79%)" or similar
+                    event_text = event.get_text(strip=True)
+                    
+                    # Extract prediction code and confidence: "1 (79%)", "X (65%)", "2 (58%)"
+                    pred_pattern = re.search(r'\b([1X2])\s*\((\d+)%?\)', event_text, re.IGNORECASE)
+                    if not pred_pattern:
                         continue
                     
-                    time = f"{match_pattern.group(1)}:{match_pattern.group(2)}"
-                    home_team = match_pattern.group(3).strip()
-                    away_team = match_pattern.group(4).strip()
-                    prediction_code = match_pattern.group(5).upper()
-                    confidence = int(match_pattern.group(6))
+                    prediction_code = pred_pattern.group(1).upper()
+                    confidence = int(pred_pattern.group(2))
                     
                     # Map prediction code to readable format
                     prediction_map = {
@@ -656,11 +666,11 @@ class RealSportsScraperService:
                         "away_team": away_team,
                         "prediction": prediction,
                         "confidence": confidence,
-                        "time": time,
+                        "time": time_text,
                         "source": "MyBets.today"
                     })
                     
-                except:
+                except Exception as e:
                     continue
                     
         except Exception as e:
