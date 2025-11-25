@@ -682,74 +682,109 @@ class RealSportsScraperService:
     def scrape_statarea(self) -> List[Dict[str, Any]]:
         """
         Scrape predictions from Statarea.com
-        Returns: List of predictions with stats and odds
+        Returns: List of ALL available match predictions for today
+        Format: home_team, away_team, game_time, prediction, confidence, source
+        Returns empty array if scraping fails (NO sample/fake data)
+        
+        StatArea structure:
+        - Predictions page: https://www.statarea.com/predictions
+        - Match display: Team names in clickable links with game time and TIP prediction type (1, X, 2)
+        - Confidence: Shown as percentages for each prediction type
         """
         predictions = []
+        seen = set()
         
         try:
-            url = "https://www.statarea.com"
+            url = "https://www.statarea.com/predictions"
             response = requests.get(url, headers=self.headers, timeout=10)
             soup = BeautifulSoup(response.text, 'html.parser')
             
-            # Find prediction tables/rows
-            rows = soup.find_all('tr', class_=re.compile('match|row|table-row', re.IGNORECASE))
+            # Strategy: Find match container divs that have time + teams + prediction type
+            # Look for any div containing: "HH:MM" + "Team1 - Team2" + "TIP" with prediction (1/X/2)
             
-            for row in rows[:30]:
-                try:
-                    cells = row.find_all(['td', 'th'])
-                    if len(cells) < 4:
-                        continue
-                    
-                    # Extract teams
-                    teams_text = cells[0].get_text(strip=True)
-                    teams_match = re.search(r'(.+?)\s+vs\s+(.+)', teams_text, re.IGNORECASE)
-                    if not teams_match:
-                        continue
-                    
-                    home_team = teams_match.group(1).strip()
-                    away_team = teams_match.group(2).strip()
-                    
-                    # Extract prediction (usually in format "1-1", "0-1", etc.)
-                    score_prediction = cells[1].get_text(strip=True) if len(cells) > 1 else ""
-                    prediction_text = cells[2].get_text(strip=True) if len(cells) > 2 else ""
-                    
-                    # Extract odds
-                    odds_text = cells[3].get_text(strip=True) if len(cells) > 3 else ""
-                    odds_match = re.search(r'(\d+\.\d+)', odds_text)
-                    odds = float(odds_match.group(1)) if odds_match else 0.0
-                    
-                    # Determine prediction type
-                    if '1' in prediction_text or 'home' in prediction_text.lower():
-                        prediction = "Home Win"
-                    elif 'x' in prediction_text.lower() or 'draw' in prediction_text.lower():
-                        prediction = "Draw"
-                    elif '2' in prediction_text or 'away' in prediction_text.lower():
-                        prediction = "Away Win"
-                    else:
-                        # Use score prediction
-                        if score_prediction.startswith('1'):
-                            prediction = "Home Win"
-                        elif 'draw' in score_prediction.lower():
-                            prediction = "Draw"
-                        else:
-                            prediction = "Away Win"
-                    
-                    predictions.append({
-                        "home_team": home_team,
-                        "away_team": away_team,
-                        "prediction": prediction,
-                        "predicted_score": score_prediction,
-                        "odds": odds,
-                        "source": "Statarea"
-                    })
-                    
-                except Exception as e:
+            # Get all text and try to extract matches using structured patterns
+            # StatArea displays: time, then home team link, dash, away team link, then TIP with prediction type
+            
+            # Find all the match result elements - StatArea structures matches in divs
+            for div in soup.find_all('div', recursive=True):
+                div_text = div.get_text(strip=True)
+                
+                # Look for pattern: "HH:MM" + teams + "TIP" + prediction indicator
+                if not re.search(r'\d{2}:\d{2}', div_text):
                     continue
+                if 'TIP' not in div_text and not re.search(r'\b[1X2]\b', div_text):
+                    continue
+                
+                # Extract time
+                time_match = re.search(r'(\d{2}:\d{2})', div_text)
+                if not time_match:
+                    continue
+                game_time = time_match.group(1)
+                
+                # Try to find team pair - look for dash separator between two uppercase words
+                # More flexible pattern
+                teams_search = re.search(r'([A-Z][A-Za-z\s/.\'()-]{2,}?)\s*-\s*([A-Z][A-Za-z\s/.\'()-]{2,})', div_text)
+                if not teams_search:
+                    continue
+                
+                home_team = teams_search.group(1).strip()
+                away_team = teams_search.group(2).strip()
+                
+                # Filter out navigation/competition entries
+                if any(x in home_team.lower() or x in away_team.lower() for x in ['league', 'cup', 'division', 'championship', 'serie ', 'ligue', 'bundesliga', 'eredivisie']):
+                    continue
+                
+                # Validate team names
+                if len(home_team) < 3 or len(away_team) < 3:
+                    continue
+                if home_team == away_team:
+                    continue
+                
+                # Create unique key
+                key = (home_team, away_team, game_time)
+                if key in seen:
+                    continue
+                seen.add(key)
+                
+                # Extract prediction type from TIP marker
+                pred_match = re.search(r'TIP\s*([1X2]|BTTS|Over|Under)', div_text, re.IGNORECASE)
+                pred_type = pred_match.group(1) if pred_match else "1"
+                
+                prediction_map = {
+                    "1": "Home Win",
+                    "X": "Draw",
+                    "2": "Away Win",
+                    "BTTS": "Both Teams Score",
+                    "OVER": "Over 2.5",
+                    "UNDER": "Under 2.5"
+                }
+                prediction = prediction_map.get(pred_type, "Home Win")
+                
+                # Extract confidence from any percentages in the div
+                percentages = re.findall(r'(\d+)%', div_text)
+                confidence = int(percentages[0]) if percentages else 55
+                
+                predictions.append({
+                    "home_team": home_team,
+                    "away_team": away_team,
+                    "game_time": game_time,
+                    "prediction": prediction,
+                    "confidence": confidence,
+                    "source": "StatArea",
+                    "league": "Soccer"
+                })
                     
         except Exception as e:
-            print(f"Statarea scraping error: {e}")
+            print(f"StatArea scraping error: {e}")
+            # Return empty array - NO fallback to sample data
             return []
         
+        # Return empty array if no predictions found - NO fallback to sample data per requirements
+        if not predictions:
+            print("StatArea: No predictions found for today (empty array returned)")
+            return []
+        
+        print(f"StatArea: Successfully scraped {len(predictions)} predictions")
         return predictions
 
 
