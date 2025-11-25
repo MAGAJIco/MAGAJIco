@@ -39,26 +39,45 @@ The platform is built with a FastAPI backend (Python 3.11) and a Next.js 16 fron
 
 ## Recent Changes
 
-### 2025-11-25: MongoDB Integration for Centralized Data Storage ✅
-**Dual-Storage System - MongoDB + JSON Fallback:**
+### 2025-11-25: MongoDB Integration + Data Dashboards ✅
+**Dual-Storage System with Frontend Dashboards:**
 - **ResultsLogger Enhanced**: Now supports both MongoDB Atlas (cloud) and JSON (local)
 - **Automatic Failover**: Falls back to JSON if MongoDB connection fails
 - **Storage Strategy**:
   - **MongoDB**: Primary storage for scalability and easy access
   - **JSON** (`shared/results_log.json`): Backup storage for reliability
   - Both receive every log entry for redundancy
-- **New Endpoints**:
-  - `/api/mongodb/status` - Check MongoDB connection status
-  - `/api/mongodb/stats` - View MongoDB collection statistics
+- **Backend Endpoints**:
+  - `/api/mongodb/status` - Check MongoDB connection status & collections
+  - `/api/mongodb/stats` - View detailed MongoDB statistics
+  - `/api/training/logs` - Get recent logs by type
+  - `/api/training/data` - Get all training data in JSON format
+  - `/api/training/summary` - Get summary statistics
+- **Frontend Dashboard Pages** (NEW):
+  - **`/en/mongodb`** - MongoDB Status Dashboard
+    - Real-time connection status monitoring
+    - Collection statistics visualization
+    - Storage method indicators
+    - Auto-refresh every 10 seconds
+  - **`/en/training-data`** - Training Data Dashboard
+    - View all logged predictions, odds, matches
+    - Download training data as JSON
+    - Summary statistics and charts
+    - Filterable by data type
+- **Navigation Menu** (UPDATED):
+  - Added "Data & Analytics" section to EnhancedMenu
+  - Quick links to MongoDB Status and Training Data dashboards
+  - Accessible from main menu with Database and BookOpen icons
 - **Features**:
   - Automatic sync of historical JSON data to MongoDB on startup
   - Graceful error handling - system continues with JSON-only if MongoDB unavailable
   - MongoDB collections: `predictions`, `odds`, `matches`, `metadata`
   - Dual logging to both databases automatically
+  - Real-time dashboard updates and statistics
 - **Configuration**: Uses `MONGODB_URI` secret from environment
-- **Tested**: System running with JSON storage (MongoDB DNS failover working)
+- **Status**: System running with JSON storage (MongoDB DNS failover working), dashboards live
 
-**To Enable MongoDB**:
+**To Enable MongoDB Cloud Storage**:
 1. Create MongoDB Atlas free account (mongodb.com)
 2. Create a cluster and get connection string
 3. Whitelist Replit IP: 0.0.0.0/0 in MongoDB Atlas Network Access

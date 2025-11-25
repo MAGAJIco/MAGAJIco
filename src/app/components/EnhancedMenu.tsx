@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Home, Zap, Trophy, Star, Settings, HelpCircle, User, LogOut } from 'lucide-react';
+import { X, Home, Zap, Trophy, Star, Settings, HelpCircle, User, LogOut, Database, BookOpen } from 'lucide-react';
 
 interface EnhancedMenuProps {
   isOpen: boolean;
@@ -123,6 +123,22 @@ export default function EnhancedMenu({ isOpen, onClose }: EnhancedMenuProps) {
                   icon={Settings}
                   label="Settings"
                   href={`/${locale}/settings`}
+                  onClick={onClose}
+                />
+              </MenuSection>
+
+              {/* Data & Analytics Section */}
+              <MenuSection title="Data & Analytics">
+                <MenuItem
+                  icon={Database}
+                  label="MongoDB Status"
+                  href={`/${locale}/mongodb`}
+                  onClick={onClose}
+                />
+                <MenuItem
+                  icon={BookOpen}
+                  label="Training Data"
+                  href={`/${locale}/training-data`}
                   onClick={onClose}
                 />
               </MenuSection>
