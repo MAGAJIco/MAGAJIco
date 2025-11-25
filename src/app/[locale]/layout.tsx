@@ -5,6 +5,7 @@ import "../../styles/icons.css";
 import { ReactNode } from "react";
 import { notFound } from "next/navigation";
 import TopNav from "../components/TopNav";
+import BottomNav from "../components/BottomNav";
 import GuestSessionWrapper from "../components/GuestSessionWrapper";
 import { EngagementNotifications } from "../components/EngagementNotifications";
 
@@ -24,13 +25,17 @@ export default async function LocaleLayout({ children, params }: { children: Rea
   if (!validLocales.includes(locale)) notFound();
 
   return (
-    <div className="min-h-screen w-full bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white flex flex-col">
+    <div className="min-h-screen w-full bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white">
       <TopNav />
-      <GuestSessionWrapper>
-        <main className="w-full flex-1 max-w-7xl mx-auto px-4 py-6 md:px-8 md:py-10">
-          {children}
-        </main>
-      </GuestSessionWrapper>
+      {/* Main content with spacing for fixed nav elements */}
+      <div className="pt-16 pb-20">
+        <GuestSessionWrapper>
+          <main className="w-full max-w-7xl mx-auto px-4 py-6 md:px-8 md:py-10">
+            {children}
+          </main>
+        </GuestSessionWrapper>
+      </div>
+      <BottomNav />
       <EngagementNotifications />
     </div>
   );
