@@ -768,22 +768,21 @@ class RealSportsScraperService:
     def _get_sample_statarea_predictions(self) -> List[Dict[str, Any]]:
         """Sample Statarea predictions"""
         return [
-            {
-                "home_team": "Manchester United",
-                "away_team": "Liverpool",
-                "prediction": "Home Win",
-                "predicted_score": "2-1",
-                "odds": 2.15,
-                "source": "Statarea"
-            },
-            {
-                "home_team": "Arsenal",
-                "away_team": "Chelsea",
-                "prediction": "Draw",
-                "predicted_score": "1-1",
-                "odds": 3.50,
-                "source": "Statarea"
-            },
+            {"home_team": "Manchester United", "away_team": "Liverpool", "prediction": "Home Win", "predicted_score": "2-1", "odds": 2.15, "source": "Statarea"},
+            {"home_team": "Arsenal", "away_team": "Chelsea", "prediction": "Draw", "predicted_score": "1-1", "odds": 3.50, "source": "Statarea"},
+            {"home_team": "Manchester City", "away_team": "Tottenham", "prediction": "Home Win", "predicted_score": "2-0", "odds": 1.95, "source": "Statarea"},
+            {"home_team": "Brighton", "away_team": "Newcastle", "prediction": "Draw", "predicted_score": "1-1", "odds": 3.40, "source": "Statarea"},
+            {"home_team": "Aston Villa", "away_team": "Fulham", "prediction": "Home Win", "predicted_score": "2-1", "odds": 2.10, "source": "Statarea"},
+            {"home_team": "Real Madrid", "away_team": "Barcelona", "prediction": "Home Win", "predicted_score": "2-1", "odds": 1.85, "source": "Statarea"},
+            {"home_team": "Bayern Munich", "away_team": "Borussia Dortmund", "prediction": "Home Win", "predicted_score": "3-0", "odds": 1.70, "source": "Statarea"},
+            {"home_team": "PSG", "away_team": "Marseille", "prediction": "Home Win", "predicted_score": "2-0", "odds": 1.65, "source": "Statarea"},
+            {"home_team": "Inter", "away_team": "AC Milan", "prediction": "Home Win", "predicted_score": "2-1", "odds": 2.05, "source": "Statarea"},
+            {"home_team": "Juventus", "away_team": "Roma", "prediction": "Home Win", "predicted_score": "2-1", "odds": 1.95, "source": "Statarea"},
+            {"home_team": "Tottenham", "away_team": "West Ham", "prediction": "Home Win", "predicted_score": "2-0", "odds": 2.20, "source": "Statarea"},
+            {"home_team": "Leicester", "away_team": "Everton", "prediction": "Draw", "predicted_score": "1-1", "odds": 3.25, "source": "Statarea"},
+            {"home_team": "Napoli", "away_team": "Lazio", "prediction": "Away Win", "predicted_score": "1-2", "odds": 3.15, "source": "Statarea"},
+            {"home_team": "Atalanta", "away_team": "Fiorentina", "prediction": "Home Win", "predicted_score": "2-1", "odds": 2.00, "source": "Statarea"},
+            {"home_team": "Ajax", "away_team": "PSV", "prediction": "Home Win", "predicted_score": "2-0", "odds": 1.90, "source": "Statarea"},
         ]
 
     def _get_sample_mybets_predictions(self) -> List[Dict[str, Any]]:
@@ -860,22 +859,22 @@ class RealSportsScraperService:
     def _get_sample_scoreprediction(self) -> List[Dict[str, Any]]:
         """Sample ScorePrediction data"""
         return [
-            {
-                "home_team": "Manchester City",
-                "away_team": "Tottenham",
-                "predicted_score": "2-1",
-                "total_goals": 3,
-                "outcome": "Home Win",
-                "source": "ScorePrediction"
-            },
-            {
-                "home_team": "Chelsea",
-                "away_team": "Newcastle",
-                "predicted_score": "1-1",
-                "total_goals": 2,
-                "outcome": "Draw",
-                "source": "ScorePrediction"
-            },
+            {"home_team": "Manchester City", "away_team": "Tottenham", "predicted_score": "2-1", "total_goals": 3, "outcome": "Home Win", "source": "ScorePrediction"},
+            {"home_team": "Chelsea", "away_team": "Newcastle", "predicted_score": "1-1", "total_goals": 2, "outcome": "Draw", "source": "ScorePrediction"},
+            {"home_team": "Liverpool", "away_team": "Brighton", "predicted_score": "2-0", "total_goals": 2, "outcome": "Home Win", "source": "ScorePrediction"},
+            {"home_team": "Arsenal", "away_team": "Aston Villa", "predicted_score": "3-1", "total_goals": 4, "outcome": "Home Win", "source": "ScorePrediction"},
+            {"home_team": "Manchester United", "away_team": "Fulham", "predicted_score": "1-1", "total_goals": 2, "outcome": "Draw", "source": "ScorePrediction"},
+            {"home_team": "Real Madrid", "away_team": "Barcelona", "predicted_score": "2-2", "total_goals": 4, "outcome": "Draw", "source": "ScorePrediction"},
+            {"home_team": "Bayern Munich", "away_team": "Borussia Dortmund", "predicted_score": "3-0", "total_goals": 3, "outcome": "Home Win", "source": "ScorePrediction"},
+            {"home_team": "PSG", "away_team": "Marseille", "predicted_score": "2-1", "total_goals": 3, "outcome": "Home Win", "source": "ScorePrediction"},
+            {"home_team": "Inter", "away_team": "AC Milan", "predicted_score": "1-0", "total_goals": 1, "outcome": "Home Win", "source": "ScorePrediction"},
+            {"home_team": "Juventus", "away_team": "Roma", "predicted_score": "2-1", "total_goals": 3, "outcome": "Home Win", "source": "ScorePrediction"},
+            {"home_team": "Tottenham", "away_team": "West Ham", "predicted_score": "2-0", "total_goals": 2, "outcome": "Home Win", "source": "ScorePrediction"},
+            {"home_team": "Leicester", "away_team": "Everton", "predicted_score": "1-1", "total_goals": 2, "outcome": "Draw", "source": "ScorePrediction"},
+            {"home_team": "Napoli", "away_team": "Lazio", "predicted_score": "2-1", "total_goals": 3, "outcome": "Home Win", "source": "ScorePrediction"},
+            {"home_team": "Atalanta", "away_team": "Fiorentina", "predicted_score": "3-1", "total_goals": 4, "outcome": "Home Win", "source": "ScorePrediction"},
+            {"home_team": "Ajax", "away_team": "PSV", "predicted_score": "2-0", "total_goals": 2, "outcome": "Home Win", "source": "ScorePrediction"},
+            {"home_team": "Sevilla", "away_team": "Villarreal", "predicted_score": "1-1", "total_goals": 2, "outcome": "Draw", "source": "ScorePrediction"},
         ]
 
     def scrape_bet365_odds(self) -> List[Dict[str, Any]]:
