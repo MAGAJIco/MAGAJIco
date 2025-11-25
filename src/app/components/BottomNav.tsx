@@ -12,7 +12,7 @@ export default function BottomNav() {
   const navItems = [
     { href: `/${locale}`, label: 'All Games', icon: '☰' },
     { href: `/${locale}/live`, label: 'LIVE', icon: '🔴' },
-    { href: `/${locale}/predictions`, label: 'Favorites', icon: '☆' },
+    { href: `/${locale}/predictions`, label: 'Private', icon: '🔒' },
     { href: `/${locale}/chat`, label: 'News', icon: '📰' },
     { href: `/${locale}/leaderboard`, label: 'Leagues', icon: '🏆' },
   ];
