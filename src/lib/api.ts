@@ -3,29 +3,24 @@
  * Automatically uses the correct backend URL based on environment
  */
 
-// Get backend API URL from environment variable or use localhost in development
-const getApiBaseUrl = (): string => {
+// Get backend API URL - must be called at runtime, not at module load time
+export const getApiBaseUrl = (): string => {
   // In production (Vercel), use the environment variable for backend URL
   if (process.env.NEXT_PUBLIC_API_URL) {
     return process.env.NEXT_PUBLIC_API_URL;
   }
 
-  // In development, use localhost:8000 with HTTP
-  // The original code was attempting to use HTTPS with Replit dev domain,
-  // which is incorrect as the backend runs on HTTP.
+  // In browser context (Replit or localhost development)
   if (typeof window !== 'undefined') {
-    const replitDevDomain = process.env.NEXT_PUBLIC_REPLIT_DEV_DOMAIN;
-    if (replitDevDomain) {
-      return `http://${replitDevDomain.split(',')[0]}:8000`;
-    }
-    return 'http://localhost:8000';
+    // Get the current hostname from window.location
+    const hostname = window.location.hostname;
+    // Backend runs on port 8000 on the same host
+    return `http://${hostname}:8000`;
   }
 
   // For SSR or other non-browser environments, default to localhost:8000
   return 'http://localhost:8000';
 };
-
-export const API_BASE_URL = getApiBaseUrl();
 
 /**
  * Helper function to make API calls to the backend

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Brain, Loader, RefreshCw, TrendingUp } from "lucide-react";
+import { getApiBaseUrl } from "@/lib/api";
 
 interface Match {
   id: string;
@@ -39,8 +40,6 @@ export default function AdvancedMLPredictor() {
   const [error, setError] = useState<string | null>(null);
   const [connectionStatus, setConnectionStatus] = useState<"idle" | "connecting" | "connected" | "predicting" | "success">("idle");
 
-  const API_BASE = "http://localhost:8000";
-
   // Determine status color and label
   const getStatusIndicator = () => {
     if (connectionStatus === "predicting") {
@@ -71,6 +70,7 @@ export default function AdvancedMLPredictor() {
         const sportConfig = SPORTS.find((s) => s.id === selectedSport);
         if (!sportConfig) return;
 
+        const API_BASE = getApiBaseUrl();
         const response = await fetch(`${API_BASE}${sportConfig.endpoint}`, {
           cache: "no-store",
         });
@@ -177,6 +177,7 @@ export default function AdvancedMLPredictor() {
         injuries: features.injuries.toString(),
       });
 
+      const API_BASE = getApiBaseUrl();
       const response = await fetch(`${API_BASE}/api/ml/predict?${params}`, {
         cache: "no-store",
       });

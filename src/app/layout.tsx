@@ -5,7 +5,7 @@ import "./globals.css";
 import "../styles/design-tokens.css";
 import "../styles/theme-enhanced.css";
 import { ThemeProvider } from "./components/ThemeProvider";
-import { Analytics } from "@vercel/analytics/react";
+// import { Analytics } from "@vercel/analytics/react";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -114,7 +114,7 @@ export default function RootLayout({
         <ThemeProvider>
           {children}
         </ThemeProvider>
-        <Analytics />
+        {/* <Analytics /> */}
       </body>
     </html>
   );

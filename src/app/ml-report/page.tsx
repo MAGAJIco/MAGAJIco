@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { Brain, CheckCircle, TrendingUp, Zap } from "lucide-react";
 import dynamic from "next/dynamic";
+import { getApiBaseUrl } from "@/lib/api";
 
 const AdvancedMLPredictor = dynamic(
   () => import("@/components/AdvancedMLPredictor"),
@@ -29,7 +30,8 @@ export default function MLReport() {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const res = await fetch("http://localhost:8000/api/ml/status", {
+        const API_BASE = getApiBaseUrl();
+        const res = await fetch(`${API_BASE}/api/ml/status`, {
           cache: "no-store"
         });
         if (res.ok) {
