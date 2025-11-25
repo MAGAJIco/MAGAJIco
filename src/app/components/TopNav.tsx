@@ -22,8 +22,8 @@ export default function TopNav() {
 
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 border-b border-blue-900 shadow-lg z-30">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+      <nav className="fixed top-0 left-0 right-0 h-16 bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 border-b border-blue-900 shadow-lg z-30">
+        <div className="max-w-7xl mx-auto px-4 h-full flex items-center justify-between">
           {/* Left: Hamburger Menu + Logo */}
           <div className="flex items-center gap-3">
             <button

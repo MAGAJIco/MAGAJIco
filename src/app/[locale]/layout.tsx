@@ -25,10 +25,10 @@ export default async function LocaleLayout({ children, params }: { children: Rea
   if (!validLocales.includes(locale)) notFound();
 
   return (
-    <div className="min-h-screen w-full bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white flex flex-col">
+    <div className="h-screen w-full bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white flex flex-col overflow-hidden">
       <TopNav />
-      {/* Main content - flex-1 to fill space between fixed navs */}
-      <main className="flex-1 overflow-y-auto pt-0 pb-20">
+      {/* Main scrollable content - accounts for fixed top (h-16) and bottom (h-20) navs */}
+      <main className="flex-1 overflow-y-auto mt-16 mb-20">
         <GuestSessionWrapper>
           <div className="w-full max-w-7xl mx-auto px-4 py-6 md:px-8 md:py-10">
             {children}
