@@ -10,6 +10,7 @@ from datetime import datetime
 import re
 import json
 from dataclasses import dataclass, asdict
+import numpy as np
 
 
 @dataclass
@@ -30,7 +31,15 @@ class LiveMatch:
     source: str = "scraped"
 
     def to_dict(self) -> Dict[str, Any]:
-        return asdict(self)
+        """Convert to dict, handling numpy types"""
+        data = asdict(self)
+        # Convert numpy types to native Python types
+        for key, value in data.items():
+            if isinstance(value, (np.integer, np.floating)):
+                data[key] = float(value) if isinstance(value, np.floating) else int(value)
+            elif isinstance(value, np.ndarray):
+                data[key] = value.tolist()
+        return data
 
 
 class RealSportsScraperService:
