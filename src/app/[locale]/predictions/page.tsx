@@ -83,6 +83,8 @@ export default function PrivatePredictionsPage() {
   const [refreshTime, setRefreshTime] = useState(new Date().toLocaleTimeString());
   const [myBetsPredictions, setMyBetsPredictions] = useState([]);
   const [loadingMyBets, setLoadingMyBets] = useState(true);
+  const [statareaPredictions, setStatareaPredictions] = useState([]);
+  const [loadingStatarea, setLoadingStatarea] = useState(true);
   const [weekCalendar, setWeekCalendar] = useState({});
   const [loadingWeek, setLoadingWeek] = useState(true);
 
@@ -94,6 +96,7 @@ export default function PrivatePredictionsPage() {
 
   const fetchData = async () => {
     fetchMyBetsPredictions();
+    fetchStatareaData();
     fetchWeekCalendar();
   };
 
@@ -111,6 +114,22 @@ export default function PrivatePredictionsPage() {
     } finally {
       setLoadingMyBets(false);
       setRefreshTime(new Date().toLocaleTimeString());
+    }
+  };
+
+  const fetchStatareaData = async () => {
+    try {
+      setLoadingStatarea(true);
+      const apiBaseUrl = getApiBaseUrl();
+      const response = await fetch(`${apiBaseUrl}/api/predictions/statarea`);
+      if (response.ok) {
+        const data = await response.json();
+        setStatareaPredictions(data.predictions || []);
+      }
+    } catch (error) {
+      console.error('Error fetching statarea:', error);
+    } finally {
+      setLoadingStatarea(false);
     }
   };
 
@@ -209,6 +228,40 @@ export default function PrivatePredictionsPage() {
     </motion.div>
   );
 
+  // Render statarea card
+  const renderStatareCard = (pred) => (
+    <motion.div
+      whileHover={{ scale: 1.05, y: -5 }}
+      className="w-80 rounded-2xl bg-gradient-to-br from-purple-500 to-purple-600 p-6 text-white shadow-lg cursor-pointer"
+    >
+      <p className="text-xs font-semibold text-white/80">Statarea</p>
+      <p className="text-sm font-bold mt-2 line-clamp-2">{pred.teams}</p>
+
+      <div className="my-4">
+        <p className="text-2xl font-bold mb-3">{pred.prediction_label}</p>
+        <div className="grid grid-cols-3 gap-2 text-xs">
+          <div className="bg-white/10 rounded p-2 text-center">
+            <p className="text-xs text-white/70">Home</p>
+            <p className="font-bold text-lg">{pred.home_pct}%</p>
+          </div>
+          <div className="bg-white/10 rounded p-2 text-center">
+            <p className="text-xs text-white/70">Draw</p>
+            <p className="font-bold text-lg">{pred.draw_pct}%</p>
+          </div>
+          <div className="bg-white/10 rounded p-2 text-center">
+            <p className="text-xs text-white/70">Away</p>
+            <p className="font-bold text-lg">{pred.away_pct}%</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex justify-between items-center">
+        <span className="text-xs font-semibold">Confidence</span>
+        <span className="bg-white/20 px-3 py-1 rounded-full text-sm font-bold">{pred.confidence}%</span>
+      </div>
+    </motion.div>
+  );
+
   // Render mybets card
   const renderMyBetsCard = (pred) => (
     <motion.div
@@ -295,13 +348,30 @@ export default function PrivatePredictionsPage() {
         />
 
         {/* Section 2: Statarea */}
-        <HorizontalCarousel
-          items={[privateSources[1]]}
-          renderItem={renderSourceCard}
-          title="Statarea Analytics"
-          icon="📊"
-          color="from-purple-500 to-purple-600"
-        />
+        <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }}>
+          {loadingStatarea ? (
+            <div className="text-center py-8">
+              <RefreshCw className="animate-spin mx-auto text-gray-400" size={32} />
+              <p className="text-gray-500 mt-3">Loading Statarea predictions...</p>
+            </div>
+          ) : statareaPredictions.length > 0 ? (
+            <HorizontalCarousel
+              items={statareaPredictions.slice(0, 10)}
+              renderItem={renderStatareCard}
+              title="Statarea Analytics - Match Probabilities"
+              icon="📊"
+              color="from-purple-500 to-purple-600"
+            />
+          ) : (
+            <HorizontalCarousel
+              items={[privateSources[1]]}
+              renderItem={renderSourceCard}
+              title="Statarea Analytics"
+              icon="📊"
+              color="from-purple-500 to-purple-600"
+            />
+          )}
+        </motion.div>
 
         {/* Section 3: ScorePrediction */}
         <HorizontalCarousel

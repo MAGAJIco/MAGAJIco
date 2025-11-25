@@ -276,6 +276,27 @@ async def get_mybets_predictions():
         raise HTTPException(status_code=500, detail=f"Failed to fetch mybets predictions: {str(e)}")
 
 
+@app.get("/api/predictions/statarea")
+async def get_statarea_predictions():
+    """
+    Get soccer predictions from Statarea (https://www.statarea.com/predictions)
+    Features: Home/Draw/Away percentage predictions
+    Accuracy: ~78% confidence prediction quality
+    """
+    try:
+        predictions = scraper.scrape_statarea()
+        
+        return {
+            "status": "success",
+            "source": "statarea.com",
+            "count": len(predictions),
+            "predictions": predictions,
+            "timestamp": datetime.now().isoformat()
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to fetch Statarea predictions: {str(e)}")
+
+
 @app.get("/api/predictions/flashscore-odds")
 async def get_flashscore_odds(
     max_odds: float = Query(1.16, ge=1.0, le=3.0, description="Maximum odds threshold (e.g., 1.16 for favorites)")
