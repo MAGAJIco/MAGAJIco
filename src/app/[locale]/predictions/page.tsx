@@ -1,7 +1,83 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { Lock, TrendingUp, Target, Eye, RefreshCw } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Lock, ChevronRight, RefreshCw, TrendingUp } from 'lucide-react';
 import { getApiBaseUrl } from '@/lib/api';
+
+// Carousel component
+const HorizontalCarousel = ({ items, renderItem, title, icon, color = 'from-blue-500 to-blue-600' }) => {
+  const [scrollPos, setScrollPos] = useState(0);
+  const [canScroll, setCanScroll] = useState(true);
+
+  const scroll = (direction) => {
+    const container = document.getElementById(`carousel-${title}`);
+    if (container) {
+      const scrollAmount = 320;
+      container.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth',
+      });
+    }
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6 }}
+      className="mb-8"
+    >
+      {/* Section Header */}
+      <div className="flex items-center gap-3 mb-4">
+        <span className="text-2xl">{icon}</span>
+        <h2 className="text-xl font-bold text-gray-900">{title}</h2>
+        <div className={`h-1 flex-1 rounded-full bg-gradient-to-r ${color}`} />
+      </div>
+
+      {/* Carousel */}
+      <div className="relative">
+        {/* Left Arrow */}
+        {scrollPos > 0 && (
+          <button
+            onClick={() => scroll('left')}
+            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white rounded-full p-2 shadow-lg transition-all"
+          >
+            <ChevronRight size={20} className="rotate-180 text-gray-700" />
+          </button>
+        )}
+
+        {/* Items Container */}
+        <div
+          id={`carousel-${title}`}
+          className="overflow-x-auto scrollbar-hide flex gap-4 pb-2"
+          style={{ scrollBehavior: 'smooth' }}
+        >
+          {items.map((item, idx) => (
+            <motion.div
+              key={idx}
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ delay: idx * 0.1, duration: 0.4 }}
+              className="flex-shrink-0"
+            >
+              {renderItem(item, idx)}
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Right Arrow */}
+        {items.length > 3 && (
+          <button
+            onClick={() => scroll('right')}
+            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white rounded-full p-2 shadow-lg transition-all"
+          >
+            <ChevronRight size={20} className="text-gray-700" />
+          </button>
+        )}
+      </div>
+    </motion.div>
+  );
+};
 
 export default function PrivatePredictionsPage() {
   const [refreshTime, setRefreshTime] = useState(new Date().toLocaleTimeString());
@@ -9,17 +85,17 @@ export default function PrivatePredictionsPage() {
   const [loadingMyBets, setLoadingMyBets] = useState(true);
   const [weekCalendar, setWeekCalendar] = useState({});
   const [loadingWeek, setLoadingWeek] = useState(true);
-  const [activeTab, setActiveTab] = useState('private');
 
   useEffect(() => {
-    fetchMyBetsPredictions();
-    fetchWeekCalendar();
-    const interval = setInterval(() => {
-      fetchMyBetsPredictions();
-      fetchWeekCalendar();
-    }, 60000);
+    fetchData();
+    const interval = setInterval(fetchData, 60000);
     return () => clearInterval(interval);
   }, []);
+
+  const fetchData = async () => {
+    fetchMyBetsPredictions();
+    fetchWeekCalendar();
+  };
 
   const fetchMyBetsPredictions = async () => {
     try {
@@ -31,7 +107,7 @@ export default function PrivatePredictionsPage() {
         setMyBetsPredictions(data.predictions || []);
       }
     } catch (error) {
-      console.error('Error fetching mybets predictions:', error);
+      console.error('Error fetching mybets:', error);
     } finally {
       setLoadingMyBets(false);
       setRefreshTime(new Date().toLocaleTimeString());
@@ -54,431 +130,258 @@ export default function PrivatePredictionsPage() {
     }
   };
 
-  // Private prediction sources
-  const privatePredictions = [
+  // Private prediction sources - each gets its own carousel
+  const privateSources = [
     {
       id: 1,
       source: 'Today Bet',
       confidence: 73,
-      type: 'home_win',
       label: 'Home Win',
       emoji: '🏠',
-      description: 'Strong home advantage prediction',
+      description: 'Strong home advantage',
       color: 'from-blue-500 to-blue-600',
+      icon: '💎'
     },
     {
       id: 2,
       source: 'Statarea',
       confidence: 78,
-      type: 'home_win',
       label: 'Home Win',
       emoji: '🎯',
-      description: 'High probability home victory',
+      description: 'High probability victory',
       color: 'from-purple-500 to-purple-600',
+      icon: '📊'
     },
     {
       id: 3,
       source: 'ScorePrediction.net',
       confidence: 72,
-      type: 'over_0_5',
       label: 'Home Win + Over 0.5',
       emoji: '⚽',
-      description: 'Combined prediction: home win & goals',
+      description: 'Combined prediction',
       color: 'from-green-500 to-green-600',
+      icon: '🎲'
     },
     {
       id: 4,
       source: 'FlashScore',
       confidence: 65,
-      type: 'odds',
       label: 'Odds 1.16',
       emoji: '💰',
-      description: 'Current betting odds snapshot',
+      description: 'Betting odds',
       color: 'from-amber-500 to-amber-600',
-    },
+      icon: '⚡'
+    }
   ];
 
-  const getConfidenceRating = (confidence) => {
-    if (confidence >= 75) return '🔥 Hot';
-    if (confidence >= 70) return '⚡ Strong';
-    if (confidence >= 65) return '👍 Good';
-    return '📊 Fair';
+  // Render source card
+  const renderSourceCard = (source) => (
+    <motion.div
+      whileHover={{ scale: 1.05, y: -5 }}
+      className={`w-80 rounded-2xl bg-gradient-to-br ${source.color} p-6 text-white shadow-lg cursor-pointer`}
+    >
+      <div className="flex items-start justify-between mb-4">
+        <div>
+          <p className="text-sm font-semibold text-white/80">{source.source}</p>
+          <h3 className="text-2xl font-bold mt-1">{source.emoji}</h3>
+        </div>
+        <span className="text-3xl">{source.icon}</span>
+      </div>
+
+      <p className="text-white/90 text-sm mb-4">{source.description}</p>
+
+      <div className="mb-4">
+        <div className="flex justify-between items-center mb-2">
+          <span className="text-xs font-semibold">Confidence</span>
+          <span className="text-2xl font-bold">{source.confidence}%</span>
+        </div>
+        <div className="h-2 bg-white/30 rounded-full overflow-hidden">
+          <motion.div
+            initial={{ width: 0 }}
+            whileInView={{ width: `${source.confidence}%` }}
+            transition={{ delay: 0.3, duration: 0.8 }}
+            className="h-full bg-white rounded-full"
+          />
+        </div>
+      </div>
+
+      <p className="text-lg font-bold">{source.label}</p>
+    </motion.div>
+  );
+
+  // Render mybets card
+  const renderMyBetsCard = (pred) => (
+    <motion.div
+      whileHover={{ scale: 1.05, y: -5 }}
+      className="w-80 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-600 p-6 text-white shadow-lg cursor-pointer"
+    >
+      <p className="text-xs font-semibold text-white/80">MyBets.Today</p>
+      <p className="text-sm font-bold mt-2 line-clamp-2">{pred.teams}</p>
+
+      <div className="my-4">
+        <p className="text-2xl font-bold mb-2">{pred.prediction_label}</p>
+        <p className="text-xs text-white/80">Odds: {pred.odds?.toFixed(2) || 'N/A'}</p>
+      </div>
+
+      <div className="flex justify-between items-center">
+        <span className="text-xs font-semibold">Confidence</span>
+        <span className="bg-white/20 px-3 py-1 rounded-full text-sm font-bold">{pred.confidence}%</span>
+      </div>
+    </motion.div>
+  );
+
+  // Render week day carousel card
+  const renderDayCard = (date, day) => {
+    const matchCount = day.matches_count || 0;
+    return (
+      <motion.div
+        whileHover={{ scale: 1.05, y: -5 }}
+        className="w-80 rounded-2xl bg-gradient-to-br from-indigo-500 to-blue-600 p-6 text-white shadow-lg cursor-pointer"
+      >
+        <div className="mb-4">
+          <p className="text-sm font-semibold text-white/80">{day.day_name}</p>
+          <p className="text-lg font-bold mt-1">{day.date_label}</p>
+        </div>
+
+        <div className="bg-white/20 rounded-lg p-4 mb-4">
+          <p className="text-xs text-white/80 mb-1">Matches with odds ≤ 1.16</p>
+          <p className="text-3xl font-bold">{matchCount}</p>
+        </div>
+
+        {matchCount > 0 && day.matches && day.matches[0] && (
+          <div className="text-sm">
+            <p className="font-semibold mb-2">Top Match:</p>
+            <p className="text-xs line-clamp-1">{day.matches[0].home_team} vs {day.matches[0].away_team}</p>
+            <p className="text-xs mt-1">Odd: {day.matches[0].best_odd}</p>
+          </div>
+        )}
+      </motion.div>
+    );
   };
 
-  const getConfidenceIndicator = (confidence) => {
-    if (confidence >= 75) return 'bg-red-500';
-    if (confidence >= 70) return 'bg-yellow-500';
-    if (confidence >= 65) return 'bg-blue-500';
-    return 'bg-gray-400';
-  };
+  const weekDays = Object.entries(weekCalendar).slice(0, 7);
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-24">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-slate-800 to-slate-900 text-white sticky top-14 z-30 py-4 px-4">
+    <div className="min-h-screen bg-gradient-to-b from-white via-gray-50 to-gray-100 pb-32">
+      {/* Hero Header */}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="sticky top-14 z-30 bg-gradient-to-r from-slate-800 to-slate-900 text-white py-6 px-4 shadow-lg"
+      >
         <div className="max-w-7xl mx-auto">
-          <div className="flex items-center gap-3 mb-4">
-            <Lock size={24} />
-            <h1 className="text-2xl font-bold">Private Predictions</h1>
+          <div className="flex items-center gap-3">
+            <motion.div animate={{ rotate: 360 }} transition={{ duration: 3, repeat: Infinity }}>
+              <Lock size={28} />
+            </motion.div>
+            <div>
+              <h1 className="text-3xl font-bold">Private Predictions</h1>
+              <p className="text-slate-300 text-sm">Curated from 4 trusted sources</p>
+            </div>
           </div>
-          
-          {/* Tab Navigation */}
-          <div className="flex gap-2 mb-3 overflow-x-auto pb-2">
-            <button
-              onClick={() => setActiveTab('private')}
-              className={`px-4 py-2 rounded-lg font-medium transition-all whitespace-nowrap ${
-                activeTab === 'private'
-                  ? 'bg-red-600 text-white'
-                  : 'bg-white/20 text-white hover:bg-white/30'
-              }`}
-            >
-              🔒 My Sources
-            </button>
-            <button
-              onClick={() => setActiveTab('mybets')}
-              className={`px-4 py-2 rounded-lg font-medium transition-all flex items-center gap-2 whitespace-nowrap ${
-                activeTab === 'mybets'
-                  ? 'bg-red-600 text-white'
-                  : 'bg-white/20 text-white hover:bg-white/30'
-              }`}
-            >
-              🎯 MyBets.Today
-              {loadingMyBets && <RefreshCw size={14} className="animate-spin" />}
-            </button>
-            <button
-              onClick={() => setActiveTab('week')}
-              className={`px-4 py-2 rounded-lg font-medium transition-all flex items-center gap-2 whitespace-nowrap ${
-                activeTab === 'week'
-                  ? 'bg-red-600 text-white'
-                  : 'bg-white/20 text-white hover:bg-white/30'
-              }`}
-            >
-              📅 Week Calendar
-              {loadingWeek && <RefreshCw size={14} className="animate-spin" />}
-            </button>
-          </div>
-          
-          <p className="text-slate-300 text-sm">Updated {refreshTime}</p>
+          <p className="text-slate-400 text-xs mt-3">Last updated: {refreshTime}</p>
         </div>
-      </div>
+      </motion.div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 py-6">
-        {activeTab === 'private' ? (
-          <>
-            {/* Info Banner - Private */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 flex items-start gap-3">
-              <Eye className="text-blue-600 flex-shrink-0 mt-1" size={20} />
-              <div>
-                <p className="font-semibold text-blue-900">Private Dashboard</p>
-                <p className="text-blue-700 text-sm">These predictions are aggregated from your 4 most trusted sources. Only you can see this data.</p>
-              </div>
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        {/* Section 1: Today Bet */}
+        <HorizontalCarousel
+          items={[privateSources[0]]}
+          renderItem={renderSourceCard}
+          title="Today Bet - Your Daily Pick"
+          icon="💎"
+          color="from-blue-500 to-blue-600"
+        />
+
+        {/* Section 2: Statarea */}
+        <HorizontalCarousel
+          items={[privateSources[1]]}
+          renderItem={renderSourceCard}
+          title="Statarea Analytics"
+          icon="📊"
+          color="from-purple-500 to-purple-600"
+        />
+
+        {/* Section 3: ScorePrediction */}
+        <HorizontalCarousel
+          items={[privateSources[2]]}
+          renderItem={renderSourceCard}
+          title="ScorePrediction Network"
+          icon="🎲"
+          color="from-green-500 to-green-600"
+        />
+
+        {/* Section 4: FlashScore */}
+        <HorizontalCarousel
+          items={[privateSources[3]]}
+          renderItem={renderSourceCard}
+          title="FlashScore Current Odds"
+          icon="⚡"
+          color="from-amber-500 to-amber-600"
+        />
+
+        {/* MyBets Carousel */}
+        <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }}>
+          {loadingMyBets ? (
+            <div className="text-center py-8">
+              <RefreshCw className="animate-spin mx-auto text-gray-400" size={32} />
+              <p className="text-gray-500 mt-3">Loading predictions...</p>
             </div>
+          ) : (
+            <HorizontalCarousel
+              items={myBetsPredictions.slice(0, 10)}
+              renderItem={renderMyBetsCard}
+              title="MyBets.Today Predictions"
+              icon="🎯"
+              color="from-purple-500 to-pink-600"
+            />
+          )}
+        </motion.div>
 
-            {/* Prediction Cards Grid - Private */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
-          {privatePredictions.map((pred) => (
-            <div
-              key={pred.id}
-              className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow border border-gray-200 overflow-hidden"
-            >
-              {/* Card Header with Gradient */}
-              <div className={`bg-gradient-to-r ${pred.color} p-4 text-white`}>
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="font-bold text-lg">{pred.source}</h3>
-                    <p className="text-white/80 text-sm">{pred.description}</p>
-                  </div>
-                  <span className="text-3xl">{pred.emoji}</span>
-                </div>
-              </div>
-
-              {/* Card Body */}
-              <div className="p-4">
-                {/* Prediction Label */}
-                <div className="mb-4">
-                  <p className="text-gray-600 text-xs font-semibold uppercase tracking-wider mb-1">Prediction</p>
-                  <p className="text-lg font-bold text-gray-900">{pred.label}</p>
-                </div>
-
-                {/* Confidence Score */}
-                <div className="mb-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <p className="text-gray-600 text-xs font-semibold uppercase tracking-wider">Confidence</p>
-                    <span className="text-lg font-bold text-gray-900">{pred.confidence}%</span>
-                  </div>
-                  
-                  {/* Progress Bar */}
-                  <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
-                    <div
-                      className={`h-full ${getConfidenceIndicator(pred.confidence)} transition-all duration-500`}
-                      style={{ width: `${pred.confidence}%` }}
-                    />
-                  </div>
-                  
-                  {/* Rating Badge */}
-                  <div className="mt-3 flex items-center gap-2">
-                    <TrendingUp size={16} className="text-gray-500" />
-                    <span className="text-sm font-semibold text-gray-700">
-                      {getConfidenceRating(pred.confidence)}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Stats */}
-                <div className="border-t border-gray-200 pt-3 mt-3">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-gray-500">Source Reliability</span>
-                    <div className="flex gap-1">
-                      {[...Array(5)].map((_, i) => (
-                        <span
-                          key={i}
-                          className={i < (pred.confidence / 20) ? 'text-yellow-400' : 'text-gray-300'}
-                        >
-                          ★
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
+        {/* Week Calendar Carousel */}
+        <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }}>
+          {loadingWeek ? (
+            <div className="text-center py-8">
+              <RefreshCw className="animate-spin mx-auto text-gray-400" size={32} />
+              <p className="text-gray-500 mt-3">Loading week calendar...</p>
             </div>
-          ))}
-        </div>
+          ) : (
+            <HorizontalCarousel
+              items={weekDays}
+              renderItem={([date, day]) => renderDayCard(date, day)}
+              title="This Week's Odds Calendar"
+              icon="📅"
+              color="from-indigo-500 to-blue-600"
+            />
+          )}
+        </motion.div>
 
-            {/* Summary Section */}
-            <div className="mt-8 bg-gradient-to-r from-slate-800 to-slate-900 text-white rounded-lg p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <Target size={24} />
-                <h2 className="text-xl font-bold">Quick Summary</h2>
-              </div>
-              
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="bg-white/10 rounded-lg p-4">
-                  <p className="text-slate-300 text-sm mb-1">Average Confidence</p>
-                  <p className="text-3xl font-bold">
-                    {Math.round(
-                      privatePredictions.reduce((sum, p) => sum + p.confidence, 0) /
-                        privatePredictions.length
-                    )}%
-                  </p>
-                </div>
-                
-                <div className="bg-white/10 rounded-lg p-4">
-                  <p className="text-slate-300 text-sm mb-1">Highest Prediction</p>
-                  <p className="text-3xl font-bold">
-                    {Math.max(...privatePredictions.map(p => p.confidence))}%
-                  </p>
-                  <p className="text-xs text-slate-300 mt-1">
-                    {privatePredictions.find(p => p.confidence === Math.max(...privatePredictions.map(p => p.confidence)))?.source}
-                  </p>
-                </div>
-                
-                <div className="bg-white/10 rounded-lg p-4">
-                  <p className="text-slate-300 text-sm mb-1">Consensus</p>
-                  <p className="text-lg font-bold">🏠 Home Win</p>
-                  <p className="text-xs text-slate-300 mt-1">All sources align</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Footer Note */}
-            <div className="mt-6 text-center text-gray-500 text-sm">
-              <p>🔐 Your private predictions dashboard • Last updated {refreshTime}</p>
-              <p className="mt-1 text-xs">Confidential data - for personal use only</p>
-            </div>
-          </>
-        ) : (
-          <>
-            {/* MyBets.Today Tab */}
-            <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 mb-6 flex items-start gap-3">
-              <TrendingUp className="text-purple-600 flex-shrink-0 mt-1" size={20} />
-              <div>
-                <p className="font-semibold text-purple-900">MyBets.Today Recommendations</p>
-                <p className="text-purple-700 text-sm">Live soccer predictions scraped from mybets.today</p>
-              </div>
-            </div>
-
-            {loadingMyBets ? (
-              <div className="text-center py-12">
-                <div className="inline-block">
-                  <RefreshCw className="animate-spin text-gray-400" size={32} />
-                  <p className="text-gray-500 mt-3">Loading predictions...</p>
-                </div>
-              </div>
-            ) : myBetsPredictions.length === 0 ? (
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
-                <p className="text-yellow-900 font-medium">No predictions found</p>
-                <p className="text-yellow-700 text-sm mt-1">Try refreshing or check mybets.today directly</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {myBetsPredictions.map((pred: any, idx: number) => (
-                  <div
-                    key={idx}
-                    className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow border border-gray-200 overflow-hidden"
-                  >
-                    {/* Header */}
-                    <div className="bg-gradient-to-r from-purple-500 to-purple-600 p-4 text-white">
-                      <h3 className="font-bold text-sm line-clamp-2">{pred.teams || 'Unknown Match'}</h3>
-                    </div>
-
-                    {/* Body */}
-                    <div className="p-4">
-                      {/* Prediction */}
-                      <div className="mb-4">
-                        <p className="text-gray-600 text-xs font-semibold uppercase tracking-wider mb-1">Prediction</p>
-                        <p className="text-lg font-bold text-gray-900">
-                          {pred.prediction === '1' ? '🏠 Home Win' :
-                           pred.prediction === 'X' ? '🤝 Draw' :
-                           pred.prediction === '2' ? '✈️ Away Win' :
-                           pred.prediction === 'OVER' ? '⬆️ Over' :
-                           pred.prediction === 'UNDER' ? '⬇️ Under' :
-                           pred.prediction}
-                        </p>
-                      </div>
-
-                      {/* Confidence */}
-                      <div className="mb-4">
-                        <div className="flex items-center justify-between mb-2">
-                          <p className="text-gray-600 text-xs font-semibold uppercase">Confidence</p>
-                          <span className="text-lg font-bold text-gray-900">{pred.confidence}%</span>
-                        </div>
-                        <div className="w-full bg-gray-200 rounded-full h-3">
-                          <div
-                            className="h-full bg-purple-500 rounded-full"
-                            style={{ width: `${pred.confidence}%` }}
-                          />
-                        </div>
-                      </div>
-
-                      {/* Odds */}
-                      {pred.odds > 0 && (
-                        <div className="bg-gray-100 rounded p-3 mt-4">
-                          <p className="text-gray-600 text-xs font-semibold uppercase mb-1">Current Odds</p>
-                          <p className="text-xl font-bold text-gray-900">{pred.odds.toFixed(2)}</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            <div className="mt-6 text-center text-gray-500 text-sm">
-              <p>🔗 Source: mybets.today • Last updated {refreshTime}</p>
-              <p className="mt-1 text-xs">Predictions updated every 60 seconds</p>
-            </div>
-          </>
-        ) : (
-          <>
-            {/* Week Calendar Tab */}
-            <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4 mb-6 flex items-start gap-3">
-              <TrendingUp className="text-indigo-600 flex-shrink-0 mt-1" size={20} />
-              <div>
-                <p className="font-semibold text-indigo-900">Complete Week Calendar</p>
-                <p className="text-indigo-700 text-sm">All 7 days of soccer odds with filter: odds ≤ 1.16 (high probability)</p>
-              </div>
-            </div>
-
-            {loadingWeek ? (
-              <div className="text-center py-12">
-                <div className="inline-block">
-                  <RefreshCw className="animate-spin text-gray-400" size={32} />
-                  <p className="text-gray-500 mt-3">Loading week calendar...</p>
-                </div>
-              </div>
-            ) : Object.keys(weekCalendar).length === 0 ? (
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
-                <p className="text-yellow-900 font-medium">No calendar data available</p>
-                <p className="text-yellow-700 text-sm mt-1">Check back soon</p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {Object.entries(weekCalendar).map(([date, day]: any) => (
-                  <div key={date} className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-                    {/* Day Header */}
-                    <div className="bg-gradient-to-r from-indigo-500 to-indigo-600 p-4 text-white">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h3 className="font-bold text-lg">{day.day_name}</h3>
-                          <p className="text-indigo-100 text-sm">{day.date_label}</p>
-                        </div>
-                        <span className="bg-white/20 px-3 py-1 rounded-full text-sm font-semibold">
-                          {day.matches_count} matches
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Day Content */}
-                    {day.matches_count === 0 ? (
-                      <div className="p-6 text-center text-gray-500 bg-gray-50">
-                        <p>No matches with odds ≤ 1.16 for this day</p>
-                      </div>
-                    ) : (
-                      <div className="divide-y">
-                        {day.matches.map((match: any, idx: number) => (
-                          <div key={idx} className="p-4 hover:bg-gray-50 transition-colors">
-                            {/* Match Info */}
-                            <div className="flex items-start justify-between gap-4 mb-3">
-                              <div className="flex-1 min-w-0">
-                                <p className="text-xs text-gray-500 mb-1">{match.time}</p>
-                                <div className="flex items-center gap-2">
-                                  <span className="font-semibold text-gray-900 line-clamp-1">{match.home_team}</span>
-                                  <span className="text-gray-400">vs</span>
-                                  <span className="font-semibold text-gray-900 line-clamp-1">{match.away_team}</span>
-                                </div>
-                              </div>
-                              <div className="text-right">
-                                <p className="text-sm font-bold text-indigo-600">{match.prediction_label}</p>
-                                <p className="text-xs text-gray-500">Odd: {match.best_odd}</p>
-                              </div>
-                            </div>
-
-                            {/* Odds Display */}
-                            <div className="grid grid-cols-3 gap-2 mb-3">
-                              <div className="bg-blue-50 p-2 rounded text-center">
-                                <p className="text-xs text-gray-600">Home</p>
-                                <p className="text-sm font-bold text-blue-600">{match.odds_1.toFixed(2)}</p>
-                              </div>
-                              <div className="bg-gray-50 p-2 rounded text-center">
-                                <p className="text-xs text-gray-600">Draw</p>
-                                <p className="text-sm font-bold text-gray-600">{match.odds_x.toFixed(2)}</p>
-                              </div>
-                              <div className="bg-amber-50 p-2 rounded text-center">
-                                <p className="text-xs text-gray-600">Away</p>
-                                <p className="text-sm font-bold text-amber-600">{match.odds_2.toFixed(2)}</p>
-                              </div>
-                            </div>
-
-                            {/* Confidence Bar */}
-                            <div className="flex items-center gap-2">
-                              <div className="flex-1 bg-gray-200 rounded-full h-2">
-                                <div
-                                  className="h-full bg-indigo-500 rounded-full"
-                                  style={{ width: `${match.confidence}%` }}
-                                />
-                              </div>
-                              <span className="text-xs font-semibold text-gray-600 whitespace-nowrap">
-                                {match.confidence}%
-                              </span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-
-            <div className="mt-6 text-center text-gray-500 text-sm">
-              <p>📅 Source: flashscore.mobi • Filter: odds ≤ 1.16 • Last updated {refreshTime}</p>
-              <p className="mt-1 text-xs">Calendar updated every 60 seconds</p>
-            </div>
-          </>
-        )}
+        {/* Bottom CTA */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          className="mt-12 text-center"
+        >
+          <div className="bg-gradient-to-r from-slate-800 to-slate-900 rounded-2xl p-8 text-white">
+            <TrendingUp size={40} className="mx-auto mb-4" />
+            <h2 className="text-2xl font-bold mb-2">Stay Updated</h2>
+            <p className="text-slate-300 mb-4">Predictions refresh every 60 seconds</p>
+            <p className="text-xs text-slate-400">🔐 All data is private and for personal use only</p>
+          </div>
+        </motion.div>
       </div>
+
+      {/* Global Scrollbar Hide CSS */}
+      <style jsx>{`
+        .scrollbar-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+      `}</style>
     </div>
   );
 }
