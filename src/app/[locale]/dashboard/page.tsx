@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { Trophy, Brain, Zap, BarChart3, TrendingUp, Users, BookOpen, Gamepad2 } from 'lucide-react';
+import { Trophy, Brain, Zap, BarChart3, TrendingUp, Users, BookOpen, Gamepad2, Star } from 'lucide-react';
 import { getApiBaseUrl } from '@/lib/api';
 
 interface QuickStat {
@@ -50,6 +50,13 @@ export default function DashboardPage() {
       href: `/${locale}/predictions`,
       color: 'from-blue-500 to-blue-600',
       count: liveCount,
+    },
+    {
+      title: 'Secrets ⭐',
+      description: 'Exclusive starred predictions',
+      icon: <Star className="w-8 h-8" />,
+      href: `/${locale}/secrets`,
+      color: 'from-yellow-500 to-orange-500',
     },
     {
       title: 'ML Report',

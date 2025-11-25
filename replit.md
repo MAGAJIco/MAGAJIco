@@ -37,6 +37,28 @@ The platform is built with a FastAPI backend (Python 3.11) and a Next.js 16 fron
 
 ## Recent Changes
 
+### 2025-11-25: Secrets Page with Starred Predictions ⭐
+**New VIP Feature - Exclusive Starred Predictions:**
+- **Created**: `/en/secrets` page showcasing high-confidence match predictions
+- **Features**:
+  - Displays matches with confidence >= 130% (starred automatically)
+  - Filter options: Starred Only, Today, This Week
+  - Real-time statistics: Starred matches count, average confidence, best odds
+  - Beautiful gradient design with yellow/orange star theme
+  - VIP Access badge for premium feel
+  - Detailed match cards with league, teams, odds (1X2), predictions
+  - Confidence badges: ULTRA HIGH (>=140%), VERY HIGH (>=130%), HIGH (>=100%), MODERATE
+  - Animated star icons on high-confidence matches
+- **Integration**:
+  - Added to main navigation menu (EnhancedMenu) with ⭐ icon
+  - Featured on dashboard with "Secrets ⭐" card
+  - Connects to FlashScore odds API endpoint
+- **Technical**:
+  - Fetches data from `/api/predictions/flashscore-odds`
+  - Sorts matches by confidence (highest first)
+  - Responsive design with mobile optimization
+- **CORS Fix**: Updated backend to allow all origins for development (`allow_origins=["*"]`)
+
 ### 2025-11-25: 2:2:2:4 World-Class Architecture ✅
 **Strategic Implementation - Inspired by Industry Leaders:**
 

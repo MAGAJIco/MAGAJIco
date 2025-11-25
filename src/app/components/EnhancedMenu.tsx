@@ -33,6 +33,7 @@ export default function EnhancedMenu({ isOpen, onClose, currentPath = "" }: Enha
     { id: "home", label: "Home", icon: "🏠", href: "/en", category: "sports" },
     { id: "live", label: "Live Matches", icon: "⚡", href: "/en/live", category: "sports", badge: 12 },
     { id: "predictions", label: "AI Predictions", icon: "🎯", href: "/en/predictions", category: "sports", isNew: true },
+    { id: "secrets", label: "Secrets", icon: "⭐", href: "/en/secrets", category: "sports", isNew: true },
     { id: "matches", label: "Match Center", icon: "📊", href: "/en/matches", category: "sports" },
     { id: "bets", label: "My Bets", icon: "🎲", href: "/en/bets", category: "sports" },
     
