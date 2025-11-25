@@ -755,52 +755,73 @@ class RealSportsScraperService:
 
     def scrape_scoreprediction(self) -> List[Dict[str, Any]]:
         """
-        Scrape predictions from ScorePrediction.com
-        Returns: Match scores with ALL games (no filter)
+        Scrape predictions from ScorePredictor.net (scorepredictor.net)
+        Returns: Match score predictions from all available tables
         """
         predictions = []
+        seen = set()
         
         try:
-            url = "https://www.scoreprediction.com"
+            url = "https://scorepredictor.net"
             response = requests.get(url, headers=self.headers, timeout=10)
             soup = BeautifulSoup(response.text, 'html.parser')
             
-            # Find match predictions
-            matches = soup.find_all('div', class_=re.compile('match|prediction|game', re.IGNORECASE))
+            # Find all tables containing predictions
+            tables = soup.find_all('table')
             
-            for match_elem in matches[:30]:
-                try:
-                    text = match_elem.get_text(strip=True)
-                    
-                    # Extract teams and score
-                    # Pattern: "Team1 X-Y Team2"
-                    score_pattern = re.search(r'(.+?)\s+(\d+)-(\d+)\s+(.+)', text)
-                    if not score_pattern:
+            for table in tables:
+                rows = table.find_all('tr')
+                for row in rows:
+                    try:
+                        cells = row.find_all('td')
+                        
+                        # Table format: Home Team | Home Score | Away Score | Away Team | Odds...
+                        if len(cells) >= 4:
+                            home_team = cells[0].get_text(strip=True) or cells[1].get_text(strip=True)
+                            
+                            try:
+                                # Extract scores (cells[1] and cells[2])
+                                home_score = int(cells[1].get_text(strip=True))
+                                away_score = int(cells[2].get_text(strip=True))
+                                away_team = cells[3].get_text(strip=True)
+                                
+                                # Validate: team names should be real (not numbers/empty)
+                                if not home_team or not away_team or len(home_team) < 2 or len(away_team) < 2:
+                                    continue
+                                if home_team == away_team:
+                                    continue
+                                
+                                # Check for duplicates
+                                match_key = (home_team, away_team)
+                                if match_key in seen:
+                                    continue
+                                seen.add(match_key)
+                                
+                                # Determine prediction
+                                if home_score > away_score:
+                                    prediction = "Home Win"
+                                elif home_score == away_score:
+                                    prediction = "Draw"
+                                else:
+                                    prediction = "Away Win"
+                                
+                                predictions.append({
+                                    "home_team": home_team,
+                                    "away_team": away_team,
+                                    "predicted_score": f"{home_score}-{away_score}",
+                                    "total_goals": home_score + away_score,
+                                    "prediction": prediction,
+                                    "source": "ScorePredictor"
+                                })
+                                
+                            except (ValueError, IndexError):
+                                continue
+                                
+                    except Exception:
                         continue
                     
-                    home_team = score_pattern.group(1).strip()
-                    home_score = int(score_pattern.group(2))
-                    away_score = int(score_pattern.group(3))
-                    away_team = score_pattern.group(4).strip()
-                    
-                    # Calculate total goals
-                    total_goals = home_score + away_score
-                    
-                    # Include ALL predictions (no filtering)
-                    predictions.append({
-                        "home_team": home_team,
-                        "away_team": away_team,
-                        "predicted_score": f"{home_score}-{away_score}",
-                        "total_goals": total_goals,
-                        "outcome": "Home Win" if home_score > away_score else ("Draw" if home_score == away_score else "Away Win"),
-                        "source": "ScorePrediction"
-                    })
-                    
-                except Exception as e:
-                    continue
-                    
         except Exception as e:
-            print(f"ScorePrediction scraping error: {e}")
+            print(f"ScorePredictor scraping error: {e}")
             return []
         
         return predictions
