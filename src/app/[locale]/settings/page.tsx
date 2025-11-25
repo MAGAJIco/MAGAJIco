@@ -16,7 +16,7 @@ function SettingsContent() {
   const [darkMode, setDarkMode] = useState(false);
   const [autoplay, setAutoplay] = useState(true);
 
-  // Load saved settings and theme
+  // Load saved settings
   useEffect(() => {
     if (typeof window !== "undefined") {
       const savedSettings = localStorage.getItem("settings");
@@ -32,7 +32,7 @@ function SettingsContent() {
     }
   }, []);
 
-  // Sync theme in real-time
+  // Apply theme in real time
   useEffect(() => {
     if (typeof window !== "undefined") {
       const newTheme = darkMode ? "dark" : "light";
@@ -41,63 +41,35 @@ function SettingsContent() {
     }
   }, [darkMode]);
 
-  // DRY helper for toggle backgrounds
+  // DRY toggle background logic
   const getToggleBackground = (enabled: boolean) => {
+    if (typeof window === "undefined") return "#ccc";
     const theme = darkMode ? "dark" : "light";
+
     if (enabled) {
       return theme === "dark"
         ? "linear-gradient(135deg, var(--gradient-from), var(--gradient-to))" // Apple dark
         : "linear-gradient(135deg, #FF9900, #FFB347)"; // Amazon light
     } else {
-      return "#ccc"; // Off state
+      return "var(--border-color)"; // Off state
     }
   };
-
-  // Reusable toggle switch
-  const ToggleSwitch = ({ enabled, onChange }: { enabled: boolean; onChange: (e: any) => void }) => (
-    <label style={{ position: "relative", width: "52px", height: "28px", flexShrink: 0 }}>
-      <input type="checkbox" checked={enabled} onChange={onChange} style={{ display: "none" }} />
-      <span
-        style={{
-          position: "absolute",
-          cursor: "pointer",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: getToggleBackground(enabled),
-          transition: "0.3s",
-          borderRadius: "28px",
-        }}
-      >
-        <span
-          style={{
-            position: "absolute",
-            height: "20px",
-            width: "20px",
-            left: enabled ? "28px" : "4px",
-            bottom: "4px",
-            background: "white",
-            transition: "0.3s",
-            borderRadius: "50%",
-          }}
-        />
-      </span>
-    </label>
-  );
 
   const handleSave = () => {
     if (language !== locale) router.push(`/${language}`);
 
     if (typeof window !== "undefined") {
-      localStorage.setItem("settings", JSON.stringify({ notifications, darkMode, autoplay }));
+      localStorage.setItem(
+        "settings",
+        JSON.stringify({ notifications, darkMode, autoplay })
+      );
 
       const newTheme = darkMode ? "dark" : "light";
       localStorage.setItem("theme", newTheme);
       document.documentElement.setAttribute("data-theme", newTheme);
       document.documentElement.classList.toggle("dark", darkMode);
 
-      // Force background/foreground colors
+      // Optional: immediate style adjustments
       document.body.style.backgroundColor = darkMode ? "#111827" : "#FFFFFF";
       document.body.style.color = darkMode ? "#F9FAFB" : "#111827";
     }
@@ -105,27 +77,72 @@ function SettingsContent() {
     router.push(`/${locale}`);
   };
 
+  // Toggle component
+  const Toggle = ({
+    label,
+    description,
+    value,
+    onChange,
+  }: {
+    label: string;
+    description: string;
+    value: boolean;
+    onChange: (v: boolean) => void;
+  }) => (
+    <div className="flex justify-between items-center py-6 border-b border-gray-200">
+      <div>
+        <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+          {label}
+        </h3>
+        <p className="text-sm text-gray-500">{description}</p>
+      </div>
+      <label className="relative w-14 h-7 flex-shrink-0 cursor-pointer">
+        <input
+          type="checkbox"
+          checked={value}
+          onChange={(e) => onChange(e.target.checked)}
+          className="hidden"
+        />
+        <span
+          style={{ background: getToggleBackground(value) }}
+          className="absolute top-0 left-0 right-0 bottom-0 rounded-full transition-all"
+        >
+          <span
+            className={`absolute bottom-1 h-5 w-5 bg-white rounded-full transition-all`}
+            style={{ left: value ? "1.5rem" : "0.25rem" }}
+          />
+        </span>
+      </label>
+    </div>
+  );
+
   return (
-    <div style={{ minHeight: "100vh", background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)", padding: "20px" }}>
-      <div style={{ maxWidth: "600px", margin: "0 auto", paddingTop: "40px" }}>
+    <div className="min-h-screen bg-gradient-to-br from-purple-500 to-indigo-600 p-5">
+      <div className="max-w-xl mx-auto pt-10">
         {/* Header */}
-        <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "32px" }}>
-          <Link href={`/${locale}`} style={{ width: "40px", height: "40px", borderRadius: "50%", background: "rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", color: "white", textDecoration: "none", fontSize: "20px" }}>
+        <div className="flex items-center gap-4 mb-8">
+          <Link
+            href={`/${locale}`}
+            className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-white text-xl"
+          >
             ←
           </Link>
-          <h1 style={{ color: "white", fontSize: "32px", fontWeight: "700", margin: 0 }}>⚙️ {t("settings.title")}</h1>
+          <h1 className="text-3xl font-bold text-white">⚙️ {t("settings.title")}</h1>
         </div>
 
         {/* Settings Container */}
-        <div style={{ background: "white", borderRadius: "24px", padding: "32px", boxShadow: "0 20px 60px rgba(0, 0, 0, 0.3)" }}>
-          <div style={{ display: "flex", flexDirection: "column", gap: "32px" }}>
-            
+        <div className="bg-white dark:bg-gray-900 rounded-3xl p-8 shadow-2xl">
+          <div className="flex flex-col gap-8">
             {/* Language */}
             <div>
-              <h3 style={{ fontSize: "18px", fontWeight: "600", color: "#333", marginBottom: "12px", display: "flex", alignItems: "center", gap: "8px" }}>
+              <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2 mb-3">
                 🌐 {t("settings.language")}
               </h3>
-              <select value={language} onChange={(e) => setLanguage(e.target.value)} style={{ width: "100%", padding: "12px 16px", border: "2px solid #e5e7eb", borderRadius: "12px", fontSize: "16px", color: "#333", background: "white", cursor: "pointer" }}>
+              <select
+                value={language}
+                onChange={(e) => setLanguage(e.target.value)}
+                className="w-full p-3 border-2 border-gray-200 rounded-xl text-gray-800 cursor-pointer bg-white dark:bg-gray-800 dark:text-gray-100"
+              >
                 <option value="en">{t("settings.english")}</option>
                 <option value="es">{t("settings.spanish")}</option>
                 <option value="fr">{t("settings.french")}</option>
@@ -133,47 +150,40 @@ function SettingsContent() {
               </select>
             </div>
 
-            {/* Notifications */}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingBottom: "24px", borderBottom: "1px solid #e5e7eb" }}>
-              <div>
-                <h3 style={{ fontSize: "18px", fontWeight: "600", color: "#333", marginBottom: "4px", display: "flex", alignItems: "center", gap: "8px" }}>🔔 {t("settings.notifications")}</h3>
-                <p style={{ fontSize: "14px", color: "#888", margin: 0 }}>{t("settings.notificationsDesc")}</p>
-              </div>
-              <ToggleSwitch enabled={notifications} onChange={(e) => setNotifications(e.target.checked)} />
-            </div>
-
-            {/* Dark Mode */}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingBottom: "24px", borderBottom: "1px solid #e5e7eb" }}>
-              <div>
-                <h3 style={{ fontSize: "18px", fontWeight: "600", color: "#333", marginBottom: "4px", display: "flex", alignItems: "center", gap: "8px" }}>🌙 {t("settings.darkMode")}</h3>
-                <p style={{ fontSize: "14px", color: "#888", margin: 0 }}>{t("settings.darkModeDesc")}</p>
-              </div>
-              <ToggleSwitch enabled={darkMode} onChange={(e) => setDarkMode(e.target.checked)} />
-            </div>
-
-            {/* Auto-play */}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingBottom: "24px", borderBottom: "1px solid #e5e7eb" }}>
-              <div>
-                <h3 style={{ fontSize: "18px", fontWeight: "600", color: "#333", marginBottom: "4px", display: "flex", alignItems: "center", gap: "8px" }}>▶️ {t("settings.autoplay")}</h3>
-                <p style={{ fontSize: "14px", color: "#888", margin: 0 }}>{t("settings.autoplayDesc")}</p>
-              </div>
-              <ToggleSwitch enabled={autoplay} onChange={(e) => setAutoplay(e.target.checked)} />
-            </div>
+            {/* Toggles */}
+            <Toggle
+              label={`🔔 ${t("settings.notifications")}`}
+              description={t("settings.notificationsDesc")}
+              value={notifications}
+              onChange={setNotifications}
+            />
+            <Toggle
+              label={`🌙 ${t("settings.darkMode")}`}
+              description={t("settings.darkModeDesc")}
+              value={darkMode}
+              onChange={setDarkMode}
+            />
+            <Toggle
+              label={`▶️ ${t("settings.autoplay")}`}
+              description={t("settings.autoplayDesc")}
+              value={autoplay}
+              onChange={setAutoplay}
+            />
 
             {/* About */}
-            <div style={{ padding: "20px", background: "#f9fafb", borderRadius: "12px" }}>
-              <p style={{ fontSize: "16px", fontWeight: "600", color: "#333", margin: "0 0 4px 0" }}>{t("settings.about")}</p>
-              <p style={{ fontSize: "14px", color: "#667eea", margin: "0 0 8px 0" }}>{t("settings.version")} 2.0.0</p>
-              <p style={{ fontSize: "14px", color: "#888", margin: 0 }}>{t("settings.description")}</p>
+            <div className="p-5 bg-gray-100 dark:bg-gray-800 rounded-xl">
+              <p className="text-md font-semibold text-gray-800 dark:text-gray-200 mb-1">
+                {t("settings.about")}
+              </p>
+              <p className="text-sm text-indigo-600 mb-2">{t("settings.version")} 2.0.0</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{t("settings.description")}</p>
             </div>
           </div>
 
           {/* Save Button */}
           <button
             onClick={handleSave}
-            style={{ width: "100%", padding: "14px 24px", background: "linear-gradient(135deg, #667eea, #764ba2)", color: "white", border: "none", borderRadius: "12px", fontSize: "16px", fontWeight: "600", cursor: "pointer", marginTop: "32px", transition: "transform 0.2s, box-shadow 0.2s" }}
-            onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 4px 12px rgba(102, 126, 234, 0.4)"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; }}
+            className="w-full mt-8 py-4 px-6 rounded-xl text-white font-semibold bg-gradient-to-br from-purple-500 to-indigo-600 shadow-lg transform transition-transform hover:-translate-y-1 hover:shadow-xl"
           >
             {t("settings.saveChanges")}
           </button>
