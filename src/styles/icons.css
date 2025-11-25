@@ -1,6 +1,4 @@
-
-/* Icon System - Consistent sizing, rounded corners, and depth */
-
+/* Icon Base */
 .icon-base {
   display: inline-flex;
   align-items: center;
@@ -16,35 +14,11 @@
 }
 
 /* Size Variants */
-.icon-xs {
-  width: var(--icon-xs);
-  height: var(--icon-xs);
-  font-size: 12px;
-}
-
-.icon-sm {
-  width: var(--icon-sm);
-  height: var(--icon-sm);
-  font-size: 16px;
-}
-
-.icon-md {
-  width: var(--icon-md);
-  height: var(--icon-md);
-  font-size: 20px;
-}
-
-.icon-lg {
-  width: var(--icon-lg);
-  height: var(--icon-lg);
-  font-size: 24px;
-}
-
-.icon-xl {
-  width: var(--icon-xl);
-  height: var(--icon-xl);
-  font-size: 32px;
-}
+.icon-xs { width: var(--icon-xs); height: var(--icon-xs); font-size: 12px; }
+.icon-sm { width: var(--icon-sm); height: var(--icon-sm); font-size: 16px; }
+.icon-md { width: var(--icon-md); height: var(--icon-md); font-size: 20px; }
+.icon-lg { width: var(--icon-lg); height: var(--icon-lg); font-size: 24px; }
+.icon-xl { width: var(--icon-xl); height: var(--icon-xl); font-size: 32px; }
 
 /* Color Variants */
 .icon-primary-bg {
@@ -58,38 +32,32 @@
 }
 
 .icon-neutral-bg {
-  background: var(--color-bg-secondary);
-  color: var(--color-text-primary);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
 }
 
 .icon-subtle-bg {
-  background: var(--color-bg-tertiary);
-  color: var(--color-text-secondary);
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
 }
 
 /* Interactive States */
-.icon-clickable {
-  cursor: pointer;
-}
-
-.icon-clickable:active {
-  transform: translateY(0);
-  box-shadow: var(--shadow-sm);
-}
+.icon-clickable { cursor: pointer; }
+.icon-clickable:active { transform: translateY(0); box-shadow: var(--shadow-sm); }
 
 /* Dark Mode Adjustments */
-.dark .icon-neutral-bg {
-  background: var(--color-bg-tertiary);
+[data-theme="dark"] .icon-neutral-bg {
+  background: var(--bg-tertiary);
 }
 
-.dark .icon-subtle-bg {
-  background: var(--color-bg-secondary);
+[data-theme="dark"] .icon-subtle-bg {
+  background: var(--bg-secondary);
 }
 
-.dark .icon-base {
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+[data-theme="dark"] .icon-base {
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
 
-.dark .icon-base:hover {
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+[data-theme="dark"] .icon-base:hover {
+  box-shadow: 0 4px 8px rgba(0,0,0,0.4);
 }
