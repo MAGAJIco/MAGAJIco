@@ -25,7 +25,7 @@ export default async function LocaleLayout({ children, params }: { children: Rea
   if (!validLocales.includes(locale)) notFound();
 
   return (
-    <div className="h-screen w-full bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white flex flex-col overflow-hidden">
+    <div className="h-screen w-full bg-white dark:bg-gradient-to-br dark:from-gray-950 dark:via-gray-900 dark:to-gray-900 text-gray-900 dark:text-white flex flex-col overflow-hidden">
       <TopNav />
       {/* Main scrollable content - accounts for fixed top (h-16) and bottom (h-20) navs */}
       <main className="flex-1 overflow-y-auto mt-16 mb-20">

@@ -98,24 +98,24 @@ export default function SecretsPage() {
   const filteredMatches = getFilteredMatches();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white p-4 md:p-8">
+    <div className="min-h-screen bg-white dark:bg-gradient-to-br dark:from-gray-950 dark:via-purple-900 dark:to-gray-950 text-gray-900 dark:text-white p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <div className="p-3 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-xl shadow-lg">
+              <div className="gradient-red p-3 rounded-xl shadow-lg">
                 <Star className="w-8 h-8 text-white fill-white" />
               </div>
               <div>
-                <h1 className="text-4xl font-bold bg-gradient-to-r from-yellow-400 via-orange-400 to-red-400 text-transparent bg-clip-text">
+                <h1 className="text-4xl font-bold gradient-text-red">
                   Secrets ⭐
                 </h1>
-                <p className="text-gray-400 mt-1">Exclusive starred predictions with highest confidence</p>
+                <p className="text-gray-600 dark:text-gray-400 mt-1">Exclusive starred predictions with highest confidence</p>
               </div>
             </div>
-            <div className="flex items-center gap-2 bg-slate-800/50 backdrop-blur-sm rounded-lg p-1">
-              <Lock className="w-5 h-5 text-yellow-500" />
-              <span className="text-sm font-semibold text-yellow-400">VIP Access</span>
+            <div className="flex items-center gap-2 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900/40 dark:to-purple-900/40 backdrop-blur-sm rounded-lg p-2 px-4 border border-blue-200 dark:border-blue-800/50">
+              <Lock className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+              <span className="text-sm font-semibold text-blue-600 dark:text-blue-400">VIP Access</span>
             </div>
           </div>
 
@@ -124,8 +124,8 @@ export default function SecretsPage() {
               onClick={() => setFilter('all')}
               className={`px-4 py-2 rounded-lg font-semibold transition-all ${
                 filter === 'all'
-                  ? 'bg-gradient-to-r from-yellow-500 to-orange-500 text-white shadow-lg'
-                  : 'bg-slate-800/50 text-gray-400 hover:bg-slate-700/50'
+                  ? 'gradient-red text-white shadow-lg'
+                  : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
               }`}
             >
               ⭐ Starred Only
@@ -134,8 +134,8 @@ export default function SecretsPage() {
               onClick={() => setFilter('today')}
               className={`px-4 py-2 rounded-lg font-semibold transition-all ${
                 filter === 'today'
-                  ? 'bg-gradient-to-r from-yellow-500 to-orange-500 text-white shadow-lg'
-                  : 'bg-slate-800/50 text-gray-400 hover:bg-slate-700/50'
+                  ? 'gradient-blue text-white shadow-lg'
+                  : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
               }`}
             >
               📅 Today
@@ -144,8 +144,8 @@ export default function SecretsPage() {
               onClick={() => setFilter('week')}
               className={`px-4 py-2 rounded-lg font-semibold transition-all ${
                 filter === 'week'
-                  ? 'bg-gradient-to-r from-yellow-500 to-orange-500 text-white shadow-lg'
-                  : 'bg-slate-800/50 text-gray-400 hover:bg-slate-700/50'
+                  ? 'gradient-purple text-white shadow-lg'
+                  : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
               }`}
             >
               📆 This Week
@@ -153,21 +153,21 @@ export default function SecretsPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div className="bg-gradient-to-br from-yellow-500/10 to-orange-500/10 backdrop-blur-sm border border-yellow-500/30 rounded-xl p-4">
+            <div className="bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 backdrop-blur-sm border border-red-200 dark:border-red-700/50 rounded-xl p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-gray-400 text-sm mb-1">Starred Matches</p>
-                  <p className="text-3xl font-bold">{secretMatches.filter(m => m.starred).length}</p>
+                  <p className="text-gray-600 dark:text-gray-400 text-sm mb-1 font-semibold">Starred Matches</p>
+                  <p className="text-3xl font-bold text-red-600 dark:text-red-400">{secretMatches.filter(m => m.starred).length}</p>
                 </div>
-                <Star className="w-12 h-12 text-yellow-500 fill-yellow-500 opacity-50" />
+                <Star className="w-12 h-12 text-red-500 fill-red-500 opacity-50" />
               </div>
             </div>
 
-            <div className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 backdrop-blur-sm border border-green-500/30 rounded-xl p-4">
+            <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 backdrop-blur-sm border border-green-200 dark:border-green-700/50 rounded-xl p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-gray-400 text-sm mb-1">Avg Confidence</p>
-                  <p className="text-3xl font-bold">
+                  <p className="text-gray-600 dark:text-gray-400 text-sm mb-1 font-semibold">Avg Confidence</p>
+                  <p className="text-3xl font-bold text-green-600 dark:text-green-400">
                     {secretMatches.length > 0
                       ? Math.round(secretMatches.reduce((sum, m) => sum + m.confidence, 0) / secretMatches.length)
                       : 0}%
@@ -177,11 +177,11 @@ export default function SecretsPage() {
               </div>
             </div>
 
-            <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-sm border border-blue-500/30 rounded-xl p-4">
+            <div className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 backdrop-blur-sm border border-blue-200 dark:border-blue-700/50 rounded-xl p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-gray-400 text-sm mb-1">Best Odd</p>
-                  <p className="text-3xl font-bold">
+                  <p className="text-gray-600 dark:text-gray-400 text-sm mb-1 font-semibold">Best Odd</p>
+                  <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">
                     {secretMatches.length > 0
                       ? Math.min(...secretMatches.map(m => m.best_odd)).toFixed(2)
                       : '0.00'}
@@ -210,10 +210,10 @@ export default function SecretsPage() {
               return (
                 <div
                   key={match.id}
-                  className="group relative bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-lg border border-slate-700/50 rounded-2xl p-6 hover:border-yellow-500/50 transition-all duration-300 hover:shadow-2xl hover:shadow-yellow-500/20"
+                  className="group relative bg-white dark:bg-gradient-to-br dark:from-gray-800 dark:to-gray-900 backdrop-blur-lg border border-gray-200 dark:border-gray-700 rounded-2xl p-6 hover:border-red-400 dark:hover:border-red-500/50 transition-all duration-300 hover:shadow-lg dark:hover:shadow-red-500/20"
                 >
                   {match.starred && (
-                    <div className="absolute -top-3 -right-3 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-full p-3 shadow-lg animate-pulse">
+                    <div className="absolute -top-3 -right-3 gradient-red rounded-full p-3 shadow-lg animate-pulse">
                       <Star className="w-6 h-6 text-white fill-white" />
                     </div>
                   )}

@@ -17,7 +17,7 @@ export default function BottomNav() {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 h-20 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 z-20 flex justify-around shadow-lg">
+    <nav className="fixed bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-blue-50 to-white dark:from-gray-900 dark:to-gray-800 border-t border-blue-200 dark:border-blue-900 z-20 flex justify-around shadow-xl">
       {navItems.map((item) => {
         const isActive = pathname === item.href || (pathname.startsWith(item.href) && item.href !== `/${locale}`);
         

@@ -131,7 +131,7 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900">
+    <div className="min-h-screen bg-white dark:bg-gradient-to-br dark:from-gray-950 dark:via-gray-900 dark:to-gray-900">
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-4 space-y-6">
         

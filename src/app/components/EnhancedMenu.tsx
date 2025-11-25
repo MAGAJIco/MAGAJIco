@@ -62,12 +62,12 @@ export default function EnhancedMenu({ isOpen, onClose }: EnhancedMenuProps) {
             animate={{ x: 0 }}
             exit={{ x: '-100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed left-0 top-0 bottom-0 w-64 bg-white dark:bg-gray-900 shadow-xl z-50 flex flex-col"
+            className="fixed left-0 top-0 bottom-0 w-64 bg-white dark:bg-gradient-to-b dark:from-gray-900 dark:to-gray-800 shadow-2xl z-50 flex flex-col"
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+            <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-blue-900/50 bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20">
               <div className="flex items-center gap-2">
-                <div className="bg-blue-600 p-2 rounded-lg">
+                <div className="gradient-blue p-2 rounded-lg">
                   <Trophy className="w-5 h-5 text-white" />
                 </div>
                 <span className="font-bold text-lg text-gray-900 dark:text-white">MagajiCo</span>
