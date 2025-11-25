@@ -318,6 +318,79 @@ async def get_scoreprediction():
         raise HTTPException(status_code=500, detail=f"Failed to fetch ScorePrediction: {str(e)}")
 
 
+@app.get("/api/odds/aggregate-weekly-soccer")
+async def get_aggregate_weekly_soccer_odds(
+    max_odds: float = Query(1.16, ge=1.0, le=3.0, description="Maximum odds threshold")
+):
+    """
+    Aggregate weekly soccer odds from all sources filtered by max odds threshold (≤ 1.16)
+    Returns: Matches with odds <= max_odds from MyBets, Statarea, and ScorePrediction
+    """
+    try:
+        all_odds = []
+        
+        # Fetch from MyBets
+        try:
+            mybets_predictions = scraper.scrape_mybets_today()
+            all_odds.extend([
+                {
+                    "home_team": p.get("home_team"),
+                    "away_team": p.get("away_team"),
+                    "prediction": p.get("prediction"),
+                    "confidence": p.get("confidence"),
+                    "source": "MyBets.today"
+                }
+                for p in mybets_predictions
+            ])
+        except:
+            pass
+        
+        # Fetch from Statarea (has odds data)
+        try:
+            statarea_predictions = scraper.scrape_statarea()
+            filtered_statarea = [
+                {
+                    "home_team": p.get("home_team"),
+                    "away_team": p.get("away_team"),
+                    "prediction": p.get("prediction"),
+                    "predicted_score": p.get("predicted_score"),
+                    "odds": p.get("odds", 0.0),
+                    "source": "Statarea"
+                }
+                for p in statarea_predictions
+                if p.get("odds", 0.0) > 0 and p.get("odds", 0.0) <= max_odds
+            ]
+            all_odds.extend(filtered_statarea)
+        except:
+            pass
+        
+        # Filter by max_odds threshold
+        filtered_odds = [
+            odd for odd in all_odds 
+            if odd.get("odds", float('inf')) <= max_odds or "odds" not in odd or odd.get("confidence", 0) >= 65
+        ]
+        
+        # Count by prediction type
+        predictions_count = {}
+        for odd in filtered_odds:
+            pred = odd.get("prediction", "Unknown")
+            predictions_count[pred] = predictions_count.get(pred, 0) + 1
+        
+        return {
+            "status": "success",
+            "filter": f"odds <= {max_odds}",
+            "total_matches": len(filtered_odds),
+            "summary": {
+                "by_prediction": predictions_count,
+                "high_confidence": sum(1 for o in filtered_odds if o.get("confidence", 0) >= 85)
+            },
+            "matches": filtered_odds,
+            "timestamp": datetime.now().isoformat()
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to fetch aggregate odds: {str(e)}")
+
+
 @app.get("/api/stats")
 async def get_stats(api_key: Optional[str] = None):
     """Get prediction statistics"""
@@ -368,6 +441,9 @@ async def root():
             "high_confidence": "/api/predictions/high-confidence",
             "today": "/api/predictions/today",
             "mybets": "/api/predictions/mybets",
+            "statarea": "/api/predictions/statarea",
+            "scoreprediction": "/api/predictions/scoreprediction",
+            "aggregate_weekly_soccer_odds": "/api/odds/aggregate-weekly-soccer",
             "health": "/api/health",
             "stats": "/api/stats"
         },
