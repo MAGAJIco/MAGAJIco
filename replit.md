@@ -39,6 +39,26 @@ The platform is built with a FastAPI backend (Python 3.11) and a Next.js 16 fron
 
 ## Recent Changes
 
+### 2025-11-25: AI Brainstorming Feature for Component Enhancement ✅
+**Connect with AI to brainstorm new features for your components:**
+- **New Backend Endpoint**: `/api/ai/brainstorm`
+  - POST request with component name and optional context
+  - Returns 5 innovative feature ideas with priority/effort/AI potential scores
+  - Uses GPT-5 with JSON output for structured responses
+- **New Frontend Components**:
+  - `AIBrainstorming.tsx` - Modal component for brainstorming interactions
+  - `/brainstorm` page - Dedicated hub with 10 pre-configured components
+  - Enhanced menu with "Brainstorm Hub" link
+- **Features Generated Include**:
+  - Title and description
+  - User benefit explanation
+  - Implementation approach
+  - Priority level (high/medium/low)
+  - Effort estimate (easy/medium/hard)
+  - AI Potential score (0-100)
+- **Access**: Menu → Brainstorm Hub or direct link `/brainstorm`
+- **Required**: `OPENAI_API_KEY` environment variable (free with OpenAI account)
+
 ### 2025-11-25: Prediction Cards Connected to Real API Data ✅
 **All Card Components Now Functional with Real Data:**
 - **MyBetsCard**: Fetches from `/api/predictions/mybets` (real data)

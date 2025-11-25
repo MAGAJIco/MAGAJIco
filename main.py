@@ -855,6 +855,78 @@ async def get_accuracy_recent(limit: int = Query(20, ge=1, le=100)):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# ========== AI BRAINSTORMING ==========
+
+@app.post("/api/ai/brainstorm")
+async def ai_brainstorm(
+    component: str = Query(..., description="Component name to brainstorm"),
+    context: str = Query("", description="Additional context about the feature")
+):
+    """Use AI to brainstorm feature enhancements for existing components"""
+    try:
+        from openai import OpenAI
+        import os
+        
+        api_key = os.getenv("OPENAI_API_KEY")
+        if not api_key:
+            raise HTTPException(status_code=503, detail="OpenAI API key not configured")
+        
+        client = OpenAI(api_key=api_key)
+        
+        prompt = f"""You are a creative product strategist helping enhance a sports prediction platform called MagajiCo.
+
+Component to enhance: {component}
+Additional context: {context if context else "None provided"}
+
+Please brainstorm 5 innovative feature enhancements for this component that would:
+1. Improve user engagement
+2. Add unique value
+3. Be technically feasible
+4. Leverage AI/ML capabilities where possible
+5. Align with a sports prediction platform
+
+Format your response as a JSON array with objects containing:
+- "title": Feature name
+- "description": 2-3 sentence description
+- "userBenefit": How users benefit
+- "implementation": Brief technical approach
+- "priority": "high", "medium", or "low"
+- "effort": "easy", "medium", or "hard"
+- "aiPotential": How AI/ML could enhance this (0-100 score)
+
+Return ONLY valid JSON, no markdown or explanation."""
+
+        response = client.chat.completions.create(
+            model="gpt-5",
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are a creative AI assistant helping enhance sports prediction features. Always respond with valid JSON only."
+                },
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ],
+            response_format={"type": "json_object"},
+            max_completion_tokens=2048
+        )
+        
+        import json as json_lib
+        response_text = response.choices[0].message.content
+        features = json_lib.loads(response_text)
+        
+        return {
+            "status": "success",
+            "component": component,
+            "features": features if isinstance(features, list) else features.get("features", []),
+            "timestamp": datetime.now().isoformat()
+        }
+    except Exception as e:
+        print(f"Brainstorming error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 # ========== ROOT ==========
 
 @app.get("/")

@@ -4,7 +4,8 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Home, Zap, Trophy, Star, Settings, HelpCircle, User, LogOut, Database, BookOpen, TrendingUp, TrendingDown } from 'lucide-react';
+import { X, Home, Zap, Trophy, Star, Settings, HelpCircle, User, LogOut, Database, BookOpen, TrendingUp, TrendingDown, Lightbulb } from 'lucide-react';
+import AIBrainstorming from './AIBrainstorming';
 
 interface EnhancedMenuProps {
   isOpen: boolean;
@@ -52,6 +53,13 @@ export default function EnhancedMenu({ isOpen, onClose }: EnhancedMenuProps) {
   const locale = params?.locale || 'en';
   const [predictions, setPredictions] = useState<Prediction[]>([]);
   const [predictionsLoading, setPredictionsLoading] = useState(false);
+  const [brainstormOpen, setBrainstormOpen] = useState(false);
+  const [selectedComponent, setSelectedComponent] = useState('Predictions Dashboard');
+
+  const handleBrainstorm = (component: string) => {
+    setSelectedComponent(component);
+    setBrainstormOpen(true);
+  };
 
   useEffect(() => {
     if (isOpen) {
@@ -191,6 +199,16 @@ export default function EnhancedMenu({ isOpen, onClose }: EnhancedMenuProps) {
                 />
               </MenuSection>
 
+              {/* AI & Innovation Section */}
+              <MenuSection title="🤖 AI & Innovation">
+                <MenuItem
+                  icon={Lightbulb}
+                  label="Brainstorm Hub"
+                  href={`/${locale}/brainstorm`}
+                  onClick={onClose}
+                />
+              </MenuSection>
+
               {/* Support Section */}
               <MenuSection title="Support">
                 <MenuItem
@@ -270,6 +288,12 @@ export default function EnhancedMenu({ isOpen, onClose }: EnhancedMenuProps) {
               </div>
             </div>
           </motion.div>
+
+          <AIBrainstorming
+            component={selectedComponent}
+            isOpen={brainstormOpen}
+            onClose={() => setBrainstormOpen(false)}
+          />
         </>
       )}
     </AnimatePresence>

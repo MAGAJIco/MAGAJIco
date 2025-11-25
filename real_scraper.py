@@ -66,7 +66,7 @@ class ResultsLogger:
     def _sync_to_mongodb(self) -> None:
         """Sync existing JSON data to MongoDB on startup"""
         try:
-            if not self.mongo_db:
+            if self.mongo_db is None:
                 return
             
             collections = ["predictions", "odds", "matches"]
@@ -114,7 +114,7 @@ class ResultsLogger:
             print(f"Failed to save JSON results: {e}")
         
         # Also save to MongoDB
-        if self.mongo_db:
+        if self.mongo_db is not None:
             try:
                 # Update metadata
                 self.mongo_db['metadata'].update_one(
@@ -137,7 +137,7 @@ class ResultsLogger:
         self.save_results()
         
         # Save to MongoDB
-        if self.mongo_db:
+        if self.mongo_db is not None:
             try:
                 self.mongo_db['predictions'].insert_one(log_entry)
             except Exception as e:
@@ -156,7 +156,7 @@ class ResultsLogger:
         self.save_results()
         
         # Save to MongoDB
-        if self.mongo_db:
+        if self.mongo_db is not None:
             try:
                 self.mongo_db['odds'].insert_one(log_entry)
             except Exception as e:
@@ -174,7 +174,7 @@ class ResultsLogger:
         self.save_results()
         
         # Save to MongoDB
-        if self.mongo_db:
+        if self.mongo_db is not None:
             try:
                 self.mongo_db['matches'].insert_one(log_entry)
             except Exception as e:
@@ -202,7 +202,7 @@ class ResultsLogger:
         self.save_results()
         
         # Save to MongoDB
-        if self.mongo_db:
+        if self.mongo_db is not None:
             try:
                 self.mongo_db['accuracy'].insert_one(accuracy_entry)
             except Exception as e:
@@ -234,7 +234,7 @@ class ResultsLogger:
     
     def get_recent(self, count: int = 100, log_type: Optional[str] = None) -> List[Dict[str, Any]]:
         """Get recent logged results from MongoDB (preferred) or JSON fallback"""
-        if self.mongo_db and log_type:
+        if self.mongo_db is not None and log_type:
             try:
                 collection = self.mongo_db[f"{log_type}s"]
                 items = list(collection.find().sort("timestamp", -1).limit(count))
@@ -258,7 +258,7 @@ class ResultsLogger:
     
     def get_training_data(self) -> Dict[str, Any]:
         """Get all logged data formatted for model training from MongoDB or JSON"""
-        if self.mongo_db:
+        if self.mongo_db is not None:
             try:
                 predictions = list(self.mongo_db['predictions'].find().limit(1000))
                 odds = list(self.mongo_db['odds'].find().limit(1000))
@@ -1085,6 +1085,7 @@ class RealSportsScraperService:
             
             try:
                 # Select bookmaker API
+                api = None
                 if bookmaker.lower() == "888sport":
                     api = Api888Sport()
                     league_urls = {
@@ -1098,7 +1099,8 @@ class RealSportsScraperService:
                     matches = api.odds(url)
                     
                 elif bookmaker.lower() == "bet365":
-                    api = ApiBet365()
+                    from soccerapi.api import ApiBet365 as ApiBet365Class
+                    api = ApiBet365Class()
                     country_league = {
                         "premier_league": ("england", "premier_league"),
                         "la_liga": ("spain", "la_liga"),
@@ -1110,7 +1112,8 @@ class RealSportsScraperService:
                     matches = api.odds(country, lg)
                     
                 elif bookmaker.lower() == "unibet":
-                    api = ApiUnibet()
+                    from soccerapi.api import ApiUnibet as ApiUnibetClass
+                    api = ApiUnibetClass()
                     country_league = {
                         "premier_league": ("england", "premier_league"),
                         "la_liga": ("spain", "la_liga"),
