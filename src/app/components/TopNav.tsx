@@ -2,12 +2,15 @@
 
 import React, { useState } from 'react';
 import { useParams } from 'next/navigation';
-import { Search, User, ChevronDown } from 'lucide-react';
+import Link from 'next/link';
+import { Menu, Search, User, ChevronDown, Star, Home, Trophy } from 'lucide-react';
+import EnhancedMenu from './EnhancedMenu';
 
 export default function TopNav() {
   const params = useParams();
   const locale = params?.locale || 'en';
   const [sportOpen, setSportOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const sports = [
     { name: 'Football', emoji: '⚽' },
@@ -18,54 +21,65 @@ export default function TopNav() {
   ];
 
   return (
-    <nav className="sticky top-0 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 border-b border-slate-700 z-30">
-      <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-        {/* Left: Sport Selector */}
-        <div className="relative">
-          <button
-            onClick={() => setSportOpen(!sportOpen)}
-            className="flex items-center gap-2 text-white font-bold text-base hover:bg-slate-700 px-3 py-2 rounded transition-colors"
-          >
-            <span className="text-2xl">⚽</span>
-            <span>Football</span>
-            <ChevronDown className="w-4 h-4" />
-          </button>
+    <>
+      <nav className="sticky top-0 bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 border-b border-blue-900 shadow-lg z-30">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+          {/* Left: Hamburger Menu + Logo */}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setMenuOpen(true)}
+              className="text-white hover:bg-blue-700 p-2 rounded-lg transition-colors"
+              aria-label="Open menu"
+            >
+              <Menu className="w-6 h-6" />
+            </button>
+            
+            <Link href={`/${locale}`} className="flex items-center gap-2">
+              <div className="bg-gradient-to-br from-yellow-400 to-orange-500 p-2 rounded-lg shadow-lg">
+                <Trophy className="w-6 h-6 text-white" />
+              </div>
+              <span className="text-white font-bold text-xl hidden sm:block">MagajiCo</span>
+            </Link>
+          </div>
 
-          {sportOpen && (
-            <div className="absolute top-full left-0 mt-1 bg-slate-800 border border-slate-700 rounded-lg shadow-lg z-50 min-w-40">
-              {sports.map((sport) => (
-                <button
-                  key={sport.name}
-                  onClick={() => setSportOpen(false)}
-                  className="w-full text-left px-4 py-3 text-white hover:bg-slate-700 transition-colors flex items-center gap-3 border-b border-slate-700 last:border-b-0"
-                >
-                  <span className="text-xl">{sport.emoji}</span>
-                  {sport.name}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
+          {/* Center: Quick Links */}
+          <div className="hidden md:flex items-center gap-2">
+            <Link 
+              href={`/${locale}`}
+              className="text-white hover:bg-blue-700 px-4 py-2 rounded-lg transition-colors flex items-center gap-2"
+            >
+              <Home className="w-4 h-4" />
+              Home
+            </Link>
+            <Link 
+              href={`/${locale}/predictions`}
+              className="text-white hover:bg-blue-700 px-4 py-2 rounded-lg transition-colors flex items-center gap-2"
+            >
+              <Trophy className="w-4 h-4" />
+              Predictions
+            </Link>
+            <Link 
+              href={`/${locale}/secrets`}
+              className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-4 py-2 rounded-lg transition-all hover:shadow-lg flex items-center gap-2"
+            >
+              <Star className="w-4 h-4 fill-white" />
+              Secrets
+            </Link>
+          </div>
 
-        {/* Center: Search */}
-        <div className="hidden sm:flex flex-1 max-w-xs mx-4">
-          <input
-            type="text"
-            placeholder="Search..."
-            className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded text-white placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
-          />
+          {/* Right: Search & User */}
+          <div className="flex items-center gap-3">
+            <button className="text-white hover:bg-blue-700 p-2 rounded-lg transition-colors">
+              <Search className="w-5 h-5" />
+            </button>
+            <button className="text-white hover:bg-blue-700 p-2 rounded-lg transition-colors">
+              <User className="w-5 h-5" />
+            </button>
+          </div>
         </div>
+      </nav>
 
-        {/* Right: Icons */}
-        <div className="flex items-center gap-4">
-          <button className="sm:hidden text-white hover:bg-slate-700 p-2 rounded transition-colors">
-            <Search className="w-5 h-5" />
-          </button>
-          <button className="text-white hover:bg-slate-700 p-2 rounded transition-colors">
-            <User className="w-5 h-5" />
-          </button>
-        </div>
-      </div>
-    </nav>
+      <EnhancedMenu isOpen={menuOpen} onClose={() => setMenuOpen(false)} />
+    </>
   );
 }
