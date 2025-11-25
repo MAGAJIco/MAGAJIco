@@ -277,17 +277,21 @@ async def get_mybets_predictions():
 
 
 @app.get("/api/predictions/flashscore-odds")
-async def get_flashscore_odds():
+async def get_flashscore_odds(
+    max_odds: float = Query(1.16, ge=1.0, le=3.0, description="Maximum odds threshold (e.g., 1.16 for favorites)")
+):
     """
-    Get FlashScore weekly odds calendar
+    Get FlashScore weekly odds calendar filtered by max odds threshold
     Uses mobile version: https://www.flashscore.mobi/?d=0&s=5
+    Only returns matches where at least one odd is <= max_odds (high probability predictions)
     """
     try:
-        odds_calendar = scraper.scrape_flashscore_odds()
+        odds_calendar = scraper.scrape_flashscore_odds(max_odds=max_odds)
         
         return {
             "status": "success",
             "source": "flashscore.mobi",
+            "filter": f"odds <= {max_odds}",
             "count": len(odds_calendar),
             "odds_calendar": odds_calendar,
             "timestamp": datetime.now().isoformat()

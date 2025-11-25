@@ -152,11 +152,12 @@ class RealSportsScraperService:
             
         return matches if matches else self._get_sample_flashscore_matches()
     
-    def scrape_flashscore_odds(self) -> List[Dict[str, Any]]:
+    def scrape_flashscore_odds(self, max_odds: float = 1.16) -> List[Dict[str, Any]]:
         """
         Scrape FlashScore mobile calendar for week odds
         URL: https://www.flashscore.mobi/?d=0&s=5
-        Returns daily odds calendar for the week
+        Returns daily odds calendar filtered by max_odds threshold
+        Only includes matches where at least one odd is <= max_odds (high probability predictions)
         """
         odds_calendar = []
         
@@ -195,22 +196,47 @@ class RealSportsScraperService:
                             # Extract odds
                             odds_spans = match_elem.find_all('span', class_=re.compile('odd|coefficient', re.IGNORECASE))
                             
+                            odds_1 = 0.0
+                            odds_x = 0.0
+                            odds_2 = 0.0
+                            
+                            if len(odds_spans) >= 3:
+                                try:
+                                    odds_1 = float(odds_spans[0].get_text(strip=True))
+                                    odds_x = float(odds_spans[1].get_text(strip=True))
+                                    odds_2 = float(odds_spans[2].get_text(strip=True))
+                                except:
+                                    pass
+                            
+                            # Filter: only include if any odd is <= max_odds threshold
+                            odds_list = [o for o in [odds_1, odds_x, odds_2] if o > 0]
+                            if not odds_list or min(odds_list) > max_odds:
+                                continue
+                            
+                            # Determine best prediction (lowest odds = highest probability)
+                            best_odd = min(odds_list)
+                            if best_odd == odds_1:
+                                prediction = "1"
+                                prediction_label = "🏠 Home Win"
+                            elif best_odd == odds_x:
+                                prediction = "X"
+                                prediction_label = "🤝 Draw"
+                            else:
+                                prediction = "2"
+                                prediction_label = "✈️ Away Win"
+                            
                             odds_data = {
                                 "date": date_text,
                                 "home_team": home_team,
                                 "away_team": away_team,
-                                "odds_1": 0.0,
-                                "odds_x": 0.0,
-                                "odds_2": 0.0
+                                "odds_1": odds_1,
+                                "odds_x": odds_x,
+                                "odds_2": odds_2,
+                                "best_prediction": prediction,
+                                "prediction_label": prediction_label,
+                                "best_odd": best_odd,
+                                "confidence": max(50, int((1.5 / best_odd) * 100)) if best_odd > 0 else 0
                             }
-                            
-                            if len(odds_spans) >= 3:
-                                try:
-                                    odds_data["odds_1"] = float(odds_spans[0].get_text(strip=True))
-                                    odds_data["odds_x"] = float(odds_spans[1].get_text(strip=True))
-                                    odds_data["odds_2"] = float(odds_spans[2].get_text(strip=True))
-                                except:
-                                    pass
                             
                             odds_calendar.append(odds_data)
                         except:
