@@ -15,6 +15,9 @@ from real_scraper import RealSportsScraperService, LiveMatch
 
 app = FastAPI(title="MagajiCo Sports Prediction API")
 
+# Prediction cache for consistency on failures
+_PREDICTION_RESULT_CACHE = {}
+
 # CORS
 app.add_middleware(
     CORSMiddleware,
@@ -67,6 +70,8 @@ async def get_ml_status():
 
 @app.get("/api/ml/predict")
 async def predict_match(
+    home_team: str = Query("Team A", description="Home team name"),
+    away_team: str = Query("Team B", description="Away team name"),
     home_strength: float = Query(..., ge=0.3, le=1.0),
     away_strength: float = Query(..., ge=0.3, le=1.0),
     home_advantage: float = Query(0.65, ge=0.5, le=0.8),
@@ -75,9 +80,14 @@ async def predict_match(
     head_to_head: float = Query(0.5, ge=0.3, le=0.7),
     injuries: float = Query(0.9, ge=0.4, le=1.0)
 ):
-    """Make ML prediction for a match"""
+    """Make ML prediction for a match with caching for consistency on failures"""
+    global _PREDICTION_RESULT_CACHE
+    
     if not ml_model:
         raise HTTPException(status_code=503, detail="ML model not loaded")
+    
+    # Create cache key for this match
+    cache_key = f"{home_team}_{away_team}"
     
     try:
         features = np.array([[
@@ -99,7 +109,8 @@ async def predict_match(
             2: "Away Win"
         }
         
-        return {
+        result = {
+            "match": f"{home_team} vs {away_team}",
             "prediction": prediction_map[prediction],
             "confidence": float(max(probabilities) * 100),
             "probabilities": {
@@ -115,9 +126,22 @@ async def predict_match(
                 "recent_form_away": recent_form_away,
                 "head_to_head": head_to_head,
                 "injuries": injuries
-            }
+            },
+            "timestamp": datetime.now().isoformat()
         }
+        
+        # Cache successful result for consistency on future failures
+        _PREDICTION_RESULT_CACHE[cache_key] = result
+        return result
+        
     except Exception as e:
+        # On failure, return cached result if available to maintain consistency
+        if cache_key in _PREDICTION_RESULT_CACHE:
+            cached = _PREDICTION_RESULT_CACHE[cache_key].copy()
+            cached["cached"] = True
+            cached["error_recovered"] = f"Using cached prediction due to: {str(e)}"
+            cached["cached_at"] = cached.get("timestamp")
+            return cached
         raise HTTPException(status_code=500, detail=f"Prediction failed: {str(e)}")
 
 
@@ -318,6 +342,106 @@ async def get_scoreprediction():
         raise HTTPException(status_code=500, detail=f"Failed to fetch ScorePrediction: {str(e)}")
 
 
+@app.get("/api/odds/soccerapi")
+async def get_soccerapi_odds(
+    bookmaker: str = Query("888sport", description="Bookmaker: 888sport, bet365, or unibet"),
+    league: str = Query("premier_league", description="League: premier_league, la_liga, serie_a, bundesliga, ligue_1"),
+    max_odds: float = Query(1.16, ge=1.0, le=5.0, description="Maximum odds threshold"),
+    include_over_under: bool = Query(True, description="Include over/under 4.5 goals odds")
+):
+    """
+    Get real soccer odds from commercial bookmakers using soccerapi library
+    Supports: 888Sport, Bet365, Unibet
+    Includes: Full-time result odds + Over/Under 4.5 goals market
+    """
+    try:
+        odds = scraper.scrape_soccerapi_odds(
+            bookmaker=bookmaker.lower(),
+            league=league.lower(),
+            min_odds=1.0,
+            max_odds=max_odds,
+            include_over_under=include_over_under
+        )
+        
+        # Filter and sort
+        filtered = [odd for odd in odds if odd.get("best_odd", float('inf')) <= max_odds]
+        
+        # Count stats
+        predictions_count = {}
+        over_under_count = 0
+        for odd in filtered:
+            pred = odd.get("prediction", "Unknown")
+            predictions_count[pred] = predictions_count.get(pred, 0) + 1
+            if "over_4_5" in odd or "under_4_5" in odd:
+                over_under_count += 1
+        
+        return {
+            "status": "success",
+            "source": f"soccerapi ({bookmaker.upper()})",
+            "league": league,
+            "filter": f"odds <= {max_odds}",
+            "total_matches": len(filtered),
+            "summary": {
+                "by_prediction": predictions_count,
+                "with_over_under_4_5": over_under_count
+            },
+            "matches": filtered,
+            "timestamp": datetime.now().isoformat()
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to fetch soccerapi odds: {str(e)}")
+
+
+@app.get("/api/odds/over-4-5")
+async def get_over_4_5_odds(
+    bookmaker: str = Query("888sport", description="Bookmaker: 888sport, bet365, or unibet"),
+    league: str = Query("premier_league", description="League: premier_league, la_liga, serie_a, bundesliga, ligue_1"),
+    max_odds: float = Query(2.0, ge=1.0, le=5.0, description="Maximum odds threshold for over 4.5")
+):
+    """
+    Get OVER 4.5 goals betting odds from commercial bookmakers
+    Returns only matches with available over 4.5 goals odds <= threshold
+    """
+    try:
+        odds = scraper.scrape_soccerapi_odds(
+            bookmaker=bookmaker.lower(),
+            league=league.lower(),
+            min_odds=1.0,
+            max_odds=5.0,
+            include_over_under=True
+        )
+        
+        # Filter for ONLY matches with over 4.5 and where over_4_5 odds <= max_odds
+        over_4_5_matches = []
+        for odd in odds:
+            over_4_5 = odd.get("over_4_5")
+            if over_4_5 and over_4_5 <= max_odds:
+                over_4_5_matches.append({
+                    "home_team": odd.get("home_team"),
+                    "away_team": odd.get("away_team"),
+                    "time": odd.get("time"),
+                    "full_time_1": odd.get("odds_1"),
+                    "full_time_x": odd.get("odds_x"),
+                    "full_time_2": odd.get("odds_2"),
+                    "over_4_5_odds": over_4_5,
+                    "under_4_5_odds": odd.get("under_4_5"),
+                    "source": odd.get("source")
+                })
+        
+        return {
+            "status": "success",
+            "market": "Over 4.5 Goals",
+            "source": f"soccerapi ({bookmaker.upper()})",
+            "league": league,
+            "filter": f"over 4.5 odds <= {max_odds}",
+            "total_matches_with_over_4_5": len(over_4_5_matches),
+            "matches": over_4_5_matches,
+            "timestamp": datetime.now().isoformat()
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to fetch over 4.5 odds: {str(e)}")
+
+
 @app.get("/api/odds/bet365")
 async def get_bet365_odds(
     max_odds: float = Query(2.5, ge=1.0, le=5.0, description="Maximum odds threshold")
@@ -509,6 +633,8 @@ async def root():
             "mybets": "/api/predictions/mybets",
             "statarea": "/api/predictions/statarea",
             "scoreprediction": "/api/predictions/scoreprediction",
+            "soccerapi_odds": "/api/odds/soccerapi",
+            "over_4_5_goals": "/api/odds/over-4-5",
             "bet365_odds": "/api/odds/bet365",
             "aggregate_weekly_soccer_odds": "/api/odds/aggregate-weekly-soccer",
             "health": "/api/health",

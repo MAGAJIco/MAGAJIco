@@ -28,3 +28,4 @@ starlette
 uvicorn
 selenium
 webdriver-manager
+soccerapi
