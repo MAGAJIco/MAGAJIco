@@ -26,11 +26,11 @@ app.add_middleware(
 
 # Load ML Model
 try:
-    with open("model_data.pkl", "rb") as f:
+    with open("ml/model_data.pkl", "rb") as f:
         model_data = pickle.load(f)
         ml_model = model_data["model"]
         feature_names = model_data["feature_names"]
-    print("✅ ML Model loaded successfully")
+    print("✅ ML Model loaded successfully from ml/model_data.pkl")
 except Exception as e:
     print(f"❌ Failed to load ML model: {e}")
     ml_model = None
