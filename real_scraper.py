@@ -405,10 +405,9 @@ class RealSportsScraperService:
                     
         except Exception as e:
             print(f"FlashScore mobile scraping error: {e}")
-            # Return sample data as fallback
-            return self._get_sample_flashscore_matches()
+            return []
             
-        return matches if matches else self._get_sample_flashscore_matches()
+        return matches
     
     def scrape_espn_scores(self, sport: str = "soccer") -> List[LiveMatch]:
         """
@@ -440,9 +439,9 @@ class RealSportsScraperService:
             
         except Exception as e:
             print(f"ESPN scraping error: {e}")
-            return self._get_sample_espn_matches(sport)
+            return []
             
-        return matches if matches else self._get_sample_espn_matches(sport)
+        return matches
 
     def fetch_api_football_data(self, api_key: str) -> List[LiveMatch]:
         """
@@ -497,9 +496,9 @@ class RealSportsScraperService:
                         
         except Exception as e:
             print(f"API-Football error: {e}")
-            return self._get_sample_api_matches()
+            return []
         
-        return matches if matches else self._get_sample_api_matches()
+        return matches
 
     def get_all_predictions(self, api_key: Optional[str] = None) -> List[Dict[str, Any]]:
         """Get predictions from all available sources"""
