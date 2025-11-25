@@ -25,16 +25,16 @@ export default async function LocaleLayout({ children, params }: { children: Rea
   if (!validLocales.includes(locale)) notFound();
 
   return (
-    <div className="min-h-screen w-full bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white">
+    <div className="min-h-screen w-full bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white flex flex-col">
       <TopNav />
-      {/* Main content with spacing for fixed nav elements */}
-      <div className="pt-16 pb-20">
+      {/* Main content - flex-1 to fill space between fixed navs */}
+      <main className="flex-1 overflow-y-auto pt-0 pb-20">
         <GuestSessionWrapper>
-          <main className="w-full max-w-7xl mx-auto px-4 py-6 md:px-8 md:py-10">
+          <div className="w-full max-w-7xl mx-auto px-4 py-6 md:px-8 md:py-10">
             {children}
-          </main>
+          </div>
         </GuestSessionWrapper>
-      </div>
+      </main>
       <BottomNav />
       <EngagementNotifications />
     </div>
