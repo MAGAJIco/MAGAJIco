@@ -31,7 +31,10 @@ export default function TopNav() {
               className="text-white hover:bg-blue-700 p-2 rounded-lg transition-colors"
               aria-label="Open menu"
             >
-              <Menu className="w-6 h-6" />
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <line x1="3" y1="6" x2="21" y2="6" strokeWidth="2" strokeLinecap="round" />
+                <line x1="3" y1="18" x2="21" y2="18" strokeWidth="2" strokeLinecap="round" />
+              </svg>
             </button>
             
             <Link href={`/${locale}`} className="flex items-center gap-2">
