@@ -55,60 +55,176 @@ class RealSportsScraperService:
         
     def scrape_flashscore_soccer(self) -> List[LiveMatch]:
         """
-        Scrape FlashScore for live soccer matches
-        Note: FlashScore has anti-scraping. Use their API or RSS instead
+        Scrape FlashScore mobile version for live soccer matches and odds
+        Uses mobile site: https://www.flashscore.mobi/?d=0&s=5 for easier parsing
         """
         matches = []
         
         try:
-            # Alternative: Use FlashScore's RSS feed
+            # Use mobile version for easier scraping - d=0 (today), s=5 (soccer)
             response = requests.get(
-                "https://www.flashscore.com/",
+                "https://www.flashscore.mobi/?d=0&s=5",
                 headers=self.headers,
                 timeout=10
             )
+            response.raise_for_status()
             
             soup = BeautifulSoup(response.text, 'html.parser')
             
-            # Find match containers (classes may change)
-            match_containers = soup.find_all('div', class_=re.compile('event__match'))
+            # Find all match rows/containers in mobile view
+            # Mobile version uses simpler structure than desktop
+            match_elements = soup.find_all('div', class_=re.compile('event|match|game', re.IGNORECASE))
             
-            for container in match_containers[:20]:  # Limit to 20 matches
+            for element in match_elements[:30]:  # Limit to 30 matches
                 try:
-                    home_team = container.find('div', class_=re.compile('event__participant--home'))
-                    away_team = container.find('div', class_=re.compile('event__participant--away'))
-                    score = container.find('div', class_=re.compile('event__score'))
-                    time_elem = container.find('div', class_=re.compile('event__time'))
+                    # Extract team names
+                    teams = element.find_all('span', class_=re.compile('team|participant', re.IGNORECASE))
+                    if len(teams) < 2:
+                        continue
                     
-                    if home_team and away_team:
-                        match = LiveMatch(
-                            id=f"fs_{len(matches)}",
-                            sport="Soccer",
-                            league="Various",
-                            home_team=home_team.text.strip(),
-                            away_team=away_team.text.strip(),
-                            game_time=time_elem.text.strip() if time_elem else "TBD",
-                            status="live" if score else "scheduled"
-                        )
-                        
-                        # Add ML prediction
-                        if self.ml_predictor:
-                            pred = self._generate_ml_prediction(match)
-                            match.prediction = pred['prediction']
-                            match.confidence = pred['confidence']
-                        
-                        matches.append(match)
-                        
+                    home_team = teams[0].get_text(strip=True)
+                    away_team = teams[1].get_text(strip=True)
+                    
+                    if not home_team or not away_team:
+                        continue
+                    
+                    # Extract time/status
+                    time_elem = element.find('span', class_=re.compile('time|status|live', re.IGNORECASE))
+                    game_time = time_elem.get_text(strip=True) if time_elem else "TBD"
+                    
+                    # Extract odds (1X2 format)
+                    odds_elements = element.find_all('span', class_=re.compile('odd|odds|coefficient', re.IGNORECASE))
+                    odds_1x2 = {}
+                    if len(odds_elements) >= 3:
+                        try:
+                            odds_1x2 = {
+                                "home": float(odds_elements[0].get_text(strip=True)),
+                                "draw": float(odds_elements[1].get_text(strip=True)),
+                                "away": float(odds_elements[2].get_text(strip=True))
+                            }
+                        except:
+                            pass
+                    
+                    # Extract score if available
+                    score_elem = element.find('span', class_=re.compile('score|result', re.IGNORECASE))
+                    score_text = score_elem.get_text(strip=True) if score_elem else ""
+                    home_score = None
+                    away_score = None
+                    
+                    if score_text and '-' in score_text:
+                        try:
+                            scores = score_text.split('-')
+                            home_score = int(scores[0].strip())
+                            away_score = int(scores[1].strip())
+                        except:
+                            pass
+                    
+                    match = LiveMatch(
+                        id=f"fs_{len(matches)}",
+                        sport="Soccer",
+                        league="Various",
+                        home_team=home_team,
+                        away_team=away_team,
+                        game_time=game_time,
+                        status="live" if (score_elem and '-' in score_text) else "scheduled",
+                        home_score=home_score,
+                        away_score=away_score,
+                        odds=odds_1x2.get("home", 0.0) if odds_1x2 else 0.0,
+                        source="FlashScore"
+                    )
+                    
+                    # Add ML prediction
+                    if self.ml_predictor:
+                        pred = self._generate_ml_prediction(match)
+                        match.prediction = pred['prediction']
+                        match.confidence = pred['confidence']
+                    
+                    matches.append(match)
+                    
                 except Exception as e:
-                    print(f"Error parsing match: {e}")
+                    print(f"Error parsing FlashScore match: {e}")
                     continue
                     
         except Exception as e:
-            print(f"FlashScore scraping error: {e}")
+            print(f"FlashScore mobile scraping error: {e}")
             # Return sample data as fallback
             return self._get_sample_flashscore_matches()
             
         return matches if matches else self._get_sample_flashscore_matches()
+    
+    def scrape_flashscore_odds(self) -> List[Dict[str, Any]]:
+        """
+        Scrape FlashScore mobile calendar for week odds
+        URL: https://www.flashscore.mobi/?d=0&s=5
+        Returns daily odds calendar for the week
+        """
+        odds_calendar = []
+        
+        try:
+            response = requests.get(
+                "https://www.flashscore.mobi/?d=0&s=5",
+                headers=self.headers,
+                timeout=10
+            )
+            response.raise_for_status()
+            
+            soup = BeautifulSoup(response.text, 'html.parser')
+            
+            # Find date sections
+            date_sections = soup.find_all('div', class_=re.compile('date|day|section', re.IGNORECASE))
+            
+            for section in date_sections[:7]:  # Get 7 days
+                try:
+                    # Get date header
+                    date_header = section.find('h3') or section.find('h2')
+                    date_text = date_header.get_text(strip=True) if date_header else "Unknown Date"
+                    
+                    # Get all matches in this date section
+                    matches_in_section = section.find_all('div', class_=re.compile('event|match', re.IGNORECASE))
+                    
+                    for match_elem in matches_in_section:
+                        try:
+                            # Extract match info
+                            teams = match_elem.find_all('span', class_=re.compile('team', re.IGNORECASE))
+                            if len(teams) < 2:
+                                continue
+                            
+                            home_team = teams[0].get_text(strip=True)
+                            away_team = teams[1].get_text(strip=True)
+                            
+                            # Extract odds
+                            odds_spans = match_elem.find_all('span', class_=re.compile('odd|coefficient', re.IGNORECASE))
+                            
+                            odds_data = {
+                                "date": date_text,
+                                "home_team": home_team,
+                                "away_team": away_team,
+                                "odds_1": 0.0,
+                                "odds_x": 0.0,
+                                "odds_2": 0.0
+                            }
+                            
+                            if len(odds_spans) >= 3:
+                                try:
+                                    odds_data["odds_1"] = float(odds_spans[0].get_text(strip=True))
+                                    odds_data["odds_x"] = float(odds_spans[1].get_text(strip=True))
+                                    odds_data["odds_2"] = float(odds_spans[2].get_text(strip=True))
+                                except:
+                                    pass
+                            
+                            odds_calendar.append(odds_data)
+                        except:
+                            continue
+                            
+                except Exception as e:
+                    print(f"Error parsing date section: {e}")
+                    continue
+            
+            return odds_calendar
+            
+        except Exception as e:
+            print(f"FlashScore odds scraping error: {e}")
+            return []
     
     def scrape_espn_scores(self, sport: str = "soccer") -> List[LiveMatch]:
         """

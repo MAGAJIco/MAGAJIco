@@ -276,6 +276,26 @@ async def get_mybets_predictions():
         raise HTTPException(status_code=500, detail=f"Failed to fetch mybets predictions: {str(e)}")
 
 
+@app.get("/api/predictions/flashscore-odds")
+async def get_flashscore_odds():
+    """
+    Get FlashScore weekly odds calendar
+    Uses mobile version: https://www.flashscore.mobi/?d=0&s=5
+    """
+    try:
+        odds_calendar = scraper.scrape_flashscore_odds()
+        
+        return {
+            "status": "success",
+            "source": "flashscore.mobi",
+            "count": len(odds_calendar),
+            "odds_calendar": odds_calendar,
+            "timestamp": datetime.now().isoformat()
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to fetch FlashScore odds: {str(e)}")
+
+
 @app.get("/api/stats")
 async def get_stats(api_key: Optional[str] = None):
     """Get prediction statistics"""
@@ -326,6 +346,7 @@ async def root():
             "high_confidence": "/api/predictions/high-confidence",
             "today": "/api/predictions/today",
             "mybets": "/api/predictions/mybets",
+            "flashscore_odds": "/api/predictions/flashscore-odds",
             "health": "/api/health",
             "stats": "/api/stats"
         },
