@@ -198,6 +198,45 @@
   "matches": [],
   "metadata": {
     "created": "2025-11-25T19:02:16.053281",
-    "total_logs": 6
-  }
+    "total_logs": 6,
+    "total_accuracy_records": 4
+  },
+  "accuracy": [
+    {
+      "timestamp": "2025-11-25T19:32:32.244918",
+      "prediction_id": "pred_001",
+      "match": "Real Madrid vs Barcelona",
+      "predicted": "Real Madrid Win",
+      "actual": "Real Madrid Win",
+      "correct": true,
+      "odds": 1.95
+    },
+    {
+      "timestamp": "2025-11-25T19:32:33.279778",
+      "prediction_id": "pred_002",
+      "match": "Bayern Munich vs Dortmund",
+      "predicted": "Bayern Win",
+      "actual": "Bayern Win",
+      "correct": true,
+      "odds": 1.7
+    },
+    {
+      "timestamp": "2025-11-25T19:32:33.368580",
+      "prediction_id": "pred_003",
+      "match": "Liverpool vs Man City",
+      "predicted": "Draw",
+      "actual": "Liverpool Win",
+      "correct": false,
+      "odds": 3.4
+    },
+    {
+      "timestamp": "2025-11-25T19:32:33.457752",
+      "prediction_id": "pred_004",
+      "match": "Arsenal vs Chelsea",
+      "predicted": "Arsenal Win",
+      "actual": "Arsenal Win",
+      "correct": true,
+      "odds": 2.1
+    }
+  ]
 }

@@ -778,6 +778,68 @@ async def get_stats(api_key: Optional[str] = None):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# ========== PREDICTION ACCURACY ENDPOINTS ==========
+
+@app.post("/api/accuracy/log")
+async def log_accuracy(
+    prediction_id: str = Query(...),
+    match: str = Query(...),
+    predicted: str = Query(...),
+    actual: str = Query(...),
+    odds: Optional[float] = Query(None)
+):
+    """Log actual match result and calculate accuracy"""
+    try:
+        results_logger.log_result(
+            prediction_id=prediction_id,
+            match=match,
+            predicted=predicted,
+            actual=actual,
+            odds=odds
+        )
+        
+        return {
+            "status": "success",
+            "message": "Prediction result logged",
+            "correct": predicted.lower() == actual.lower(),
+            "timestamp": datetime.now().isoformat()
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/accuracy/stats")
+async def get_accuracy_stats():
+    """Get prediction accuracy statistics"""
+    try:
+        stats = results_logger.get_accuracy_stats()
+        
+        return {
+            "status": "success",
+            **stats,
+            "timestamp": datetime.now().isoformat()
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/accuracy/recent")
+async def get_accuracy_recent(limit: int = Query(20, ge=1, le=100)):
+    """Get recent accuracy records"""
+    try:
+        stats = results_logger.get_accuracy_stats()
+        recent = stats.get("recent_records", [])[:limit]
+        
+        return {
+            "status": "success",
+            "total_records": len(stats.get("recent_records", [])),
+            "recent": recent,
+            "timestamp": datetime.now().isoformat()
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 # ========== ROOT ==========
 
 @app.get("/")

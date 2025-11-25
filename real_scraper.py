@@ -95,9 +95,11 @@ class ResultsLogger:
                 "predictions": [],
                 "odds": [],
                 "matches": [],
+                "accuracy": [],
                 "metadata": {
                     "created": datetime.now().isoformat(),
-                    "total_logs": 0
+                    "total_logs": 0,
+                    "total_accuracy_records": 0
                 }
             }
     
@@ -177,6 +179,58 @@ class ResultsLogger:
                 self.mongo_db['matches'].insert_one(log_entry)
             except Exception as e:
                 print(f"Failed to save match to MongoDB: {e}")
+    
+    def log_result(self, prediction_id: str, match: str, predicted: str, actual: str, odds: Optional[float] = None) -> None:
+        """Log actual match result and compare with prediction"""
+        accuracy_entry = {
+            "timestamp": datetime.now().isoformat(),
+            "prediction_id": prediction_id,
+            "match": match,
+            "predicted": predicted,
+            "actual": actual,
+            "correct": predicted.lower() == actual.lower(),
+            "odds": odds or 0.0
+        }
+        
+        if "accuracy" not in self.results:
+            self.results["accuracy"] = []
+        
+        self.results["accuracy"].append(accuracy_entry)
+        if "total_accuracy_records" not in self.results["metadata"]:
+            self.results["metadata"]["total_accuracy_records"] = 0
+        self.results["metadata"]["total_accuracy_records"] += 1
+        self.save_results()
+        
+        # Save to MongoDB
+        if self.mongo_db:
+            try:
+                self.mongo_db['accuracy'].insert_one(accuracy_entry)
+            except Exception as e:
+                print(f"Failed to save accuracy record to MongoDB: {e}")
+    
+    def get_accuracy_stats(self) -> Dict[str, Any]:
+        """Calculate accuracy statistics"""
+        accuracy_records = self.results.get("accuracy", [])
+        
+        if not accuracy_records:
+            return {
+                "total_predictions_evaluated": 0,
+                "correct": 0,
+                "incorrect": 0,
+                "accuracy_percentage": 0.0,
+                "recent_records": []
+            }
+        
+        correct = sum(1 for r in accuracy_records if r.get("correct", False))
+        total = len(accuracy_records)
+        
+        return {
+            "total_predictions_evaluated": total,
+            "correct": correct,
+            "incorrect": total - correct,
+            "accuracy_percentage": round((correct / total * 100), 2) if total > 0 else 0.0,
+            "recent_records": sorted(accuracy_records, key=lambda x: x.get("timestamp", ""), reverse=True)[:20]
+        }
     
     def get_recent(self, count: int = 100, log_type: Optional[str] = None) -> List[Dict[str, Any]]:
         """Get recent logged results from MongoDB (preferred) or JSON fallback"""

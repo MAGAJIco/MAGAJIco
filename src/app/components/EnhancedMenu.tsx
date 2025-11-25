@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Home, Zap, Trophy, Star, Settings, HelpCircle, User, LogOut, Database, BookOpen } from 'lucide-react';
+import { X, Home, Zap, Trophy, Star, Settings, HelpCircle, User, LogOut, Database, BookOpen, TrendingUp } from 'lucide-react';
 
 interface EnhancedMenuProps {
   isOpen: boolean;
@@ -129,6 +129,12 @@ export default function EnhancedMenu({ isOpen, onClose }: EnhancedMenuProps) {
 
               {/* Data & Analytics Section */}
               <MenuSection title="Data & Analytics">
+                <MenuItem
+                  icon={TrendingUp}
+                  label="Prediction Accuracy"
+                  href={`/${locale}/accuracy`}
+                  onClick={onClose}
+                />
                 <MenuItem
                   icon={Database}
                   label="MongoDB Status"
