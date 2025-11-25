@@ -152,105 +152,141 @@ class RealSportsScraperService:
             
         return matches if matches else self._get_sample_flashscore_matches()
     
-    def scrape_flashscore_odds(self, max_odds: float = 1.16) -> List[Dict[str, Any]]:
+    def scrape_flashscore_odds(self, max_odds: float = 1.16) -> Dict[str, Any]:
         """
-        Scrape FlashScore mobile calendar for week odds
-        URL: https://www.flashscore.mobi/?d=0&s=5
+        Scrape FlashScore mobile calendar for ENTIRE WEEK odds (7 days)
+        URL: https://www.flashscore.mobi/?d=X&s=5 (d=0 to d=6)
         Returns daily odds calendar filtered by max_odds threshold
-        Only includes matches where at least one odd is <= max_odds (high probability predictions)
+        Organized day-by-day with only matches where any odd is <= max_odds
         """
-        odds_calendar = []
+        from datetime import datetime, timedelta
         
-        try:
-            response = requests.get(
-                "https://www.flashscore.mobi/?d=0&s=5",
-                headers=self.headers,
-                timeout=10
-            )
-            response.raise_for_status()
-            
-            soup = BeautifulSoup(response.text, 'html.parser')
-            
-            # Find date sections
-            date_sections = soup.find_all('div', class_=re.compile('date|day|section', re.IGNORECASE))
-            
-            for section in date_sections[:7]:  # Get 7 days
-                try:
-                    # Get date header
-                    date_header = section.find('h3') or section.find('h2')
-                    date_text = date_header.get_text(strip=True) if date_header else "Unknown Date"
-                    
-                    # Get all matches in this date section
-                    matches_in_section = section.find_all('div', class_=re.compile('event|match', re.IGNORECASE))
-                    
-                    for match_elem in matches_in_section:
-                        try:
-                            # Extract match info
-                            teams = match_elem.find_all('span', class_=re.compile('team', re.IGNORECASE))
-                            if len(teams) < 2:
-                                continue
-                            
-                            home_team = teams[0].get_text(strip=True)
-                            away_team = teams[1].get_text(strip=True)
-                            
-                            # Extract odds
-                            odds_spans = match_elem.find_all('span', class_=re.compile('odd|coefficient', re.IGNORECASE))
-                            
-                            odds_1 = 0.0
-                            odds_x = 0.0
-                            odds_2 = 0.0
-                            
-                            if len(odds_spans) >= 3:
-                                try:
-                                    odds_1 = float(odds_spans[0].get_text(strip=True))
-                                    odds_x = float(odds_spans[1].get_text(strip=True))
-                                    odds_2 = float(odds_spans[2].get_text(strip=True))
-                                except:
-                                    pass
-                            
-                            # Filter: only include if any odd is <= max_odds threshold
-                            odds_list = [o for o in [odds_1, odds_x, odds_2] if o > 0]
-                            if not odds_list or min(odds_list) > max_odds:
-                                continue
-                            
-                            # Determine best prediction (lowest odds = highest probability)
-                            best_odd = min(odds_list)
-                            if best_odd == odds_1:
-                                prediction = "1"
-                                prediction_label = "🏠 Home Win"
-                            elif best_odd == odds_x:
-                                prediction = "X"
-                                prediction_label = "🤝 Draw"
-                            else:
-                                prediction = "2"
-                                prediction_label = "✈️ Away Win"
-                            
-                            odds_data = {
-                                "date": date_text,
-                                "home_team": home_team,
-                                "away_team": away_team,
-                                "odds_1": odds_1,
-                                "odds_x": odds_x,
-                                "odds_2": odds_2,
-                                "best_prediction": prediction,
-                                "prediction_label": prediction_label,
-                                "best_odd": best_odd,
-                                "confidence": max(50, int((1.5 / best_odd) * 100)) if best_odd > 0 else 0
-                            }
-                            
-                            odds_calendar.append(odds_data)
-                        except:
+        week_calendar = {}
+        today = datetime.now()
+        
+        # Fetch each day of the week
+        for day_offset in range(7):
+            try:
+                # Generate date label
+                day_date = today + timedelta(days=day_offset)
+                day_name = day_date.strftime('%A')  # Monday, Tuesday, etc.
+                date_label = day_date.strftime('%a %d.%m')  # Mon 25.11
+                full_date = day_date.strftime('%Y-%m-%d')
+                
+                # Fetch FlashScore for this day
+                url = f"https://www.flashscore.mobi/?d={day_offset}&s=5"
+                response = requests.get(url, headers=self.headers, timeout=10)
+                response.raise_for_status()
+                
+                soup = BeautifulSoup(response.text, 'html.parser')
+                
+                day_matches = []
+                
+                # Find all match elements on this day
+                match_elements = soup.find_all('div', class_=re.compile('event|match|game', re.IGNORECASE))
+                
+                for match_elem in match_elements:
+                    try:
+                        # Extract team names
+                        teams = match_elem.find_all('span', class_=re.compile('team|participant', re.IGNORECASE))
+                        if len(teams) < 2:
                             continue
-                            
-                except Exception as e:
-                    print(f"Error parsing date section: {e}")
-                    continue
-            
-            return odds_calendar
-            
-        except Exception as e:
-            print(f"FlashScore odds scraping error: {e}")
-            return []
+                        
+                        home_team = teams[0].get_text(strip=True)
+                        away_team = teams[1].get_text(strip=True)
+                        
+                        if not home_team or not away_team:
+                            continue
+                        
+                        # Extract time
+                        time_elem = match_elem.find('span', class_=re.compile('time|status', re.IGNORECASE))
+                        game_time = time_elem.get_text(strip=True) if time_elem else "TBD"
+                        
+                        # Extract odds (1X2 format)
+                        odds_elements = match_elem.find_all('span', class_=re.compile('odd|odds|coefficient', re.IGNORECASE))
+                        
+                        odds_1 = 0.0
+                        odds_x = 0.0
+                        odds_2 = 0.0
+                        
+                        if len(odds_elements) >= 3:
+                            try:
+                                odds_1 = float(odds_elements[0].get_text(strip=True))
+                                odds_x = float(odds_elements[1].get_text(strip=True))
+                                odds_2 = float(odds_elements[2].get_text(strip=True))
+                            except ValueError:
+                                pass
+                        
+                        # Filter: only include if any odd is <= max_odds threshold
+                        odds_list = [o for o in [odds_1, odds_x, odds_2] if o > 0]
+                        if not odds_list or min(odds_list) > max_odds:
+                            continue
+                        
+                        # Determine best prediction (lowest odds = highest probability)
+                        best_odd = min(odds_list)
+                        if best_odd == odds_1:
+                            prediction = "1"
+                            prediction_label = "🏠 Home"
+                        elif best_odd == odds_x:
+                            prediction = "X"
+                            prediction_label = "🤝 Draw"
+                        else:
+                            prediction = "2"
+                            prediction_label = "✈️ Away"
+                        
+                        match_data = {
+                            "home_team": home_team,
+                            "away_team": away_team,
+                            "time": game_time,
+                            "odds_1": round(odds_1, 2),
+                            "odds_x": round(odds_x, 2),
+                            "odds_2": round(odds_2, 2),
+                            "best_prediction": prediction,
+                            "prediction_label": prediction_label,
+                            "best_odd": round(best_odd, 2),
+                            "confidence": max(50, int((1.5 / best_odd) * 100)) if best_odd > 0 else 0
+                        }
+                        
+                        day_matches.append(match_data)
+                    
+                    except Exception as e:
+                        continue
+                
+                # Add day to calendar if it has matches
+                if day_matches:
+                    week_calendar[full_date] = {
+                        "day_name": day_name,
+                        "date_label": date_label,
+                        "matches_count": len(day_matches),
+                        "matches": day_matches
+                    }
+                else:
+                    # Add empty day for completeness
+                    week_calendar[full_date] = {
+                        "day_name": day_name,
+                        "date_label": date_label,
+                        "matches_count": 0,
+                        "matches": []
+                    }
+                
+                print(f"✅ Day {day_offset} ({date_label}): {len(day_matches)} matches with odds <= {max_odds}")
+                
+            except Exception as e:
+                print(f"Error fetching day {day_offset}: {e}")
+                # Add empty day
+                day_date = today + timedelta(days=day_offset)
+                date_label = day_date.strftime('%a %d.%m')
+                full_date = day_date.strftime('%Y-%m-%d')
+                day_name = day_date.strftime('%A')
+                week_calendar[full_date] = {
+                    "day_name": day_name,
+                    "date_label": date_label,
+                    "matches_count": 0,
+                    "matches": []
+                }
+                continue
+        
+        return week_calendar
     
     def scrape_espn_scores(self, sport: str = "soccer") -> List[LiveMatch]:
         """

@@ -281,19 +281,27 @@ async def get_flashscore_odds(
     max_odds: float = Query(1.16, ge=1.0, le=3.0, description="Maximum odds threshold (e.g., 1.16 for favorites)")
 ):
     """
-    Get FlashScore weekly odds calendar filtered by max odds threshold
-    Uses mobile version: https://www.flashscore.mobi/?d=0&s=5
-    Only returns matches where at least one odd is <= max_odds (high probability predictions)
+    Get FlashScore COMPLETE WEEK odds calendar (all 7 days) filtered by max odds
+    Uses mobile version: https://www.flashscore.mobi/?d=X&s=5 (d=0 to d=6)
+    Returns organized day-by-day with only matches where any odd is <= max_odds
     """
     try:
-        odds_calendar = scraper.scrape_flashscore_odds(max_odds=max_odds)
+        week_calendar = scraper.scrape_flashscore_odds(max_odds=max_odds)
+        
+        # Count total matches across all days
+        total_matches = sum(day.get("matches_count", 0) for day in week_calendar.values())
+        total_days_with_matches = len([d for d in week_calendar.values() if d.get("matches_count", 0) > 0])
         
         return {
             "status": "success",
             "source": "flashscore.mobi",
             "filter": f"odds <= {max_odds}",
-            "count": len(odds_calendar),
-            "odds_calendar": odds_calendar,
+            "summary": {
+                "total_matches": total_matches,
+                "days_with_matches": total_days_with_matches,
+                "total_days": len(week_calendar)
+            },
+            "week_calendar": week_calendar,
             "timestamp": datetime.now().isoformat()
         }
     except Exception as e:

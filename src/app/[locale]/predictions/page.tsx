@@ -7,11 +7,17 @@ export default function PrivatePredictionsPage() {
   const [refreshTime, setRefreshTime] = useState(new Date().toLocaleTimeString());
   const [myBetsPredictions, setMyBetsPredictions] = useState([]);
   const [loadingMyBets, setLoadingMyBets] = useState(true);
+  const [weekCalendar, setWeekCalendar] = useState({});
+  const [loadingWeek, setLoadingWeek] = useState(true);
   const [activeTab, setActiveTab] = useState('private');
 
   useEffect(() => {
     fetchMyBetsPredictions();
-    const interval = setInterval(fetchMyBetsPredictions, 60000);
+    fetchWeekCalendar();
+    const interval = setInterval(() => {
+      fetchMyBetsPredictions();
+      fetchWeekCalendar();
+    }, 60000);
     return () => clearInterval(interval);
   }, []);
 
@@ -29,6 +35,22 @@ export default function PrivatePredictionsPage() {
     } finally {
       setLoadingMyBets(false);
       setRefreshTime(new Date().toLocaleTimeString());
+    }
+  };
+
+  const fetchWeekCalendar = async () => {
+    try {
+      setLoadingWeek(true);
+      const apiBaseUrl = getApiBaseUrl();
+      const response = await fetch(`${apiBaseUrl}/api/predictions/flashscore-odds?max_odds=1.16`);
+      if (response.ok) {
+        const data = await response.json();
+        setWeekCalendar(data.week_calendar || {});
+      }
+    } catch (error) {
+      console.error('Error fetching week calendar:', error);
+    } finally {
+      setLoadingWeek(false);
     }
   };
 
@@ -101,10 +123,10 @@ export default function PrivatePredictionsPage() {
           </div>
           
           {/* Tab Navigation */}
-          <div className="flex gap-2 mb-3">
+          <div className="flex gap-2 mb-3 overflow-x-auto pb-2">
             <button
               onClick={() => setActiveTab('private')}
-              className={`px-4 py-2 rounded-lg font-medium transition-all ${
+              className={`px-4 py-2 rounded-lg font-medium transition-all whitespace-nowrap ${
                 activeTab === 'private'
                   ? 'bg-red-600 text-white'
                   : 'bg-white/20 text-white hover:bg-white/30'
@@ -114,7 +136,7 @@ export default function PrivatePredictionsPage() {
             </button>
             <button
               onClick={() => setActiveTab('mybets')}
-              className={`px-4 py-2 rounded-lg font-medium transition-all flex items-center gap-2 ${
+              className={`px-4 py-2 rounded-lg font-medium transition-all flex items-center gap-2 whitespace-nowrap ${
                 activeTab === 'mybets'
                   ? 'bg-red-600 text-white'
                   : 'bg-white/20 text-white hover:bg-white/30'
@@ -122,6 +144,17 @@ export default function PrivatePredictionsPage() {
             >
               🎯 MyBets.Today
               {loadingMyBets && <RefreshCw size={14} className="animate-spin" />}
+            </button>
+            <button
+              onClick={() => setActiveTab('week')}
+              className={`px-4 py-2 rounded-lg font-medium transition-all flex items-center gap-2 whitespace-nowrap ${
+                activeTab === 'week'
+                  ? 'bg-red-600 text-white'
+                  : 'bg-white/20 text-white hover:bg-white/30'
+              }`}
+            >
+              📅 Week Calendar
+              {loadingWeek && <RefreshCw size={14} className="animate-spin" />}
             </button>
           </div>
           
@@ -335,6 +368,113 @@ export default function PrivatePredictionsPage() {
             <div className="mt-6 text-center text-gray-500 text-sm">
               <p>🔗 Source: mybets.today • Last updated {refreshTime}</p>
               <p className="mt-1 text-xs">Predictions updated every 60 seconds</p>
+            </div>
+          </>
+        ) : (
+          <>
+            {/* Week Calendar Tab */}
+            <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4 mb-6 flex items-start gap-3">
+              <TrendingUp className="text-indigo-600 flex-shrink-0 mt-1" size={20} />
+              <div>
+                <p className="font-semibold text-indigo-900">Complete Week Calendar</p>
+                <p className="text-indigo-700 text-sm">All 7 days of soccer odds with filter: odds ≤ 1.16 (high probability)</p>
+              </div>
+            </div>
+
+            {loadingWeek ? (
+              <div className="text-center py-12">
+                <div className="inline-block">
+                  <RefreshCw className="animate-spin text-gray-400" size={32} />
+                  <p className="text-gray-500 mt-3">Loading week calendar...</p>
+                </div>
+              </div>
+            ) : Object.keys(weekCalendar).length === 0 ? (
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
+                <p className="text-yellow-900 font-medium">No calendar data available</p>
+                <p className="text-yellow-700 text-sm mt-1">Check back soon</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {Object.entries(weekCalendar).map(([date, day]: any) => (
+                  <div key={date} className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                    {/* Day Header */}
+                    <div className="bg-gradient-to-r from-indigo-500 to-indigo-600 p-4 text-white">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h3 className="font-bold text-lg">{day.day_name}</h3>
+                          <p className="text-indigo-100 text-sm">{day.date_label}</p>
+                        </div>
+                        <span className="bg-white/20 px-3 py-1 rounded-full text-sm font-semibold">
+                          {day.matches_count} matches
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Day Content */}
+                    {day.matches_count === 0 ? (
+                      <div className="p-6 text-center text-gray-500 bg-gray-50">
+                        <p>No matches with odds ≤ 1.16 for this day</p>
+                      </div>
+                    ) : (
+                      <div className="divide-y">
+                        {day.matches.map((match: any, idx: number) => (
+                          <div key={idx} className="p-4 hover:bg-gray-50 transition-colors">
+                            {/* Match Info */}
+                            <div className="flex items-start justify-between gap-4 mb-3">
+                              <div className="flex-1 min-w-0">
+                                <p className="text-xs text-gray-500 mb-1">{match.time}</p>
+                                <div className="flex items-center gap-2">
+                                  <span className="font-semibold text-gray-900 line-clamp-1">{match.home_team}</span>
+                                  <span className="text-gray-400">vs</span>
+                                  <span className="font-semibold text-gray-900 line-clamp-1">{match.away_team}</span>
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-sm font-bold text-indigo-600">{match.prediction_label}</p>
+                                <p className="text-xs text-gray-500">Odd: {match.best_odd}</p>
+                              </div>
+                            </div>
+
+                            {/* Odds Display */}
+                            <div className="grid grid-cols-3 gap-2 mb-3">
+                              <div className="bg-blue-50 p-2 rounded text-center">
+                                <p className="text-xs text-gray-600">Home</p>
+                                <p className="text-sm font-bold text-blue-600">{match.odds_1.toFixed(2)}</p>
+                              </div>
+                              <div className="bg-gray-50 p-2 rounded text-center">
+                                <p className="text-xs text-gray-600">Draw</p>
+                                <p className="text-sm font-bold text-gray-600">{match.odds_x.toFixed(2)}</p>
+                              </div>
+                              <div className="bg-amber-50 p-2 rounded text-center">
+                                <p className="text-xs text-gray-600">Away</p>
+                                <p className="text-sm font-bold text-amber-600">{match.odds_2.toFixed(2)}</p>
+                              </div>
+                            </div>
+
+                            {/* Confidence Bar */}
+                            <div className="flex items-center gap-2">
+                              <div className="flex-1 bg-gray-200 rounded-full h-2">
+                                <div
+                                  className="h-full bg-indigo-500 rounded-full"
+                                  style={{ width: `${match.confidence}%` }}
+                                />
+                              </div>
+                              <span className="text-xs font-semibold text-gray-600 whitespace-nowrap">
+                                {match.confidence}%
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="mt-6 text-center text-gray-500 text-sm">
+              <p>📅 Source: flashscore.mobi • Filter: odds ≤ 1.16 • Last updated {refreshTime}</p>
+              <p className="mt-1 text-xs">Calendar updated every 60 seconds</p>
             </div>
           </>
         )}
