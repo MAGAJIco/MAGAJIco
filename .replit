@@ -7,20 +7,7 @@ channel = "stable-25_05"
 packages = ["glibcLocales", "xcodebuild", "zlib"]
 
 [workflows]
-runButton = "Start Full Stack"
-
-[[workflows.workflow]]
-name = "Project"
-mode = "parallel"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "MagajiCo Frontend"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "MagajiCo Backend"
+runButton = "Project"
 
 [[workflows.workflow]]
 name = "Start Frontend"
@@ -49,18 +36,6 @@ task = "shell.exec"
 args = "npm run dev"
 
 [[workflows.workflow]]
-name = "MagajiCo Frontend"
-author = "agent"
-
-[workflows.workflow.metadata]
-outputType = "webview"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "npm run dev"
-waitForPort = 5000
-
-[[workflows.workflow]]
 name = "Start Frontend Only"
 author = 49554518
 mode = "sequential"
@@ -72,18 +47,6 @@ args = "npm install"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "npm run dev"
-
-[[workflows.workflow]]
-name = "MagajiCo Backend"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
-waitForPort = 8000
-
-[workflows.workflow.metadata]
-outputType = "console"
 
 [[workflows.workflow]]
 name = "Start Full Stack"
@@ -98,6 +61,43 @@ args = "python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
 task = "shell.exec"
 args = "npm run dev"
 
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "MagajiCo Backend"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "MagajiCo Frontend"
+
+[[workflows.workflow]]
+name = "MagajiCo Backend"
+author = "agent"
+
+[workflows.workflow.metadata]
+outputType = "console"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
+waitForPort = 8000
+
+[[workflows.workflow]]
+name = "MagajiCo Frontend"
+author = "agent"
+
+[workflows.workflow.metadata]
+outputType = "webview"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run dev"
+waitForPort = 5000
+
 [[ports]]
 localPort = 3000
 externalPort = 3000
@@ -107,28 +107,16 @@ localPort = 5000
 externalPort = 80
 
 [[ports]]
-localPort = 8000
-externalPort = 8000
-
-[[ports]]
-localPort = 33319
-externalPort = 4200
-
-[[ports]]
-localPort = 33941
-externalPort = 6800
-
-[[ports]]
-localPort = 35241
-externalPort = 6000
-
-[[ports]]
 localPort = 37227
 externalPort = 5000
 
 [[ports]]
 localPort = 40399
 externalPort = 3001
+
+[[ports]]
+localPort = 41781
+externalPort = 4200
 
 [[ports]]
 localPort = 43779
