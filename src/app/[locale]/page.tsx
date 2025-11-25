@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { getApiBaseUrl } from '@/lib/api';
 import { RefreshCw } from 'lucide-react';
+import { AuthNav } from '@/app/components/AuthNav';
 
 interface Match {
   id: string;
@@ -228,14 +229,17 @@ export default function HomePage() {
               {totalLive}
             </span>
           </div>
-          <button
-            onClick={fetchMatches}
-            disabled={loading}
-            className="p-2 hover:bg-gray-200 rounded transition-colors"
-            title="Refresh matches"
-          >
-            <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
-          </button>
+          <div className="flex items-center gap-4">
+            <button
+              onClick={fetchMatches}
+              disabled={loading}
+              className="p-2 hover:bg-gray-200 rounded transition-colors"
+              title="Refresh matches"
+            >
+              <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
+            </button>
+            <AuthNav />
+          </div>
         </div>
 
         {/* Loading State */}

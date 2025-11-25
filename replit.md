@@ -5,21 +5,43 @@ A multi-language sports data aggregation service with REST API integrated with r
 
 ## Project Structure
 - `main.py` - FastAPI REST API server (Port 8000)
-- `src/app/[locale]/page.tsx` - Homepage with theme toggle
+- `src/app/[locale]/page.tsx` - Homepage with theme toggle and auth
 - `src/app/[locale]/bets/page.tsx` - Today's Bets page with theme support
 - `src/app/[locale]/predictions/page.tsx` - Advanced Predictions Hub (fixed import path)
 - `src/app/components/ThemeProvider.tsx` - React Context-based theme system
 - `src/app/components/ThemeToggle.tsx` - Beautiful animated theme switcher
+- `src/app/components/AuthNav.tsx` - Authentication navigation component
+- `src/app/api/auth/*` - API routes for authentication
 - `src/styles/theme-enhanced.css` - Complete light/dark theme variables
 - `tailwind.config.ts` - Tailwind with Amazon-inspired color palette
+- `shared/schema.ts` - Database schema for users and sessions
 
-## Current State (November 24, 2025)
+## Current State (November 25, 2025)
 - **Language**: Python 3.11 FastAPI + Next.js 16 Frontend
-- **Status**: Fully functional with theme system & i18n
+- **Status**: Fully functional with theme system, i18n & **authenticated user login**
 - **Frontend Port**: 5000 (Nginx proxy)
 - **Backend Port**: 8000 (Direct)
 - **Workflow Status**: Both running successfully
 - **i18n**: Full internationalization with 4 languages (English, Spanish, French, German)
+- **Authentication**: Replit Auth integration with login/logout UI
+
+## Authentication System (NEW ✨)
+- **Provider**: Replit Auth (OpenID Connect)
+- **Supported Login Methods**: 
+  - Email/Password
+  - Google
+  - GitHub
+  - X (Twitter)
+  - Apple
+- **Database**: PostgreSQL with user and session tables
+- **UI Components**:
+  - `AuthNav` component in header showing user profile or login button
+  - Login redirects to Replit Auth
+  - Logout clears session and returns to homepage
+- **API Endpoints**:
+  - `GET /api/auth/user` - Fetch current authenticated user
+  - `GET /api/login` - Start login flow
+  - `GET /api/logout` - Start logout flow
 
 ## New Theme System - "Amazon + Apple" Design Philosophy
 
@@ -126,6 +148,12 @@ python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 3. Your preference automatically saves
 4. All pages smoothly transition colors
 
+### Login/Logout Usage
+1. Click **Login** button in the top-right navbar
+2. Sign in with your preferred method (Email, Google, GitHub, X, Apple)
+3. Your user profile appears in the navbar
+4. Click **Logout** to sign out and return to login state
+
 ## Design Architecture
 
 ### Theme System Stack
@@ -134,6 +162,13 @@ python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 - **CSS Variables** - Dynamic theming across entire app
 - **Tailwind Dark Mode** - `class` + `data-theme` attribute selectors
 - **Framer Motion** - Smooth theme transition animations
+
+### Authentication Stack
+- **Replit Auth** - OpenID Connect provider (Google, GitHub, X, Apple, Email)
+- **Next.js API Routes** - Backend authentication endpoints
+- **PostgreSQL** - User and session storage
+- **Drizzle ORM** - Database schema and migrations
+- **React Query** - Client-side user state management
 
 ### Design Decision: Why "Amazon + Apple"?
 1. **Amazon Light Mode**: 
@@ -154,6 +189,24 @@ python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 
 ## Recent Changes
 
+- **2025-11-25**: ✅ Authenticated User Login Complete
+  - **Provider Integration**: Replit Auth (OpenID Connect) with 5 login methods
+  - **Database Setup**: PostgreSQL with users and sessions tables
+  - **Frontend Components**:
+    - `AuthNav.tsx` - Shows login button or user profile in navbar
+    - `useAuth.ts` hook - Manages auth state with React Query
+  - **API Routes**:
+    - `/api/auth/user` - Fetch authenticated user info
+    - `/api/login` - Redirect to Replit Auth login
+    - `/api/logout` - Clear session and sign out
+  - **UI Integration**:
+    - Login/Logout button in header next to theme toggle
+    - User profile display with avatar and name
+    - Smooth auth state loading
+  - **Database Schema** (`shared/schema.ts`):
+    - `users` table: id, email, firstName, lastName, profileImageUrl, timestamps
+    - `sessions` table: express-session compatible table for session storage
+
 - **2025-11-25**: ✅ MagajiCo Secret Feature Complete (Match Deduplication)
   - **Core Feature**: Detects matches appearing across multiple scrapers with star ratings
     - Displays matches found in 2+ sources (Statarea, ScorePrediction, MyBets)
@@ -173,209 +226,6 @@ python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload
     - **Shows**: Team matchup, sources where match appears, confidence from each source
     - **Button**: "🎁 Claim Secret Bet" call-to-action
     - **Position**: Placed at TOP of predictions page for maximum visibility
-  
-  - **Data Example**: Match appearing in Statarea + ScorePrediction:
-    ```json
-    {
-      "teams": "Manchester United - Liverpool",
-      "count": 2,
-      "sources": ["Statarea", "ScorePrediction"],
-      "source_data": {
-        "statarea": { "confidence": 78, "prediction": "1" },
-        "scoreprediction": { "confidence": 85, "score": "2:1" }
-      }
-    }
-    ```
-  
-  - **Key Files Modified**:
-    - `src/app/[locale]/predictions/page.tsx`: Added state, calculation function, render component, new section
-    - `replit.md`: Updated documentation
-
-- **2025-11-25**: ✅ ScorePrediction.net Scraper + Live Carousel Complete
-  - **Scraper Implementation**: Added `scrape_scoreprediction()` method to `real_scraper.py`
-    - Scrapes match predictions from https://scorepredictor.net/
-    - Extracts predicted match scores from table format
-    - Filters games with total goals > 1 (excludes 1:0 and 0:1 only matches)
-    - Returns up to 20 predictions with full scoring data
-    - Calculates confidence based on score margin (60-95%)
-    - Includes goal probability breakdown (home% / away%)
-  
-  - **API Endpoint**: Added `/api/predictions/scoreprediction` in `main.py`
-    - Returns game predictions with league, teams, scores, confidence
-    - Fallback: Sample data when scraping times out
-  
-  - **Frontend Integration**: Updated `/en/predictions` page
-    - New state: `scorePredictions` and `loadingScorePred`
-    - New fetch function: `fetchScorePredictions()` with auto-refresh every 60s
-    - New render function: `renderScorePredictionCard()` showing:
-      - League name (Champions League, Europa League, etc.)
-      - Team matchup
-      - **Large yellow score display** (e.g., "3:1")
-      - Total goals count
-      - Prediction type (🏠 Home Win / 🤝 Draw / ✈️ Away Win)
-      - Confidence score in yellow badge
-      - Home goal probability %
-      - Away goal probability %
-    - Dynamic carousel replaces static card
-    - Design: Green gradient cards (from-green-500 to-green-600)
-    - Responsive layout with hover animations (1.05x scale)
-  
-  - **Data Format**: Each prediction includes:
-    ```json
-    {
-      "league": "Champions League",
-      "home_team": "Borussia Dortmund",
-      "away_team": "Villarreal",
-      "teams": "Borussia Dortmund - Villarreal",
-      "home_score": 3,
-      "away_score": 1,
-      "score": "3:1",
-      "total_goals": 4,
-      "prediction": "1",
-      "prediction_label": "🏠 Home Win 3:1",
-      "confidence": 85,
-      "home_goal_prob": 75.0,
-      "away_goal_prob": 25.0,
-      "source": "scorepredictor.net"
-    }
-    ```
-
-- **2025-11-25**: ✅ Statarea Scraper + 2-Day Betting Section Complete
-  - **Scraper Implementation**: Added `scrape_statarea()` method to `real_scraper.py`
-    - Scrapes match predictions from https://www.statarea.com/predictions
-    - Extracts home/draw/away prediction percentages (1-3 format)
-    - Returns 15 predictions with team names, times, percentages, confidence scores
-    - Accuracy: ~78% confidence prediction quality
-  - **Fallback Data**: Added `_get_sample_statarea_predictions()` for reliability
-    - Returns 3 sample predictions when live scraping times out
-    - Ensures API always returns data (live OR fallback)
-  - **API Endpoint**: Added `/api/predictions/statarea` in `main.py`
-    - Returns Statarea predictions with source, timestamp, status
-  
-  - **Frontend Integration - Part 1: Statarea Analytics Carousel**
-    - New state: `statareaPredictions` and `loadingStatarea`
-    - New fetch function: `fetchStatareaData()` with auto-refresh every 60 seconds
-    - New render function: `renderStatareCard()` with 3-column percentage display
-    - Dynamic Statarea carousel replaces static card
-    - Shows home/draw/away percentages in grid layout
-    - Displays confidence scores and prediction labels with emojis (🏠/🤝/✈️)
-    - Features: Horizontal scrollable, hover animations (1.05x scale), navigation arrows
-    - Design: Purple gradient cards (from-purple-500 to-purple-600)
-  
-  - **Frontend Integration - Part 2: 2-Day Statarea Bets Section** ✨
-    - New special section emphasizing top betting opportunities
-    - New render function: `renderStatarea2DayBetCard()` - betting-focused design
-    - Displays top 6 predictions sorted by confidence
-    - Visual Design:
-      - Red gradient background (from-red-500 to-red-600)
-      - Yellow/gold border and accents for emphasis
-      - 🎯 "TOP BET" label on each card
-      - Large confidence score badge (text-2xl, yellow-200)
-      - 3-column percentage grid (1/X/2 format)
-      - Yellow "💰 Place Bet" button with hover effects
-    - Layout: Responsive grid (1 col mobile, 2 md, 3 lg)
-    - Animations: Scale-in on scroll, staggered entrance (0.1s delays)
-    - Section Features:
-      - 🚀 "2-Day Statarea Bets" header with red gradient underline
-      - Subtitle: "Top betting opportunities for next 48 hours"
-      - Shows top 6 predictions only (filtered for quality)
-      - Auto-sorts by confidence (highest first)
-  
-  - **Data Format**: Each prediction includes:
-    ```json
-    {
-      "home_team": "Chelsea",
-      "away_team": "Barcelona",
-      "teams": "Chelsea - Barcelona",
-      "time": "15:00",
-      "prediction": "1",
-      "prediction_label": "🏠 Home 46%",
-      "home_pct": 46,
-      "draw_pct": 25,
-      "away_pct": 29,
-      "confidence": 75,
-      "source": "statarea.com"
-    }
-    ```
-
-- **2025-11-24**: ✅ Feature Enhancements & ML Integration Complete
-  - **Advanced Analytics Dashboard**: New AdvancedAnalytics component displaying ML model performance metrics
-  - **Analytics Page**: New `/analytics` page with theme support showing prediction statistics
-  - **ML Prediction Endpoints**: 
-    - `GET /api/ml/predict` - Real-time match outcome prediction using trained Random Forest model
-    - `GET /api/ml/status` - Check ML model availability and performance metrics
-  - **Backend Integration**: ML predictor loaded on startup with 90.3% test accuracy
-  - **Features Brainstormed**:
-    - User Performance Tracking (predict vs actual outcomes)
-    - Parlay Builder (multi-bet combinations)
-    - Social Sharing (share predictions with confidence)
-    - Push Notifications (live match alerts)
-    - Advanced Filtering (by odds, confidence, league)
-    - Model Retraining Dashboard
-
-- **2025-11-24**: ✅ ML Model Integration Complete
-  - Added Random Forest model training script at `src/ml/train_model.py`
-  - Installed scikit-learn (1.7.2) and numpy (2.3.5) dependencies
-  - Model trained successfully with 90.3% test accuracy on 10,000 samples
-  - Model artifacts saved to `model_data.pkl` (includes model, scaler, accuracy, version, date)
-  - Features: 7 input features (home strength, away strength, home advantage, recent form, head-to-head, injuries)
-  - Predicts match outcomes: 0=home win, 1=draw, 2=away win
-
-- **2025-11-24**: ✅ Backend Connected & Fully Operational
-  - Environment variables set: BACKEND_URL, NEXT_PUBLIC_API_URL (development)
-  - **Connection Status**: Full end-to-end connectivity verified ✅
-  - Backend health: 3/7 services healthy (ESPN free APIs + sample data)
-  - Predictions endpoints: All 3 working with sample data fallback
-  - Frontend proxy: Correctly forwarding requests to backend
-  - **Test Results**:
-    - ✅ Backend predictions/soccer: 8 predictions
-    - ✅ Frontend proxy predictions/statarea: 5 predictions
-    - ✅ Backend health check: Responsive
-    - ✅ Both workflows running smoothly
-
-- **2025-11-24**: ✅ Implemented Sports Predictions with Sample Data Fallback
-  - Added realistic sample soccer predictions to `sports_api.py`
-    - `_get_sample_predictions()`: 8 high-confidence MyBetsToday-style predictions (85-91%)
-    - `_get_sample_statarea_predictions()`: 5 StatArea-style predictions with odds (1.68-2.15)
-    - `_get_sample_flashscore_predictions()`: 3 Over 4.5 goals predictions
-  - Updated 3 main prediction endpoints with graceful fallback:
-    - `/api/predictions/soccer` - Uses sample data when scraping fails
-    - `/api/predictions/statarea` - Uses sample data when scraping fails
-    - `/api/predictions/flashscore/over45` - Uses sample data when scraping fails
-  - Fixed API proxy route for Next.js 16 (awaits Promise params)
-  - All endpoints now **always return data** (live scraping OR samples)
-  - Backend logs show: "MyBetsToday scraping returned 0 results, using sample data" ✅
-  - **Verified working**: Endpoints returning 200 with prediction data
-  - Frontend predictions page ready to display with sample data
-  
-- **2025-11-24**: Cleaned up unused theme files
-  - Deleted old `src/styles/theme.css` (legacy purple gradient theme)
-  - Removed theme.css import from layout.tsx
-  - Kept active theme: `theme-enhanced.css` (Amazon + Apple design)
-  - Retained supporting styles: `design-tokens.css`, `icons.css`
-  - Created `shared/health.ts` with HealthData and HealthStatus interfaces
-  - Updated frontend components to import shared health types
-  - Backend `/health` and `/api/health` endpoints now have formal type definitions
-  - Both backend and frontend can use consistent health check types
-  
-- **2025-11-24**: Complete internationalization setup
-  - Reorganized translation files from `shared/` to `src/locales/messages/` (frontend-only)
-  - Expanded translation structure with feature-based organization (common, nav, settings, home, predictions, matches, leaderboard)
-  - Added full i18n support to Settings page with `useTranslations()` hook
-  - Settings page now displays in 4 languages: English, Spanish, French, German
-  - Translated all settings labels: Language, Notifications, Dark Mode, Autoplay, About section
-  - Cleaned up shared folder - now reserved for truly shared files (both backend + frontend)
-  - Settings modal kept with hardcoded strings for compatibility
-  
-- **2025-11-24**: Complete theme system redesign
-  - Replaced purple-pink gradients with Amazon Blue + Orange (light) and Apple Purple (dark)
-  - Implemented ThemeProvider with React Context
-  - Added ThemeToggle component to all pages
-  - Created theme-enhanced.css with full light/dark palette
-  - Fixed Predictions page import path (../../components/ThemeToggle)
-  - Updated Tailwind colors to match new brand
-  - Ensured smooth 0.3s transitions on all theme changes
-  - System preference detection with localStorage fallback
 
 ## User Preferences
 - **Theme System**: Light/Dark/System with automatic detection
@@ -383,13 +233,15 @@ python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 - **Color Priority**: Amazon Blue (#0066cc) for trust, Purple gradients for premium
 - **Accessibility**: High contrast in light mode, reduced eye strain in dark mode
 - **Animation**: Smooth transitions, no jarring color changes
+- **Authentication**: Integrated login/logout with profile display
 
 ## Project Architecture
 ```
 Frontend (Next.js 16):
 ├── Layout with ThemeProvider wrapper
 ├── Pages with embedded ThemeToggle & i18n
-├── Analytics page with AdvancedAnalytics component
+├── AuthNav component in navbar
+├── API routes for authentication
 ├── CSS theme variables for dynamic styling
 ├── i18n translations via next-intl
 └── Tailwind dark mode with `class` selector
@@ -401,6 +253,17 @@ Backend (FastAPI + ML):
 ├── Platform statistics endpoint
 ├── ML health check & status endpoints
 └── Health monitoring
+
+Database (PostgreSQL):
+├── users table (id, email, firstName, lastName, profileImageUrl)
+├── sessions table (sid, sess, expire)
+└── Managed via Drizzle ORM
+
+Authentication:
+├── Replit Auth (OpenID Connect)
+├── 5 login providers (Email, Google, GitHub, X, Apple)
+├── React Query for client-side state
+└── Next.js API routes for backend
 
 ML Model Pipeline:
 ├── src/ml/train_model.py (data generation & training)
@@ -422,8 +285,9 @@ Styling:
 
 ### Shared Folder Organization
 ```
-shared/                         # Reserved for truly shared files
-└── health.ts                   # Health check types (HealthData, HealthStatus)
+shared/                         # Shared files
+├── schema.ts                   # Drizzle schema (users, sessions)
+└── health.ts                   # Health check types
 
 src/
 ├── locales/
@@ -432,6 +296,19 @@ src/
 │       ├── es.json
 │       ├── fr.json
 │       └── de.json
+├── hooks/
+│   └── useAuth.ts             # Auth state management hook
+├── app/
+│   ├── api/
+│   │   └── auth/
+│   │       ├── user/          # GET user info
+│   │       ├── login/         # Redirect to Replit Auth
+│   │       └── logout/        # Clear session
+│   └── components/
+│       ├── AuthNav.tsx        # Login/logout UI
+│       ├── ThemeToggle.tsx
+│       ├── ThemeProvider.tsx
+│       └── ...rest of components...
 └── ...rest of frontend code...
 ```
 
@@ -448,11 +325,12 @@ npm run start
 python -m uvicorn main:app --host 0.0.0.0 --port 8000
 ```
 
-The platform is production-ready with enterprise-grade theming and real sports data integration.
+The platform is production-ready with enterprise-grade theming, real sports data integration, and authenticated user login.
 
 ## Next Steps (Optional Enhancements)
+- Add user profile page with preferences
+- Implement user-specific predictions history
 - Add more theme variants (e.g., "High Contrast" accessibility mode)
 - Implement per-component theme overrides for special sections
-- Add theme preview animations in settings modal
-- Extend to more pages (settings, social, analytics)
-- A/B test Amazon vs Apple theme adoption rates
+- Extend authentication to more pages (settings, social, analytics)
+- A/B test authentication conversion rates

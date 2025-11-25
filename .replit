@@ -1,6 +1,7 @@
 modules = ["nodejs-20", "python-3.11", "web"]
 [agent]
 expertMode = true
+integrations = ["javascript_log_in_with_replit:1.0.0"]
 
 [nix]
 channel = "stable-25_05"
@@ -113,6 +114,10 @@ externalPort = 8000
 [[ports]]
 localPort = 37227
 externalPort = 5000
+
+[[ports]]
+localPort = 38141
+externalPort = 8008
 
 [[ports]]
 localPort = 38405
