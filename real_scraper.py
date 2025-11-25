@@ -799,9 +799,10 @@ class RealSportsScraperService:
                     
         except Exception as e:
             print(f"MyBets.today scraping error: {e}")
-            return self._fetch_real_api_mybets()
+            print("Falling back to sample data")
+            return self._get_sample_mybets_predictions()
         
-        return predictions if predictions else self._fetch_real_api_mybets()
+        return predictions if predictions else self._get_sample_mybets_predictions()
 
     def scrape_statarea(self) -> List[Dict[str, Any]]:
         """
@@ -872,9 +873,10 @@ class RealSportsScraperService:
                     
         except Exception as e:
             print(f"Statarea scraping error: {e}")
-            return self._fetch_real_api_statarea()
+            print("Falling back to sample data")
+            return self._get_sample_statarea_predictions()
         
-        return predictions if predictions else self._fetch_real_api_statarea()
+        return predictions if predictions else self._get_sample_statarea_predictions()
 
     def _get_sample_statarea_predictions(self) -> List[Dict[str, Any]]:
         """Sample Statarea predictions"""
@@ -957,9 +959,10 @@ class RealSportsScraperService:
                     
         except Exception as e:
             print(f"ScorePrediction scraping error: {e}")
-            return self._fetch_real_api_scoreprediction()
+            print("Falling back to sample data")
+            return self._get_sample_scoreprediction()
         
-        return predictions if predictions else self._fetch_real_api_scoreprediction()
+        return predictions if predictions else self._get_sample_scoreprediction()
 
     def _get_sample_scoreprediction(self) -> List[Dict[str, Any]]:
         """Sample ScorePrediction data"""
