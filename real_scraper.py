@@ -335,117 +335,6 @@ class RealSportsScraperService:
         }
         self.ml_predictor = ml_predictor
     
-    def _fetch_real_api_mybets(self) -> List[Dict[str, Any]]:
-        """Fetch REAL MyBets data from football API"""
-        try:
-            # Use statarea-like prediction format from a real source
-            url = "https://www.statarea.com/"
-            response = requests.get(url, headers=self.headers, timeout=8)
-            if response.status_code == 200:
-                soup = BeautifulSoup(response.text, 'html.parser')
-                predictions = []
-                
-                # Try to parse prediction tables
-                tables = soup.find_all('table')
-                for table in tables[:2]:
-                    rows = table.find_all('tr')
-                    for row in rows[:8]:  # Limit to 8 for MyBets
-                        try:
-                            cells = row.find_all(['td', 'th'])
-                            if len(cells) >= 3:
-                                home = cells[0].get_text(strip=True)
-                                away = cells[1].get_text(strip=True) if len(cells) > 1 else ""
-                                
-                                if home and away and len(home) > 2 and len(away) > 2:
-                                    predictions.append({
-                                        "home_team": home,
-                                        "away_team": away,
-                                        "prediction": "Home Win",
-                                        "confidence": 65,
-                                        "source": "MyBets.today"
-                                    })
-                        except:
-                            continue
-                    if predictions:
-                        return predictions[:8]
-        except:
-            pass
-        return []
-    
-    def _fetch_real_api_statarea(self) -> List[Dict[str, Any]]:
-        """Fetch REAL Statarea data"""
-        try:
-            url = "https://www.statarea.com/"
-            response = requests.get(url, headers=self.headers, timeout=8)
-            if response.status_code == 200:
-                soup = BeautifulSoup(response.text, 'html.parser')
-                predictions = []
-                
-                tables = soup.find_all('table')
-                for table in tables:
-                    rows = table.find_all('tr')
-                    for row in rows[:30]:
-                        try:
-                            cells = row.find_all(['td', 'th'])
-                            if len(cells) >= 4:
-                                home = cells[0].get_text(strip=True)
-                                away = cells[1].get_text(strip=True) if len(cells) > 1 else ""
-                                
-                                if home and away and len(home) > 2 and len(away) > 2:
-                                    predictions.append({
-                                        "home_team": home,
-                                        "away_team": away,
-                                        "prediction": "Home Win",
-                                        "predicted_score": "2-1",
-                                        "odds": 1.95,
-                                        "source": "Statarea"
-                                    })
-                        except:
-                            continue
-                    if predictions:
-                        return predictions[:15]
-        except:
-            pass
-        return []
-    
-    def _fetch_real_api_scoreprediction(self) -> List[Dict[str, Any]]:
-        """Fetch REAL ScorePrediction data"""
-        try:
-            url = "https://www.scoreprediction.com/"
-            response = requests.get(url, headers=self.headers, timeout=8)
-            if response.status_code == 200:
-                soup = BeautifulSoup(response.text, 'html.parser')
-                predictions = []
-                
-                divs = soup.find_all('div')
-                for div in divs[:50]:
-                    try:
-                        text = div.get_text(strip=True)
-                        if 'vs' in text.lower():
-                            # Try to extract team names
-                            pattern = re.search(r'(.+?)\s+vs\s+(.+?)(?:\s+|$)', text, re.IGNORECASE)
-                            if pattern:
-                                home = pattern.group(1).strip()
-                                away = pattern.group(2).strip()
-                                
-                                if len(home) > 2 and len(away) > 2:
-                                    predictions.append({
-                                        "home_team": home,
-                                        "away_team": away,
-                                        "predicted_score": "2-1",
-                                        "total_goals": 3,
-                                        "outcome": "Home Win",
-                                        "source": "ScorePrediction"
-                                    })
-                    except:
-                        continue
-                
-                if predictions:
-                    return predictions[:16]
-        except:
-            pass
-        return []
-
     def scrape_flashscore_soccer(self) -> List[LiveMatch]:
         """
         Scrape live soccer matches from FlashScore mobile
@@ -719,78 +608,56 @@ class RealSportsScraperService:
         
         return matches
 
-    def _get_sample_flashscore_matches(self) -> List[LiveMatch]:
-        """Sample FlashScore data"""
-        return [
-            LiveMatch(league="Premier League", home_team="Liverpool", away_team="Manchester City", 
-                     game_time="15:00", status="scheduled", prediction="Draw", confidence=72),
-            LiveMatch(league="La Liga", home_team="Barcelona", away_team="Real Madrid", 
-                     game_time="20:45", status="scheduled", prediction="Home Win", confidence=65),
-        ]
-
-    def _get_sample_espn_matches(self, sport: str) -> List[LiveMatch]:
-        """Sample ESPN data"""
-        return [
-            LiveMatch(league=f"ESPN {sport.upper()}", home_team="Team A", away_team="Team B", 
-                     game_time="TBD", status="scheduled", prediction="TBD", confidence=0),
-        ]
-
-    def _get_sample_api_matches(self) -> List[LiveMatch]:
-        """Sample API-Football data"""
-        return [
-            LiveMatch(league="API-Football", home_team="Sample Home", away_team="Sample Away", 
-                     game_time="TBD", status="scheduled", prediction="TBD", confidence=0),
-        ]
-
-    def _get_comprehensive_sample_data(self) -> List[LiveMatch]:
-        """Comprehensive sample data for development"""
-        return self._get_sample_flashscore_matches() + self._get_sample_espn_matches("soccer")
-
     def scrape_mybets_today(self) -> List[Dict[str, Any]]:
         """
-        Scrape predictions from MyBets.today
-        Returns: List of matches with predictions
+        Scrape predictions from MyBets.today/recommended-soccer-predictions/
+        Returns: List of matches with predictions and confidence
+        Format: Time HH:MM | Home Team vs Away Team | Prediction (1/X/2) Confidence%
         """
         predictions = []
         
         try:
-            url = "https://mybets.today"
+            url = "https://www.mybets.today/recommended-soccer-predictions/"
             response = requests.get(url, headers=self.headers, timeout=10)
             soup = BeautifulSoup(response.text, 'html.parser')
             
-            # Find prediction rows
-            rows = soup.find_all('div', class_=re.compile('row|match|prediction', re.IGNORECASE))
-            
-            for row in rows[:20]:
+            # Find all rows/divs containing match data
+            # Look for pattern: time, teams, and odds with confidence
+            for elem in soup.find_all(['div', 'tr', 'li']):
                 try:
-                    text = row.get_text(strip=True)
+                    text = elem.get_text(strip=True)
                     
-                    # Extract teams (looks for patterns like "Team1 vs Team2")
-                    vs_pattern = re.search(r'(.+?)\s+(?:vs|v)\s+(.+?)(?:\s+\d{1,2}:\d{2}|\s+\d+%)', text, re.IGNORECASE)
-                    if not vs_pattern:
+                    # Pattern: "HH:MM Team1 vs Team2 1 (XX%)"
+                    # Example: "17:30 Orlando Pirates vs Chippa United 1 (79%)"
+                    match_pattern = re.search(
+                        r'(\d{1,2}):(\d{2})\s+(.+?)\s+vs\s+(.+?)\s+([1X2])\s+\((\d+)%\)',
+                        text,
+                        re.IGNORECASE
+                    )
+                    
+                    if not match_pattern:
                         continue
                     
-                    home_team = vs_pattern.group(1).strip()
-                    away_team = vs_pattern.group(2).strip()
+                    time = f"{match_pattern.group(1)}:{match_pattern.group(2)}"
+                    home_team = match_pattern.group(3).strip()
+                    away_team = match_pattern.group(4).strip()
+                    prediction_code = match_pattern.group(5).upper()
+                    confidence = int(match_pattern.group(6))
                     
-                    # Extract prediction
-                    prediction = "Unknown"
-                    if '1' in text and 'home' in text.lower():
-                        prediction = "Home Win"
-                    elif 'x' in text.lower() or 'draw' in text.lower():
-                        prediction = "Draw"
-                    elif '2' in text and 'away' in text.lower():
-                        prediction = "Away Win"
-                    
-                    # Extract confidence percentage
-                    conf_match = re.search(r'(\d{1,3})%', text)
-                    confidence = int(conf_match.group(1)) if conf_match else 0
+                    # Map prediction code to readable format
+                    prediction_map = {
+                        "1": "Home Win",
+                        "X": "Draw",
+                        "2": "Away Win"
+                    }
+                    prediction = prediction_map.get(prediction_code, "Unknown")
                     
                     predictions.append({
                         "home_team": home_team,
                         "away_team": away_team,
                         "prediction": prediction,
                         "confidence": confidence,
+                        "time": time,
                         "source": "MyBets.today"
                     })
                     
@@ -799,10 +666,9 @@ class RealSportsScraperService:
                     
         except Exception as e:
             print(f"MyBets.today scraping error: {e}")
-            print("Falling back to sample data")
-            return self._get_sample_mybets_predictions()
+            return []
         
-        return predictions if predictions else self._get_sample_mybets_predictions()
+        return predictions
 
     def scrape_statarea(self) -> List[Dict[str, Any]]:
         """
@@ -873,43 +739,10 @@ class RealSportsScraperService:
                     
         except Exception as e:
             print(f"Statarea scraping error: {e}")
-            print("Falling back to sample data")
-            return self._get_sample_statarea_predictions()
+            return []
         
-        return predictions if predictions else self._get_sample_statarea_predictions()
+        return predictions
 
-    def _get_sample_statarea_predictions(self) -> List[Dict[str, Any]]:
-        """Sample Statarea predictions"""
-        return [
-            {"home_team": "Manchester United", "away_team": "Liverpool", "prediction": "Home Win", "predicted_score": "2-1", "odds": 2.15, "source": "Statarea"},
-            {"home_team": "Arsenal", "away_team": "Chelsea", "prediction": "Draw", "predicted_score": "1-1", "odds": 3.50, "source": "Statarea"},
-            {"home_team": "Manchester City", "away_team": "Tottenham", "prediction": "Home Win", "predicted_score": "2-0", "odds": 1.95, "source": "Statarea"},
-            {"home_team": "Brighton", "away_team": "Newcastle", "prediction": "Draw", "predicted_score": "1-1", "odds": 3.40, "source": "Statarea"},
-            {"home_team": "Aston Villa", "away_team": "Fulham", "prediction": "Home Win", "predicted_score": "2-1", "odds": 2.10, "source": "Statarea"},
-            {"home_team": "Real Madrid", "away_team": "Barcelona", "prediction": "Home Win", "predicted_score": "2-1", "odds": 1.85, "source": "Statarea"},
-            {"home_team": "Bayern Munich", "away_team": "Borussia Dortmund", "prediction": "Home Win", "predicted_score": "3-0", "odds": 1.70, "source": "Statarea"},
-            {"home_team": "PSG", "away_team": "Marseille", "prediction": "Home Win", "predicted_score": "2-0", "odds": 1.65, "source": "Statarea"},
-            {"home_team": "Inter", "away_team": "AC Milan", "prediction": "Home Win", "predicted_score": "2-1", "odds": 2.05, "source": "Statarea"},
-            {"home_team": "Juventus", "away_team": "Roma", "prediction": "Home Win", "predicted_score": "2-1", "odds": 1.95, "source": "Statarea"},
-            {"home_team": "Tottenham", "away_team": "West Ham", "prediction": "Home Win", "predicted_score": "2-0", "odds": 2.20, "source": "Statarea"},
-            {"home_team": "Leicester", "away_team": "Everton", "prediction": "Draw", "predicted_score": "1-1", "odds": 3.25, "source": "Statarea"},
-            {"home_team": "Napoli", "away_team": "Lazio", "prediction": "Away Win", "predicted_score": "1-2", "odds": 3.15, "source": "Statarea"},
-            {"home_team": "Atalanta", "away_team": "Fiorentina", "prediction": "Home Win", "predicted_score": "2-1", "odds": 2.00, "source": "Statarea"},
-            {"home_team": "Ajax", "away_team": "PSV", "prediction": "Home Win", "predicted_score": "2-0", "odds": 1.90, "source": "Statarea"},
-        ]
-
-    def _get_sample_mybets_predictions(self) -> List[Dict[str, Any]]:
-        """Sample MyBets.today predictions"""
-        return [
-            {"home_team": "Liverpool", "away_team": "Manchester City", "prediction": "Home Win", "confidence": 72, "source": "MyBets.today"},
-            {"home_team": "Barcelona", "away_team": "Real Madrid", "prediction": "Draw", "confidence": 65, "source": "MyBets.today"},
-            {"home_team": "Chelsea", "away_team": "Arsenal", "prediction": "Away Win", "confidence": 58, "source": "MyBets.today"},
-            {"home_team": "Bayern Munich", "away_team": "RB Leipzig", "prediction": "Home Win", "confidence": 81, "source": "MyBets.today"},
-            {"home_team": "PSG", "away_team": "Lens", "prediction": "Home Win", "confidence": 76, "source": "MyBets.today"},
-            {"home_team": "Inter", "away_team": "Napoli", "prediction": "Draw", "confidence": 62, "source": "MyBets.today"},
-            {"home_team": "Juventus", "away_team": "Atalanta", "prediction": "Away Win", "confidence": 55, "source": "MyBets.today"},
-            {"home_team": "Manchester United", "away_team": "Newcastle", "prediction": "Home Win", "confidence": 68, "source": "MyBets.today"},
-        ]
 
     def scrape_scoreprediction(self) -> List[Dict[str, Any]]:
         """
@@ -959,31 +792,10 @@ class RealSportsScraperService:
                     
         except Exception as e:
             print(f"ScorePrediction scraping error: {e}")
-            print("Falling back to sample data")
-            return self._get_sample_scoreprediction()
+            return []
         
-        return predictions if predictions else self._get_sample_scoreprediction()
+        return predictions
 
-    def _get_sample_scoreprediction(self) -> List[Dict[str, Any]]:
-        """Sample ScorePrediction data"""
-        return [
-            {"home_team": "Manchester City", "away_team": "Tottenham", "predicted_score": "2-1", "total_goals": 3, "outcome": "Home Win", "source": "ScorePrediction"},
-            {"home_team": "Chelsea", "away_team": "Newcastle", "predicted_score": "1-1", "total_goals": 2, "outcome": "Draw", "source": "ScorePrediction"},
-            {"home_team": "Liverpool", "away_team": "Brighton", "predicted_score": "2-0", "total_goals": 2, "outcome": "Home Win", "source": "ScorePrediction"},
-            {"home_team": "Arsenal", "away_team": "Aston Villa", "predicted_score": "3-1", "total_goals": 4, "outcome": "Home Win", "source": "ScorePrediction"},
-            {"home_team": "Manchester United", "away_team": "Fulham", "predicted_score": "1-1", "total_goals": 2, "outcome": "Draw", "source": "ScorePrediction"},
-            {"home_team": "Real Madrid", "away_team": "Barcelona", "predicted_score": "2-2", "total_goals": 4, "outcome": "Draw", "source": "ScorePrediction"},
-            {"home_team": "Bayern Munich", "away_team": "Borussia Dortmund", "predicted_score": "3-0", "total_goals": 3, "outcome": "Home Win", "source": "ScorePrediction"},
-            {"home_team": "PSG", "away_team": "Marseille", "predicted_score": "2-1", "total_goals": 3, "outcome": "Home Win", "source": "ScorePrediction"},
-            {"home_team": "Inter", "away_team": "AC Milan", "predicted_score": "1-0", "total_goals": 1, "outcome": "Home Win", "source": "ScorePrediction"},
-            {"home_team": "Juventus", "away_team": "Roma", "predicted_score": "2-1", "total_goals": 3, "outcome": "Home Win", "source": "ScorePrediction"},
-            {"home_team": "Tottenham", "away_team": "West Ham", "predicted_score": "2-0", "total_goals": 2, "outcome": "Home Win", "source": "ScorePrediction"},
-            {"home_team": "Leicester", "away_team": "Everton", "predicted_score": "1-1", "total_goals": 2, "outcome": "Draw", "source": "ScorePrediction"},
-            {"home_team": "Napoli", "away_team": "Lazio", "predicted_score": "2-1", "total_goals": 3, "outcome": "Home Win", "source": "ScorePrediction"},
-            {"home_team": "Atalanta", "away_team": "Fiorentina", "predicted_score": "3-1", "total_goals": 4, "outcome": "Home Win", "source": "ScorePrediction"},
-            {"home_team": "Ajax", "away_team": "PSV", "predicted_score": "2-0", "total_goals": 2, "outcome": "Home Win", "source": "ScorePrediction"},
-            {"home_team": "Sevilla", "away_team": "Villarreal", "predicted_score": "1-1", "total_goals": 2, "outcome": "Draw", "source": "ScorePrediction"},
-        ]
 
     def scrape_bet365_odds(self) -> List[Dict[str, Any]]:
         """
@@ -1042,8 +854,8 @@ class RealSportsScraperService:
         except:
             pass
         
-        # Return sample Bet365-style odds if scraping fails
-        return self._get_sample_bet365_odds()
+        # Return empty if scraping fails (no static fallback)
+        return []
 
     def scrape_soccerapi_odds(self, bookmaker: str = "888sport", league: str = "premier_league", min_odds: float = 1.0, max_odds: float = 1.16, include_over_under: bool = True, timeout: int = 5) -> List[Dict[str, Any]]:
         """
@@ -1062,7 +874,7 @@ class RealSportsScraperService:
             return _PREDICTION_CACHE["soccerapi_cache"][cache_key]
         
         if not SOCCERAPI_AVAILABLE:
-            return self._get_sample_soccerapi_odds()
+            return []
         
         odds_data = []
         
@@ -1115,7 +927,7 @@ class RealSportsScraperService:
                     matches = api.odds(country, lg)
                 else:
                     signal.alarm(0)
-                    return self._get_sample_soccerapi_odds()
+                    return []
                 
                 # Process matches
                 for match in matches[:10]:  # Limit to 10 matches for speed
@@ -1168,10 +980,10 @@ class RealSportsScraperService:
             except TimeoutError:
                 print(f"Timeout fetching {bookmaker} odds")
                 signal.alarm(0)
-                # Use cache or sample data
+                # Use cache only
                 if cache_key in _PREDICTION_CACHE["soccerapi_cache"]:
                     return _PREDICTION_CACHE["soccerapi_cache"][cache_key]
-                return self._get_sample_soccerapi_odds()
+                return []
             
             # Cache successful results
             if odds_data:
@@ -1181,110 +993,12 @@ class RealSportsScraperService:
                 # Use cache if no results
                 if cache_key in _PREDICTION_CACHE["soccerapi_cache"]:
                     return _PREDICTION_CACHE["soccerapi_cache"][cache_key]
-                return self._get_sample_soccerapi_odds()
+                return []
                 
         except Exception as e:
             print(f"soccerapi error ({bookmaker}): {e}")
-            # Return cached or sample data
+            # Return cached data only
             if cache_key in _PREDICTION_CACHE["soccerapi_cache"]:
                 return _PREDICTION_CACHE["soccerapi_cache"][cache_key]
-            return self._get_sample_soccerapi_odds()
+            return []
 
-    def _get_sample_soccerapi_odds(self) -> List[Dict[str, Any]]:
-        """Sample data mimicking soccerapi response"""
-        return [
-            {
-                "home_team": "Manchester City",
-                "away_team": "Liverpool",
-                "time": "2025-11-25T15:00:00Z",
-                "odds_1": 1.72,
-                "odds_x": 3.75,
-                "odds_2": 5.00,
-                "best_odd": 1.72,
-                "prediction": "1",
-                "over_4_5": 1.95,
-                "under_4_5": 1.83,
-                "source": "888SPORT"
-            },
-            {
-                "home_team": "Arsenal",
-                "away_team": "Chelsea",
-                "time": "2025-11-25T17:30:00Z",
-                "odds_1": 1.95,
-                "odds_x": 3.50,
-                "odds_2": 4.20,
-                "best_odd": 1.95,
-                "prediction": "1",
-                "over_4_5": 1.87,
-                "under_4_5": 1.91,
-                "source": "888SPORT"
-            },
-            {
-                "home_team": "Barcelona",
-                "away_team": "Real Madrid",
-                "time": "2025-11-25T20:45:00Z",
-                "odds_1": 1.85,
-                "odds_x": 3.60,
-                "odds_2": 4.50,
-                "best_odd": 1.85,
-                "prediction": "1",
-                "over_4_5": 2.10,
-                "under_4_5": 1.72,
-                "source": "888SPORT"
-            },
-        ]
-
-    def _get_sample_bet365_odds(self) -> List[Dict[str, Any]]:
-        """Sample Bet365-style soccer odds with realistic prices"""
-        return [
-            {
-                "home_team": "Manchester City",
-                "away_team": "Liverpool",
-                "odds_1": 1.72,
-                "odds_x": 3.75,
-                "odds_2": 5.00,
-                "best_odd": 1.72,
-                "prediction": "1",
-                "source": "Bet365"
-            },
-            {
-                "home_team": "Arsenal",
-                "away_team": "Chelsea",
-                "odds_1": 1.95,
-                "odds_x": 3.50,
-                "odds_2": 4.20,
-                "best_odd": 1.95,
-                "prediction": "1",
-                "source": "Bet365"
-            },
-            {
-                "home_team": "Barcelona",
-                "away_team": "Real Madrid",
-                "odds_1": 1.85,
-                "odds_x": 3.60,
-                "odds_2": 4.50,
-                "best_odd": 1.85,
-                "prediction": "1",
-                "source": "Bet365"
-            },
-            {
-                "home_team": "Bayern Munich",
-                "away_team": "Borussia Dortmund",
-                "odds_1": 1.65,
-                "odds_x": 3.80,
-                "odds_2": 5.50,
-                "best_odd": 1.65,
-                "prediction": "1",
-                "source": "Bet365"
-            },
-            {
-                "home_team": "Inter Milan",
-                "away_team": "AC Milan",
-                "odds_1": 1.90,
-                "odds_x": 3.40,
-                "odds_2": 4.10,
-                "best_odd": 1.90,
-                "prediction": "1",
-                "source": "Bet365"
-            },
-        ]
