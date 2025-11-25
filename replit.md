@@ -39,6 +39,31 @@ The platform is built with a FastAPI backend (Python 3.11) and a Next.js 16 fron
 
 ## Recent Changes
 
+### 2025-11-25: MongoDB Integration for Centralized Data Storage ✅
+**Dual-Storage System - MongoDB + JSON Fallback:**
+- **ResultsLogger Enhanced**: Now supports both MongoDB Atlas (cloud) and JSON (local)
+- **Automatic Failover**: Falls back to JSON if MongoDB connection fails
+- **Storage Strategy**:
+  - **MongoDB**: Primary storage for scalability and easy access
+  - **JSON** (`shared/results_log.json`): Backup storage for reliability
+  - Both receive every log entry for redundancy
+- **New Endpoints**:
+  - `/api/mongodb/status` - Check MongoDB connection status
+  - `/api/mongodb/stats` - View MongoDB collection statistics
+- **Features**:
+  - Automatic sync of historical JSON data to MongoDB on startup
+  - Graceful error handling - system continues with JSON-only if MongoDB unavailable
+  - MongoDB collections: `predictions`, `odds`, `matches`, `metadata`
+  - Dual logging to both databases automatically
+- **Configuration**: Uses `MONGODB_URI` secret from environment
+- **Tested**: System running with JSON storage (MongoDB DNS failover working)
+
+**To Enable MongoDB**:
+1. Create MongoDB Atlas free account (mongodb.com)
+2. Create a cluster and get connection string
+3. Whitelist Replit IP: 0.0.0.0/0 in MongoDB Atlas Network Access
+4. Update MONGODB_URI secret with your connection string
+
 ### 2025-11-25: Results Storage & Training Data System ✅
 **Comprehensive Logging for All API Outputs:**
 - **ResultsLogger Class**: Stores all predictions, odds, and matches to `shared/results_log.json`

@@ -8,6 +8,7 @@ import re
 import json
 from typing import List, Dict, Any, Optional
 from datetime import datetime
+import os
 
 try:
     from soccerapi.api import Api888Sport, ApiBet365, ApiUnibet
@@ -15,6 +16,13 @@ try:
 except ImportError:
     SOCCERAPI_AVAILABLE = False
     print("⚠️ soccerapi not installed. Run: pip install soccerapi")
+
+try:
+    from pymongo import MongoClient
+    MONGODB_AVAILABLE = True
+except ImportError:
+    MONGODB_AVAILABLE = False
+    print("⚠️ pymongo not installed. Run: pip install pymongo")
 
 
 # Global cache for predictions to maintain consistency on failures
@@ -27,11 +35,55 @@ _PREDICTION_CACHE = {
 
 
 class ResultsLogger:
-    """Logs all API outputs for training and consistency tracking"""
+    """Logs all API outputs to MongoDB and JSON for training and consistency tracking"""
     
-    def __init__(self, storage_path: str = "shared/results_log.json"):
+    def __init__(self, storage_path: str = "shared/results_log.json", mongodb_uri: Optional[str] = None):
         self.storage_path = storage_path
+        self.mongodb_uri = mongodb_uri or os.getenv("MONGODB_URI")
+        self.mongo_client = None
+        self.mongo_db = None
         self.results = self._load_results()
+        
+        # Try to connect to MongoDB
+        if self.mongodb_uri and MONGODB_AVAILABLE:
+            self._connect_mongodb()
+        else:
+            print("⚠️ MongoDB not configured. Using JSON storage only.")
+    
+    def _connect_mongodb(self) -> None:
+        """Connect to MongoDB Atlas"""
+        try:
+            self.mongo_client = MongoClient(self.mongodb_uri, serverSelectionTimeoutMS=5000)
+            self.mongo_client.admin.command('ping')
+            self.mongo_db = self.mongo_client['magajico_sports']
+            print("✅ Connected to MongoDB Atlas successfully")
+            self._sync_to_mongodb()
+        except Exception as e:
+            print(f"⚠️ MongoDB connection failed: {e}. Using JSON storage only.")
+            self.mongo_client = None
+            self.mongo_db = None
+    
+    def _sync_to_mongodb(self) -> None:
+        """Sync existing JSON data to MongoDB on startup"""
+        try:
+            if not self.mongo_db:
+                return
+            
+            collections = ["predictions", "odds", "matches"]
+            for collection_name in collections:
+                collection = self.mongo_db[collection_name]
+                items = self.results.get(collection_name, [])
+                
+                for item in items:
+                    # Insert if not already in MongoDB
+                    try:
+                        collection.insert_one(item)
+                    except:
+                        pass  # Already exists
+            
+            print(f"📊 Synced {sum(len(self.results.get(c, [])) for c in collections)} records to MongoDB")
+        except Exception as e:
+            print(f"⚠️ MongoDB sync failed: {e}")
     
     def _load_results(self) -> Dict[str, Any]:
         """Load existing results from disk"""
@@ -50,14 +102,26 @@ class ResultsLogger:
             }
     
     def save_results(self) -> None:
-        """Persist results to disk"""
+        """Persist results to disk (JSON) and MongoDB"""
+        # Save to JSON
         try:
-            import os
             os.makedirs(os.path.dirname(self.storage_path), exist_ok=True)
             with open(self.storage_path, 'w') as f:
                 json.dump(self.results, f, indent=2, default=str)
         except Exception as e:
-            print(f"Failed to save results: {e}")
+            print(f"Failed to save JSON results: {e}")
+        
+        # Also save to MongoDB
+        if self.mongo_db:
+            try:
+                # Update metadata
+                self.mongo_db['metadata'].update_one(
+                    {"type": "system"},
+                    {"$set": self.results["metadata"]},
+                    upsert=True
+                )
+            except Exception as e:
+                print(f"Failed to update MongoDB metadata: {e}")
     
     def log_prediction(self, prediction: Dict[str, Any]) -> None:
         """Log a model prediction"""
@@ -69,6 +133,13 @@ class ResultsLogger:
         self.results["predictions"].append(log_entry)
         self.results["metadata"]["total_logs"] += 1
         self.save_results()
+        
+        # Save to MongoDB
+        if self.mongo_db:
+            try:
+                self.mongo_db['predictions'].insert_one(log_entry)
+            except Exception as e:
+                print(f"Failed to save prediction to MongoDB: {e}")
     
     def log_odds(self, odds_data: Dict[str, Any], source: str) -> None:
         """Log odds scraping result"""
@@ -81,6 +152,13 @@ class ResultsLogger:
         self.results["odds"].append(log_entry)
         self.results["metadata"]["total_logs"] += 1
         self.save_results()
+        
+        # Save to MongoDB
+        if self.mongo_db:
+            try:
+                self.mongo_db['odds'].insert_one(log_entry)
+            except Exception as e:
+                print(f"Failed to save odds to MongoDB: {e}")
     
     def log_match(self, match: Dict[str, Any]) -> None:
         """Log match prediction result"""
@@ -92,9 +170,28 @@ class ResultsLogger:
         self.results["matches"].append(log_entry)
         self.results["metadata"]["total_logs"] += 1
         self.save_results()
+        
+        # Save to MongoDB
+        if self.mongo_db:
+            try:
+                self.mongo_db['matches'].insert_one(log_entry)
+            except Exception as e:
+                print(f"Failed to save match to MongoDB: {e}")
     
     def get_recent(self, count: int = 100, log_type: Optional[str] = None) -> List[Dict[str, Any]]:
-        """Get recent logged results"""
+        """Get recent logged results from MongoDB (preferred) or JSON fallback"""
+        if self.mongo_db and log_type:
+            try:
+                collection = self.mongo_db[f"{log_type}s"]
+                items = list(collection.find().sort("timestamp", -1).limit(count))
+                # Remove MongoDB's _id field for cleaner JSON
+                for item in items:
+                    item.pop("_id", None)
+                return items
+            except Exception as e:
+                print(f"Failed to get recent from MongoDB: {e}")
+        
+        # Fallback to JSON
         if log_type:
             items = self.results.get(f"{log_type}s", [])
         else:
@@ -106,7 +203,31 @@ class ResultsLogger:
         return sorted(items, key=lambda x: x.get("timestamp", ""), reverse=True)[:count]
     
     def get_training_data(self) -> Dict[str, Any]:
-        """Get all logged data formatted for model training"""
+        """Get all logged data formatted for model training from MongoDB or JSON"""
+        if self.mongo_db:
+            try:
+                predictions = list(self.mongo_db['predictions'].find().limit(1000))
+                odds = list(self.mongo_db['odds'].find().limit(1000))
+                matches = list(self.mongo_db['matches'].find().limit(1000))
+                
+                # Remove MongoDB IDs
+                for item in predictions + odds + matches:
+                    item.pop("_id", None)
+                
+                return {
+                    "total_predictions": len(predictions),
+                    "total_odds_logs": len(odds),
+                    "total_matches": len(matches),
+                    "predictions": predictions,
+                    "odds": odds,
+                    "matches": matches,
+                    "metadata": self.results["metadata"],
+                    "source": "MongoDB"
+                }
+            except Exception as e:
+                print(f"Failed to get training data from MongoDB: {e}")
+        
+        # Fallback to JSON
         return {
             "total_predictions": len(self.results["predictions"]),
             "total_odds_logs": len(self.results["odds"]),
@@ -114,8 +235,14 @@ class ResultsLogger:
             "predictions": self.results["predictions"],
             "odds": self.results["odds"],
             "matches": self.results["matches"],
-            "metadata": self.results["metadata"]
+            "metadata": self.results["metadata"],
+            "source": "JSON"
         }
+    
+    def close(self) -> None:
+        """Close MongoDB connection"""
+        if self.mongo_client:
+            self.mongo_client.close()
 
 
 class LiveMatch:

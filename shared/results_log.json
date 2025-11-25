@@ -41,6 +41,27 @@
         "head_to_head": 0.55,
         "injuries": 0.9
       }
+    },
+    {
+      "timestamp": "2025-11-25T19:12:54.313246",
+      "type": "prediction",
+      "match": "Liverpool vs Manchester_United",
+      "prediction": "Draw",
+      "confidence": 91.61638979272044,
+      "probabilities": {
+        "home_win": 0.06920884752638856,
+        "draw": 0.9161638979272044,
+        "away_win": 0.014627254546407158
+      },
+      "features_used": {
+        "home_strength": 0.85,
+        "away_strength": 0.8,
+        "home_advantage": 0.65,
+        "recent_form_home": 0.82,
+        "recent_form_away": 0.78,
+        "head_to_head": 0.52,
+        "injuries": 0.9
+      }
     }
   ],
   "odds": [
@@ -127,11 +148,56 @@
           "source": "888SPORT"
         }
       ]
+    },
+    {
+      "timestamp": "2025-11-25T19:12:54.354850",
+      "type": "odds",
+      "source": "soccerapi_bet365_over_4_5",
+      "market": "over_4_5_goals",
+      "league": "premier_league",
+      "bookmaker": "bet365",
+      "max_odds": 2.2,
+      "total_matches": 3,
+      "matches": [
+        {
+          "home_team": "Manchester City",
+          "away_team": "Liverpool",
+          "time": "2025-11-25T15:00:00Z",
+          "full_time_1": 1.72,
+          "full_time_x": 3.75,
+          "full_time_2": 5.0,
+          "over_4_5_odds": 1.95,
+          "under_4_5_odds": 1.83,
+          "source": "888SPORT"
+        },
+        {
+          "home_team": "Arsenal",
+          "away_team": "Chelsea",
+          "time": "2025-11-25T17:30:00Z",
+          "full_time_1": 1.95,
+          "full_time_x": 3.5,
+          "full_time_2": 4.2,
+          "over_4_5_odds": 1.87,
+          "under_4_5_odds": 1.91,
+          "source": "888SPORT"
+        },
+        {
+          "home_team": "Barcelona",
+          "away_team": "Real Madrid",
+          "time": "2025-11-25T20:45:00Z",
+          "full_time_1": 1.85,
+          "full_time_x": 3.6,
+          "full_time_2": 4.5,
+          "over_4_5_odds": 2.1,
+          "under_4_5_odds": 1.72,
+          "source": "888SPORT"
+        }
+      ]
     }
   ],
   "matches": [],
   "metadata": {
     "created": "2025-11-25T19:02:16.053281",
-    "total_logs": 4
+    "total_logs": 6
   }
 }

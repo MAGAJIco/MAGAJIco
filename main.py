@@ -18,8 +18,12 @@ app = FastAPI(title="MagajiCo Sports Prediction API")
 # Prediction cache for consistency on failures
 _PREDICTION_RESULT_CACHE = {}
 
-# Initialize results logger for all API outputs
-results_logger = ResultsLogger(storage_path="shared/results_log.json")
+# Initialize results logger with MongoDB support
+import os
+results_logger = ResultsLogger(
+    storage_path="shared/results_log.json",
+    mongodb_uri=os.getenv("MONGODB_URI")
+)
 
 # CORS
 app.add_middleware(
@@ -678,12 +682,66 @@ async def get_training_summary():
                 "matches_logged": matches,
                 "total_entries": total,
                 "storage_file": results_logger.storage_path,
+                "mongodb_connected": results_logger.mongo_db is not None,
                 "created": results_logger.results["metadata"].get("created")
             },
             "timestamp": datetime.now().isoformat()
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to get summary: {str(e)}")
+
+
+@app.get("/api/mongodb/status")
+async def get_mongodb_status():
+    """
+    Get MongoDB connection status
+    """
+    try:
+        return {
+            "status": "success",
+            "mongodb_connected": results_logger.mongo_db is not None,
+            "database": "magajico_sports" if results_logger.mongo_db else None,
+            "storage_methods": ["MongoDB", "JSON"] if results_logger.mongo_db else ["JSON"],
+            "collections": {
+                "predictions": len(results_logger.results["predictions"]),
+                "odds": len(results_logger.results["odds"]),
+                "matches": len(results_logger.results["matches"])
+            },
+            "timestamp": datetime.now().isoformat()
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get MongoDB status: {str(e)}")
+
+
+@app.get("/api/mongodb/stats")
+async def get_mongodb_stats():
+    """
+    Get detailed MongoDB statistics
+    """
+    try:
+        stats = {
+            "status": "success",
+            "mongodb_connected": results_logger.mongo_db is not None,
+            "storage_file": results_logger.storage_path,
+            "dual_storage": results_logger.mongo_db is not None,
+            "timestamp": datetime.now().isoformat()
+        }
+        
+        if results_logger.mongo_db:
+            try:
+                collections = {
+                    "predictions": results_logger.mongo_db['predictions'].count_documents({}),
+                    "odds": results_logger.mongo_db['odds'].count_documents({}),
+                    "matches": results_logger.mongo_db['matches'].count_documents({})
+                }
+                stats["mongodb_collections"] = collections
+                stats["total_mongodb_records"] = sum(collections.values())
+            except Exception as e:
+                stats["mongodb_error"] = str(e)
+        
+        return stats
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get MongoDB stats: {str(e)}")
 
 
 @app.get("/api/stats")
@@ -745,6 +803,8 @@ async def root():
             "training_logs": "/api/training/logs",
             "training_data": "/api/training/data",
             "training_summary": "/api/training/summary",
+            "mongodb_status": "/api/mongodb/status",
+            "mongodb_stats": "/api/mongodb/stats",
             "health": "/api/health",
             "stats": "/api/stats"
         },
