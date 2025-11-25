@@ -157,7 +157,7 @@ class RealSportsScraperService:
         Scrape FlashScore mobile calendar for ENTIRE WEEK odds (7 days)
         URL: https://www.flashscore.mobi/?d=X&s=5 (d=0 to d=6)
         Returns daily odds calendar filtered by max_odds threshold
-        Organized day-by-day with only matches where any odd is <= max_odds
+        Organized day-by-day with ONLY matches where at least one odd is <= max_odds
         
         NOTE: FlashScore uses JavaScript to load content, so we fallback to
         enhanced sample data that mimics real match structures.
@@ -212,51 +212,55 @@ class RealSportsScraperService:
                 full_date = day_date.strftime('%Y-%m-%d')
                 
                 day_matches = []
+                all_fixtures = set()
                 
-                # Generate 3-8 matches per day with realistic data
-                num_matches = random.randint(3, 8)
-                used_fixtures = set()
+                # Only generate matches that meet the odds criteria (max_odds filter)
+                # Retry until we get enough matches with odds <= max_odds
+                attempts = 0
+                max_attempts = 50
                 
-                for _ in range(num_matches):
-                    # Select random league and fixture
+                while len(day_matches) < 5 and attempts < max_attempts:
+                    attempts += 1
+                    
+                    # Select random league and fixture (avoid duplicates)
                     league = random.choice(list(leagues_teams.keys()))
-                    available_fixtures = [f for f in leagues_teams[league] if f not in used_fixtures]
+                    available_fixtures = [f for f in leagues_teams[league] if f not in all_fixtures]
                     
                     if not available_fixtures:
                         continue
                     
                     fixture = random.choice(available_fixtures)
-                    used_fixtures.add(fixture)
+                    all_fixtures.add(fixture)
                     home_team, away_team = fixture
                     
-                    # Generate realistic odds with favorites (low odds)
-                    # Bias towards home wins for variety
-                    home_bias = random.uniform(0.5, 0.9)
+                    # Generate odds with BIAS towards favorites (odds <= 1.16)
+                    # 70% of matches should have at least one odd <= 1.16
+                    is_favorite_match = random.random() < 0.7
                     
-                    if home_bias > 0.7:  # Home favorite
-                        odds_1 = round(random.uniform(1.05, 1.15), 2)
-                        odds_x = round(random.uniform(4.5, 7.0), 2)
-                        odds_2 = round(random.uniform(8.0, 15.0), 2)
-                    elif home_bias < 0.3:  # Away favorite
-                        odds_1 = round(random.uniform(8.0, 15.0), 2)
-                        odds_x = round(random.uniform(4.5, 7.0), 2)
-                        odds_2 = round(random.uniform(1.05, 1.15), 2)
-                    else:  # Balanced match
-                        odds_1 = round(random.uniform(2.2, 3.5), 2)
-                        odds_x = round(random.uniform(2.8, 3.5), 2)
-                        odds_2 = round(random.uniform(2.2, 3.5), 2)
+                    if is_favorite_match:
+                        # Generate favorite odds (likely to have odds <= 1.16)
+                        odds_1 = round(random.uniform(1.04, 1.16), 2)
+                        odds_x = round(random.uniform(5.0, 8.0), 2)
+                        odds_2 = round(random.uniform(8.0, 20.0), 2)
+                    else:
+                        # Generate non-favorite odds (higher odds overall)
+                        odds_1 = round(random.uniform(1.5, 2.5), 2)
+                        odds_x = round(random.uniform(3.0, 4.5), 2)
+                        odds_2 = round(random.uniform(1.5, 2.5), 2)
                     
-                    # Filter by max_odds (only include matches with at least one low odd)
+                    # STRICT FILTER: only include matches with at least one odd <= max_odds
                     odds_list = [odds_1, odds_x, odds_2]
-                    if min(odds_list) > max_odds:
+                    min_odd = min(odds_list)
+                    
+                    if min_odd > max_odds:
+                        # This match doesn't meet criteria, skip it
                         continue
                     
-                    # Determine best prediction
-                    best_odd = min(odds_list)
-                    if best_odd == odds_1:
+                    # Determine best prediction (lowest odd)
+                    if min_odd == odds_1:
                         prediction = "1"
                         prediction_label = "🏠 Home"
-                    elif best_odd == odds_x:
+                    elif min_odd == odds_x:
                         prediction = "X"
                         prediction_label = "🤝 Draw"
                     else:
@@ -273,8 +277,8 @@ class RealSportsScraperService:
                         "odds_2": odds_2,
                         "best_prediction": prediction,
                         "prediction_label": prediction_label,
-                        "best_odd": best_odd,
-                        "confidence": max(50, int((1.5 / best_odd) * 100)) if best_odd > 0 else 0
+                        "best_odd": min_odd,
+                        "confidence": max(50, int((1.5 / min_odd) * 100)) if min_odd > 0 else 0
                     }
                     
                     day_matches.append(match_data)
@@ -290,7 +294,10 @@ class RealSportsScraperService:
                     "matches": day_matches
                 }
                 
-                print(f"✅ Day {day_offset} ({date_label}): {len(day_matches)} matches with odds <= {max_odds}")
+                if len(day_matches) > 0:
+                    print(f"✅ Day {day_offset} ({date_label}): {len(day_matches)} matches with odds <= {max_odds}")
+                else:
+                    print(f"ℹ️ Day {day_offset} ({date_label}): 0 matches with odds <= {max_odds}")
                 
             except Exception as e:
                 print(f"Error generating day {day_offset}: {e}")
