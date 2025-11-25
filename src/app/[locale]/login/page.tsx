@@ -127,13 +127,13 @@ export default function LoginPage() {
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-primary" />
             </div>
           ) : (
-            <Link
-              href="/api/login"
+            <a
+              href="/auth/login"
               className="flex items-center justify-center gap-3 w-full px-6 py-3 rounded-lg bg-brand-primary hover:bg-opacity-90 text-white font-semibold transition-colors"
             >
               <LogIn size={20} />
               Continue with Google
-            </Link>
+            </a>
           )}
 
           <p className="text-xs text-center text-gray-500 dark:text-gray-400 mt-6">

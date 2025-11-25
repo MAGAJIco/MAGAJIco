@@ -26,10 +26,6 @@ export function useAuth() {
 
         if (response.ok) {
           const userData = await response.json();
-          // Check for username in localStorage as fallback
-          if (!userData.username && typeof window !== 'undefined') {
-            userData.username = localStorage.getItem('user_username') || undefined;
-          }
           setUser(userData);
         } else {
           setUser(undefined);
