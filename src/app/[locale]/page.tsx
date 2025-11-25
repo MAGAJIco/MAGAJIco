@@ -27,49 +27,12 @@ interface Competition {
   live: number;
 }
 
-const DEFAULT_LIVE = [
-  { id: '1', homeTeam: 'Man City', awayTeam: 'Real Madrid', league: 'Champions League', time: '14:30', status: 'live', homeScore: 2, awayScore: 1 },
-  { id: '2', homeTeam: 'Bayern', awayTeam: 'PSG', league: 'Champions League', time: '15:00', status: 'live', homeScore: 1, awayScore: 0 },
-];
-
-const DEFAULT_COMPETITIONS: Competition[] = [
-  {
-    name: 'Champions League',
-    flag: '🇪🇺',
-    country: 'EUROPE',
-    live: 2,
-    matches: [
-      ...DEFAULT_LIVE,
-      { id: '3', homeTeam: 'Liverpool', awayTeam: 'Inter', league: 'Champions League', time: '16:00', status: 'scheduled' },
-    ],
-  },
-  {
-    name: 'Premier League',
-    flag: '🇬🇧',
-    country: 'ENGLAND',
-    live: 0,
-    matches: [
-      { id: '4', homeTeam: 'Arsenal', awayTeam: 'Chelsea', league: 'Premier League', time: '16:00', status: 'scheduled' },
-      { id: '5', homeTeam: 'Liverpool', awayTeam: 'Man United', league: 'Premier League', time: '17:30', status: 'scheduled' },
-    ],
-  },
-  {
-    name: 'La Liga',
-    flag: '🇪🇸',
-    country: 'SPAIN',
-    live: 0,
-    matches: [
-      { id: '6', homeTeam: 'Real Madrid', awayTeam: 'Barcelona', league: 'La Liga', time: '21:00', status: 'scheduled' },
-    ],
-  },
-];
-
 export default function HomePage() {
   const params = useParams();
   const locale = params?.locale || 'en';
   const router = useRouter();
-  const [competitions, setCompetitions] = useState<Competition[]>(DEFAULT_COMPETITIONS);
-  const [liveMatches, setLiveMatches] = useState<Match[]>(DEFAULT_LIVE);
+  const [competitions, setCompetitions] = useState<Competition[]>([]);
+  const [liveMatches, setLiveMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(false);
   const [totalLive, setTotalLive] = useState(2);
   const [expandedLeague, setExpandedLeague] = useState<string | null>(null);
@@ -131,55 +94,18 @@ export default function HomePage() {
         setLiveMatches(live.slice(0, 10));
         setTotalLive(liveCount);
       } else {
-        setSampleData();
+        setCompetitions([]);
+        setLiveMatches([]);
+        setTotalLive(0);
       }
     } catch (err) {
-      console.log('Using sample data:', err);
-      setSampleData();
+      console.error('Error fetching matches:', err);
+      setCompetitions([]);
+      setLiveMatches([]);
+      setTotalLive(0);
     } finally {
       setLoading(false);
     }
-  };
-
-  const setSampleData = () => {
-    const sampleLive = [
-      { id: '1', homeTeam: 'Man City', awayTeam: 'Real Madrid', league: 'Champions League', time: '14:30', status: 'live', homeScore: 2, awayScore: 1 },
-      { id: '2', homeTeam: 'Bayern', awayTeam: 'PSG', league: 'Champions League', time: '15:00', status: 'live', homeScore: 1, awayScore: 0 },
-    ];
-    const sampleCompetitions: Competition[] = [
-      {
-        name: 'Champions League',
-        flag: '🇪🇺',
-        country: 'EUROPE',
-        live: 2,
-        matches: [
-          ...sampleLive,
-          { id: '3', homeTeam: 'Liverpool', awayTeam: 'Inter', league: 'Champions League', time: '16:00', status: 'scheduled' },
-        ],
-      },
-      {
-        name: 'Premier League',
-        flag: '🇬🇧',
-        country: 'ENGLAND',
-        live: 0,
-        matches: [
-          { id: '4', homeTeam: 'Arsenal', awayTeam: 'Chelsea', league: 'Premier League', time: '16:00', status: 'scheduled' },
-          { id: '5', homeTeam: 'Liverpool', awayTeam: 'Man United', league: 'Premier League', time: '17:30', status: 'scheduled' },
-        ],
-      },
-      {
-        name: 'La Liga',
-        flag: '🇪🇸',
-        country: 'SPAIN',
-        live: 0,
-        matches: [
-          { id: '6', homeTeam: 'Real Madrid', awayTeam: 'Barcelona', league: 'La Liga', time: '21:00', status: 'scheduled' },
-        ],
-      },
-    ];
-    setCompetitions(sampleCompetitions);
-    setLiveMatches(sampleLive);
-    setTotalLive(2);
   };
 
   return (
@@ -296,7 +222,13 @@ export default function HomePage() {
             All Competitions
           </h2>
 
-          {competitions.length > 0 ? (
+          {loading ? (
+            <div className="flex justify-center py-8">
+              <div className="animate-spin">
+                <RefreshCw className="w-6 h-6 text-[var(--accent-color)]" />
+              </div>
+            </div>
+          ) : competitions.length > 0 ? (
             <div className="space-y-2">
               {competitions.map((comp, idx) => {
                 const isExpanded = expandedLeague === comp.name;
