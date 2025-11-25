@@ -45,6 +45,18 @@ module.exports = {
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000',
   },
   
+  // Rewrites for API calls to backend
+  async rewrites() {
+    return {
+      beforeFiles: [
+        {
+          source: '/api/:path*',
+          destination: 'http://127.0.0.1:8000/api/:path*',
+        },
+      ],
+    };
+  },
+  
   // Headers for security, PWA, and cache control
   async headers() {
     return [

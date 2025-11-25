@@ -1,14 +1,22 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Home, Zap, Trophy, Star, Settings, HelpCircle, User, LogOut, Database, BookOpen, TrendingUp } from 'lucide-react';
+import { X, Home, Zap, Trophy, Star, Settings, HelpCircle, User, LogOut, Database, BookOpen, TrendingUp, TrendingDown } from 'lucide-react';
 
 interface EnhancedMenuProps {
   isOpen: boolean;
   onClose: () => void;
+}
+
+interface Prediction {
+  home_team: string;
+  away_team: string;
+  prediction: string;
+  confidence: number;
+  source: string;
 }
 
 const MenuItem = ({ icon: Icon, label, href, onClick, isDivider = false }: any) => {
@@ -42,6 +50,40 @@ const MenuSection = ({ title, children }: any) => (
 export default function EnhancedMenu({ isOpen, onClose }: EnhancedMenuProps) {
   const params = useParams();
   const locale = params?.locale || 'en';
+  const [predictions, setPredictions] = useState<Prediction[]>([]);
+  const [predictionsLoading, setPredictionsLoading] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      fetchPredictions();
+    }
+  }, [isOpen]);
+
+  const fetchPredictions = async () => {
+    setPredictionsLoading(true);
+    try {
+      const myBetsRes = await fetch('/api/predictions/mybets', { signal: AbortSignal.timeout(5000) }).catch(() => null);
+      const statAreaRes = await fetch('/api/predictions/statarea/high-confidence?min_confidence=78', { signal: AbortSignal.timeout(5000) }).catch(() => null);
+      
+      const allPreds: Prediction[] = [];
+      
+      if (myBetsRes?.ok) {
+        const data = await myBetsRes.json();
+        allPreds.push(...(data.predictions || []).slice(0, 2));
+      }
+      
+      if (statAreaRes?.ok) {
+        const data = await statAreaRes.json();
+        allPreds.push(...(data.predictions || []).slice(0, 2));
+      }
+      
+      setPredictions(allPreds.slice(0, 4));
+    } catch (err) {
+      console.error('Failed to fetch predictions:', err);
+    } finally {
+      setPredictionsLoading(false);
+    }
+  };
 
   return (
     <AnimatePresence>
@@ -157,6 +199,57 @@ export default function EnhancedMenu({ isOpen, onClose }: EnhancedMenuProps) {
                   href={`/${locale}/help`}
                   onClick={onClose}
                 />
+              </MenuSection>
+
+              {/* Premium Secrets Section */}
+              <MenuSection title="🔥 Premium Secrets">
+                {predictionsLoading ? (
+                  <div className="px-4 py-3 text-xs text-gray-500 dark:text-gray-400">
+                    Loading predictions...
+                  </div>
+                ) : predictions.length > 0 ? (
+                  <div className="space-y-2 px-2">
+                    {predictions.map((pred, idx) => (
+                      <div
+                        key={idx}
+                        className="bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-orange-900/20 dark:to-yellow-900/20 rounded-lg p-3 border border-yellow-200 dark:border-yellow-800"
+                      >
+                        <div className="text-xs font-semibold text-gray-900 dark:text-white truncate">
+                          {pred.home_team} vs {pred.away_team}
+                        </div>
+                        <div className="flex items-center justify-between mt-2">
+                          <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                            {pred.prediction}
+                          </span>
+                          <span className={`text-xs font-bold px-2 py-0.5 rounded ${
+                            pred.confidence >= 85
+                              ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300'
+                              : pred.confidence >= 78
+                              ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300'
+                              : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300'
+                          }`}>
+                            {pred.confidence}%
+                          </span>
+                        </div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                          {pred.source}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="px-4 py-3 text-xs text-gray-500 dark:text-gray-400">
+                    No predictions available
+                  </div>
+                )}
+                <Link
+                  href={`/${locale}/predictions`}
+                  onClick={onClose}
+                  className="flex items-center gap-2 px-4 py-3 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors rounded-lg mt-2"
+                >
+                  <Star className="w-4 h-4" />
+                  View All Predictions →
+                </Link>
               </MenuSection>
             </div>
 

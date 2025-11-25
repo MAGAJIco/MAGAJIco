@@ -33,17 +33,17 @@ export default function PredictionsPage() {
       setError(null);
 
       const [myBets, statarea, scorePred] = await Promise.allSettled([
-        fetch(`/api/predictions/mybets`, { signal: AbortSignal.timeout(8000) })
+        fetch(`/api/predictions/mybets`, { signal: AbortSignal.timeout(15000) })
           .then(r => {
             if (!r.ok) throw new Error(`MyBets error: ${r.status}`);
             return r.json();
           }),
-        fetch(`/api/predictions/statarea`, { signal: AbortSignal.timeout(8000) })
+        fetch(`/api/predictions/statarea`, { signal: AbortSignal.timeout(15000) })
           .then(r => {
             if (!r.ok) throw new Error(`Statarea error: ${r.status}`);
             return r.json();
           }),
-        fetch(`/api/predictions/scoreprediction`, { signal: AbortSignal.timeout(8000) })
+        fetch(`/api/predictions/sport/soccer`, { signal: AbortSignal.timeout(15000) })
           .then(r => {
             if (!r.ok) throw new Error(`ScorePrediction error: ${r.status}`);
             return r.json();
