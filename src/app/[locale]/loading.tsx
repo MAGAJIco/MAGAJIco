@@ -1,60 +1,32 @@
-
+// Loading.jsx
 import SkeletonCard from "../components/SkeletonCard";
 
 export default function Loading() {
+  const headerStyles = "bg-gray-300 rounded-md mx-auto mb-3";
+  const subHeaderStyles = "bg-gray-200 rounded-sm mx-auto";
+
   return (
-    <div className="container" style={{ paddingTop: '40px', paddingBottom: '100px' }}>
-      <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-        <div style={{ 
-          height: '48px', 
-          width: '300px', 
-          background: 'rgba(255,255,255,0.3)', 
-          borderRadius: '8px',
-          margin: '0 auto 12px'
-        }} />
-        <div style={{ 
-          height: '18px', 
-          width: '200px', 
-          background: 'rgba(255,255,255,0.2)', 
-          borderRadius: '4px',
-          margin: '0 auto'
-        }} />
+    <div className="container px-4 py-10">
+      {/* Header Skeleton */}
+      <div className="text-center mb-10">
+        <div className={`${headerStyles} h-12 w-72`} />
+        <div className={`${subHeaderStyles} h-4 w-48`} />
       </div>
 
-      <section style={{ marginBottom: '40px' }}>
-        <div style={{ display: 'flex', gap: '20px', overflowX: 'auto', paddingBottom: '10px' }}>
-          {[1, 2, 3, 4].map((i) => (
+      {/* Horizontal Card Skeletons */}
+      <section className="mb-10 overflow-x-auto">
+        <div className="flex gap-5 pb-2">
+          {[...Array(4)].map((_, i) => (
             <SkeletonCard key={i} />
           ))}
         </div>
       </section>
 
-      <section style={{
-        background: 'rgba(255,255,255,0.95)',
-        borderRadius: '16px',
-        padding: '32px',
-        marginBottom: '32px'
-      }}>
-        <div style={{ 
-          height: '32px', 
-          width: '250px', 
-          background: '#e5e7eb', 
-          borderRadius: '8px',
-          marginBottom: '16px'
-        }} />
-        <div style={{ 
-          height: '18px', 
-          width: '100%', 
-          background: '#e5e7eb', 
-          borderRadius: '4px',
-          marginBottom: '8px'
-        }} />
-        <div style={{ 
-          height: '18px', 
-          width: '80%', 
-          background: '#e5e7eb', 
-          borderRadius: '4px'
-        }} />
+      {/* Paragraph Skeleton */}
+      <section className="bg-white/95 rounded-2xl p-8 mb-8">
+        <div className="bg-gray-300 h-8 w-64 rounded-md mb-4" />
+        <div className="bg-gray-200 h-4 w-full rounded-sm mb-2" />
+        <div className="bg-gray-200 h-4 w-4/5 rounded-sm" />
       </section>
     </div>
   );
