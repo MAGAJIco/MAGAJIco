@@ -30,8 +30,9 @@ export default function HomePage() {
   const [competitions, setCompetitions] = useState<Competition[]>([]);
   const [loading, setLoading] = useState(false);
   const [totalLive, setTotalLive] = useState(0);
+  const [dates, setDatesState] = useState<any[]>([]);
 
-  // Generate date tabs (static, no hydration issues)
+  // Generate date tabs dynamically
   const getDates = () => {
     const days = ['SA', 'SU', 'MO', 'TU', 'WE', 'TH', 'FR'];
     const today = new Date();
@@ -52,13 +53,19 @@ export default function HomePage() {
     return dateArray;
   };
 
-  const dates = getDates();
-
-  // Initialize with sample data
+  // Initialize and update dates dynamically
   useEffect(() => {
+    // Set initial dates
+    setDatesState(getDates());
     setSampleData();
-    // Then fetch real data
     fetchMatches();
+
+    // Update dates every minute to ensure they're always current
+    const dateInterval = setInterval(() => {
+      setDatesState(getDates());
+    }, 60000); // Update every minute
+
+    return () => clearInterval(dateInterval);
   }, []);
 
   const fetchMatches = async () => {
