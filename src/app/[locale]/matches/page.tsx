@@ -33,20 +33,20 @@ export default function MatchesPage() {
   const fetchMatches = async () => {
     try {
       setLoading(true);
-      // Use Next.js API proxy
-      const response = await fetch(`/api/predictions/live`);
+      // Use ESPN live endpoint
+      const response = await fetch(`/api/predictions/espn/live?sport=soccer`);
       const data = await response.json();
-      const predictions = data.predictions || [];
+      const espnMatches = data.matches || [];
 
-      const matches = predictions.map((p: any) => ({
-        id: p.id,
-        homeTeam: p.home_team || 'Team A',
-        awayTeam: p.away_team || 'Team B',
-        league: p.league || 'League',
-        time: p.game_time || '14:30',
-        status: p.status || 'scheduled',
-        homeScore: p.home_score,
-        awayScore: p.away_score,
+      const matches = espnMatches.map((m: any) => ({
+        id: m.id,
+        homeTeam: m.home_team || 'Team A',
+        awayTeam: m.away_team || 'Team B',
+        league: m.league || 'League',
+        time: m.game_time || '14:30',
+        status: m.status || 'scheduled',
+        homeScore: m.home_score,
+        awayScore: m.away_score,
       }));
 
       setMatches(matches);

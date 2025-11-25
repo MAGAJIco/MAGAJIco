@@ -34,23 +34,23 @@ export default function LivePage() {
   const fetchLive = async () => {
     try {
       setLoading(true);
-      // Use Next.js API proxy
-      const response = await fetch(`/api/predictions/live`);
+      // Use ESPN live endpoint
+      const response = await fetch(`/api/predictions/espn/live?sport=soccer`);
       const data = await response.json();
-      const preds = data.predictions || [];
+      const matches = data.matches || [];
 
-      const liveMatches = preds
-        .filter((p: any) => p.status === 'live' || p.status === 'in_progress')
-        .map((p: any) => ({
-          id: p.id,
-          sport: p.sport || 'Football',
-          homeTeam: p.home_team || 'Team A',
-          awayTeam: p.away_team || 'Team B',
-          homeScore: p.home_score || 0,
-          awayScore: p.away_score || 0,
+      const liveMatches = matches
+        .filter((m: any) => m.status === 'live' || m.status === 'in_progress')
+        .map((m: any) => ({
+          id: m.id,
+          sport: 'Soccer',
+          homeTeam: m.home_team || 'Team A',
+          awayTeam: m.away_team || 'Team B',
+          homeScore: m.home_score || 0,
+          awayScore: m.away_score || 0,
           status: 'live',
-          league: p.league || 'League',
-          time: p.game_time || 'Live',
+          league: m.league || 'League',
+          time: m.game_time || 'Live',
         }));
 
       setMatches(liveMatches);

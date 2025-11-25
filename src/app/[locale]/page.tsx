@@ -47,26 +47,26 @@ export default function HomePage() {
   const fetchMatches = async () => {
     try {
       setLoading(true);
-      const data = await cachedFetch(`/api/predictions/live`);
-      const predictions = data.predictions || [];
+      const data = await cachedFetch(`/api/predictions/espn/live?sport=soccer`);
+      const espnMatches = data.matches || [];
 
       const groupedByLeague: { [key: string]: Competition } = {};
       const live: Match[] = [];
       let liveCount = 0;
 
-      predictions.forEach((pred: any) => {
-        const league = pred.league || pred.sport || 'Other';
-        const isLive = pred.status === 'live' || pred.status === 'in_progress';
+      espnMatches.forEach((m: any) => {
+        const league = m.league || 'Soccer';
+        const isLive = m.status === 'live' || m.status === 'in_progress';
 
         const match = {
-          id: pred.id || `${pred.home_team || 'A'}-${pred.away_team || 'B'}`,
-          homeTeam: pred.home_team || pred.homeTeam || 'Team A',
-          awayTeam: pred.away_team || pred.awayTeam || 'Team B',
+          id: m.id || `${m.home_team || 'A'}-${m.away_team || 'B'}`,
+          homeTeam: m.home_team || 'Team A',
+          awayTeam: m.away_team || 'Team B',
           league: league,
-          time: pred.game_time || pred.time || '14:30',
-          status: pred.status || 'scheduled',
-          homeScore: pred.home_score || pred.homeScore,
-          awayScore: pred.away_score || pred.awayScore,
+          time: m.game_time || '14:30',
+          status: m.status || 'scheduled',
+          homeScore: m.home_score,
+          awayScore: m.away_score,
         };
 
         if (isLive) {
@@ -88,7 +88,7 @@ export default function HomePage() {
         if (isLive) groupedByLeague[league].live++;
       });
 
-      if (predictions.length > 0) {
+      if (espnMatches.length > 0) {
         const competitionsArray = Object.values(groupedByLeague).sort((a, b) => b.live - a.live);
         setCompetitions(competitionsArray);
         setLiveMatches(live.slice(0, 10));

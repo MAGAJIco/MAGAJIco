@@ -161,26 +161,33 @@ async def predict_match(
 
 # ========== NEW LIVE PREDICTIONS ENDPOINTS ==========
 
-@app.get("/api/predictions/live")
-async def get_live_predictions(
-    api_key: Optional[str] = Query(None, description="RapidAPI key for real data")
+@app.get("/api/predictions/espn/live")
+async def get_espn_live(
+    sport: str = Query("soccer", description="Sport: soccer, nfl, nba")
 ):
     """
-    Get live match predictions from multiple sources
-    Returns real data if API key provided, otherwise uses ESPN + samples
+    Get live matches from ESPN for specified sport
+    Returns REAL data only - empty array if no live matches or scraping fails
     """
     try:
-        predictions = scraper.get_all_predictions(api_key=api_key)
+        sport = sport.lower()
+        if sport not in ["soccer", "nfl", "nba", "mlb"]:
+            raise HTTPException(status_code=400, detail="Unsupported sport. Use: soccer, nfl, nba, or mlb")
+        
+        matches = scraper.scrape_espn_scores(sport)
         
         return {
             "status": "success",
-            "count": len(predictions),
-            "predictions": predictions,
+            "sport": sport,
+            "count": len(matches),
+            "matches": [match.to_dict() for match in matches],
             "timestamp": datetime.now().isoformat(),
-            "sources": ["ESPN", "FlashScore", "API-Football"] if api_key else ["ESPN", "Sample Data"]
+            "source": "ESPN"
         }
+    except HTTPException:
+        raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to fetch predictions: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to fetch ESPN live data: {str(e)}")
 
 
 @app.get("/api/predictions/sport/{sport}")
@@ -851,7 +858,7 @@ async def root():
         "endpoints": {
             "ml_status": "/api/ml/status",
             "ml_predict": "/api/ml/predict",
-            "live_predictions": "/api/predictions/live",
+            "espn_live": "/api/predictions/espn/live?sport=soccer",
             "sport_predictions": "/api/predictions/sport/{sport}",
             "high_confidence": "/api/predictions/high-confidence",
             "today": "/api/predictions/today",
