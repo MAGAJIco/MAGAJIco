@@ -47,7 +47,7 @@ export default function HomePage() {
   const fetchMatches = async () => {
     try {
       setLoading(true);
-      const data = await cachedFetch(`/api/predictions/espn/live?sport=soccer`);
+      const data = await cachedFetch(`/api/predictions/sport/soccer`);
       const espnMatches = data.matches || [];
 
       const groupedByLeague: { [key: string]: Competition } = {};

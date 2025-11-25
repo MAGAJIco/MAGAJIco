@@ -33,8 +33,8 @@ export default function MatchesPage() {
   const fetchMatches = async () => {
     try {
       setLoading(true);
-      // Use ESPN live endpoint
-      const response = await fetch(`/api/predictions/espn/live?sport=soccer`);
+      // Use sport predictions endpoint
+      const response = await fetch(`/api/predictions/sport/soccer`);
       const data = await response.json();
       const espnMatches = data.matches || [];
 

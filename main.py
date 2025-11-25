@@ -159,36 +159,7 @@ async def predict_match(
         raise HTTPException(status_code=500, detail=f"Prediction failed: {str(e)}")
 
 
-# ========== NEW LIVE PREDICTIONS ENDPOINTS ==========
-
-@app.get("/api/predictions/espn/live")
-async def get_espn_live(
-    sport: str = Query("soccer", description="Sport: soccer, nfl, nba")
-):
-    """
-    Get live matches from ESPN for specified sport
-    Returns REAL data only - empty array if no live matches or scraping fails
-    """
-    try:
-        sport = sport.lower()
-        if sport not in ["soccer", "nfl", "nba", "mlb"]:
-            raise HTTPException(status_code=400, detail="Unsupported sport. Use: soccer, nfl, nba, or mlb")
-        
-        matches = scraper.scrape_espn_scores(sport)
-        
-        return {
-            "status": "success",
-            "sport": sport,
-            "count": len(matches),
-            "matches": [match.to_dict() for match in matches],
-            "timestamp": datetime.now().isoformat(),
-            "source": "ESPN"
-        }
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to fetch ESPN live data: {str(e)}")
-
+# ========== SPORT PREDICTIONS ENDPOINT ==========
 
 @app.get("/api/predictions/sport/{sport}")
 async def get_sport_predictions(sport: str):
@@ -858,7 +829,6 @@ async def root():
         "endpoints": {
             "ml_status": "/api/ml/status",
             "ml_predict": "/api/ml/predict",
-            "espn_live": "/api/predictions/espn/live?sport=soccer",
             "sport_predictions": "/api/predictions/sport/{sport}",
             "high_confidence": "/api/predictions/high-confidence",
             "today": "/api/predictions/today",
