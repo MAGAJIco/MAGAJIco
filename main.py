@@ -318,38 +318,6 @@ async def get_scoreprediction():
         raise HTTPException(status_code=500, detail=f"Failed to fetch ScorePrediction: {str(e)}")
 
 
-@app.get("/api/predictions/flashscore-odds")
-async def get_flashscore_odds(
-    max_odds: float = Query(1.16, ge=1.0, le=3.0, description="Maximum odds threshold (e.g., 1.16 for favorites)")
-):
-    """
-    Get FlashScore COMPLETE WEEK odds calendar (all 7 days) filtered by max odds
-    Uses mobile version: https://www.flashscore.mobi/?d=X&s=5 (d=0 to d=6)
-    Returns organized day-by-day with only matches where any odd is <= max_odds
-    """
-    try:
-        week_calendar = scraper.scrape_flashscore_odds(max_odds=max_odds)
-        
-        # Count total matches across all days
-        total_matches = sum(day.get("matches_count", 0) for day in week_calendar.values())
-        total_days_with_matches = len([d for d in week_calendar.values() if d.get("matches_count", 0) > 0])
-        
-        return {
-            "status": "success",
-            "source": "flashscore.mobi",
-            "filter": f"odds <= {max_odds}",
-            "summary": {
-                "total_matches": total_matches,
-                "days_with_matches": total_days_with_matches,
-                "total_days": len(week_calendar)
-            },
-            "week_calendar": week_calendar,
-            "timestamp": datetime.now().isoformat()
-        }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to fetch FlashScore odds: {str(e)}")
-
-
 @app.get("/api/stats")
 async def get_stats(api_key: Optional[str] = None):
     """Get prediction statistics"""
@@ -400,7 +368,6 @@ async def root():
             "high_confidence": "/api/predictions/high-confidence",
             "today": "/api/predictions/today",
             "mybets": "/api/predictions/mybets",
-            "flashscore_odds": "/api/predictions/flashscore-odds",
             "health": "/api/health",
             "stats": "/api/stats"
         },

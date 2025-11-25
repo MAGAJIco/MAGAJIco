@@ -1,132 +1,100 @@
 """
-Real Sports Data Scraper with ML Predictions
-Scrapes live match data and generates ML predictions
+Real Sports Data Scraper with ML Integration
 """
 
-import requests
 from bs4 import BeautifulSoup
-from typing import List, Dict, Any, Optional
-from datetime import datetime
+import requests
 import re
 import json
-from dataclasses import dataclass, asdict
-import numpy as np
+from typing import List, Dict, Any, Optional
+from datetime import datetime
 
-
-@dataclass
 class LiveMatch:
-    """Live match data structure"""
-    id: str
-    sport: str
-    league: str
-    home_team: str
-    away_team: str
-    game_time: str
-    status: str
-    home_score: Optional[int] = None
-    away_score: Optional[int] = None
-    prediction: Optional[str] = None
-    confidence: Optional[int] = None
-    odds: Optional[float] = None
-    source: str = "scraped"
+    def __init__(self, **kwargs):
+        self.league = kwargs.get('league', 'Unknown')
+        self.home_team = kwargs.get('home_team', 'Unknown')
+        self.away_team = kwargs.get('away_team', 'Unknown')
+        self.game_time = kwargs.get('game_time', 'TBD')
+        self.status = kwargs.get('status', 'scheduled')
+        self.home_score = kwargs.get('home_score', 0)
+        self.away_score = kwargs.get('away_score', 0)
+        self.odds = kwargs.get('odds', 0.0)
+        self.source = kwargs.get('source', 'Unknown')
+        self.prediction = kwargs.get('prediction', 'TBD')
+        self.confidence = kwargs.get('confidence', 0)
 
     def to_dict(self) -> Dict[str, Any]:
-        """Convert to dict, handling numpy types"""
-        data = asdict(self)
-        # Convert numpy types to native Python types
-        for key, value in data.items():
-            if isinstance(value, (np.integer, np.floating)):
-                data[key] = float(value) if isinstance(value, np.floating) else int(value)
-            elif isinstance(value, np.ndarray):
-                data[key] = value.tolist()
-        return data
+        return {
+            "league": self.league,
+            "home_team": self.home_team,
+            "away_team": self.away_team,
+            "game_time": self.game_time,
+            "status": self.status,
+            "score": f"{self.home_score}-{self.away_score}" if self.status == "live" else "TBD",
+            "odds": self.odds,
+            "source": self.source,
+            "prediction": self.prediction,
+            "confidence": self.confidence
+        }
 
 
 class RealSportsScraperService:
-    """
-    Real-time sports data scraper with multiple sources
-    """
-    
     def __init__(self, ml_predictor=None):
         self.headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
         }
         self.ml_predictor = ml_predictor
-        
+
     def scrape_flashscore_soccer(self) -> List[LiveMatch]:
         """
-        Scrape FlashScore mobile version for live soccer matches and odds
-        Uses mobile site: https://www.flashscore.mobi/?d=0&s=5 for easier parsing
+        Scrape live soccer matches from FlashScore mobile
         """
         matches = []
         
         try:
-            # Use mobile version for easier scraping - d=0 (today), s=5 (soccer)
-            response = requests.get(
-                "https://www.flashscore.mobi/?d=0&s=5",
-                headers=self.headers,
-                timeout=10
-            )
-            response.raise_for_status()
-            
+            url = "https://www.flashscore.mobi/"
+            response = requests.get(url, headers=self.headers, timeout=10)
             soup = BeautifulSoup(response.text, 'html.parser')
             
-            # Find all match rows/containers in mobile view
-            # Mobile version uses simpler structure than desktop
-            match_elements = soup.find_all('div', class_=re.compile('event|match|game', re.IGNORECASE))
+            # Find all match elements
+            match_elements = soup.find_all('div', class_=re.compile('event|match', re.IGNORECASE))
             
-            for element in match_elements[:30]:  # Limit to 30 matches
+            for elem in match_elements[:20]:  # Limit to 20 matches
                 try:
-                    # Extract team names
-                    teams = element.find_all('span', class_=re.compile('team|participant', re.IGNORECASE))
-                    if len(teams) < 2:
+                    text = elem.get_text(strip=True)
+                    
+                    # Extract teams and score
+                    team_divs = elem.find_all(['span', 'strong', 'a'])
+                    if len(team_divs) < 2:
                         continue
                     
-                    home_team = teams[0].get_text(strip=True)
-                    away_team = teams[1].get_text(strip=True)
+                    home_team = team_divs[0].get_text(strip=True)
+                    away_team = team_divs[1].get_text(strip=True) if len(team_divs) > 1 else None
                     
                     if not home_team or not away_team:
                         continue
                     
-                    # Extract time/status
-                    time_elem = element.find('span', class_=re.compile('time|status|live', re.IGNORECASE))
-                    game_time = time_elem.get_text(strip=True) if time_elem else "TBD"
-                    
-                    # Extract odds (1X2 format)
-                    odds_elements = element.find_all('span', class_=re.compile('odd|odds|coefficient', re.IGNORECASE))
-                    odds_1x2 = {}
-                    if len(odds_elements) >= 3:
-                        try:
-                            odds_1x2 = {
-                                "home": float(odds_elements[0].get_text(strip=True)),
-                                "draw": float(odds_elements[1].get_text(strip=True)),
-                                "away": float(odds_elements[2].get_text(strip=True))
-                            }
-                        except:
-                            pass
-                    
                     # Extract score if available
-                    score_elem = element.find('span', class_=re.compile('score|result', re.IGNORECASE))
-                    score_text = score_elem.get_text(strip=True) if score_elem else ""
-                    home_score = None
-                    away_score = None
+                    score_match = re.search(r'(\d+)\s*-\s*(\d+)', text)
+                    home_score = int(score_match.group(1)) if score_match else 0
+                    away_score = int(score_match.group(2)) if score_match else 0
                     
-                    if score_text and '-' in score_text:
-                        try:
-                            scores = score_text.split('-')
-                            home_score = int(scores[0].strip())
-                            away_score = int(scores[1].strip())
-                        except:
-                            pass
+                    # Extract time
+                    time_match = re.search(r'(\d{1,2}:\d{2})', text)
+                    game_time = time_match.group(1) if time_match else "TBD"
+                    
+                    # Extract odds
+                    odds_matches = re.findall(r'(\d+\.\d+)', text)
+                    odds_1x2 = None
+                    if odds_matches:
+                        odds_1x2 = {"home": float(odds_matches[0])} if odds_matches else None
                     
                     match = LiveMatch(
-                        id=f"fs_{len(matches)}",
-                        sport="Soccer",
                         league="Various",
                         home_team=home_team,
                         away_team=away_team,
                         game_time=game_time,
-                        status="live" if (score_elem and '-' in score_text) else "scheduled",
+                        status="live" if (score_match and '-' in text) else "scheduled",
                         home_score=home_score,
                         away_score=away_score,
                         odds=odds_1x2.get("home", 0.0) if odds_1x2 else 0.0,
@@ -151,458 +119,6 @@ class RealSportsScraperService:
             return self._get_sample_flashscore_matches()
             
         return matches if matches else self._get_sample_flashscore_matches()
-    
-    def scrape_flashscore_odds(self, max_odds: float = 1.16) -> Dict[str, Any]:
-        """
-        Scrape FlashScore mobile calendar for ENTIRE WEEK odds (7 days)
-        URL: https://www.flashscore.mobi/?d=X&s=5 (d=0 to d=6 for soccer)
-        Returns daily odds calendar filtered by max_odds threshold
-        Organized day-by-day with ONLY matches where at least one odd is <= max_odds
-        
-        REAL DATA: Actually fetches from FlashScore mobile site
-        """
-        from datetime import datetime, timedelta
-        import random
-        
-        week_calendar = {}
-        today = datetime.now()
-        
-        # First, try to fetch REAL data from FlashScore for each day
-        for day_offset in range(7):
-            try:
-                day_date = today + timedelta(days=day_offset)
-                day_name = day_date.strftime('%A')
-                date_label = day_date.strftime('%a %d.%m')
-                full_date = day_date.strftime('%Y-%m-%d')
-                
-                day_matches = []
-                
-                # Fetch real data from FlashScore mobile for this day
-                # d=0 (today), d=1 (tomorrow), d=2 (day after), etc.
-                url = f"https://www.flashscore.mobi/?d={day_offset}&s=5"
-                
-                try:
-                    response = requests.get(url, headers=self.headers, timeout=10)
-                    response.raise_for_status()
-                    soup = BeautifulSoup(response.text, 'html.parser')
-                    
-                    # Find all match elements with scores/times/odds
-                    # FlashScore mobile format: match rows with team names and odds
-                    match_rows = soup.find_all('div', class_=re.compile('match|event|game', re.IGNORECASE))
-                    
-                    for row in match_rows[:30]:  # Limit to 30 per day
-                        try:
-                            row_text = row.get_text(strip=True)
-                            
-                            # Try to extract: "Team1 - Team2" pattern with odds
-                            # Format: "Team1Team2TimeOdds1:XOdds2"
-                            
-                            # Extract team names
-                            teams = row.find_all(['span', 'a', 'strong'], limit=4)
-                            if len(teams) < 2:
-                                continue
-                            
-                            home_team = teams[0].get_text(strip=True)
-                            away_team = teams[1].get_text(strip=True) if len(teams) > 1 else None
-                            
-                            if not home_team or not away_team or len(home_team) < 2:
-                                continue
-                            
-                            # Extract odds (look for decimal numbers like 1.05, 1.16, etc.)
-                            odds_matches = re.findall(r'\b([0-9]{1,2}\.[0-9]{2})\b', row_text)
-                            
-                            if len(odds_matches) >= 1:
-                                odds_1 = float(odds_matches[0]) if len(odds_matches) > 0 else None
-                                odds_x = float(odds_matches[1]) if len(odds_matches) > 1 else None
-                                odds_2 = float(odds_matches[2]) if len(odds_matches) > 2 else None
-                                
-                                if odds_1 is None:
-                                    continue
-                                
-                                # Filter by max_odds
-                                min_odd = min(o for o in [odds_1, odds_x, odds_2] if o is not None)
-                                if min_odd > max_odds:
-                                    continue
-                                
-                                # Determine best prediction
-                                if odds_1 == min_odd:
-                                    prediction = "1"
-                                    prediction_label = "🏠 Home"
-                                elif odds_x and odds_x == min_odd:
-                                    prediction = "X"
-                                    prediction_label = "🤝 Draw"
-                                elif odds_2 and odds_2 == min_odd:
-                                    prediction = "2"
-                                    prediction_label = "✈️ Away"
-                                else:
-                                    continue
-                                
-                                match_data = {
-                                    "home_team": home_team,
-                                    "away_team": away_team,
-                                    "league": "Mixed",
-                                    "time": row_text[:5] if re.search(r'\d{1,2}:\d{2}', row_text) else "TBD",
-                                    "odds_1": odds_1,
-                                    "odds_x": odds_x if odds_x else 0,
-                                    "odds_2": odds_2 if odds_2 else 0,
-                                    "best_prediction": prediction,
-                                    "prediction_label": prediction_label,
-                                    "best_odd": min_odd,
-                                    "confidence": max(50, int((1.5 / min_odd) * 100)) if min_odd > 0 else 0,
-                                    "source": "flashscore.mobi"
-                                }
-                                
-                                day_matches.append(match_data)
-                        
-                        except Exception as e:
-                            continue
-                    
-                    # If we got real matches, use them
-                    if day_matches:
-                        week_calendar[full_date] = {
-                            "day_name": day_name,
-                            "date_label": date_label,
-                            "matches_count": len(day_matches),
-                            "matches": day_matches[:5]
-                        }
-                        print(f"✅ Day {day_offset} ({date_label}): {len(day_matches)} REAL matches from FlashScore with odds <= {max_odds}")
-                        continue
-                
-                except Exception as e:
-                    print(f"FlashScore fetch failed for day {day_offset}: {e}")
-                
-                # FlashScore failed - use realistic generated data as fallback
-                print(f"📊 Day {day_offset} ({date_label}): Using realistic generated data (odds from 1.0)")
-                day_matches = self._generate_realistic_matches(day_offset, max_odds)
-                
-                week_calendar[full_date] = {
-                    "day_name": day_name,
-                    "date_label": date_label,
-                    "matches_count": len(day_matches),
-                    "matches": day_matches
-                }
-                
-            except Exception as e:
-                print(f"Error processing day {day_offset}: {e}")
-        
-        return week_calendar
-
-    def _generate_realistic_matches(self, day_offset: int, max_odds: float = 1.16) -> list:
-        """
-        Generate realistic upcoming matches with valid odds for the given day
-        Used as fallback when FlashScore JavaScript rendering fails
-        """
-        import random
-        
-        # Real upcoming fixtures - no duplicates across days
-        real_fixtures = {
-            "Premier League": [
-                ("Manchester City", "Manchester United"),
-                ("Liverpool", "Chelsea"),
-                ("Arsenal", "Newcastle"),
-                ("Brighton", "Aston Villa"),
-                ("Tottenham", "West Ham")
-            ],
-            "La Liga": [
-                ("Barcelona", "Atletico Madrid"),
-                ("Real Madrid", "Sevilla"),
-                ("Valencia", "Real Sociedad"),
-                ("Villarreal", "Athletic Bilbao"),
-                ("Granada", "Rayo Vallecano")
-            ],
-            "Bundesliga": [
-                ("Bayern Munich", "RB Leipzig"),
-                ("Borussia Dortmund", "Leverkusen"),
-                ("Frankfurt", "Stuttgart"),
-                ("Hoffenheim", "Wolfsburg"),
-                ("Union Berlin", "Eintracht Frankfurt")
-            ],
-            "Serie A": [
-                ("Inter Milan", "AC Milan"),
-                ("Juventus", "Napoli"),
-                ("Roma", "Lazio"),
-                ("Fiorentina", "Atalanta"),
-                ("Torino", "Sassuolo")
-            ],
-            "Ligue 1": [
-                ("PSG", "Marseille"),
-                ("Monaco", "Lyon"),
-                ("Lille", "Nice"),
-                ("Rennes", "Lens"),
-                ("Nantes", "Toulouse")
-            ],
-            "Eredivisie": [
-                ("Ajax", "PSV"),
-                ("Feyenoord", "AZ Alkmaar"),
-                ("Twente", "Utrecht"),
-                ("Vitesse", "Groningen"),
-                ("Heerenveen", "Almere City")
-            ],
-            "Championship": [
-                ("Leeds United", "West Brom"),
-                ("Leicester", "Middlesbrough"),
-                ("Norwich", "Southampton"),
-                ("Sheffield United", "Preston"),
-                ("Sunderland", "Coventry")
-            ]
-        }
-        
-        match_times = ["12:00", "13:30", "14:00", "15:00", "15:30", "16:00", "17:00", "17:30",
-                      "18:00", "18:30", "19:00", "19:45", "20:00", "20:45", "21:00"]
-        
-        day_matches = []
-        all_fixtures = set()
-        attempts = 0
-        max_attempts = 50
-        
-        # Generate 5 matches for this day with odds <= max_odds
-        while len(day_matches) < 5 and attempts < max_attempts:
-            attempts += 1
-            
-            league = random.choice(list(real_fixtures.keys()))
-            available_fixtures = [f for f in real_fixtures[league] if f not in all_fixtures]
-            
-            if not available_fixtures:
-                continue
-            
-            fixture = random.choice(available_fixtures)
-            all_fixtures.add(fixture)
-            home_team, away_team = fixture
-            
-            # Generate realistic odds starting from 1.0 (like real betting odds)
-            # 60% favorite matches, 40% competitive matches
-            is_favorite_match = random.random() < 0.6
-            
-            if is_favorite_match:
-                # Favorite odds: start from 1.0, typical range 1.0-1.5
-                odds_1 = round(random.uniform(1.0, 1.5), 2)
-                odds_x = round(random.uniform(3.5, 6.5), 2)
-                odds_2 = round(random.uniform(5.0, 15.0), 2)
-            else:
-                # Competitive odds: wider spread
-                odds_1 = round(random.uniform(1.8, 3.5), 2)
-                odds_x = round(random.uniform(3.0, 4.0), 2)
-                odds_2 = round(random.uniform(1.8, 3.5), 2)
-            
-            # Filter by max_odds - only include if at least one odd <= max_odds
-            odds_list = [odds_1, odds_x, odds_2]
-            min_odd = min(odds_list)
-            
-            if min_odd > max_odds:
-                continue
-            
-            # Determine best prediction (lowest odd)
-            if min_odd == odds_1:
-                prediction = "1"
-                prediction_label = "🏠 Home"
-            elif min_odd == odds_x:
-                prediction = "X"
-                prediction_label = "🤝 Draw"
-            else:
-                prediction = "2"
-                prediction_label = "✈️ Away"
-            
-            match_data = {
-                "home_team": home_team,
-                "away_team": away_team,
-                "league": league,
-                "time": random.choice(match_times),
-                "odds_1": odds_1,
-                "odds_x": odds_x,
-                "odds_2": odds_2,
-                "best_prediction": prediction,
-                "prediction_label": prediction_label,
-                "best_odd": min_odd,
-                "confidence": max(50, int((1.5 / min_odd) * 100)) if min_odd > 0 else 0
-            }
-            
-            day_matches.append(match_data)
-        
-        # Sort by time
-        day_matches.sort(key=lambda x: x['time'])
-        return day_matches
-
-# OLD FALLBACK METHOD BELOW - DEPRECATED
-    def _scrape_flashscore_odds_fallback(self, max_odds: float = 1.16) -> Dict[str, Any]:
-        """
-        FALLBACK: Generate sample data for FlashScore odds when real scraping fails
-        """
-        from datetime import datetime, timedelta
-        import random
-        
-        week_calendar = {}
-        today = datetime.now()
-        
-        # REAL upcoming fixtures for the week (realistic match pairings)
-        real_fixtures = {
-            "Premier League": [
-                ("Manchester City", "Manchester United"),
-                ("Liverpool", "Chelsea"),
-                ("Arsenal", "Newcastle"),
-                ("Brighton", "Aston Villa"),
-                ("Tottenham", "West Ham")
-            ],
-            "La Liga": [
-                ("Barcelona", "Atletico Madrid"),
-                ("Real Madrid", "Sevilla"),
-                ("Valencia", "Real Sociedad"),
-                ("Villarreal", "Athletic Bilbao"),
-                ("Granada", "Rayo Vallecano")
-            ],
-            "Bundesliga": [
-                ("Bayern Munich", "RB Leipzig"),
-                ("Borussia Dortmund", "Leverkusen"),
-                ("Frankfurt", "Stuttgart"),
-                ("Hoffenheim", "Wolfsburg"),
-                ("Union Berlin", "Eintracht Frankfurt")
-            ],
-            "Serie A": [
-                ("Inter Milan", "AC Milan"),
-                ("Juventus", "Napoli"),
-                ("Roma", "Lazio"),
-                ("Fiorentina", "Atalanta"),
-                ("Torino", "Sassuolo")
-            ],
-            "Ligue 1": [
-                ("PSG", "Marseille"),
-                ("Monaco", "Lyon"),
-                ("Lille", "Nice"),
-                ("Rennes", "Lens"),
-                ("Nantes", "Toulouse")
-            ],
-            "Eredivisie": [
-                ("Ajax", "PSV"),
-                ("Feyenoord", "AZ Alkmaar"),
-                ("Twente", "Utrecht"),
-                ("Vitesse", "Groningen"),
-                ("Heerenveen", "Almere City")
-            ],
-            "Championship": [
-                ("Leeds United", "West Brom"),
-                ("Leicester", "Middlesbrough"),
-                ("Norwich", "Southampton"),
-                ("Sheffield United", "Preston"),
-                ("Sunderland", "Coventry")
-            ]
-        }
-        
-        # Times distributed throughout the day
-        match_times = ["12:00", "13:30", "14:00", "15:00", "15:30", "16:00", "17:00", "17:30", 
-                      "18:00", "18:30", "19:00", "19:45", "20:00", "20:45", "21:00"]
-        
-        # Fetch each day of the week
-        for day_offset in range(7):
-            try:
-                # Generate date label
-                day_date = today + timedelta(days=day_offset)
-                day_name = day_date.strftime('%A')
-                date_label = day_date.strftime('%a %d.%m')
-                full_date = day_date.strftime('%Y-%m-%d')
-                
-                day_matches = []
-                all_fixtures = set()
-                
-                # Only generate matches that meet the odds criteria (max_odds filter)
-                # Retry until we get enough matches with odds <= max_odds
-                attempts = 0
-                max_attempts = 50
-                
-                while len(day_matches) < 5 and attempts < max_attempts:
-                    attempts += 1
-                    
-                    # Select random league and fixture (avoid duplicates)
-                    league = random.choice(list(real_fixtures.keys()))
-                    available_fixtures = [f for f in real_fixtures[league] if f not in all_fixtures]
-                    
-                    if not available_fixtures:
-                        continue
-                    
-                    fixture = random.choice(available_fixtures)
-                    all_fixtures.add(fixture)
-                    home_team, away_team = fixture
-                    
-                    # Generate odds with BIAS towards favorites (odds <= 1.16)
-                    # 70% of matches should have at least one odd <= 1.16
-                    is_favorite_match = random.random() < 0.7
-                    
-                    if is_favorite_match:
-                        # Generate favorite odds (likely to have odds <= 1.16)
-                        odds_1 = round(random.uniform(1.04, 1.16), 2)
-                        odds_x = round(random.uniform(5.0, 8.0), 2)
-                        odds_2 = round(random.uniform(8.0, 20.0), 2)
-                    else:
-                        # Generate non-favorite odds (higher odds overall)
-                        odds_1 = round(random.uniform(1.5, 2.5), 2)
-                        odds_x = round(random.uniform(3.0, 4.5), 2)
-                        odds_2 = round(random.uniform(1.5, 2.5), 2)
-                    
-                    # STRICT FILTER: only include matches with at least one odd <= max_odds
-                    odds_list = [odds_1, odds_x, odds_2]
-                    min_odd = min(odds_list)
-                    
-                    if min_odd > max_odds:
-                        # This match doesn't meet criteria, skip it
-                        continue
-                    
-                    # Determine best prediction (lowest odd)
-                    if min_odd == odds_1:
-                        prediction = "1"
-                        prediction_label = "🏠 Home"
-                    elif min_odd == odds_x:
-                        prediction = "X"
-                        prediction_label = "🤝 Draw"
-                    else:
-                        prediction = "2"
-                        prediction_label = "✈️ Away"
-                    
-                    match_data = {
-                        "home_team": home_team,
-                        "away_team": away_team,
-                        "league": league,
-                        "time": random.choice(match_times),
-                        "odds_1": odds_1,
-                        "odds_x": odds_x,
-                        "odds_2": odds_2,
-                        "best_prediction": prediction,
-                        "prediction_label": prediction_label,
-                        "best_odd": min_odd,
-                        "confidence": max(50, int((1.5 / min_odd) * 100)) if min_odd > 0 else 0
-                    }
-                    
-                    day_matches.append(match_data)
-                
-                # Sort matches by time
-                day_matches.sort(key=lambda x: x['time'])
-                
-                # Add day to calendar
-                week_calendar[full_date] = {
-                    "day_name": day_name,
-                    "date_label": date_label,
-                    "matches_count": len(day_matches),
-                    "matches": day_matches
-                }
-                
-                if len(day_matches) > 0:
-                    print(f"✅ Day {day_offset} ({date_label}): {len(day_matches)} matches with odds <= {max_odds}")
-                else:
-                    print(f"ℹ️ Day {day_offset} ({date_label}): 0 matches with odds <= {max_odds}")
-                
-            except Exception as e:
-                print(f"Error generating day {day_offset}: {e}")
-                # Add empty day
-                day_date = today + timedelta(days=day_offset)
-                date_label = day_date.strftime('%a %d.%m')
-                full_date = day_date.strftime('%Y-%m-%d')
-                day_name = day_date.strftime('%A')
-                week_calendar[full_date] = {
-                    "day_name": day_name,
-                    "date_label": date_label,
-                    "matches_count": 0,
-                    "matches": []
-                }
-                continue
-        
-        return week_calendar
     
     def scrape_espn_scores(self, sport: str = "soccer") -> List[LiveMatch]:
         """
@@ -637,742 +153,437 @@ class RealSportsScraperService:
             return self._get_sample_espn_matches(sport)
             
         return matches if matches else self._get_sample_espn_matches(sport)
-    
+
     def fetch_api_football_data(self, api_key: str) -> List[LiveMatch]:
         """
-        Fetch from API-Football (RapidAPI)
-        This is the most reliable source for real data
+        Fetch data from API-Football (rapidapi.com/api-sports)
+        Requires API key from: https://rapidapi.com/api-sports/api/api-football
         """
         matches = []
         
         try:
-            # Get today's fixtures
-            response = requests.get(
-                "https://api-football-v1.p.rapidapi.com/v3/fixtures",
-                headers={
-                    "X-RapidAPI-Key": api_key,
-                    "X-RapidAPI-Host": "api-football-v1.p.rapidapi.com"
-                },
-                params={
-                    "date": datetime.now().strftime("%Y-%m-%d"),
-                    "season": "2024",
-                    "league": "39"  # Premier League
-                },
-                timeout=10
-            )
+            url = "https://api-football-v1.p.rapidapi.com/v3/fixtures"
+            params = {
+                "live": "all"
+            }
+            headers = {
+                "X-RapidAPI-Key": api_key,
+                "X-RapidAPI-Host": "api-football-v1.p.rapidapi.com"
+            }
             
-            if response.status_code == 200:
-                data = response.json()
-                
-                for fixture in data.get('response', [])[:20]:
-                    match = LiveMatch(
-                        id=str(fixture['fixture']['id']),
-                        sport="Soccer",
-                        league=fixture['league']['name'],
-                        home_team=fixture['teams']['home']['name'],
-                        away_team=fixture['teams']['away']['name'],
-                        game_time=fixture['fixture']['date'],
-                        status=fixture['fixture']['status']['short'],
-                        home_score=fixture['goals']['home'],
-                        away_score=fixture['goals']['away']
-                    )
-                    
-                    # Add ML prediction
-                    if self.ml_predictor:
-                        pred = self._generate_ml_prediction(match)
-                        match.prediction = pred['prediction']
-                        match.confidence = pred['confidence']
-                    
-                    matches.append(match)
-                    
+            response = requests.get(url, headers=headers, params=params, timeout=10)
+            data = response.json()
+            
+            if data.get("response"):
+                for fixture in data["response"][:50]:
+                    try:
+                        home_team = fixture["teams"]["home"]["name"]
+                        away_team = fixture["teams"]["away"]["name"]
+                        home_score = fixture["goals"]["home"] or 0
+                        away_score = fixture["goals"]["away"] or 0
+                        league = fixture["league"]["name"]
+                        
+                        match = LiveMatch(
+                            league=league,
+                            home_team=home_team,
+                            away_team=away_team,
+                            game_time=fixture["fixture"]["date"],
+                            status=fixture["fixture"]["status"]["short"],
+                            home_score=home_score,
+                            away_score=away_score,
+                            odds=fixture.get("odds", {}).get("home", 0.0),
+                            source="API-Football"
+                        )
+                        
+                        # Add ML prediction
+                        if self.ml_predictor:
+                            pred = self._generate_ml_prediction(match)
+                            match.prediction = pred['prediction']
+                            match.confidence = pred['confidence']
+                        
+                        matches.append(match)
+                    except:
+                        continue
+                        
         except Exception as e:
             print(f"API-Football error: {e}")
             return self._get_sample_api_matches()
-            
+        
         return matches if matches else self._get_sample_api_matches()
-    
+
     def get_all_predictions(self, api_key: Optional[str] = None) -> List[Dict[str, Any]]:
-        """
-        Get all predictions from multiple sources
-        Aggregates real data from FlashScore, MyBets, Statarea, ScorePrediction, ESPN, and APIs
-        """
-        all_matches = []
+        """Get predictions from all available sources"""
+        all_predictions = []
         
-        # Try FlashScore scraping (REAL DATA - primary source)
-        try:
-            fs_matches = self.scrape_flashscore_soccer()
-            if fs_matches:
-                all_matches.extend(fs_matches)
-                print(f"✅ Scraped {len(fs_matches)} matches from FlashScore")
-        except Exception as e:
-            print(f"❌ FlashScore scraping failed: {e}")
+        # ESPN (always available)
+        espn_matches = self.scrape_espn_scores("soccer")
+        for match in espn_matches:
+            all_predictions.append({
+                "sport": "soccer",
+                "league": match.league,
+                "home_team": match.home_team,
+                "away_team": match.away_team,
+                "time": match.game_time,
+                "status": match.status,
+                "score": f"{match.home_score}-{match.away_score}",
+                "prediction": match.prediction,
+                "confidence": match.confidence,
+                "source": "ESPN"
+            })
         
-        # Try MyBets.today scraping (REAL DATA)
-        try:
-            mybets_predictions = self.scrape_mybets_today()
-            if mybets_predictions:
-                all_matches.extend(mybets_predictions)
-                print(f"✅ Scraped {len(mybets_predictions)} predictions from MyBets.today")
-        except Exception as e:
-            print(f"❌ MyBets.today scraping failed: {e}")
-        
-        # Try Statarea scraping (REAL DATA)
-        try:
-            statarea_predictions = self.scrape_statarea()
-            if statarea_predictions:
-                all_matches.extend(statarea_predictions)
-                print(f"✅ Scraped {len(statarea_predictions)} predictions from Statarea")
-        except Exception as e:
-            print(f"❌ Statarea scraping failed: {e}")
-        
-        # Try ScorePrediction scraping (REAL DATA)
-        try:
-            score_predictions = self.scrape_scoreprediction()
-            if score_predictions:
-                all_matches.extend(score_predictions)
-                print(f"✅ Scraped {len(score_predictions)} predictions from ScorePrediction")
-        except Exception as e:
-            print(f"❌ ScorePrediction scraping failed: {e}")
-        
-        # Try ESPN scraping (REAL DATA)
-        try:
-            espn_matches = self.scrape_espn_scores("soccer")
-            if espn_matches:
-                all_matches.extend(espn_matches)
-                print(f"✅ Scraped {len(espn_matches)} matches from ESPN")
-        except Exception as e:
-            print(f"❌ ESPN scraping failed: {e}")
-        
-        # Try API-Football if key provided (most reliable)
+        # API-Football (if API key provided)
         if api_key:
-            try:
-                api_matches = self.fetch_api_football_data(api_key)
-                if api_matches:
-                    all_matches.extend(api_matches)
-                    print(f"✅ Fetched {len(api_matches)} matches from API-Football")
-            except Exception as e:
-                print(f"❌ API-Football failed: {e}")
+            api_matches = self.fetch_api_football_data(api_key)
+            for match in api_matches:
+                all_predictions.append({
+                    "sport": "soccer",
+                    "league": match.league,
+                    "home_team": match.home_team,
+                    "away_team": match.away_team,
+                    "time": match.game_time,
+                    "status": match.status,
+                    "score": f"{match.home_score}-{match.away_score}",
+                    "prediction": match.prediction,
+                    "confidence": match.confidence,
+                    "source": "API-Football"
+                })
         
-        # If everything fails, return sample data
-        if not all_matches:
-            print("⚠️ All sources failed, returning sample data")
-            all_matches = self._get_comprehensive_sample_data()
-        
-        # Return mixed real data from all sources (convert LiveMatch objects to dicts)
-        result: List[Dict[str, Any]] = []
-        for item in all_matches[:50]:  # Increased limit to 50 to show more diverse data
-            if hasattr(item, 'to_dict'):
-                result.append(item.to_dict())
-            elif isinstance(item, dict):
-                result.append(item)
-            else:
-                # Fallback: try to convert to dict
-                try:
-                    result.append(item.__dict__)
-                except:
-                    continue
-        
-        print(f"📊 Total predictions: {len(result)} from multiple sources (FlashScore, MyBets, Statarea, ScorePrediction, ESPN)")
-        return result
-    
+        return all_predictions
+
     def _generate_ml_prediction(self, match: LiveMatch) -> Dict[str, Any]:
         """Generate ML prediction for a match"""
         if not self.ml_predictor:
-            # Simple rule-based prediction
-            import random
-            return {
-                'prediction': random.choice(['1', 'X', '2']),
-                'confidence': random.randint(70, 95),
-                'home_win_prob': random.uniform(0.3, 0.7),
-                'draw_prob': random.uniform(0.15, 0.35),
-                'away_win_prob': random.uniform(0.2, 0.5)
-            }
+            return {"prediction": "TBD", "confidence": 0}
         
-        # Use real ML predictor
         try:
-            # Estimate features from team names (you'd want real data here)
             features = self._estimate_match_features(match)
-            
-            prediction = self.ml_predictor.predict([features])
+            prediction = self.ml_predictor.predict([features])[0]
             probabilities = self.ml_predictor.predict_proba([features])[0]
             
+            prediction_map = {0: "Home Win", 1: "Draw", 2: "Away Win"}
+            
             return {
-                'prediction': prediction[0],
-                'confidence': int(max(probabilities) * 100),
-                'home_win_prob': float(probabilities[0]),
-                'draw_prob': float(probabilities[1]),
-                'away_win_prob': float(probabilities[2])
+                "prediction": prediction_map.get(prediction, "TBD"),
+                "confidence": int(max(probabilities) * 100)
             }
-        except Exception as e:
-            print(f"ML prediction error: {e}")
-            return {'prediction': 'X', 'confidence': 50}
-    
+        except:
+            return {"prediction": "TBD", "confidence": 0}
+
     def _estimate_match_features(self, match: LiveMatch) -> List[float]:
         """
         Estimate match features for ML prediction
-        In production, you'd fetch real stats from an API
+        Returns 7-dimensional feature vector
         """
-        # Simple heuristic based on team names
-        # In reality, you'd query a stats API
-        
-        # For demo: assign random but realistic values
-        import random
-        return [
-            random.uniform(0.5, 0.9),  # home_strength
-            random.uniform(0.5, 0.9),  # away_strength
-            0.65,                       # home_advantage
-            random.uniform(0.4, 0.9),  # recent_form_home
-            random.uniform(0.4, 0.9),  # recent_form_away
-            0.5,                        # head_to_head
-            random.uniform(0.7, 1.0)   # injuries
-        ]
-    
+        # Placeholder values - in production, would use actual team stats
+        return [0.65, 0.55, 0.65, 0.6, 0.58, 0.5, 0.9]
+
     def _parse_espn_json(self, data: Dict, sport: str) -> List[LiveMatch]:
-        """Parse ESPN's JSON data structure"""
+        """Parse ESPN JSON data"""
         matches = []
-        
         try:
-            events = data.get('events', [])
-            for event in events[:15]:
-                competitors = event.get('competitions', [{}])[0].get('competitors', [])
+            for event in data.get("events", [])[:50]:
+                competitions = event.get("competitions", [])
+                if not competitions:
+                    continue
                 
-                home = next((c for c in competitors if c.get('homeAway') == 'home'), {})
-                away = next((c for c in competitors if c.get('homeAway') == 'away'), {})
+                competition = competitions[0]
+                competitors = competition.get("competitors", [])
+                
+                if len(competitors) < 2:
+                    continue
+                
+                home_competitor = competitors[0]
+                away_competitor = competitors[1]
                 
                 match = LiveMatch(
-                    id=event['id'],
-                    sport=sport.upper(),
-                    league=event.get('league', {}).get('name', 'Unknown'),
-                    home_team=home.get('team', {}).get('displayName', 'Unknown'),
-                    away_team=away.get('team', {}).get('displayName', 'Unknown'),
-                    game_time=event.get('date', ''),
-                    status=event.get('status', {}).get('type', {}).get('description', 'Scheduled'),
-                    home_score=int(home.get('score', 0)),
-                    away_score=int(away.get('score', 0)),
+                    league=event.get("league", {}).get("name", f"ESPN {sport.upper()}"),
+                    home_team=home_competitor.get("team", {}).get("displayName", "Unknown"),
+                    away_team=away_competitor.get("team", {}).get("displayName", "Unknown"),
+                    game_time=event.get("date", "TBD"),
+                    status=competition.get("status", {}).get("type", "scheduled"),
+                    home_score=int(home_competitor.get("score", 0)) if home_competitor.get("score") else 0,
+                    away_score=int(away_competitor.get("score", 0)) if away_competitor.get("score") else 0,
+                    odds=0.0,
                     source="ESPN"
                 )
                 
-                # Add ML prediction
                 if self.ml_predictor:
                     pred = self._generate_ml_prediction(match)
                     match.prediction = pred['prediction']
                     match.confidence = pred['confidence']
                 
                 matches.append(match)
-                
         except Exception as e:
             print(f"Error parsing ESPN JSON: {e}")
-            
-        return matches
-    
-    # ========== SAMPLE DATA METHODS (Fallbacks) ==========
-    
-    def _get_sample_flashscore_matches(self) -> List[LiveMatch]:
-        """Sample FlashScore-style matches"""
-        sample_matches = [
-            ("Manchester City", "Liverpool", "Premier League", "15:30"),
-            ("Real Madrid", "Barcelona", "La Liga", "20:45"),
-            ("Bayern Munich", "Dortmund", "Bundesliga", "18:30"),
-            ("PSG", "Marseille", "Ligue 1", "19:00"),
-            ("Juventus", "Inter Milan", "Serie A", "21:00"),
-        ]
         
-        matches = []
-        for i, (home, away, league, time) in enumerate(sample_matches):
-            match = LiveMatch(
-                id=f"sample_{i}",
-                sport="Soccer",
-                league=league,
-                home_team=home,
-                away_team=away,
-                game_time=time,
-                status="scheduled",
-                source="sample"
-            )
-            
-            if self.ml_predictor:
-                pred = self._generate_ml_prediction(match)
-                match.prediction = pred['prediction']
-                match.confidence = pred['confidence']
-            
-            matches.append(match)
-            
         return matches
-    
-    def _get_sample_espn_matches(self, sport: str) -> List[LiveMatch]:
-        """Sample ESPN matches"""
-        return self._get_sample_flashscore_matches()
-    
-    def _get_sample_api_matches(self) -> List[LiveMatch]:
-        """Sample API matches"""
-        return self._get_sample_flashscore_matches()
-    
-    def _get_comprehensive_sample_data(self) -> List[LiveMatch]:
-        """Comprehensive sample dataset when all sources fail"""
-        return self._get_sample_flashscore_matches()
 
+    def _get_sample_flashscore_matches(self) -> List[LiveMatch]:
+        """Sample FlashScore data"""
+        return [
+            LiveMatch(league="Premier League", home_team="Liverpool", away_team="Manchester City", 
+                     game_time="15:00", status="scheduled", prediction="Draw", confidence=72),
+            LiveMatch(league="La Liga", home_team="Barcelona", away_team="Real Madrid", 
+                     game_time="20:45", status="scheduled", prediction="Home Win", confidence=65),
+        ]
+
+    def _get_sample_espn_matches(self, sport: str) -> List[LiveMatch]:
+        """Sample ESPN data"""
+        return [
+            LiveMatch(league=f"ESPN {sport.upper()}", home_team="Team A", away_team="Team B", 
+                     game_time="TBD", status="scheduled", prediction="TBD", confidence=0),
+        ]
+
+    def _get_sample_api_matches(self) -> List[LiveMatch]:
+        """Sample API-Football data"""
+        return [
+            LiveMatch(league="API-Football", home_team="Sample Home", away_team="Sample Away", 
+                     game_time="TBD", status="scheduled", prediction="TBD", confidence=0),
+        ]
+
+    def _get_comprehensive_sample_data(self) -> List[LiveMatch]:
+        """Comprehensive sample data for development"""
+        return self._get_sample_flashscore_matches() + self._get_sample_espn_matches("soccer")
 
     def scrape_mybets_today(self) -> List[Dict[str, Any]]:
         """
-        Scrape recommended soccer predictions from mybets.today
+        Scrape predictions from MyBets.today
+        Returns: List of matches with predictions
         """
         predictions = []
         
         try:
-            response = requests.get(
-                "https://www.mybets.today/recommended-soccer-predictions/",
-                headers=self.headers,
-                timeout=10
-            )
-            response.raise_for_status()
-            
+            url = "https://mybets.today"
+            response = requests.get(url, headers=self.headers, timeout=10)
             soup = BeautifulSoup(response.text, 'html.parser')
             
-            # Find prediction containers - look for prediction cards/rows
-            prediction_items = soup.find_all('div', class_=re.compile('prediction|prediction-item|betting-tip'))
+            # Find prediction rows
+            rows = soup.find_all('div', class_=re.compile('row|match|prediction', re.IGNORECASE))
             
-            if not prediction_items:
-                # Alternative: try to find any match-related divs with odds/predictions
-                prediction_items = soup.find_all('div', class_=re.compile('tip|bet|match'))
-            
-            for item in prediction_items[:15]:  # Limit to 15 predictions
+            for row in rows[:20]:
                 try:
-                    # Extract teams (often in strong or h3 tags)
-                    teams_text = ''
-                    if item.find('h3'):
-                        teams_text = item.find('h3').get_text(strip=True)
-                    elif item.find('strong'):
-                        teams_text = item.find('strong').get_text(strip=True)
+                    text = row.get_text(strip=True)
                     
-                    if not teams_text:
+                    # Extract teams (looks for patterns like "Team1 vs Team2")
+                    vs_pattern = re.search(r'(.+?)\s+(?:vs|v)\s+(.+?)(?:\s+\d{1,2}:\d{2}|\s+\d+%)', text, re.IGNORECASE)
+                    if not vs_pattern:
                         continue
                     
-                    # Extract prediction type
-                    pred_text = item.get_text(strip=True)
+                    home_team = vs_pattern.group(1).strip()
+                    away_team = vs_pattern.group(2).strip()
                     
-                    # Extract odds if available
-                    odds = 0.0
-                    odds_match = re.search(r'(?:Odds?|@|odds:?\s*)([0-9.]+)', pred_text, re.IGNORECASE)
-                    if odds_match:
-                        odds = float(odds_match.group(1))
+                    # Extract prediction
+                    prediction = "Unknown"
+                    if '1' in text and 'home' in text.lower():
+                        prediction = "Home Win"
+                    elif 'x' in text.lower() or 'draw' in text.lower():
+                        prediction = "Draw"
+                    elif '2' in text and 'away' in text.lower():
+                        prediction = "Away Win"
                     
-                    # Estimate confidence from odds (lower odds = higher confidence)
-                    if odds > 0:
-                        confidence = max(50, min(95, int((2.0 / odds) * 50)))
-                    else:
-                        confidence = 70
-                    
-                    # Determine prediction type
-                    pred_type = "1"  # Default to home win
-                    if "draw" in pred_text.lower() or "x" in pred_text.lower():
-                        pred_type = "X"
-                    elif "away" in pred_text.lower() or "2" in pred_text.lower():
-                        pred_type = "2"
-                    elif "over" in pred_text.lower():
-                        pred_type = "OVER"
-                    elif "under" in pred_text.lower():
-                        pred_type = "UNDER"
-                    
-                    predictions.append({
-                        "teams": teams_text,
-                        "prediction": pred_type,
-                        "confidence": confidence,
-                        "odds": odds,
-                        "source": "mybets.today"
-                    })
-                
-                except Exception as e:
-                    continue
-            
-            return predictions
-        
-        except Exception as e:
-            print(f"Error scraping mybets.today: {str(e)}")
-            return []
-    
-    def scrape_statarea(self) -> List[Dict[str, Any]]:
-        """
-        Scrape soccer predictions from Statarea (https://www.statarea.com/predictions)
-        Extracts match data with home/draw/away prediction percentages
-        Accuracy: ~78% confidence prediction quality
-        """
-        predictions = []
-        
-        try:
-            response = requests.get(
-                "https://www.statarea.com/predictions",
-                headers=self.headers,
-                timeout=10
-            )
-            response.raise_for_status()
-            
-            soup = BeautifulSoup(response.text, 'html.parser')
-            
-            # Find all match containers - typically divs or tr elements with match data
-            # Statarea uses various class structures, so we look broadly
-            match_containers = []
-            
-            # Try different selectors that might contain match data
-            for selector in ['div[class*="match"]', 'tr[data-row]', 'div[id*="match"]', 'div.event']:
-                elements = soup.select(selector)
-                if elements:
-                    match_containers.extend(elements[:20])  # Limit to 20 per selector
-            
-            # If no matches found, try generic div search
-            if not match_containers:
-                all_divs = soup.find_all('div', class_=True)
-                for div in all_divs[:50]:
-                    text_content = div.get_text(strip=True)
-                    if any(team in text_content for team in ['Chelsea', 'Manchester', 'Barcelona', 'Real Madrid']):
-                        match_containers.append(div)
-            
-            for container in match_containers[:20]:  # Process up to 20 matches
-                try:
-                    container_text = container.get_text(strip=True)
-                    
-                    # Look for team names pattern: "Team1 - Team2"
-                    match_pattern = r'([A-Za-z\s]+?)\s*-\s*([A-Za-z\s]+?)\s*(\d{1,2}:\d{2})?'
-                    match_obj = re.search(match_pattern, container_text[:200])
-                    
-                    if not match_obj:
-                        # Alternative: extract from nested elements
-                        team_elements = container.find_all(['span', 'a', 'td'], limit=5)
-                        if len(team_elements) < 2:
-                            continue
-                        
-                        home_team = team_elements[0].get_text(strip=True)
-                        away_team = team_elements[1].get_text(strip=True)
-                    else:
-                        home_team = match_obj.group(1).strip()
-                        away_team = match_obj.group(2).strip()
-                    
-                    if not home_team or not away_team or len(home_team) < 2:
-                        continue
-                    
-                    # Extract time
-                    time_match = re.search(r'(\d{1,2}:\d{2})', container_text)
-                    game_time = time_match.group(1) if time_match else "TBD"
-                    
-                    # Extract prediction percentages (1, X, 2)
-                    # Statarea format: "46 25 29" = 46% Home, 25% Draw, 29% Away
-                    numbers = re.findall(r'\b(\d{1,3})\b', container_text)
-                    
-                    # Filter for reasonable percentages (between 10-90)
-                    percentages = [int(n) for n in numbers if 10 <= int(n) <= 90]
-                    
-                    if len(percentages) >= 3:
-                        home_pct = percentages[0]
-                        draw_pct = percentages[1]
-                        away_pct = percentages[2]
-                    else:
-                        # Use defaults if not found
-                        home_pct = 40
-                        draw_pct = 30
-                        away_pct = 30
-                    
-                    # Determine best prediction (highest percentage)
-                    pred_values = {"1": home_pct, "X": draw_pct, "2": away_pct}
-                    best_prediction = max(pred_values.items(), key=lambda x: x[1])[0]
-                    best_percentage = pred_values[best_prediction]
-                    
-                    # Map prediction type to label
-                    pred_labels = {
-                        "1": f"🏠 Home {home_pct}%",
-                        "X": f"🤝 Draw {draw_pct}%",
-                        "2": f"✈️ Away {away_pct}%"
-                    }
-                    
-                    # Confidence is based on how dominant the top prediction is
-                    confidence = min(95, max(60, best_percentage + 10))
+                    # Extract confidence percentage
+                    conf_match = re.search(r'(\d{1,3})%', text)
+                    confidence = int(conf_match.group(1)) if conf_match else 0
                     
                     predictions.append({
                         "home_team": home_team,
                         "away_team": away_team,
-                        "teams": f"{home_team} - {away_team}",
-                        "time": game_time,
-                        "prediction": best_prediction,
-                        "prediction_label": pred_labels[best_prediction],
-                        "home_pct": home_pct,
-                        "draw_pct": draw_pct,
-                        "away_pct": away_pct,
+                        "prediction": prediction,
                         "confidence": confidence,
-                        "source": "statarea.com"
+                        "source": "MyBets.today"
                     })
-                
-                except Exception as e:
+                    
+                except:
                     continue
-            
-            if not predictions:
-                # Return sample data if scraping fails
-                return self._get_sample_statarea_predictions()
-            
-            return predictions[:15]  # Limit to 15 predictions
-        
+                    
         except Exception as e:
-            print(f"Error scraping statarea.com: {str(e)}")
-            return self._get_sample_statarea_predictions()
-    
-    def _get_sample_statarea_predictions(self) -> List[Dict[str, Any]]:
-        """Sample Statarea predictions for fallback"""
-        return [
-            {
-                "home_team": "Chelsea",
-                "away_team": "Barcelona",
-                "teams": "Chelsea - Barcelona",
-                "time": "15:00",
-                "prediction": "1",
-                "prediction_label": "🏠 Home 46%",
-                "home_pct": 46,
-                "draw_pct": 25,
-                "away_pct": 29,
-                "confidence": 75,
-                "source": "statarea.com"
-            },
-            {
-                "home_team": "Manchester City",
-                "away_team": "Bayer Leverkusen",
-                "teams": "Manchester City - Bayer Leverkusen",
-                "time": "15:00",
-                "prediction": "1",
-                "prediction_label": "🏠 Home 66%",
-                "home_pct": 66,
-                "draw_pct": 18,
-                "away_pct": 16,
-                "confidence": 82,
-                "source": "statarea.com"
-            },
-            {
-                "home_team": "Napoli",
-                "away_team": "Qarabag",
-                "teams": "Napoli - Qarabag",
-                "time": "15:00",
-                "prediction": "1",
-                "prediction_label": "🏠 Home 60%",
-                "home_pct": 60,
-                "draw_pct": 18,
-                "away_pct": 22,
-                "confidence": 78,
-                "source": "statarea.com"
-            }
-        ]
+            print(f"MyBets.today scraping error: {e}")
+            return self._get_sample_mybets_predictions()
+        
+        return predictions if predictions else self._get_sample_mybets_predictions()
 
-    def scrape_scoreprediction(self) -> List[Dict[str, Any]]:
+    def scrape_statarea(self) -> List[Dict[str, Any]]:
         """
-        Scrape score predictions from ScorePrediction.net
-        Displays all available games with predicted scores > 1:0 or 0:1
-        Format: Team1 Predicted_Score1 Predicted_Score2 Team2
+        Scrape predictions from Statarea.com
+        Returns: List of predictions with stats and odds
         """
         predictions = []
         
         try:
-            response = requests.get(
-                "https://scorepredictor.net/",
-                headers=self.headers,
-                timeout=10
-            )
-            response.raise_for_status()
-            
+            url = "https://www.statarea.com"
+            response = requests.get(url, headers=self.headers, timeout=10)
             soup = BeautifulSoup(response.text, 'html.parser')
             
-            # Find all prediction rows - typically in table rows
-            # ScorePrediction.net uses table format with scores
-            tables = soup.find_all('table')
+            # Find prediction tables/rows
+            rows = soup.find_all('tr', class_=re.compile('match|row|table-row', re.IGNORECASE))
             
-            for table in tables:
-                rows = table.find_all('tr')
-                
-                for row in rows:
-                    try:
-                        cells = row.find_all(['td', 'th'])
-                        if len(cells) < 5:
-                            continue
-                        
-                        # Extract league/category
-                        league = cells[0].get_text(strip=True) if cells[0] else "Unknown"
-                        
-                        # Extract team names and scores
-                        home_team = cells[1].get_text(strip=True) if len(cells) > 1 else ""
-                        home_score_text = cells[2].get_text(strip=True) if len(cells) > 2 else ""
-                        away_score_text = cells[3].get_text(strip=True) if len(cells) > 3 else ""
-                        away_team = cells[4].get_text(strip=True) if len(cells) > 4 else ""
-                        
-                        if not home_team or not away_team:
-                            continue
-                        
-                        # Parse scores
-                        try:
-                            home_score = int(home_score_text)
-                            away_score = int(away_score_text)
-                        except (ValueError, TypeError):
-                            continue
-                        
-                        # Filter: only include if score is > 1:0 or 0:1 (total > 1)
-                        total_score = home_score + away_score
-                        if total_score <= 1:
-                            continue
-                        
-                        # Determine prediction type
-                        if home_score > away_score:
-                            pred_type = "1"
-                            pred_label = f"🏠 Home Win {home_score}:{away_score}"
-                        elif away_score > home_score:
-                            pred_type = "2"
-                            pred_label = f"✈️ Away Win {home_score}:{away_score}"
-                        else:
-                            pred_type = "X"
-                            pred_label = f"🤝 Draw {home_score}:{away_score}"
-                        
-                        # Calculate confidence based on score margin
-                        margin = abs(home_score - away_score)
-                        confidence = min(95, 60 + (margin * 10))  # 60-95% based on margin
-                        
-                        # Calculate goal probability
-                        total_goals = home_score + away_score
-                        home_goal_prob = (home_score / total_goals * 100) if total_goals > 0 else 50
-                        away_goal_prob = (away_score / total_goals * 100) if total_goals > 0 else 50
-                        
-                        predictions.append({
-                            "league": league,
-                            "home_team": home_team,
-                            "away_team": away_team,
-                            "teams": f"{home_team} - {away_team}",
-                            "home_score": home_score,
-                            "away_score": away_score,
-                            "score": f"{home_score}:{away_score}",
-                            "total_goals": total_goals,
-                            "prediction": pred_type,
-                            "prediction_label": pred_label,
-                            "confidence": confidence,
-                            "home_goal_prob": round(home_goal_prob, 1),
-                            "away_goal_prob": round(away_goal_prob, 1),
-                            "source": "scorepredictor.net"
-                        })
-                    
-                    except Exception as e:
+            for row in rows[:30]:
+                try:
+                    cells = row.find_all(['td', 'th'])
+                    if len(cells) < 4:
                         continue
-            
-            if not predictions:
-                # Return sample data if scraping fails
-                return self._get_sample_scoreprediction()
-            
-            return predictions[:20]  # Limit to 20 predictions
-        
+                    
+                    # Extract teams
+                    teams_text = cells[0].get_text(strip=True)
+                    teams_match = re.search(r'(.+?)\s+vs\s+(.+)', teams_text, re.IGNORECASE)
+                    if not teams_match:
+                        continue
+                    
+                    home_team = teams_match.group(1).strip()
+                    away_team = teams_match.group(2).strip()
+                    
+                    # Extract prediction (usually in format "1-1", "0-1", etc.)
+                    score_prediction = cells[1].get_text(strip=True) if len(cells) > 1 else ""
+                    prediction_text = cells[2].get_text(strip=True) if len(cells) > 2 else ""
+                    
+                    # Extract odds
+                    odds_text = cells[3].get_text(strip=True) if len(cells) > 3 else ""
+                    odds_match = re.search(r'(\d+\.\d+)', odds_text)
+                    odds = float(odds_match.group(1)) if odds_match else 0.0
+                    
+                    # Determine prediction type
+                    if '1' in prediction_text or 'home' in prediction_text.lower():
+                        prediction = "Home Win"
+                    elif 'x' in prediction_text.lower() or 'draw' in prediction_text.lower():
+                        prediction = "Draw"
+                    elif '2' in prediction_text or 'away' in prediction_text.lower():
+                        prediction = "Away Win"
+                    else:
+                        # Use score prediction
+                        if score_prediction.startswith('1'):
+                            prediction = "Home Win"
+                        elif 'draw' in score_prediction.lower():
+                            prediction = "Draw"
+                        else:
+                            prediction = "Away Win"
+                    
+                    predictions.append({
+                        "home_team": home_team,
+                        "away_team": away_team,
+                        "prediction": prediction,
+                        "predicted_score": score_prediction,
+                        "odds": odds,
+                        "source": "Statarea"
+                    })
+                    
+                except Exception as e:
+                    continue
+                    
         except Exception as e:
-            print(f"Error scraping scorepredictor.net: {str(e)}")
-            return self._get_sample_scoreprediction()
-    
-    def _get_sample_scoreprediction(self) -> List[Dict[str, Any]]:
-        """Sample ScorePrediction.net data for fallback"""
+            print(f"Statarea scraping error: {e}")
+            return self._get_sample_statarea_predictions()
+        
+        return predictions if predictions else self._get_sample_statarea_predictions()
+
+    def _get_sample_statarea_predictions(self) -> List[Dict[str, Any]]:
+        """Sample Statarea predictions"""
         return [
             {
-                "league": "Champions League",
-                "home_team": "Borussia Dortmund",
-                "away_team": "Villarreal",
-                "teams": "Borussia Dortmund - Villarreal",
-                "home_score": 3,
-                "away_score": 1,
-                "score": "3:1",
-                "total_goals": 4,
-                "prediction": "1",
-                "prediction_label": "🏠 Home Win 3:1",
-                "confidence": 85,
-                "home_goal_prob": 75.0,
-                "away_goal_prob": 25.0,
-                "source": "scorepredictor.net"
+                "home_team": "Manchester United",
+                "away_team": "Liverpool",
+                "prediction": "Home Win",
+                "predicted_score": "2-1",
+                "odds": 2.15,
+                "source": "Statarea"
             },
             {
-                "league": "Europa League",
-                "home_team": "Nottingham Forest",
-                "away_team": "Malmo",
-                "teams": "Nottingham Forest - Malmo",
-                "home_score": 3,
-                "away_score": 0,
-                "score": "3:0",
-                "total_goals": 3,
-                "prediction": "1",
-                "prediction_label": "🏠 Home Win 3:0",
-                "confidence": 90,
-                "home_goal_prob": 100.0,
-                "away_goal_prob": 0.0,
-                "source": "scorepredictor.net"
+                "home_team": "Arsenal",
+                "away_team": "Chelsea",
+                "prediction": "Draw",
+                "predicted_score": "1-1",
+                "odds": 3.50,
+                "source": "Statarea"
             },
-            {
-                "league": "Europa League",
-                "home_team": "Porto",
-                "away_team": "Nice",
-                "teams": "Porto - Nice",
-                "home_score": 3,
-                "away_score": 1,
-                "score": "3:1",
-                "total_goals": 4,
-                "prediction": "1",
-                "prediction_label": "🏠 Home Win 3:1",
-                "confidence": 85,
-                "home_goal_prob": 75.0,
-                "away_goal_prob": 25.0,
-                "source": "scorepredictor.net"
-            }
         ]
 
-# ========== FastAPI Integration ==========
+    def _get_sample_mybets_predictions(self) -> List[Dict[str, Any]]:
+        """Sample MyBets.today predictions"""
+        return [
+            {
+                "home_team": "Liverpool",
+                "away_team": "Manchester City",
+                "prediction": "Home Win",
+                "confidence": 72,
+                "source": "MyBets.today"
+            },
+            {
+                "home_team": "Barcelona",
+                "away_team": "Real Madrid",
+                "prediction": "Draw",
+                "confidence": 65,
+                "source": "MyBets.today"
+            },
+        ]
 
-def create_sports_prediction_endpoints(app, ml_predictor):
-    """
-    Add to your FastAPI main.py
-    """
-    from fastapi import HTTPException
-    
-    scraper = RealSportsScraperService(ml_predictor=ml_predictor)
-    
-    @app.get("/api/predictions/live")
-    async def get_live_predictions(api_key: Optional[str] = None):
-        """Get live match predictions"""
+    def scrape_scoreprediction(self) -> List[Dict[str, Any]]:
+        """
+        Scrape predictions from ScorePrediction.com
+        Returns: Match scores with ALL games (no filter)
+        """
+        predictions = []
+        
         try:
-            predictions = scraper.get_all_predictions(api_key=api_key)
-            return {
-                "status": "success",
-                "count": len(predictions),
-                "predictions": predictions,
-                "timestamp": datetime.now().isoformat()
-            }
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
-    
-    @app.get("/api/predictions/sport/{sport}")
-    async def get_sport_predictions(sport: str):
-        """Get predictions for specific sport"""
-        try:
-            if sport.lower() == "soccer":
-                matches = scraper.scrape_espn_scores("soccer")
-            elif sport.lower() == "nfl":
-                matches = scraper.scrape_espn_scores("nfl")
-            elif sport.lower() == "nba":
-                matches = scraper.scrape_espn_scores("nba")
-            else:
-                raise HTTPException(status_code=400, detail="Unsupported sport")
+            url = "https://www.scoreprediction.com"
+            response = requests.get(url, headers=self.headers, timeout=10)
+            soup = BeautifulSoup(response.text, 'html.parser')
             
-            return {
-                "sport": sport,
-                "count": len(matches),
-                "matches": [m.to_dict() for m in matches]
-            }
+            # Find match predictions
+            matches = soup.find_all('div', class_=re.compile('match|prediction|game', re.IGNORECASE))
+            
+            for match_elem in matches[:30]:
+                try:
+                    text = match_elem.get_text(strip=True)
+                    
+                    # Extract teams and score
+                    # Pattern: "Team1 X-Y Team2"
+                    score_pattern = re.search(r'(.+?)\s+(\d+)-(\d+)\s+(.+)', text)
+                    if not score_pattern:
+                        continue
+                    
+                    home_team = score_pattern.group(1).strip()
+                    home_score = int(score_pattern.group(2))
+                    away_score = int(score_pattern.group(3))
+                    away_team = score_pattern.group(4).strip()
+                    
+                    # Calculate total goals
+                    total_goals = home_score + away_score
+                    
+                    # Include ALL predictions (no filtering)
+                    predictions.append({
+                        "home_team": home_team,
+                        "away_team": away_team,
+                        "predicted_score": f"{home_score}-{away_score}",
+                        "total_goals": total_goals,
+                        "outcome": "Home Win" if home_score > away_score else ("Draw" if home_score == away_score else "Away Win"),
+                        "source": "ScorePrediction"
+                    })
+                    
+                except Exception as e:
+                    continue
+                    
         except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
+            print(f"ScorePrediction scraping error: {e}")
+            return self._get_sample_scoreprediction()
+        
+        return predictions if predictions else self._get_sample_scoreprediction()
 
-
-# ========== Usage Example ==========
-
-if __name__ == "__main__":
-    # Test the scraper
-    scraper = RealSportsScraperService()
-    
-    print("🔍 Fetching live predictions...")
-    predictions = scraper.get_all_predictions()
-    
-    print(f"\n✅ Found {len(predictions)} predictions:")
-    for pred in predictions[:5]:
-        print(f"\n{pred['home_team']} vs {pred['away_team']}")
-        print(f"League: {pred['league']}")
-        print(f"Time: {pred['game_time']}")
-        if pred.get('prediction'):
-            print(f"Prediction: {pred['prediction']} ({pred['confidence']}% confidence)")
+    def _get_sample_scoreprediction(self) -> List[Dict[str, Any]]:
+        """Sample ScorePrediction data"""
+        return [
+            {
+                "home_team": "Manchester City",
+                "away_team": "Tottenham",
+                "predicted_score": "2-1",
+                "total_goals": 3,
+                "outcome": "Home Win",
+                "source": "ScorePrediction"
+            },
+            {
+                "home_team": "Chelsea",
+                "away_team": "Newcastle",
+                "predicted_score": "1-1",
+                "total_goals": 2,
+                "outcome": "Draw",
+                "source": "ScorePrediction"
+            },
+        ]
