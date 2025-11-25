@@ -2,12 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { getApiBaseUrl } from '@/lib/api';
-import { RefreshCw, Zap, TrendingUp, ChevronRight, Heart } from 'lucide-react';
+import { RefreshCw, Zap, TrendingUp, ChevronRight, Heart, AlertCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useFavorites } from '@/hooks/useFavorites';
-import { useRecommendations } from '@/hooks/useRecommendations';
 import { cachedFetch } from '@/lib/performance';
 
 interface Match {
@@ -34,11 +32,10 @@ export default function HomePage() {
   const locale = params?.locale || 'en';
   const router = useRouter();
   const [competitions, setCompetitions] = useState<Competition[]>([]);
+  const [liveMatches, setLiveMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(false);
   const [totalLive, setTotalLive] = useState(0);
-  const { favorites, toggleFavorite, isFavorite } = useFavorites();
-  const { trackView, generateRecommendations } = useRecommendations();
-  const [recommendations, setRecommendations] = useState<any[]>([]);
+  const { isFavorite, toggleFavorite } = useFavorites();
 
   useEffect(() => {
     fetchMatches();
@@ -49,19 +46,33 @@ export default function HomePage() {
   const fetchMatches = async () => {
     try {
       setLoading(true);
-      // Use cached fetch for performance (Tesla/SpaceX philosophy)
       const data = await cachedFetch(`/api/predictions/live`);
       const predictions = data.predictions || [];
       
       const groupedByLeague: { [key: string]: Competition } = {};
+      const live: Match[] = [];
       let liveCount = 0;
 
       predictions.forEach((pred: any) => {
         const league = pred.league || pred.sport || 'Other';
         const isLive = pred.status === 'live' || pred.status === 'in_progress';
         
-        if (isLive) liveCount++;
+        const match = {
+          id: pred.id || `${pred.home_team || 'A'}-${pred.away_team || 'B'}`,
+          homeTeam: pred.home_team || pred.homeTeam || 'Team A',
+          awayTeam: pred.away_team || pred.awayTeam || 'Team B',
+          league: league,
+          time: pred.game_time || pred.time || '14:30',
+          status: pred.status || 'scheduled',
+          homeScore: pred.home_score,
+          awayScore: pred.away_score,
+        };
 
+        if (isLive) {
+          live.push(match);
+          liveCount++;
+        }
+        
         if (!groupedByLeague[league]) {
           groupedByLeague[league] = {
             name: league,
@@ -72,29 +83,14 @@ export default function HomePage() {
           };
         }
 
-        groupedByLeague[league].matches.push({
-          id: pred.id || `${pred.home_team || 'A'}-${pred.away_team || 'B'}`,
-          homeTeam: pred.home_team || pred.homeTeam || 'Team A',
-          awayTeam: pred.away_team || pred.awayTeam || 'Team B',
-          league: league,
-          time: pred.game_time || pred.time || '14:30',
-          status: pred.status || 'scheduled',
-          homeScore: pred.home_score,
-          awayScore: pred.away_score,
-        });
-
-        if (isLive) {
-          groupedByLeague[league].live++;
-        }
+        groupedByLeague[league].matches.push(match);
+        if (isLive) groupedByLeague[league].live++;
       });
 
       const competitionsArray = Object.values(groupedByLeague).sort((a, b) => b.live - a.live);
       setCompetitions(competitionsArray);
+      setLiveMatches(live.slice(0, 5)); // Show top 5 live matches
       setTotalLive(liveCount);
-      
-      // Generate smart recommendations (Amazon philosophy)
-      const recs = generateRecommendations(competitionsArray);
-      setRecommendations(recs);
     } catch (err) {
       console.log('Using sample data');
       setSampleData();
@@ -104,6 +100,9 @@ export default function HomePage() {
   };
 
   const setSampleData = () => {
+    const sampleLive = [
+      { id: '1', homeTeam: 'Manchester City', awayTeam: 'Real Madrid', league: 'Champions League', time: '14:30', status: 'live', homeScore: 2, awayScore: 1 },
+    ];
     const sampleCompetitions: Competition[] = [
       {
         name: 'Champions League',
@@ -111,7 +110,7 @@ export default function HomePage() {
         country: 'EUROPE',
         live: 1,
         matches: [
-          { id: '1', homeTeam: 'Manchester City', awayTeam: 'Real Madrid', league: 'Champions League', time: '14:30', status: 'live', homeScore: 2, awayScore: 1 },
+          ...sampleLive,
           { id: '2', homeTeam: 'Bayern Munich', awayTeam: 'PSG', league: 'Champions League', time: '15:00', status: 'scheduled' },
         ],
       },
@@ -125,214 +124,203 @@ export default function HomePage() {
           { id: '4', homeTeam: 'Liverpool', awayTeam: 'Man United', league: 'Premier League', time: '17:30', status: 'scheduled' },
         ],
       },
-      {
-        name: 'La Liga',
-        flag: '🇪🇸',
-        country: 'SPAIN',
-        live: 0,
-        matches: [
-          { id: '5', homeTeam: 'Barcelona', awayTeam: 'Atletico Madrid', league: 'La Liga', time: '17:00', status: 'scheduled' },
-        ],
-      },
     ];
     setCompetitions(sampleCompetitions);
+    setLiveMatches(sampleLive);
     setTotalLive(1);
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900">
-      {/* Header - FlashScore Style */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-700 dark:from-blue-900 dark:to-blue-800 text-white px-4 py-6">
+    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-800">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-blue-600 to-blue-700 dark:from-blue-900 dark:to-blue-800 text-white px-4 py-6 sticky top-14 z-20 shadow-lg">
         <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-between mb-4">
-            <h1 className="text-3xl font-bold">MagajiCo</h1>
-            <div className="flex items-center gap-4">
-              <button
-                onClick={fetchMatches}
-                disabled={loading}
-                className="p-2 hover:bg-blue-500 rounded-lg transition"
-                title="Refresh"
-              >
-                <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
-              </button>
-              <Link href={`/${locale}/predictions`} className="px-4 py-2 rounded-lg bg-white/20 hover:bg-white/30 transition font-medium">
-                Premium
-              </Link>
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-3">
+              <Zap className="w-6 h-6" />
+              <h1 className="text-3xl font-bold">MagajiCo</h1>
             </div>
+            <button
+              onClick={fetchMatches}
+              disabled={loading}
+              className="p-2 hover:bg-blue-500 rounded-lg transition"
+              title="Refresh"
+            >
+              <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
+            </button>
           </div>
-          <p className="text-blue-100">Live scores • Fixtures • Predictions</p>
+          <p className="text-blue-100 text-sm">Live scores • Fixtures • Predictions</p>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 py-6">
-        {/* Stats Bar */}
+      <div className="max-w-7xl mx-auto px-4 py-6 space-y-8">
+        
+        {/* Quick Stats */}
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8"
+          className="grid grid-cols-1 md:grid-cols-3 gap-4"
         >
-          <div className="bg-blue-50 dark:bg-gray-800 rounded-lg p-4 flex items-center gap-3">
-            <Zap className="w-6 h-6 text-blue-600" />
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm border border-gray-200 dark:border-gray-700 flex items-center gap-3">
+            <div className="bg-blue-100 dark:bg-blue-900/30 p-3 rounded-lg">
+              <Zap className="w-6 h-6 text-blue-600" />
+            </div>
             <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Live</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">{totalLive}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Live Matches</p>
+              <p className="text-3xl font-bold text-gray-900 dark:text-white">{totalLive}</p>
             </div>
           </div>
-          <div className="bg-purple-50 dark:bg-gray-800 rounded-lg p-4 flex items-center gap-3">
-            <TrendingUp className="w-6 h-6 text-purple-600" />
+          
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm border border-gray-200 dark:border-gray-700 flex items-center gap-3">
+            <div className="bg-purple-100 dark:bg-purple-900/30 p-3 rounded-lg">
+              <TrendingUp className="w-6 h-6 text-purple-600" />
+            </div>
             <div>
               <p className="text-sm text-gray-600 dark:text-gray-400">Competitions</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">{competitions.length}</p>
+              <p className="text-3xl font-bold text-gray-900 dark:text-white">{competitions.length}</p>
             </div>
           </div>
-          <div className="bg-green-50 dark:bg-gray-800 rounded-lg p-4 flex items-center gap-3">
-            <div className="w-6 h-6 text-green-600 text-lg">✓</div>
+          
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm border border-gray-200 dark:border-gray-700 flex items-center gap-3">
+            <div className="bg-green-100 dark:bg-green-900/30 p-3 rounded-lg">
+              <AlertCircle className="w-6 h-6 text-green-600" />
+            </div>
             <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Accuracy</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">90.3%</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">ML Accuracy</p>
+              <p className="text-3xl font-bold text-gray-900 dark:text-white">90.3%</p>
             </div>
           </div>
         </motion.div>
 
-        {/* Matches */}
-        {loading ? (
-          <div className="flex justify-center py-12">
-            <RefreshCw className="w-8 h-8 animate-spin text-blue-600" />
-          </div>
-        ) : competitions.length > 0 ? (
-          <div className="space-y-6">
-            {competitions.map((comp, idx) => (
-              <motion.div
-                key={idx}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: idx * 0.1 }}
-              >
-                {/* League Header */}
-                <button
-                  onClick={() => router.push(`/${locale}/matches?league=${encodeURIComponent(comp.name)}`)}
-                  className="w-full flex items-center justify-between bg-gray-100 dark:bg-gray-800 px-4 py-3 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition group"
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="text-2xl">{comp.flag}</span>
-                    <div className="text-left">
-                      <p className="font-bold text-gray-900 dark:text-white">{comp.name}</p>
-                      <p className="text-xs text-gray-600 dark:text-gray-400">{comp.country}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {comp.live > 0 && (
-                      <span className="bg-red-500 text-white px-2 py-1 rounded text-xs font-bold animate-pulse">{comp.live} Live</span>
-                    )}
-                    <ChevronRight className="w-5 h-5 text-gray-400 group-hover:translate-x-1 transition" />
-                  </div>
-                </button>
-
-                {/* Matches */}
-                <div className="space-y-1 mt-2">
-                  {comp.matches.slice(0, 5).map((match, midx) => {
-                    const matchId = match.id;
-                    const isFav = isFavorite(matchId);
-                    return (
-                      <motion.div
-                        key={midx}
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: idx * 0.1 + midx * 0.05 }}
-                        className={`flex items-center justify-between px-4 py-3 rounded-lg border ${
-                          match.status === 'live'
-                            ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
-                            : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700'
-                        } hover:bg-gray-50 dark:hover:bg-gray-700/50 transition cursor-pointer group`}
+        {/* Live Now Section */}
+        {liveMatches.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Live Now</h2>
+              <span className="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold">{liveMatches.length}</span>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {liveMatches.map((match, idx) => {
+                const isFav = isFavorite(match.id);
+                return (
+                  <motion.div
+                    key={match.id}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: idx * 0.05 }}
+                    className="bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 rounded-lg p-4 border border-red-200 dark:border-red-800 hover:shadow-lg transition"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs font-bold text-red-600 dark:text-red-400 uppercase bg-red-100 dark:bg-red-900/40 px-2 py-1 rounded">{match.league}</span>
+                      <motion.button
+                        onClick={() => toggleFavorite(match.id, 'match', `${match.homeTeam} vs ${match.awayTeam}`)}
+                        whileHover={{ scale: 1.2 }}
                       >
-                        <div className="flex-1">
-                          <div className="font-semibold text-gray-900 dark:text-white">
-                            {match.homeTeam} <span className="text-gray-600 dark:text-gray-400">vs</span> {match.awayTeam}
-                          </div>
-                          <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">{match.time}</div>
+                        <Heart className={`w-5 h-5 ${isFav ? 'fill-red-500 text-red-500' : 'text-gray-400'}`} />
+                      </motion.button>
+                    </div>
+                    <div className="mb-3">
+                      <p className="font-semibold text-gray-900 dark:text-white text-center mb-2">{match.homeTeam}</p>
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex-1"></div>
+                        <div className="text-center">
+                          <div className="text-3xl font-bold text-gray-900 dark:text-white">{match.homeScore} - {match.awayScore}</div>
+                          <div className="text-xs text-red-600 dark:text-red-400 font-bold animate-pulse mt-1">LIVE</div>
                         </div>
+                        <div className="flex-1"></div>
+                      </div>
+                      <p className="font-semibold text-gray-900 dark:text-white text-center mt-2">{match.awayTeam}</p>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
 
-                        <div className="flex items-center gap-3">
-                          <div className="text-right">
-                            {match.status === 'live' ? (
-                              <div>
-                                <div className="font-bold text-lg text-gray-900 dark:text-white">
-                                  {match.homeScore} - {match.awayScore}
-                                </div>
-                                <div className="text-xs text-red-600 font-semibold animate-pulse">LIVE</div>
-                              </div>
-                            ) : (
-                              <div className="text-sm text-gray-600 dark:text-gray-400">{match.time}</div>
-                            )}
-                          </div>
-                          {/* Favorite button */}
-                          <motion.button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              toggleFavorite(matchId, 'match', `${match.homeTeam} vs ${match.awayTeam}`);
-                              trackView(matchId, 'match', `${match.homeTeam} vs ${match.awayTeam}`, 0.8);
-                            }}
-                            whileHover={{ scale: 1.15 }}
-                            whileTap={{ scale: 0.95 }}
-                            className="opacity-0 group-hover:opacity-100 transition"
-                          >
-                            <Heart className={`w-5 h-5 ${isFav ? 'fill-red-500 text-red-500' : 'text-gray-400'}`} />
-                          </motion.button>
+        {/* Upcoming Matches by Competition */}
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Upcoming</h2>
+            <Link href={`/${locale}/predictions`} className="text-blue-600 dark:text-blue-400 hover:underline text-sm font-semibold flex items-center gap-1">
+              View Predictions <ChevronRight className="w-4 h-4" />
+            </Link>
+          </div>
+          
+          {loading ? (
+            <div className="flex justify-center py-12">
+              <RefreshCw className="w-8 h-8 animate-spin text-blue-600" />
+            </div>
+          ) : competitions.length > 0 ? (
+            <div className="space-y-4">
+              {competitions.slice(0, 3).map((comp, idx) => (
+                <motion.div
+                  key={idx}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: idx * 0.1 }}
+                  className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-lg transition"
+                >
+                  {/* Competition Header */}
+                  <button
+                    onClick={() => router.push(`/${locale}/matches?league=${encodeURIComponent(comp.name)}`)}
+                    className="w-full flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl">{comp.flag}</span>
+                      <div className="text-left">
+                        <p className="font-bold text-gray-900 dark:text-white">{comp.name}</p>
+                        <p className="text-xs text-gray-600 dark:text-gray-400">{comp.country}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {comp.live > 0 && <span className="bg-red-500 text-white px-2 py-1 rounded text-xs font-bold animate-pulse">{comp.live} Live</span>}
+                      <ChevronRight className="w-5 h-5 text-gray-400" />
+                    </div>
+                  </button>
+
+                  {/* Matches */}
+                  <div className="divide-y divide-gray-100 dark:divide-gray-700">
+                    {comp.matches.slice(0, 3).map((match, midx) => (
+                      <div key={midx} className="px-4 py-3 flex items-center justify-between text-sm hover:bg-gray-50 dark:hover:bg-gray-700/30">
+                        <div className="flex-1">
+                          <p className="font-medium text-gray-900 dark:text-white">{match.homeTeam} vs {match.awayTeam}</p>
+                          <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">{match.time}</p>
                         </div>
-                      </motion.div>
-                    );
-                  })}
-                  {comp.matches.length > 5 && (
+                        {match.status === 'live' ? (
+                          <div className="text-right">
+                            <div className="font-bold text-gray-900 dark:text-white">{match.homeScore} - {match.awayScore}</div>
+                            <div className="text-xs text-red-600 font-semibold">LIVE</div>
+                          </div>
+                        ) : (
+                          <div className="text-gray-600 dark:text-gray-400 text-xs">{match.time}</div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+
+                  {comp.matches.length > 3 && (
                     <button
                       onClick={() => router.push(`/${locale}/matches?league=${encodeURIComponent(comp.name)}`)}
-                      className="w-full text-center py-2 text-blue-600 dark:text-blue-400 text-sm font-semibold hover:underline"
+                      className="w-full px-4 py-3 text-blue-600 dark:text-blue-400 text-sm font-semibold hover:bg-gray-50 dark:hover:bg-gray-700/30 transition text-center"
                     >
                       View all {comp.matches.length} matches →
                     </button>
                   )}
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-12">
-            <p className="text-gray-500 dark:text-gray-400">No matches available</p>
-          </div>
-        )}
-
-        {/* Recommendations Section (Amazon philosophy) */}
-        {recommendations.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700"
-          >
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Recommended for You</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {recommendations.map((rec, idx) => (
-                <motion.div
-                  key={idx}
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: idx * 0.1 }}
-                  className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-4 rounded-lg border border-blue-100 dark:border-blue-800 cursor-pointer hover:shadow-lg transition"
-                  onClick={() => {
-                    trackView(rec.id, 'recommendation', rec.name, 0.6);
-                  }}
-                >
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <p className="font-semibold text-gray-900 dark:text-white">{rec.name}</p>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{rec.reason}</p>
-                    </div>
-                    <div className="text-2xl font-bold text-blue-600">⭐ {(rec.score * 100).toFixed(0)}%</div>
-                  </div>
                 </motion.div>
               ))}
             </div>
-          </motion.div>
-        )}
+          ) : (
+            <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg">
+              <p className="text-gray-500 dark:text-gray-400">No matches available</p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
