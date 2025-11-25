@@ -4,6 +4,8 @@ import "../globals.css";
 import "../../styles/icons.css";
 import { ReactNode } from "react";
 import { notFound } from "next/navigation";
+import TopNav from "../components/TopNav";
+import BottomNav from "../components/BottomNav";
 
 export async function generateStaticParams() {
   return [
@@ -21,10 +23,12 @@ export default async function LocaleLayout({ children, params }: { children: Rea
   if (!validLocales.includes(locale)) notFound();
 
   return (
-    <div className="min-h-screen w-full bg-gray-50 text-gray-900 flex flex-col items-center">
-      <main className="w-full max-w-5xl px-4 py-6 md:px-8 md:py-10">
+    <div className="min-h-screen w-full bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white flex flex-col">
+      <TopNav />
+      <main className="w-full flex-1 max-w-7xl mx-auto px-4 py-6 md:px-8 md:py-10 pb-24">
         {children}
       </main>
+      <BottomNav />
     </div>
   );
 }
