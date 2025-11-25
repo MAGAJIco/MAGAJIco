@@ -538,8 +538,8 @@ export default function PrivatePredictionsPage() {
     );
   }
 
-  // Show login prompt if not authenticated
-  if (!isAuthenticated) {
+  // Show login prompt if not authenticated or missing username
+  if (!isAuthenticated || !user?.username) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 flex items-center justify-center px-4">
         <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center">
@@ -549,7 +549,7 @@ export default function PrivatePredictionsPage() {
             These advanced predictions are available for authenticated users only. Please log in to access your personalized betting insights.
           </p>
           <Link
-            href="/api/login"
+            href="/en/login"
             className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition-colors"
           >
             Sign In

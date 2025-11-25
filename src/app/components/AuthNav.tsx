@@ -22,7 +22,7 @@ export function AuthNav() {
           {user.profileImageUrl ? (
             <img
               src={user.profileImageUrl}
-              alt={user.firstName || 'User'}
+              alt={user.username || user.firstName || 'User'}
               className="w-8 h-8 rounded-full object-cover"
             />
           ) : (
@@ -31,7 +31,7 @@ export function AuthNav() {
             </div>
           )}
           <span className="text-sm font-medium text-text-primary">
-            {user.firstName || user.email || 'User'}
+            {user.username || user.firstName || user.email || 'User'}
           </span>
         </div>
         <Link
@@ -47,7 +47,7 @@ export function AuthNav() {
 
   return (
     <Link
-      href="/api/login"
+      href="/en/login"
       className="flex items-center gap-2 px-4 py-2 rounded-lg bg-brand-primary hover:bg-opacity-90 text-white font-medium transition-colors"
     >
       <LogIn size={16} />
