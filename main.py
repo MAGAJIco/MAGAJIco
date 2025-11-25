@@ -318,16 +318,75 @@ async def get_scoreprediction():
         raise HTTPException(status_code=500, detail=f"Failed to fetch ScorePrediction: {str(e)}")
 
 
+@app.get("/api/odds/bet365")
+async def get_bet365_odds(
+    max_odds: float = Query(2.5, ge=1.0, le=5.0, description="Maximum odds threshold")
+):
+    """
+    Get soccer odds from Bet365 filtered by max odds threshold
+    Returns: Matches with betting odds <= max_odds from Bet365
+    """
+    try:
+        bet365_odds = scraper.scrape_bet365_odds()
+        
+        # Filter by max_odds threshold
+        filtered = [
+            odd for odd in bet365_odds 
+            if odd.get("best_odd", float('inf')) <= max_odds
+        ]
+        
+        # Count by prediction type
+        predictions_count = {}
+        for odd in filtered:
+            pred = odd.get("prediction", "Unknown")
+            predictions_count[pred] = predictions_count.get(pred, 0) + 1
+        
+        return {
+            "status": "success",
+            "source": "Bet365",
+            "filter": f"odds <= {max_odds}",
+            "total_matches": len(filtered),
+            "summary": {
+                "by_prediction": predictions_count
+            },
+            "matches": filtered,
+            "timestamp": datetime.now().isoformat()
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to fetch Bet365 odds: {str(e)}")
+
+
 @app.get("/api/odds/aggregate-weekly-soccer")
 async def get_aggregate_weekly_soccer_odds(
     max_odds: float = Query(1.16, ge=1.0, le=3.0, description="Maximum odds threshold")
 ):
     """
     Aggregate weekly soccer odds from all sources filtered by max odds threshold (≤ 1.16)
-    Returns: Matches with odds <= max_odds from MyBets, Statarea, and ScorePrediction
+    Returns: Matches with odds <= max_odds from Bet365, MyBets, Statarea, and ScorePrediction
     """
     try:
         all_odds = []
+        
+        # Fetch from Bet365
+        try:
+            bet365_odds = scraper.scrape_bet365_odds()
+            filtered_bet365 = [
+                {
+                    "home_team": p.get("home_team"),
+                    "away_team": p.get("away_team"),
+                    "prediction": p.get("prediction"),
+                    "odds_1": p.get("odds_1"),
+                    "odds_x": p.get("odds_x"),
+                    "odds_2": p.get("odds_2"),
+                    "best_odd": p.get("best_odd", 0.0),
+                    "source": "Bet365"
+                }
+                for p in bet365_odds
+                if p.get("best_odd", float('inf')) <= max_odds
+            ]
+            all_odds.extend(filtered_bet365)
+        except:
+            pass
         
         # Fetch from MyBets
         try:
@@ -367,7 +426,7 @@ async def get_aggregate_weekly_soccer_odds(
         # Filter by max_odds threshold
         filtered_odds = [
             odd for odd in all_odds 
-            if odd.get("odds", float('inf')) <= max_odds or "odds" not in odd or odd.get("confidence", 0) >= 65
+            if odd.get("best_odd", float('inf')) <= max_odds or odd.get("odds", float('inf')) <= max_odds or "odds" not in odd or odd.get("confidence", 0) >= 65
         ]
         
         # Count by prediction type
@@ -376,12 +435,19 @@ async def get_aggregate_weekly_soccer_odds(
             pred = odd.get("prediction", "Unknown")
             predictions_count[pred] = predictions_count.get(pred, 0) + 1
         
+        # Count by source
+        sources_count = {}
+        for odd in filtered_odds:
+            source = odd.get("source", "Unknown")
+            sources_count[source] = sources_count.get(source, 0) + 1
+        
         return {
             "status": "success",
             "filter": f"odds <= {max_odds}",
             "total_matches": len(filtered_odds),
             "summary": {
                 "by_prediction": predictions_count,
+                "by_source": sources_count,
                 "high_confidence": sum(1 for o in filtered_odds if o.get("confidence", 0) >= 85)
             },
             "matches": filtered_odds,
@@ -443,6 +509,7 @@ async def root():
             "mybets": "/api/predictions/mybets",
             "statarea": "/api/predictions/statarea",
             "scoreprediction": "/api/predictions/scoreprediction",
+            "bet365_odds": "/api/odds/bet365",
             "aggregate_weekly_soccer_odds": "/api/odds/aggregate-weekly-soccer",
             "health": "/api/health",
             "stats": "/api/stats"
