@@ -26,3 +26,5 @@ requests
 scikit-learn
 starlette
 uvicorn
+selenium
+webdriver-manager

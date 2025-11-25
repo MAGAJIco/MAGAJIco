@@ -5,7 +5,7 @@ integrations = ["javascript_log_in_with_replit:1.0.0"]
 
 [nix]
 channel = "stable-25_05"
-packages = ["glibcLocales", "xcodebuild", "zlib"]
+packages = ["geckodriver", "glibcLocales", "xcodebuild", "zlib", "chromium"]
 
 [workflows]
 runButton = "Project"
@@ -138,10 +138,6 @@ externalPort = 4200
 [[ports]]
 localPort = 41897
 externalPort = 6000
-
-[[ports]]
-localPort = 42113
-externalPort = 8099
 
 [[ports]]
 localPort = 43779
