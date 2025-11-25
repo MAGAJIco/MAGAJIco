@@ -788,20 +788,21 @@ class RealSportsScraperService:
     def _get_sample_mybets_predictions(self) -> List[Dict[str, Any]]:
         """Sample MyBets.today predictions"""
         return [
-            {
-                "home_team": "Liverpool",
-                "away_team": "Manchester City",
-                "prediction": "Home Win",
-                "confidence": 72,
-                "source": "MyBets.today"
-            },
-            {
-                "home_team": "Barcelona",
-                "away_team": "Real Madrid",
-                "prediction": "Draw",
-                "confidence": 65,
-                "source": "MyBets.today"
-            },
+            {"home_team": "Liverpool", "away_team": "Manchester City", "prediction": "Home Win", "confidence": 72, "source": "MyBets.today"},
+            {"home_team": "Barcelona", "away_team": "Real Madrid", "prediction": "Draw", "confidence": 65, "source": "MyBets.today"},
+            {"home_team": "Chelsea", "away_team": "Arsenal", "prediction": "Away Win", "confidence": 58, "source": "MyBets.today"},
+            {"home_team": "Bayern Munich", "away_team": "RB Leipzig", "prediction": "Home Win", "confidence": 81, "source": "MyBets.today"},
+            {"home_team": "PSG", "away_team": "Lens", "prediction": "Home Win", "confidence": 76, "source": "MyBets.today"},
+            {"home_team": "Inter", "away_team": "Napoli", "prediction": "Draw", "confidence": 62, "source": "MyBets.today"},
+            {"home_team": "Juventus", "away_team": "Atalanta", "prediction": "Away Win", "confidence": 55, "source": "MyBets.today"},
+            {"home_team": "Manchester United", "away_team": "Newcastle", "prediction": "Home Win", "confidence": 68, "source": "MyBets.today"},
+            {"home_team": "Tottenham", "away_team": "Brighton", "prediction": "Home Win", "confidence": 74, "source": "MyBets.today"},
+            {"home_team": "Ajax", "away_team": "Feyenoord", "prediction": "Draw", "confidence": 61, "source": "MyBets.today"},
+            {"home_team": "Sevilla", "away_team": "Atletico Madrid", "prediction": "Away Win", "confidence": 52, "source": "MyBets.today"},
+            {"home_team": "Benfica", "away_team": "Porto", "prediction": "Home Win", "confidence": 69, "source": "MyBets.today"},
+            {"home_team": "Roma", "away_team": "Lazio", "prediction": "Home Win", "confidence": 64, "source": "MyBets.today"},
+            {"home_team": "Galatasaray", "away_team": "Fenerbahce", "prediction": "Draw", "confidence": 59, "source": "MyBets.today"},
+            {"home_team": "Marseille", "away_team": "Monaco", "prediction": "Away Win", "confidence": 56, "source": "MyBets.today"},
         ]
 
     def scrape_scoreprediction(self) -> List[Dict[str, Any]]:
