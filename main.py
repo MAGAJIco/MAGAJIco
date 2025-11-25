@@ -165,20 +165,48 @@ async def predict_match(
 async def get_sport_predictions(sport: str):
     """
     Get predictions for a specific sport
-    Supported: soccer, nfl, nba, mlb
+    For soccer: returns real predictions from ScorePredictor
     """
     sport = sport.lower()
     
-    if sport not in ["soccer", "nfl", "nba", "mlb"]:
-        raise HTTPException(status_code=400, detail="Unsupported sport. Use: soccer, nfl, nba, or mlb")
+    if sport != "soccer":
+        raise HTTPException(status_code=400, detail="Only soccer is currently supported")
     
     try:
-        matches = scraper.scrape_espn_scores(sport)
+        # For soccer, return ScorePredictor predictions
+        predictions = scraper.scrape_scoreprediction()
+        
+        # Format predictions for frontend compatibility
+        formatted = []
+        for pred in predictions:
+            # Extract home and away scores from predicted_score
+            score_parts = pred["predicted_score"].split('-')
+            home_score = int(score_parts[0]) if len(score_parts) > 0 else 0
+            away_score = int(score_parts[1]) if len(score_parts) > 1 else 0
+            
+            formatted.append({
+                "id": f"{pred['home_team']}-{pred['away_team']}",
+                "home_team": pred["home_team"],
+                "away_team": pred["away_team"],
+                "home_score": home_score,
+                "away_score": away_score,
+                "predicted_score": pred["predicted_score"],
+                "prediction": pred["prediction"],
+                "day_of_week": pred["day_of_week"],
+                "total_goals": pred["total_goals"],
+                "league": "Soccer",
+                "status": "scheduled",
+                "game_time": "15:00",
+                "source": pred["source"],
+                "confidence": 85
+            })
         
         return {
+            "status": "success",
             "sport": sport,
-            "count": len(matches),
-            "matches": [match.to_dict() for match in matches],
+            "count": len(formatted),
+            "matches": formatted,
+            "source": "ScorePredictor",
             "timestamp": datetime.now().isoformat()
         }
     except Exception as e:

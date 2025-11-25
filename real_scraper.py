@@ -755,17 +755,16 @@ class RealSportsScraperService:
 
     def scrape_scoreprediction(self) -> List[Dict[str, Any]]:
         """
-        Scrape predictions from ScorePredictor.net (scorepredictor.net)
+        Scrape predictions from ScorePredictor.net (scorepredictor.net/index.php)
         Returns: ALL available match score predictions grouped by day of week
         Includes: home_team, away_team, predicted_score, total_goals, prediction, day_of_week
-        Counts each unique match only once (removes within-day duplicates only)
+        Real games from scorepredictor.net with no filtering applied
         """
         predictions = []
         seen = set()
-        current_day = "Unknown"
         
         try:
-            url = "https://scorepredictor.net"
+            url = "https://scorepredictor.net/index.php"
             response = requests.get(url, headers=self.headers, timeout=10)
             soup = BeautifulSoup(response.text, 'html.parser')
             
@@ -773,14 +772,12 @@ class RealSportsScraperService:
             body_text = soup.get_text()
             lines = body_text.split('\n')
             
-            # First pass: identify day sections and their boundaries
+            # Identify day sections and their line positions
             day_sections = {}
             current_day = "Today"
-            day_line_idx = 0
             
             for i, line in enumerate(lines):
                 line_stripped = line.strip()
-                # Look for day headers
                 if 'Selected tips' in line_stripped:
                     if 'today' in line_stripped.lower():
                         current_day = "Today"
@@ -795,75 +792,91 @@ class RealSportsScraperService:
             
             # Find all tables containing predictions
             tables = soup.find_all('table')
-            table_idx = 0
+            
+            # Map tables to days: skip empty tables, assign day based on table index
+            table_counter = 0
+            day_list = sorted(day_sections.items(), key=lambda x: x[1])
             
             for table in tables:
                 rows = table.find_all('tr')
                 
-                # Determine which day this table belongs to
-                # First table = Today, subsequent tables = Other days
-                day_assignment = "Today" if table_idx == 0 else "Upcoming"
-                if len(day_sections) > 1:
-                    day_list = sorted(day_sections.items(), key=lambda x: x[1])
-                    if table_idx < len(day_list):
-                        day_assignment = day_list[table_idx][0]
+                # Skip header row and empty tables
+                if len(rows) < 2:
+                    continue
                 
-                row_in_table = 0
-                for row in rows:
+                # Determine which day this table belongs to
+                day_assignment = day_list[table_counter][0] if table_counter < len(day_list) else "Upcoming"
+                
+                for row_idx, row in enumerate(rows):
+                    # Skip header row (first row with th tags)
+                    if row_idx == 0:
+                        continue
+                    
                     try:
                         cells = row.find_all('td')
                         
-                        # Table format: Home Team | Home Score | Away Score | Away Team | Odds...
-                        if len(cells) >= 4:
-                            home_team = cells[0].get_text(strip=True) or cells[1].get_text(strip=True)
+                        # Parse all matches in this row (multiple matches can be in one row)
+                        # Pattern: [League | Home Team | Home Score | Away Score | Away Team | Tip | details | separator | ...]*
+                        cell_idx = 0
+                        while cell_idx < len(cells):
+                            # Look for match pattern starting at cell_idx
+                            # First cell might be league (could be empty) or home team
                             
-                            try:
-                                # Extract scores (cells[1] and cells[2])
-                                home_score = int(cells[1].get_text(strip=True))
-                                away_score = int(cells[2].get_text(strip=True))
-                                away_team = cells[3].get_text(strip=True)
-                                total_goals = home_score + away_score
-                                
-                                # Validate: team names should be real (not numbers/empty)
-                                if not home_team or not away_team or len(home_team) < 2 or len(away_team) < 2:
-                                    continue
-                                if home_team == away_team:
-                                    continue
-                                
-                                # Only skip duplicates within the same table/day
-                                # Different days can have same match
-                                match_key = (home_team, away_team, day_assignment)
-                                if match_key in seen:
-                                    continue
-                                seen.add(match_key)
-                                
-                                # Determine prediction
-                                if home_score > away_score:
-                                    prediction = "Home Win"
-                                elif home_score == away_score:
-                                    prediction = "Draw"
-                                else:
-                                    prediction = "Away Win"
-                                
-                                predictions.append({
-                                    "home_team": home_team,
-                                    "away_team": away_team,
-                                    "predicted_score": f"{home_score}-{away_score}",
-                                    "total_goals": total_goals,
-                                    "prediction": prediction,
-                                    "day_of_week": day_assignment,
-                                    "source": "ScorePredictor"
-                                })
-                                
-                                row_in_table += 1
-                                
-                            except (ValueError, IndexError):
-                                continue
+                            # Try to find a valid match starting at current position
+                            match_found = False
+                            
+                            # Pattern 1: League | Home Team | Home Score | Away Score | Away Team | Tip
+                            if cell_idx + 5 <= len(cells):
+                                try:
+                                    home_team = cells[cell_idx].get_text(strip=True)
+                                    home_score_text = cells[cell_idx + 1].get_text(strip=True)
+                                    away_score_text = cells[cell_idx + 2].get_text(strip=True)
+                                    away_team = cells[cell_idx + 3].get_text(strip=True)
+                                    
+                                    # Try to parse scores
+                                    home_score = int(home_score_text)
+                                    away_score = int(away_score_text)
+                                    
+                                    # Validate team names (must be 2+ chars and different)
+                                    if home_team and away_team and len(home_team) >= 2 and len(away_team) >= 2 and home_team != away_team:
+                                        total_goals = home_score + away_score
+                                        
+                                        # Skip duplicates within same day
+                                        match_key = (home_team, away_team, day_assignment)
+                                        if match_key not in seen:
+                                            seen.add(match_key)
+                                            
+                                            # Determine prediction
+                                            if home_score > away_score:
+                                                prediction = "Home Win"
+                                            elif home_score == away_score:
+                                                prediction = "Draw"
+                                            else:
+                                                prediction = "Away Win"
+                                            
+                                            predictions.append({
+                                                "home_team": home_team,
+                                                "away_team": away_team,
+                                                "predicted_score": f"{home_score}-{away_score}",
+                                                "total_goals": total_goals,
+                                                "prediction": prediction,
+                                                "day_of_week": day_assignment,
+                                                "source": "ScorePredictor"
+                                            })
+                                        
+                                        match_found = True
+                                        cell_idx += 6  # Move past this match (5 cells + tip + details)
+                                except (ValueError, IndexError, AttributeError):
+                                    pass
+                            
+                            # If no match found, move to next cell (empty separator)
+                            if not match_found:
+                                cell_idx += 1
                     
                     except Exception:
                         continue
                 
-                table_idx += 1
+                table_counter += 1
                     
         except Exception as e:
             print(f"ScorePredictor scraping error: {e}")
