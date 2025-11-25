@@ -399,10 +399,46 @@ class RealSportsScraperService:
     def get_all_predictions(self, api_key: Optional[str] = None) -> List[Dict[str, Any]]:
         """
         Get all predictions from multiple sources
+        Aggregates real data from MyBets, Statarea, ScorePrediction, ESPN, and APIs
         """
         all_matches = []
         
-        # Try API first (most reliable)
+        # Try MyBets.today scraping (REAL DATA)
+        try:
+            mybets_predictions = self.scrape_mybets_today()
+            if mybets_predictions:
+                all_matches.extend(mybets_predictions)
+                print(f"✅ Scraped {len(mybets_predictions)} predictions from MyBets.today")
+        except Exception as e:
+            print(f"❌ MyBets.today scraping failed: {e}")
+        
+        # Try Statarea scraping (REAL DATA)
+        try:
+            statarea_predictions = self.scrape_statarea()
+            if statarea_predictions:
+                all_matches.extend(statarea_predictions)
+                print(f"✅ Scraped {len(statarea_predictions)} predictions from Statarea")
+        except Exception as e:
+            print(f"❌ Statarea scraping failed: {e}")
+        
+        # Try ScorePrediction scraping (REAL DATA)
+        try:
+            score_predictions = self.scrape_scoreprediction()
+            if score_predictions:
+                all_matches.extend(score_predictions)
+                print(f"✅ Scraped {len(score_predictions)} predictions from ScorePrediction")
+        except Exception as e:
+            print(f"❌ ScorePrediction scraping failed: {e}")
+        
+        # Try ESPN scraping (REAL DATA)
+        try:
+            espn_matches = self.scrape_espn_scores("soccer")
+            all_matches.extend(espn_matches)
+            print(f"✅ Scraped {len(espn_matches)} matches from ESPN")
+        except Exception as e:
+            print(f"❌ ESPN scraping failed: {e}")
+        
+        # Try API-Football if key provided (most reliable)
         if api_key:
             try:
                 api_matches = self.fetch_api_football_data(api_key)
@@ -410,14 +446,6 @@ class RealSportsScraperService:
                 print(f"✅ Fetched {len(api_matches)} matches from API-Football")
             except Exception as e:
                 print(f"❌ API-Football failed: {e}")
-        
-        # Try ESPN scraping
-        try:
-            espn_matches = self.scrape_espn_scores("soccer")
-            all_matches.extend(espn_matches)
-            print(f"✅ Scraped {len(espn_matches)} matches from ESPN")
-        except Exception as e:
-            print(f"❌ ESPN scraping failed: {e}")
         
         # Try FlashScore scraping (fallback)
         if len(all_matches) < 5:
@@ -433,7 +461,22 @@ class RealSportsScraperService:
             print("⚠️ All sources failed, returning sample data")
             all_matches = self._get_comprehensive_sample_data()
         
-        return [match.to_dict() for match in all_matches[:30]]  # Limit to 30 matches
+        # Return mixed real data from all sources (convert LiveMatch objects to dicts)
+        result: List[Dict[str, Any]] = []
+        for item in all_matches[:50]:  # Increased limit to 50 to show more diverse data
+            if hasattr(item, 'to_dict'):
+                result.append(item.to_dict())
+            elif isinstance(item, dict):
+                result.append(item)
+            else:
+                # Fallback: try to convert to dict
+                try:
+                    result.append(item.__dict__)
+                except:
+                    continue
+        
+        print(f"📊 Total predictions: {len(result)} from multiple sources")
+        return result
     
     def _generate_ml_prediction(self, match: LiveMatch) -> Dict[str, Any]:
         """Generate ML prediction for a match"""

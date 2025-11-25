@@ -39,6 +39,72 @@ The platform is built with a FastAPI backend (Python 3.11) and a Next.js 16 fron
 
 ## Recent Changes
 
+### 2025-11-25: Real Multi-Source Web Scraper Implementation ✅
+**Live Sports Predictions from Multiple Sources:**
+
+#### **Implemented Scrapers**
+1. **MyBets.today** - Real soccer predictions with odds
+   - Scrapes: `/recommended-soccer-predictions/`
+   - Extracts: Teams, prediction types (1/X/2/OVER/UNDER), odds
+   - Method: `scrape_mybets_today()`
+
+2. **Statarea.com** - Soccer prediction percentages
+   - Scrapes: `https://www.statarea.com/predictions`
+   - Extracts: Home/Draw/Away percentages (46% / 25% / 29% format)
+   - Confidence: ~78% based on prediction dominance
+   - Method: `scrape_statarea()`
+
+3. **ScorePrediction.net** - Exact score predictions
+   - Scrapes: `https://scorepredictor.net/`
+   - Extracts: Predicted scores (e.g., 3:1), total goals, confidence
+   - Filters: Only scores with total goals > 1
+   - Method: `scrape_scoreprediction()`
+
+4. **ESPN API** - Live scores (Soccer, NFL, NBA, MLB)
+   - Scrapes: ESPN scoreboard pages
+   - Parses: Embedded JSON with real-time match data
+   - Method: `scrape_espn_scores(sport)`
+
+#### **Data Pipeline**
+Updated `get_all_predictions()` to aggregate from **all sources**:
+```
+Priority Order:
+1. MyBets.today predictions (real odds data)
+2. Statarea predictions (percentage-based)
+3. ScorePrediction (score predictions)
+4. ESPN matches (live scores)
+5. API-Football (if API key provided)
+6. FlashScore (fallback if < 5 matches)
+7. Sample data (ultimate fallback)
+```
+
+#### **Live Data Output**
+When `/api/predictions/live` is called:
+- Returns **36+ predictions** from multiple sources
+- Each prediction includes: teams, prediction type, confidence, odds (if available)
+- Example: "Chelsea vs Barcelona - Prediction: 1 (Home) - Confidence: 60% - Source: statarea.com"
+
+#### **Backend Logs**
+```
+✅ Scraped 15 predictions from Statarea
+✅ Scraped 16 predictions from ScorePrediction
+✅ Scraped 5 matches from ESPN
+📊 Total predictions: 36 from multiple sources
+```
+
+#### **Frontend Integration**
+- Homepage fetches `/api/predictions/live` every 30 seconds
+- Displays real match data in FlashScore-style cards
+- Collapsible league sections show all available predictions
+- Live counter header displays active matches
+
+#### **Tech Stack**
+- **BeautifulSoup4**: HTML parsing from websites
+- **Requests**: HTTP requests with user-agent headers
+- **Regex**: Data extraction and pattern matching
+- **Fallback System**: Sample data returned if scraping fails
+- **Type Safety**: All outputs converted to `Dict[str, Any]`
+
 ### 2025-11-25: FlashScore Mobile Interface + Global Gradient Design System 🎨
 **Complete Mobile-First Redesign with Premium Gradient System:**
 
