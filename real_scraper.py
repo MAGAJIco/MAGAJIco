@@ -682,14 +682,15 @@ class RealSportsScraperService:
     def scrape_statarea(self) -> List[Dict[str, Any]]:
         """
         Scrape predictions from Statarea.com
-        Returns: List of ALL available match predictions for today
-        Format: home_team, away_team, game_time, prediction, confidence, source
+        Returns: List of ALL available match predictions with weekday information
+        Format: home_team, away_team, game_time, prediction, confidence, day_of_week, source
         Returns empty array if scraping fails (NO sample/fake data)
         
         StatArea structure:
         - Predictions page: https://www.statarea.com/predictions
         - Match display: Team names in clickable links with game time and TIP prediction type (1, X, 2)
         - Confidence: Shown as percentages for each prediction type
+        - Dates: Page displays predictions for specific dates
         """
         predictions = []
         seen = set()
@@ -699,11 +700,52 @@ class RealSportsScraperService:
             response = requests.get(url, headers=self.headers, timeout=10)
             soup = BeautifulSoup(response.text, 'html.parser')
             
+            # Extract current date from page - StatArea displays date in format like "2025-11-25"
+            page_text = soup.get_text()
+            date_match = re.search(r'(\d{4})-(\d{2})-(\d{2})', page_text)
+            current_date_str = None
+            
+            if date_match:
+                year, month, day = date_match.groups()
+                current_date_str = f"{year}-{month}-{day}"
+                try:
+                    from datetime import datetime
+                    current_date = datetime.strptime(current_date_str, "%Y-%m-%d")
+                except:
+                    current_date = None
+            else:
+                current_date = None
+            
+            # Get weekday name and format
+            def format_day_of_week(date_obj):
+                """Convert datetime to day format like 'Today' or 'Tuesday (November 25th)'"""
+                if not date_obj:
+                    return "Today"
+                
+                from datetime import datetime, timedelta
+                today = datetime.now()
+                
+                # Check if it's today
+                if date_obj.date() == today.date():
+                    return "Today"
+                
+                # Format as "DayName (Month Dth)"
+                day_name = date_obj.strftime("%A")  # Monday, Tuesday, etc.
+                month_name = date_obj.strftime("%B")  # January, February, etc.
+                day_num = date_obj.day
+                
+                # Get ordinal suffix (st, nd, rd, th)
+                if 10 <= day_num % 100 <= 20:
+                    suffix = 'th'
+                else:
+                    suffix = {1: 'st', 2: 'nd', 3: 'rd'}.get(day_num % 10, 'th')
+                
+                return f"{day_name} ({month_name} {day_num}{suffix})"
+            
+            day_of_week = format_day_of_week(current_date)
+            
             # Strategy: Find match container divs that have time + teams + prediction type
             # Look for any div containing: "HH:MM" + "Team1 - Team2" + "TIP" with prediction (1/X/2)
-            
-            # Get all text and try to extract matches using structured patterns
-            # StatArea displays: time, then home team link, dash, away team link, then TIP with prediction type
             
             # Find all the match result elements - StatArea structures matches in divs
             for div in soup.find_all('div', recursive=True):
@@ -740,8 +782,8 @@ class RealSportsScraperService:
                 if home_team == away_team:
                     continue
                 
-                # Create unique key
-                key = (home_team, away_team, game_time)
+                # Create unique key including day
+                key = (home_team, away_team, game_time, day_of_week)
                 if key in seen:
                     continue
                 seen.add(key)
@@ -774,6 +816,7 @@ class RealSportsScraperService:
                     "home_team": home_team,
                     "away_team": away_team,
                     "game_time": game_time,
+                    "day_of_week": day_of_week,
                     "prediction": prediction,
                     "confidence": confidence,
                     "source": "StatArea",
@@ -790,7 +833,7 @@ class RealSportsScraperService:
             print("StatArea: No predictions found for today (empty array returned)")
             return []
         
-        print(f"StatArea: Successfully scraped {len(predictions)} predictions")
+        print(f"StatArea: Successfully scraped {len(predictions)} predictions for {predictions[0].get('day_of_week', 'Today')}")
         return predictions
 
     def get_statarea_high_confidence(self, min_confidence: int = 78, predictions: Optional[List[Dict[str, Any]]] = None) -> List[Dict[str, Any]]:
