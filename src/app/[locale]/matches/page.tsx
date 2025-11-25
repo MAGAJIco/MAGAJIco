@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { useSmartRetry } from "../../hook/useSmartRetry";
 import StatCard from "../../components/StatCard";
-import { API_BASE_URL } from "../../../lib/api";
+import { getApiBaseUrl } from "../../../lib/api";
 
 interface Match {
   id: string;
@@ -69,15 +69,16 @@ export default function MatchesPage() {
 
     try {
       const result = await executeWithRetry(async () => {
+        const apiBaseUrl = getApiBaseUrl();
         // Fetch from multiple sources like FlashScore
         const endpoints = sportFilter === "all" 
           ? [
-              { url: `${API_BASE_URL}/api/nfl?source=espn`, sport: "NFL" },
-              { url: `${API_BASE_URL}/api/nba?source=espn`, sport: "NBA" },
-              { url: `${API_BASE_URL}/api/mlb?source=espn`, sport: "MLB" },
-              { url: `${API_BASE_URL}/api/soccer`, sport: "Soccer" }
+              { url: `${apiBaseUrl}/api/nfl?source=espn`, sport: "NFL" },
+              { url: `${apiBaseUrl}/api/nba?source=espn`, sport: "NBA" },
+              { url: `${apiBaseUrl}/api/mlb?source=espn`, sport: "MLB" },
+              { url: `${apiBaseUrl}/api/soccer`, sport: "Soccer" }
             ]
-          : [{ url: `${API_BASE_URL}/api/${sportFilter.toLowerCase()}?source=espn`, sport: sportFilter }];
+          : [{ url: `${apiBaseUrl}/api/${sportFilter.toLowerCase()}?source=espn`, sport: sportFilter }];
 
         const responses = await Promise.allSettled(
           endpoints.map(endpoint => 

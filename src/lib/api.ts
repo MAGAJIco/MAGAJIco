@@ -26,7 +26,7 @@ export const getApiBaseUrl = (): string => {
  * Helper function to make API calls to the backend
  */
 export async function fetchFromBackend(endpoint: string, options?: RequestInit) {
-  const url = `${API_BASE_URL}${endpoint}`;
+  const url = `${getApiBaseUrl()}${endpoint}`;
 
   try {
     const response = await fetch(url, {

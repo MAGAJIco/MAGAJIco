@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { useSmartRetry } from "../../hook/useSmartRetry";
 import StatCard from "../../components/StatCard";
-import { API_BASE_URL } from "../../../lib/api";
+import { getApiBaseUrl } from "../../../lib/api";
 
 interface LiveMatch {
   id: string;
@@ -77,15 +77,16 @@ export default function LiveMatchesPage() {
 
     try {
       const result = await executeWithRetry(async () => {
+        const apiBaseUrl = getApiBaseUrl();
         // Fetch live data from API
         const endpoints = sportFilter === "all" 
           ? [
-              { url: `${API_BASE_URL}/api/nfl?source=espn`, sport: "NFL" },
-              { url: `${API_BASE_URL}/api/nba?source=espn`, sport: "NBA" },
-              { url: `${API_BASE_URL}/api/mlb?source=espn`, sport: "MLB" },
-              { url: `${API_BASE_URL}/api/soccer`, sport: "Soccer" }
+              { url: `${apiBaseUrl}/api/nfl?source=espn`, sport: "NFL" },
+              { url: `${apiBaseUrl}/api/nba?source=espn`, sport: "NBA" },
+              { url: `${apiBaseUrl}/api/mlb?source=espn`, sport: "MLB" },
+              { url: `${apiBaseUrl}/api/soccer`, sport: "Soccer" }
             ]
-          : [{ url: `${API_BASE_URL}/api/${sportFilter.toLowerCase()}?source=espn`, sport: sportFilter }];
+          : [{ url: `${apiBaseUrl}/api/${sportFilter.toLowerCase()}?source=espn`, sport: sportFilter }];
 
         const [matchesResponses, predictionsResponse] = await Promise.all([
           Promise.allSettled(
@@ -101,7 +102,7 @@ export default function LiveMatchesPage() {
                 }))
             )
           ),
-          fetch(`${API_BASE_URL}/api/predictions/combined?min_confidence=75&date=today`, { 
+          fetch(`${apiBaseUrl}/api/predictions/combined?min_confidence=75&date=today`, { 
             signal: AbortSignal.timeout(5000) 
           })
             .then(r => r.ok ? r.json() : { predictions: [] })

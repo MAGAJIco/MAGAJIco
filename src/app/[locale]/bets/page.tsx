@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { ArrowUpRight, Copy, Share2, ExternalLink, Zap, Target, TrendingUp } from "lucide-react";
 import { motion } from "framer-motion";
-import { API_BASE_URL } from "../../../lib/api";
+import { getApiBaseUrl } from "../../../lib/api";
 
 interface Bet {
   id: string;
@@ -34,10 +34,11 @@ export default function BetsPage() {
     setLoading(true);
     setError(null);
     try {
+      const apiBaseUrl = getApiBaseUrl();
       const [nflRes, nbaRes, soccerRes] = await Promise.all([
-        fetch(`${API_BASE_URL}/api/nfl`),
-        fetch(`${API_BASE_URL}/api/nba`),
-        fetch(`${API_BASE_URL}/api/soccer`)
+        fetch(`${apiBaseUrl}/api/nfl`),
+        fetch(`${apiBaseUrl}/api/nba`),
+        fetch(`${apiBaseUrl}/api/soccer`)
       ]);
 
       const [nflData, nbaData, soccerData] = await Promise.all([

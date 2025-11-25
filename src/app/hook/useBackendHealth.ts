@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
-import { API_BASE_URL } from '../../lib/api';
+import { getApiBaseUrl } from '../../lib/api';
 import type { HealthStatus } from '../../../shared/health';
 
 export function useBackendHealth(checkInterval = 60000) {
@@ -14,7 +14,7 @@ export function useBackendHealth(checkInterval = 60000) {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000);
 
-      const response = await fetch(`${API_BASE_URL}/health`, {
+      const response = await fetch(`${getApiBaseUrl()}/health`, {
         signal: controller.signal,
         headers: { 'Accept': 'application/json' }
       });

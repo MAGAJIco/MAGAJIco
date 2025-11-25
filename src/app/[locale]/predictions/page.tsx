@@ -26,7 +26,7 @@ import { motion } from "framer-motion";
 import ThemeToggle from "../../components/ThemeToggle";
 import { useSmartRetry } from "../../hook/useSmartRetry";
 import StatCard from "../../components/StatCard";
-import { API_BASE_URL } from "../../../lib/api";
+import { getApiBaseUrl } from "../../../lib/api";
 
 interface PredictionSource {
   name: string;
@@ -123,12 +123,13 @@ export default function AdvancedPredictionsPage() {
     setError(null);
 
     try {
+      const apiBaseUrl = getApiBaseUrl();
       // Amazon-style: Fetch from multiple sources with graceful degradation
       const result = await executeWithRetry(async () => {
         const sources = [
-          { name: 'mybets', url: `${API_BASE_URL}/api/predictions/soccer?min_confidence=${minConfidence}&date=${date}` },
-          { name: 'statarea', url: `${API_BASE_URL}/api/predictions/statarea?min_odds=1.5` },
-          { name: 'combined', url: `${API_BASE_URL}/api/predictions/combined?min_confidence=${minConfidence}&date=${date}` }
+          { name: 'mybets', url: `${apiBaseUrl}/api/predictions/soccer?min_confidence=${minConfidence}&date=${date}` },
+          { name: 'statarea', url: `${apiBaseUrl}/api/predictions/statarea?min_odds=1.5` },
+          { name: 'combined', url: `${apiBaseUrl}/api/predictions/combined?min_confidence=${minConfidence}&date=${date}` }
         ];
 
         // Fetch with individual error handling - don't let one failure block all
