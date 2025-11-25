@@ -33,8 +33,8 @@ export default function MatchesPage() {
   const fetchMatches = async () => {
     try {
       setLoading(true);
-      const apiBaseUrl = getApiBaseUrl();
-      const response = await fetch(`${apiBaseUrl}/api/predictions/live`);
+      // Use Next.js API proxy
+      const response = await fetch(`/api/predictions/live`);
       const data = await response.json();
       const predictions = data.predictions || [];
 

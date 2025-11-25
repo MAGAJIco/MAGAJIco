@@ -43,8 +43,8 @@ export default function HomePage() {
   const fetchMatches = async () => {
     try {
       setLoading(true);
-      const apiBaseUrl = getApiBaseUrl();
-      const response = await fetch(`${apiBaseUrl}/api/predictions/live`, { timeout: 5000 });
+      // Use Next.js API proxy
+      const response = await fetch(`/api/predictions/live`, { timeout: 5000 });
       
       if (!response.ok) throw new Error('API error');
       
