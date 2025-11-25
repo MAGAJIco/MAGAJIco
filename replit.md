@@ -154,6 +154,43 @@ python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 
 ## Recent Changes
 
+- **2025-11-25**: ✅ MagajiCo Secret Feature Complete (Match Deduplication)
+  - **Core Feature**: Detects matches appearing across multiple scrapers with star ratings
+    - Displays matches found in 2+ sources (Statarea, ScorePrediction, MyBets)
+    - ⭐⭐ for appearing in 2 sources
+    - ⭐⭐⭐ for appearing in all 3 sources
+  
+  - **Implementation**:
+    - New `calculateSecretMatches()` function matches teams across all scrapers
+    - Team name normalization: case-insensitive, alphabetically sorted for deduplication
+    - useEffect recalculates whenever any scraper data updates
+    - Matches sorted by confidence (highest first), max 10 displayed
+  
+  - **UI Design**:
+    - **Card Design**: Gold/orange/red gradient background (gradient-to-br from-yellow-400 via-orange-400 to-red-500)
+    - **Star Rating**: Large emoji display (⭐⭐ or ⭐⭐⭐)
+    - **Header**: "🔮 MAGAJICO SECRET" with spinning crystal emoji
+    - **Shows**: Team matchup, sources where match appears, confidence from each source
+    - **Button**: "🎁 Claim Secret Bet" call-to-action
+    - **Position**: Placed at TOP of predictions page for maximum visibility
+  
+  - **Data Example**: Match appearing in Statarea + ScorePrediction:
+    ```json
+    {
+      "teams": "Manchester United - Liverpool",
+      "count": 2,
+      "sources": ["Statarea", "ScorePrediction"],
+      "source_data": {
+        "statarea": { "confidence": 78, "prediction": "1" },
+        "scoreprediction": { "confidence": 85, "score": "2:1" }
+      }
+    }
+    ```
+  
+  - **Key Files Modified**:
+    - `src/app/[locale]/predictions/page.tsx`: Added state, calculation function, render component, new section
+    - `replit.md`: Updated documentation
+
 - **2025-11-25**: ✅ ScorePrediction.net Scraper + Live Carousel Complete
   - **Scraper Implementation**: Added `scrape_scoreprediction()` method to `real_scraper.py`
     - Scrapes match predictions from https://scorepredictor.net/

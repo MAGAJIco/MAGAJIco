@@ -80,27 +80,90 @@ const HorizontalCarousel = ({ items, renderItem, title, icon, color = 'from-blue
 };
 
 export default function PrivatePredictionsPage() {
-  const [refreshTime, setRefreshTime] = useState(new Date().toLocaleTimeString());
+  const [refreshTime, setRefreshTime] = useState('');
   const [myBetsPredictions, setMyBetsPredictions] = useState([]);
   const [loadingMyBets, setLoadingMyBets] = useState(true);
   const [statareaPredictions, setStatareaPredictions] = useState([]);
   const [loadingStatarea, setLoadingStatarea] = useState(true);
   const [scorePredictions, setScorePredictions] = useState([]);
   const [loadingScorePred, setLoadingScorePred] = useState(true);
+  const [secretMatches, setSecretMatches] = useState([]);
   const [weekCalendar, setWeekCalendar] = useState({});
   const [loadingWeek, setLoadingWeek] = useState(true);
 
   useEffect(() => {
+    // Update time on client side only (avoid hydration mismatch)
+    setRefreshTime(new Date().toLocaleTimeString());
     fetchData();
     const interval = setInterval(fetchData, 60000);
     return () => clearInterval(interval);
   }, []);
+
+  // Recalculate secret matches whenever predictions change
+  useEffect(() => {
+    calculateSecretMatches();
+  }, [statareaPredictions, scorePredictions, myBetsPredictions]);
 
   const fetchData = async () => {
     fetchMyBetsPredictions();
     fetchStatareaData();
     fetchScorePredictions();
     fetchWeekCalendar();
+  };
+
+  // Calculate matches appearing multiple times across scrapers
+  const calculateSecretMatches = () => {
+    const matchMap = new Map();
+
+    // Helper to normalize team names (case-insensitive)
+    const normalizeTeams = (team1, team2) => {
+      const sorted = [team1?.toLowerCase().trim(), team2?.toLowerCase().trim()].sort();
+      return `${sorted[0]}|${sorted[1]}`;
+    };
+
+    // Add Statarea matches
+    statareaPredictions.forEach(pred => {
+      const key = normalizeTeams(pred.home_team, pred.away_team);
+      const existing = matchMap.get(key) || { teams: pred.teams, sources: [], count: 0 };
+      if (!existing.sources.includes('Statarea')) {
+        existing.sources.push('Statarea');
+        existing.count += 1;
+      }
+      existing.source_data = { ...existing.source_data, statarea: pred };
+      matchMap.set(key, existing);
+    });
+
+    // Add ScorePrediction matches
+    scorePredictions.forEach(pred => {
+      const key = normalizeTeams(pred.home_team, pred.away_team);
+      const existing = matchMap.get(key) || { teams: pred.teams, sources: [], count: 0 };
+      if (!existing.sources.includes('ScorePrediction')) {
+        existing.sources.push('ScorePrediction');
+        existing.count += 1;
+      }
+      existing.source_data = { ...existing.source_data, scoreprediction: pred };
+      matchMap.set(key, existing);
+    });
+
+    // Add MyBets matches
+    myBetsPredictions.forEach(pred => {
+      const key = normalizeTeams(pred.home_team || '', pred.away_team || '');
+      const existing = matchMap.get(key) || { teams: pred.teams, sources: [], count: 0 };
+      if (!existing.sources.includes('MyBets')) {
+        existing.sources.push('MyBets');
+        existing.count += 1;
+      }
+      existing.source_data = { ...existing.source_data, mybets: pred };
+      matchMap.set(key, existing);
+    });
+
+    // Filter for matches appearing 2+ times and sort by count
+    const filtered = Array.from(matchMap.values())
+      .filter(match => match.count >= 2)
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10);
+
+    setSecretMatches(filtered);
   };
 
   const fetchMyBetsPredictions = async () => {
@@ -116,7 +179,6 @@ export default function PrivatePredictionsPage() {
       console.error('Error fetching mybets:', error);
     } finally {
       setLoadingMyBets(false);
-      setRefreshTime(new Date().toLocaleTimeString());
     }
   };
 
@@ -320,6 +382,53 @@ export default function PrivatePredictionsPage() {
     </motion.div>
   );
 
+  // Render secret match card (matches appearing in multiple scrapers)
+  const renderSecretMatchCard = (match) => (
+    <motion.div
+      whileHover={{ scale: 1.05, y: -5 }}
+      className="w-96 rounded-2xl bg-gradient-to-br from-yellow-400 via-orange-400 to-red-500 p-6 text-white shadow-xl cursor-pointer border-2 border-white/30"
+    >
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-xs font-bold text-white/90 tracking-widest">🔮 MAGAJICO SECRET</span>
+        <span className="text-2xl font-bold">
+          {match.count === 3 ? '⭐⭐⭐' : match.count === 2 ? '⭐⭐' : '⭐'}
+        </span>
+      </div>
+
+      <p className="text-sm font-bold line-clamp-2 mb-3">{match.teams}</p>
+
+      <div className="bg-black/20 rounded-lg p-3 mb-3">
+        <p className="text-xs text-white/80 mb-1">Appears in:</p>
+        <div className="flex flex-wrap gap-1">
+          {match.sources.map((source) => (
+            <span key={source} className="bg-white/20 px-2 py-1 rounded text-xs font-semibold">
+              {source}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      <div className="bg-white/10 rounded-lg p-2 text-xs">
+        <p className="text-white/80">Confidence from sources:</p>
+        <div className="flex justify-between mt-1 font-bold">
+          {match.source_data?.statarea && (
+            <span>📊 {match.source_data.statarea.confidence}%</span>
+          )}
+          {match.source_data?.scoreprediction && (
+            <span>🎲 {match.source_data.scoreprediction.confidence}%</span>
+          )}
+          {match.source_data?.mybets && (
+            <span>🎯 {match.source_data.mybets.confidence}%</span>
+          )}
+        </div>
+      </div>
+
+      <button className="w-full mt-4 bg-white text-orange-500 font-bold py-2 rounded-lg hover:bg-gray-100 transition-all text-sm">
+        🎁 Claim Secret Bet
+      </button>
+    </motion.div>
+  );
+
   // Render score prediction card
   const renderScorePredictionCard = (pred) => (
     <motion.div
@@ -438,6 +547,44 @@ export default function PrivatePredictionsPage() {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-8">
+        {/* MAGAJICO SECRET - Top Priority */}
+        {secretMatches.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            className="mb-8"
+          >
+            <div className="flex items-center gap-3 mb-4">
+              <span className="text-3xl animate-spin">🔮</span>
+              <h2 className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 via-orange-500 to-red-500">
+                MagajiCo Secret Matches
+              </h2>
+              <div className="h-1 flex-1 rounded-full bg-gradient-to-r from-yellow-400 via-orange-400 to-red-500" />
+            </div>
+            <p className="text-sm text-gray-600 mb-4">Matches appearing across multiple sources with star ratings</p>
+            
+            <div className="relative">
+              <div
+                id="carousel-MagajiCo Secret"
+                className="overflow-x-auto scrollbar-hide flex gap-4 pb-2"
+                style={{ scrollBehavior: 'smooth' }}
+              >
+                {secretMatches.map((match, idx) => (
+                  <motion.div
+                    key={idx}
+                    initial={{ opacity: 0, x: 20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    transition={{ delay: idx * 0.1, duration: 0.4 }}
+                    className="flex-shrink-0"
+                  >
+                    {renderSecretMatchCard(match)}
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        )}
+
         {/* Section 1: Today Bet */}
         <HorizontalCarousel
           items={[privateSources[0]]}
