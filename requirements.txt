@@ -29,3 +29,4 @@ uvicorn
 selenium
 webdriver-manager
 soccerapi
+pymongo
