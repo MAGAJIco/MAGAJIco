@@ -756,18 +756,45 @@ class RealSportsScraperService:
     def scrape_scoreprediction(self) -> List[Dict[str, Any]]:
         """
         Scrape predictions from ScorePredictor.net (scorepredictor.net)
-        Returns: ALL available match score predictions (no filtering)
+        Returns: ALL available match score predictions grouped by day of week
+        Includes: home_team, away_team, predicted_score, total_goals, prediction, day_of_week
         """
         predictions = []
         seen = set()
+        current_day = "Unknown"
         
         try:
             url = "https://scorepredictor.net"
             response = requests.get(url, headers=self.headers, timeout=10)
             soup = BeautifulSoup(response.text, 'html.parser')
             
+            # Parse page text to find day sections
+            body_text = soup.get_text()
+            lines = body_text.split('\n')
+            
+            # First pass: identify day sections and their boundaries
+            day_sections = {}
+            current_day = "Today"
+            day_line_idx = 0
+            
+            for i, line in enumerate(lines):
+                line_stripped = line.strip()
+                # Look for day headers
+                if 'Selected tips' in line_stripped:
+                    if 'today' in line_stripped.lower():
+                        current_day = "Today"
+                    else:
+                        # Extract day name: "Selected tips Thursday (November 27th)"
+                        match = re.search(r'Selected tips\s+(\w+)\s*\(([^)]+)\)', line_stripped)
+                        if match:
+                            day_name = match.group(1)
+                            date_str = match.group(2)
+                            current_day = f"{day_name} ({date_str})"
+                    day_sections[current_day] = i
+            
             # Find all tables containing predictions
             tables = soup.find_all('table')
+            table_idx = 0
             
             for table in tables:
                 rows = table.find_all('tr')
@@ -806,20 +833,31 @@ class RealSportsScraperService:
                                 else:
                                     prediction = "Away Win"
                                 
+                                # Determine which day this table belongs to
+                                # First table = Today, subsequent tables = Other days
+                                day_assignment = "Today" if table_idx == 0 else "Upcoming"
+                                if len(day_sections) > 1:
+                                    day_list = sorted(day_sections.items(), key=lambda x: x[1])
+                                    if table_idx < len(day_list):
+                                        day_assignment = day_list[table_idx][0]
+                                
                                 predictions.append({
                                     "home_team": home_team,
                                     "away_team": away_team,
                                     "predicted_score": f"{home_score}-{away_score}",
                                     "total_goals": total_goals,
                                     "prediction": prediction,
+                                    "day_of_week": day_assignment,
                                     "source": "ScorePredictor"
                                 })
                                 
                             except (ValueError, IndexError):
                                 continue
-                                
+                    
                     except Exception:
                         continue
+                
+                table_idx += 1
                     
         except Exception as e:
             print(f"ScorePredictor scraping error: {e}")
