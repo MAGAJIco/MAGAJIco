@@ -37,6 +37,29 @@ The platform is built with a FastAPI backend (Python 3.11) and a Next.js 16 fron
 
 ## Recent Changes
 
+### 2025-11-25: FlashScore-Style Interface + Error Handling ✅
+**Complete Interface Redesign with Real Data Loading:**
+- **API Proxy Routes Fixed**: Changed predictions page to use `/api/predictions/*` proxy routes instead of direct backend calls
+- **Error Handling Implemented**:
+  - Promise.allSettled for graceful failure handling
+  - 8-second timeout per API request
+  - Retry buttons on error state
+  - Individual error messages per source
+- **Lazy Loading with Collapsible Sections**:
+  - Expandable prediction tables (Statarea, ScorePrediction)
+  - Smooth transitions with ChevronDown indicator
+  - Show first 15 predictions, display count of total
+- **Mobile Navigation Fixed**:
+  - Updated BottomNav with persistent underline indicator
+  - Menu items: All Games (☰), LIVE (🔴), Premium (⭐), Leagues (🏆)
+  - Gradient underline animation on active state
+  - Proper mobile-only display (hidden on desktop)
+- **FlashScore-Style Pages**:
+  - Homepage: Blue gradient header, stats cards, competition list with live indicators
+  - Live Page: Red header, sport filters, live match scores with animations
+  - Matches Page: Indigo header, date filters, clean match list
+  - All pages use data-focused layout, minimal design, fast-loading cards
+
 ### 2025-11-25: Guest Experience & Extended Free Trial ✅
 **Guest Session System Implemented:**
 - **Motivation**: Guests can now enjoy/browse the app for 30 minutes before being prompted to login

@@ -12,45 +12,44 @@ export default function BottomNav() {
   const navItems = [
     { href: `/${locale}`, label: 'All Games', icon: '☰' },
     { href: `/${locale}/live`, label: 'LIVE', icon: '🔴' },
-    { href: `/${locale}/predictions`, label: 'Private', icon: '🔒' },
-    { href: `/${locale}/chat`, label: 'News', icon: '📰' },
+    { href: `/${locale}/predictions`, label: 'Premium', icon: '⭐' },
     { href: `/${locale}/leaderboard`, label: 'Leagues', icon: '🏆' },
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40 flex justify-around shadow-lg sm:shadow-none">
+    <nav className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 z-40 flex justify-around shadow-lg sm:hidden md:hidden lg:hidden">
       {navItems.map((item) => {
-        const isActive = pathname === item.href;
-        const accentColor = isActive ? 'text-red-600' : 'text-gray-600';
+        const isActive = pathname === item.href || (pathname.startsWith(item.href) && item.href !== `/${locale}`);
         
         return (
           <Link
             key={item.href}
             href={item.href}
             className={`
-              flex flex-col items-center justify-center transition-colors flex-1
-              min-h-16 sm:py-3 px-2 sm:px-4 
-              text-xs sm:text-xs font-medium
-              active:bg-gray-100 hover:bg-gray-50
-              ${isActive ? 'border-b-4 border-red-600' : ''}
+              flex flex-col items-center justify-center transition-all flex-1
+              min-h-16 px-2 relative group
+              ${isActive ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-300'}
             `}
             title={item.label}
           >
-            {/* Icon - larger on all screens, especially mobile */}
-            <span className="text-2xl sm:text-lg leading-none mb-1 sm:mb-1">{item.icon}</span>
+            {/* Icon */}
+            <span className="text-2xl mb-1 transition-transform group-active:scale-110">
+              {item.icon}
+            </span>
             
-            {/* Label - hidden on mobile, visible on sm+ */}
-            <span className={`hidden sm:inline ${accentColor} truncate max-w-16`}>
+            {/* Label */}
+            <span className="text-xs font-medium truncate max-w-14 leading-tight">
               {item.label}
             </span>
-            
-            {/* Mobile-only label below icon (shorter) */}
-            <span className="sm:hidden text-gray-600 text-xs leading-tight truncate max-w-12">
-              {item.label === 'All Games' ? 'All' : 
-               item.label === 'Favorites' ? 'Fav' :
-               item.label === 'Leagues' ? 'Lg' :
-               item.label}
-            </span>
+
+            {/* Persistent Underline Indicator */}
+            <div
+              className={`
+                absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-600 to-blue-500 transition-all duration-300
+                ${isActive ? 'scale-x-100 opacity-100' : 'scale-x-0 opacity-0'}
+              `}
+              style={{ transformOrigin: 'center' }}
+            />
           </Link>
         );
       })}
