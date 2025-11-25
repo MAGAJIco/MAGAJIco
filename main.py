@@ -257,6 +257,25 @@ async def health_check():
     }
 
 
+@app.get("/api/predictions/mybets")
+async def get_mybets_predictions():
+    """
+    Get recommended soccer predictions from mybets.today
+    """
+    try:
+        predictions = scraper.scrape_mybets_today()
+        
+        return {
+            "status": "success",
+            "source": "mybets.today",
+            "count": len(predictions),
+            "predictions": predictions,
+            "timestamp": datetime.now().isoformat()
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to fetch mybets predictions: {str(e)}")
+
+
 @app.get("/api/stats")
 async def get_stats(api_key: Optional[str] = None):
     """Get prediction statistics"""
@@ -306,6 +325,7 @@ async def root():
             "sport_predictions": "/api/predictions/sport/{sport}",
             "high_confidence": "/api/predictions/high-confidence",
             "today": "/api/predictions/today",
+            "mybets": "/api/predictions/mybets",
             "health": "/api/health",
             "stats": "/api/stats"
         },

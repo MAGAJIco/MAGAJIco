@@ -373,6 +373,84 @@ class RealSportsScraperService:
         return self._get_sample_flashscore_matches()
 
 
+    def scrape_mybets_today(self) -> List[Dict[str, Any]]:
+        """
+        Scrape recommended soccer predictions from mybets.today
+        """
+        predictions = []
+        
+        try:
+            response = requests.get(
+                "https://www.mybets.today/recommended-soccer-predictions/",
+                headers=self.headers,
+                timeout=10
+            )
+            response.raise_for_status()
+            
+            soup = BeautifulSoup(response.text, 'html.parser')
+            
+            # Find prediction containers - look for prediction cards/rows
+            prediction_items = soup.find_all('div', class_=re.compile('prediction|prediction-item|betting-tip'))
+            
+            if not prediction_items:
+                # Alternative: try to find any match-related divs with odds/predictions
+                prediction_items = soup.find_all('div', class_=re.compile('tip|bet|match'))
+            
+            for item in prediction_items[:15]:  # Limit to 15 predictions
+                try:
+                    # Extract teams (often in strong or h3 tags)
+                    teams_text = ''
+                    if item.find('h3'):
+                        teams_text = item.find('h3').get_text(strip=True)
+                    elif item.find('strong'):
+                        teams_text = item.find('strong').get_text(strip=True)
+                    
+                    if not teams_text:
+                        continue
+                    
+                    # Extract prediction type
+                    pred_text = item.get_text(strip=True)
+                    
+                    # Extract odds if available
+                    odds = 0.0
+                    odds_match = re.search(r'(?:Odds?|@|odds:?\s*)([0-9.]+)', pred_text, re.IGNORECASE)
+                    if odds_match:
+                        odds = float(odds_match.group(1))
+                    
+                    # Estimate confidence from odds (lower odds = higher confidence)
+                    if odds > 0:
+                        confidence = max(50, min(95, int((2.0 / odds) * 50)))
+                    else:
+                        confidence = 70
+                    
+                    # Determine prediction type
+                    pred_type = "1"  # Default to home win
+                    if "draw" in pred_text.lower() or "x" in pred_text.lower():
+                        pred_type = "X"
+                    elif "away" in pred_text.lower() or "2" in pred_text.lower():
+                        pred_type = "2"
+                    elif "over" in pred_text.lower():
+                        pred_type = "OVER"
+                    elif "under" in pred_text.lower():
+                        pred_type = "UNDER"
+                    
+                    predictions.append({
+                        "teams": teams_text,
+                        "prediction": pred_type,
+                        "confidence": confidence,
+                        "odds": odds,
+                        "source": "mybets.today"
+                    })
+                
+                except Exception as e:
+                    continue
+            
+            return predictions
+        
+        except Exception as e:
+            print(f"Error scraping mybets.today: {str(e)}")
+            return []
+
 # ========== FastAPI Integration ==========
 
 def create_sports_prediction_endpoints(app, ml_predictor):

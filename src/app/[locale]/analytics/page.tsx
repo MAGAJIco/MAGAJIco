@@ -4,7 +4,6 @@ import React from "react";
 import { BarChart3, TrendingUp, PieChart } from "lucide-react";
 import { motion } from "framer-motion";
 import ThemeToggle from "../../components/ThemeToggle";
-import AdvancedAnalytics from "../../components/AdvancedAnalytics";
 
 export default function AnalyticsPage() {
   const stats = [
@@ -44,7 +43,6 @@ export default function AnalyticsPage() {
         </motion.div>
 
         {/* ML-Powered Analytics Component */}
-        <AdvancedAnalytics />
 
         {/* Legacy Stats Grid */}
         <motion.div
