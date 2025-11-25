@@ -124,12 +124,12 @@ export default function AdvancedPredictionsPage() {
 
     try {
       const apiBaseUrl = getApiBaseUrl();
-      // Amazon-style: Fetch from multiple sources with graceful degradation
+      // Fetch from available backend endpoints
       const result = await executeWithRetry(async () => {
         const sources = [
-          { name: 'mybets', url: `${apiBaseUrl}/api/predictions/soccer?min_confidence=${minConfidence}&date=${date}` },
-          { name: 'statarea', url: `${apiBaseUrl}/api/predictions/statarea?min_odds=1.5` },
-          { name: 'combined', url: `${apiBaseUrl}/api/predictions/combined?min_confidence=${minConfidence}&date=${date}` }
+          { name: 'nfl', url: `${apiBaseUrl}/api/espn/nfl?source=espn` },
+          { name: 'nba', url: `${apiBaseUrl}/api/espn/nba?source=espn` },
+          { name: 'soccer', url: `${apiBaseUrl}/api/espn/soccer` }
         ];
 
         // Fetch with individual error handling - don't let one failure block all
