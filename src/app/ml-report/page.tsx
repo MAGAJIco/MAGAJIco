@@ -2,6 +2,12 @@
 
 import React, { useEffect, useState } from "react";
 import { Brain, CheckCircle, TrendingUp, Zap } from "lucide-react";
+import dynamic from "next/dynamic";
+
+const AdvancedMLPredictor = dynamic(
+  () => import("@/components/AdvancedMLPredictor"),
+  { ssr: false }
+);
 
 interface ModelStatus {
   status: string;
@@ -273,6 +279,14 @@ export default function MLReport() {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Live Predictor */}
+        <div className="mb-12">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+            Live Match Predictor
+          </h2>
+          <AdvancedMLPredictor />
         </div>
 
         {/* Footer */}
