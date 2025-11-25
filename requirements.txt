@@ -13,3 +13,16 @@ numpy>=1.21.0
 scikit-learn>=1.0.0
 numpy
 scikit-learn
+authlib
+beautifulsoup4
+fastapi
+itsdangerous
+lxml
+numpy
+openai
+pyjwt
+python-dotenv
+requests
+scikit-learn
+starlette
+uvicorn

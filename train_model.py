@@ -87,9 +87,20 @@ def train_model():
     logger.info(f"📊 Test accuracy: {test_score:.3f}")
 
     import sklearn
+    feature_names = [
+        "home_strength",
+        "away_strength",
+        "home_advantage",
+        "recent_form_home",
+        "recent_form_away",
+        "head_to_head",
+        "injuries"
+    ]
+    
     model_data = {
         "model": model,
         "scaler": scaler,
+        "feature_names": feature_names,
         "accuracy": test_score,
         "version": "MagajiCo-v2.2",
         "sklearn_version": sklearn.__version__,
