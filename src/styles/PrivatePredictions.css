@@ -1,0 +1,229 @@
+/* PrivatePredictions.css */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: linear-gradient(to bottom, #fff, #f9fafb, #f3f4f6);
+  min-height: 100vh;
+  color: #1f2937;
+}
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: linear-gradient(135deg, #1e293b, #0f172a);
+  color: white;
+  padding: 1.5rem 1rem;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.header h1 {
+  font-size: 1.875rem;
+}
+
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.section-header h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.divider {
+  flex: 1;
+  height: 4px;
+  border-radius: 9999px;
+  background: linear-gradient(to right, var(--from), var(--to));
+}
+
+.carousel {
+  position: relative;
+  margin-bottom: 3rem;
+}
+
+.carousel-wrapper {
+  overflow-x: auto;
+  display: flex;
+  gap: 1rem;
+  padding-bottom: 0.5rem;
+  scroll-behavior: smooth;
+}
+
+.carousel-wrapper::-webkit-scrollbar {
+  display: none;
+}
+
+.carousel-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255,255,255,0.9);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  z-index: 10;
+  transition: all 0.2s;
+}
+
+.carousel-btn:hover {
+  background: white;
+  transform: translateY(-50%) scale(1.1);
+}
+
+.carousel-btn.left {
+  left: 0;
+}
+
+.carousel-btn.right {
+  right: 0;
+}
+
+.card {
+  flex-shrink: 0;
+  width: 320px;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  color: white;
+  box-shadow: 0 10px 15px rgba(0,0,0,0.1);
+  transition: all 0.3s;
+  cursor: pointer;
+}
+
+.card:hover {
+  transform: translateY(-8px) scale(1.03);
+  box-shadow: 0 20px 25px rgba(0,0,0,0.15);
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+  margin: 1rem 0;
+}
+
+.stat-box {
+  background: rgba(255,255,255,0.1);
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  text-align: center;
+}
+
+.stat-box p:first-child {
+  font-size: 0.75rem;
+  opacity: 0.8;
+}
+
+.stat-box p:last-child {
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1rem;
+  margin-bottom: 3rem;
+}
+
+.loading {
+  text-align: center;
+  padding: 3rem;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e5e7eb;
+  border-top-color: #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.error-container, .login-required {
+  max-width: 600px;
+  margin: 4rem auto;
+  text-align: center;
+  padding: 2rem;
+  background: white;
+  border-radius: 1rem;
+  box-shadow: 0 10px 15px rgba(0,0,0,0.1);
+}
+
+.error-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.btn-primary {
+  background: #f59e0b;
+  color: white;
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-primary:hover {
+  background: #d97706;
+  transform: translateY(-2px);
+}
+
+.secret-header, .sources, .confidence, .bet-header, .bet-prediction, .score-display {
+  margin-bottom: 1rem;
+}
+
+.claim-btn {
+  width: 100%;
+  background: white;
+  color: #f59e0b;
+}
+
+.place-bet-btn {
+  width: 100%;
+  background: #fde68a;
+  color: #dc2626;
+}
+
+/* Background colors */
+.bg-blue { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+.bg-purple { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+.bg-green { background: linear-gradient(135deg, #10b981, #059669); }
+.bg-red { background: linear-gradient(135deg, #ef4444, #dc2626); }
+.bg-pink { background: linear-gradient(135deg, #8b5cf6, #ec4899); }
+.bg-gold { background: linear-gradient(135deg, #fbbf24, #f59e0b, #ef4444); border: 2px solid rgba(255,255,255,0.3); }
+
+@media (max-width: 768px) {
+  .header h1 { font-size: 1.5rem; }
+  .card { width: 280px; }
+  .grid { grid-template-columns: 1fr; }
+}
