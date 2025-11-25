@@ -758,6 +758,7 @@ class RealSportsScraperService:
         Scrape predictions from ScorePredictor.net (scorepredictor.net)
         Returns: ALL available match score predictions grouped by day of week
         Includes: home_team, away_team, predicted_score, total_goals, prediction, day_of_week
+        Counts each unique match only once (removes within-day duplicates only)
         """
         predictions = []
         seen = set()
@@ -798,6 +799,16 @@ class RealSportsScraperService:
             
             for table in tables:
                 rows = table.find_all('tr')
+                
+                # Determine which day this table belongs to
+                # First table = Today, subsequent tables = Other days
+                day_assignment = "Today" if table_idx == 0 else "Upcoming"
+                if len(day_sections) > 1:
+                    day_list = sorted(day_sections.items(), key=lambda x: x[1])
+                    if table_idx < len(day_list):
+                        day_assignment = day_list[table_idx][0]
+                
+                row_in_table = 0
                 for row in rows:
                     try:
                         cells = row.find_all('td')
@@ -819,8 +830,9 @@ class RealSportsScraperService:
                                 if home_team == away_team:
                                     continue
                                 
-                                # Check for duplicates
-                                match_key = (home_team, away_team)
+                                # Only skip duplicates within the same table/day
+                                # Different days can have same match
+                                match_key = (home_team, away_team, day_assignment)
                                 if match_key in seen:
                                     continue
                                 seen.add(match_key)
@@ -833,14 +845,6 @@ class RealSportsScraperService:
                                 else:
                                     prediction = "Away Win"
                                 
-                                # Determine which day this table belongs to
-                                # First table = Today, subsequent tables = Other days
-                                day_assignment = "Today" if table_idx == 0 else "Upcoming"
-                                if len(day_sections) > 1:
-                                    day_list = sorted(day_sections.items(), key=lambda x: x[1])
-                                    if table_idx < len(day_list):
-                                        day_assignment = day_list[table_idx][0]
-                                
                                 predictions.append({
                                     "home_team": home_team,
                                     "away_team": away_team,
@@ -850,6 +854,8 @@ class RealSportsScraperService:
                                     "day_of_week": day_assignment,
                                     "source": "ScorePredictor"
                                 })
+                                
+                                row_in_table += 1
                                 
                             except (ValueError, IndexError):
                                 continue
