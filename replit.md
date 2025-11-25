@@ -39,6 +39,43 @@ The platform is built with a FastAPI backend (Python 3.11) and a Next.js 16 fron
 
 ## Recent Changes
 
+### 2025-11-25: Results Storage & Training Data System ✅
+**Comprehensive Logging for All API Outputs:**
+- **ResultsLogger Class**: Stores all predictions, odds, and matches to `shared/results_log.json`
+- **Training Data Endpoints**:
+  - `/api/training/logs` - Get recent logs by type (prediction/odds/match)
+  - `/api/training/data` - Get all logged data formatted for model retraining
+  - `/api/training/summary` - View statistics on logged results
+- **Caching System**:
+  - All successful results cached to prevent gaps on failures
+  - ML predictions return cached results if model unavailable
+  - Odds cached across bookmakers for consistency
+- **Persistence**: All results automatically saved to disk (JSON format)
+- **Training Ready**: Complete history available for model retraining
+
+### 2025-11-25: soccerapi Integration - Real Betting Odds ✅
+**Real Odds from Commercial Bookmakers:**
+- **Bookmakers Supported**: 888Sport, Bet365, Unibet (via soccerapi Python library)
+- **Markets Included**:
+  - Full-time result (1/X/2)
+  - Over/Under 4.5 goals specifically
+  - Both teams to score
+- **New Endpoints**:
+  - `/api/odds/soccerapi` - Get real odds from any bookmaker
+  - `/api/odds/over-4-5` - Filter for over 4.5 goals market specifically
+  - `/api/odds/aggregate-weekly-soccer` - Combine from all sources
+- **Optimizations**:
+  - 5-second timeout per bookmaker (prevents hangs)
+  - Reduced to 10 matches per request for speed
+  - Automatic fallback to sample data on timeout
+  - Global caching across requests
+- **Features**:
+  - Query by league (premier_league, la_liga, serie_a, bundesliga, ligue_1)
+  - Filter by max odds threshold (customizable)
+  - All results logged for training data
+
+## Recent Changes (Previous)
+
 ### 2025-11-25: Real Multi-Source Web Scraper Implementation ✅
 **Live Sports Predictions from Multiple Sources:**
 

@@ -26,6 +26,98 @@ _PREDICTION_CACHE = {
 }
 
 
+class ResultsLogger:
+    """Logs all API outputs for training and consistency tracking"""
+    
+    def __init__(self, storage_path: str = "shared/results_log.json"):
+        self.storage_path = storage_path
+        self.results = self._load_results()
+    
+    def _load_results(self) -> Dict[str, Any]:
+        """Load existing results from disk"""
+        try:
+            with open(self.storage_path, 'r') as f:
+                return json.load(f)
+        except:
+            return {
+                "predictions": [],
+                "odds": [],
+                "matches": [],
+                "metadata": {
+                    "created": datetime.now().isoformat(),
+                    "total_logs": 0
+                }
+            }
+    
+    def save_results(self) -> None:
+        """Persist results to disk"""
+        try:
+            import os
+            os.makedirs(os.path.dirname(self.storage_path), exist_ok=True)
+            with open(self.storage_path, 'w') as f:
+                json.dump(self.results, f, indent=2, default=str)
+        except Exception as e:
+            print(f"Failed to save results: {e}")
+    
+    def log_prediction(self, prediction: Dict[str, Any]) -> None:
+        """Log a model prediction"""
+        log_entry = {
+            "timestamp": datetime.now().isoformat(),
+            "type": "prediction",
+            **prediction
+        }
+        self.results["predictions"].append(log_entry)
+        self.results["metadata"]["total_logs"] += 1
+        self.save_results()
+    
+    def log_odds(self, odds_data: Dict[str, Any], source: str) -> None:
+        """Log odds scraping result"""
+        log_entry = {
+            "timestamp": datetime.now().isoformat(),
+            "type": "odds",
+            "source": source,
+            **odds_data
+        }
+        self.results["odds"].append(log_entry)
+        self.results["metadata"]["total_logs"] += 1
+        self.save_results()
+    
+    def log_match(self, match: Dict[str, Any]) -> None:
+        """Log match prediction result"""
+        log_entry = {
+            "timestamp": datetime.now().isoformat(),
+            "type": "match",
+            **match
+        }
+        self.results["matches"].append(log_entry)
+        self.results["metadata"]["total_logs"] += 1
+        self.save_results()
+    
+    def get_recent(self, count: int = 100, log_type: Optional[str] = None) -> List[Dict[str, Any]]:
+        """Get recent logged results"""
+        if log_type:
+            items = self.results.get(f"{log_type}s", [])
+        else:
+            items = (
+                self.results.get("predictions", []) +
+                self.results.get("odds", []) +
+                self.results.get("matches", [])
+            )
+        return sorted(items, key=lambda x: x.get("timestamp", ""), reverse=True)[:count]
+    
+    def get_training_data(self) -> Dict[str, Any]:
+        """Get all logged data formatted for model training"""
+        return {
+            "total_predictions": len(self.results["predictions"]),
+            "total_odds_logs": len(self.results["odds"]),
+            "total_matches": len(self.results["matches"]),
+            "predictions": self.results["predictions"],
+            "odds": self.results["odds"],
+            "matches": self.results["matches"],
+            "metadata": self.results["metadata"]
+        }
+
+
 class LiveMatch:
     def __init__(self, **kwargs):
         self.league = kwargs.get('league', 'Unknown')

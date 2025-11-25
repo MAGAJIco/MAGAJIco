@@ -11,12 +11,15 @@ import pickle
 import numpy as np
 
 # Import your scraper (save the previous artifact as real_scraper.py)
-from real_scraper import RealSportsScraperService, LiveMatch
+from real_scraper import RealSportsScraperService, LiveMatch, ResultsLogger
 
 app = FastAPI(title="MagajiCo Sports Prediction API")
 
 # Prediction cache for consistency on failures
 _PREDICTION_RESULT_CACHE = {}
+
+# Initialize results logger for all API outputs
+results_logger = ResultsLogger(storage_path="shared/results_log.json")
 
 # CORS
 app.add_middleware(
@@ -132,6 +135,10 @@ async def predict_match(
         
         # Cache successful result for consistency on future failures
         _PREDICTION_RESULT_CACHE[cache_key] = result
+        
+        # Log prediction result for training
+        results_logger.log_prediction(result)
+        
         return result
         
     except Exception as e:
@@ -141,6 +148,9 @@ async def predict_match(
             cached["cached"] = True
             cached["error_recovered"] = f"Using cached prediction due to: {str(e)}"
             cached["cached_at"] = cached.get("timestamp")
+            
+            # Still log the cached result
+            results_logger.log_prediction(cached)
             return cached
         raise HTTPException(status_code=500, detail=f"Prediction failed: {str(e)}")
 
@@ -375,7 +385,7 @@ async def get_soccerapi_odds(
             if "over_4_5" in odd or "under_4_5" in odd:
                 over_under_count += 1
         
-        return {
+        response = {
             "status": "success",
             "source": f"soccerapi ({bookmaker.upper()})",
             "league": league,
@@ -388,6 +398,17 @@ async def get_soccerapi_odds(
             "matches": filtered,
             "timestamp": datetime.now().isoformat()
         }
+        
+        # Log odds results for training
+        results_logger.log_odds({
+            "league": league,
+            "bookmaker": bookmaker,
+            "max_odds": max_odds,
+            "total_matches": len(filtered),
+            "matches": filtered
+        }, source=f"soccerapi_{bookmaker}")
+        
+        return response
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to fetch soccerapi odds: {str(e)}")
 
@@ -428,7 +449,7 @@ async def get_over_4_5_odds(
                     "source": odd.get("source")
                 })
         
-        return {
+        response = {
             "status": "success",
             "market": "Over 4.5 Goals",
             "source": f"soccerapi ({bookmaker.upper()})",
@@ -438,6 +459,18 @@ async def get_over_4_5_odds(
             "matches": over_4_5_matches,
             "timestamp": datetime.now().isoformat()
         }
+        
+        # Log over 4.5 odds results for training
+        results_logger.log_odds({
+            "market": "over_4_5_goals",
+            "league": league,
+            "bookmaker": bookmaker,
+            "max_odds": max_odds,
+            "total_matches": len(over_4_5_matches),
+            "matches": over_4_5_matches
+        }, source=f"soccerapi_{bookmaker}_over_4_5")
+        
+        return response
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to fetch over 4.5 odds: {str(e)}")
 
@@ -581,6 +614,78 @@ async def get_aggregate_weekly_soccer_odds(
         raise HTTPException(status_code=500, detail=f"Failed to fetch aggregate odds: {str(e)}")
 
 
+@app.get("/api/training/logs")
+async def get_training_logs(
+    log_type: Optional[str] = Query(None, description="Type: prediction, odds, or match"),
+    count: int = Query(100, ge=1, le=1000, description="Number of recent logs to retrieve")
+):
+    """
+    Get logged API results for training and analysis
+    Returns all output stored since system startup
+    """
+    try:
+        recent = results_logger.get_recent(count=count, log_type=log_type)
+        return {
+            "status": "success",
+            "log_type": log_type or "all",
+            "count": len(recent),
+            "logs": recent,
+            "total_stored": {
+                "predictions": len(results_logger.results["predictions"]),
+                "odds": len(results_logger.results["odds"]),
+                "matches": len(results_logger.results["matches"])
+            },
+            "timestamp": datetime.now().isoformat()
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to retrieve logs: {str(e)}")
+
+
+@app.get("/api/training/data")
+async def get_training_data():
+    """
+    Get all logged training data in structured format
+    Use this to retrain or analyze the ML model
+    """
+    try:
+        training_data = results_logger.get_training_data()
+        return {
+            "status": "success",
+            "training_data": training_data,
+            "timestamp": datetime.now().isoformat()
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to retrieve training data: {str(e)}")
+
+
+@app.get("/api/training/summary")
+async def get_training_summary():
+    """
+    Get summary statistics of all logged results
+    """
+    try:
+        preds = len(results_logger.results["predictions"])
+        odds_logs = len(results_logger.results["odds"])
+        matches = len(results_logger.results["matches"])
+        total = preds + odds_logs + matches
+        
+        return {
+            "status": "success",
+            "summary": {
+                "total_logs": results_logger.results["metadata"].get("total_logs", 0),
+                "predictions_logged": preds,
+                "odds_logged": odds_logs,
+                "matches_logged": matches,
+                "total_entries": total,
+                "storage_file": results_logger.storage_path,
+                "created": results_logger.results["metadata"].get("created")
+            },
+            "timestamp": datetime.now().isoformat()
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get summary: {str(e)}")
+
+
 @app.get("/api/stats")
 async def get_stats(api_key: Optional[str] = None):
     """Get prediction statistics"""
@@ -637,6 +742,9 @@ async def root():
             "over_4_5_goals": "/api/odds/over-4-5",
             "bet365_odds": "/api/odds/bet365",
             "aggregate_weekly_soccer_odds": "/api/odds/aggregate-weekly-soccer",
+            "training_logs": "/api/training/logs",
+            "training_data": "/api/training/data",
+            "training_summary": "/api/training/summary",
             "health": "/api/health",
             "stats": "/api/stats"
         },
