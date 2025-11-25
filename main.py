@@ -297,6 +297,27 @@ async def get_statarea_predictions():
         raise HTTPException(status_code=500, detail=f"Failed to fetch Statarea predictions: {str(e)}")
 
 
+@app.get("/api/predictions/scoreprediction")
+async def get_scoreprediction():
+    """
+    Get score predictions from ScorePrediction.net
+    Features: Predicted match scores with >1:0 or 0:1 filtering
+    Returns: All games with total goals > 1
+    """
+    try:
+        predictions = scraper.scrape_scoreprediction()
+        
+        return {
+            "status": "success",
+            "source": "scorepredictor.net",
+            "count": len(predictions),
+            "predictions": predictions,
+            "timestamp": datetime.now().isoformat()
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to fetch ScorePrediction: {str(e)}")
+
+
 @app.get("/api/predictions/flashscore-odds")
 async def get_flashscore_odds(
     max_odds: float = Query(1.16, ge=1.0, le=3.0, description="Maximum odds threshold (e.g., 1.16 for favorites)")

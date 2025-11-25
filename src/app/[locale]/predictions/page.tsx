@@ -85,6 +85,8 @@ export default function PrivatePredictionsPage() {
   const [loadingMyBets, setLoadingMyBets] = useState(true);
   const [statareaPredictions, setStatareaPredictions] = useState([]);
   const [loadingStatarea, setLoadingStatarea] = useState(true);
+  const [scorePredictions, setScorePredictions] = useState([]);
+  const [loadingScorePred, setLoadingScorePred] = useState(true);
   const [weekCalendar, setWeekCalendar] = useState({});
   const [loadingWeek, setLoadingWeek] = useState(true);
 
@@ -97,6 +99,7 @@ export default function PrivatePredictionsPage() {
   const fetchData = async () => {
     fetchMyBetsPredictions();
     fetchStatareaData();
+    fetchScorePredictions();
     fetchWeekCalendar();
   };
 
@@ -130,6 +133,22 @@ export default function PrivatePredictionsPage() {
       console.error('Error fetching statarea:', error);
     } finally {
       setLoadingStatarea(false);
+    }
+  };
+
+  const fetchScorePredictions = async () => {
+    try {
+      setLoadingScorePred(true);
+      const apiBaseUrl = getApiBaseUrl();
+      const response = await fetch(`${apiBaseUrl}/api/predictions/scoreprediction`);
+      if (response.ok) {
+        const data = await response.json();
+        setScorePredictions(data.predictions || []);
+      }
+    } catch (error) {
+      console.error('Error fetching scoreprediction:', error);
+    } finally {
+      setLoadingScorePred(false);
     }
   };
 
@@ -301,6 +320,48 @@ export default function PrivatePredictionsPage() {
     </motion.div>
   );
 
+  // Render score prediction card
+  const renderScorePredictionCard = (pred) => (
+    <motion.div
+      whileHover={{ scale: 1.05, y: -5 }}
+      className="w-80 rounded-2xl bg-gradient-to-br from-green-500 to-green-600 p-6 text-white shadow-lg cursor-pointer"
+    >
+      <div className="flex items-start justify-between mb-3">
+        <div>
+          <p className="text-xs font-semibold text-green-100">{pred.league}</p>
+          <p className="text-sm font-bold mt-1 line-clamp-2">{pred.teams}</p>
+        </div>
+      </div>
+
+      <div className="bg-black/20 rounded-lg p-4 mb-4 text-center">
+        <p className="text-4xl font-bold text-yellow-300">{pred.score}</p>
+        <p className="text-xs text-white/80 mt-1">{pred.total_goals} Goals</p>
+      </div>
+
+      <div className="grid grid-cols-2 gap-2 text-xs mb-3">
+        <div className="bg-white/10 rounded p-2 text-center">
+          <p className="text-white/70">Prediction</p>
+          <p className="font-bold text-lg">{pred.prediction_label}</p>
+        </div>
+        <div className="bg-white/10 rounded p-2 text-center">
+          <p className="text-white/70">Confidence</p>
+          <p className="font-bold text-lg text-yellow-200">{pred.confidence}%</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-2 text-xs">
+        <div className="bg-white/10 rounded p-2 text-center">
+          <p className="text-white/70">Home %</p>
+          <p className="font-bold">{pred.home_goal_prob}%</p>
+        </div>
+        <div className="bg-white/10 rounded p-2 text-center">
+          <p className="text-white/70">Away %</p>
+          <p className="font-bold">{pred.away_goal_prob}%</p>
+        </div>
+      </div>
+    </motion.div>
+  );
+
   // Render mybets card
   const renderMyBetsCard = (pred) => (
     <motion.div
@@ -445,13 +506,30 @@ export default function PrivatePredictionsPage() {
         )}
 
         {/* Section 3: ScorePrediction */}
-        <HorizontalCarousel
-          items={[privateSources[2]]}
-          renderItem={renderSourceCard}
-          title="ScorePrediction Network"
-          icon="🎲"
-          color="from-green-500 to-green-600"
-        />
+        <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }}>
+          {loadingScorePred ? (
+            <div className="text-center py-8">
+              <RefreshCw className="animate-spin mx-auto text-gray-400" size={32} />
+              <p className="text-gray-500 mt-3">Loading ScorePrediction games...</p>
+            </div>
+          ) : scorePredictions.length > 0 ? (
+            <HorizontalCarousel
+              items={scorePredictions.slice(0, 10)}
+              renderItem={renderScorePredictionCard}
+              title="ScorePrediction.net - Score Forecasts"
+              icon="🎲"
+              color="from-green-500 to-green-600"
+            />
+          ) : (
+            <HorizontalCarousel
+              items={[privateSources[2]]}
+              renderItem={renderSourceCard}
+              title="ScorePrediction Network"
+              icon="🎲"
+              color="from-green-500 to-green-600"
+            />
+          )}
+        </motion.div>
 
         {/* Section 4: FlashScore */}
         <HorizontalCarousel

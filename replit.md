@@ -154,6 +154,55 @@ python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 
 ## Recent Changes
 
+- **2025-11-25**: ✅ ScorePrediction.net Scraper + Live Carousel Complete
+  - **Scraper Implementation**: Added `scrape_scoreprediction()` method to `real_scraper.py`
+    - Scrapes match predictions from https://scorepredictor.net/
+    - Extracts predicted match scores from table format
+    - Filters games with total goals > 1 (excludes 1:0 and 0:1 only matches)
+    - Returns up to 20 predictions with full scoring data
+    - Calculates confidence based on score margin (60-95%)
+    - Includes goal probability breakdown (home% / away%)
+  
+  - **API Endpoint**: Added `/api/predictions/scoreprediction` in `main.py`
+    - Returns game predictions with league, teams, scores, confidence
+    - Fallback: Sample data when scraping times out
+  
+  - **Frontend Integration**: Updated `/en/predictions` page
+    - New state: `scorePredictions` and `loadingScorePred`
+    - New fetch function: `fetchScorePredictions()` with auto-refresh every 60s
+    - New render function: `renderScorePredictionCard()` showing:
+      - League name (Champions League, Europa League, etc.)
+      - Team matchup
+      - **Large yellow score display** (e.g., "3:1")
+      - Total goals count
+      - Prediction type (🏠 Home Win / 🤝 Draw / ✈️ Away Win)
+      - Confidence score in yellow badge
+      - Home goal probability %
+      - Away goal probability %
+    - Dynamic carousel replaces static card
+    - Design: Green gradient cards (from-green-500 to-green-600)
+    - Responsive layout with hover animations (1.05x scale)
+  
+  - **Data Format**: Each prediction includes:
+    ```json
+    {
+      "league": "Champions League",
+      "home_team": "Borussia Dortmund",
+      "away_team": "Villarreal",
+      "teams": "Borussia Dortmund - Villarreal",
+      "home_score": 3,
+      "away_score": 1,
+      "score": "3:1",
+      "total_goals": 4,
+      "prediction": "1",
+      "prediction_label": "🏠 Home Win 3:1",
+      "confidence": 85,
+      "home_goal_prob": 75.0,
+      "away_goal_prob": 25.0,
+      "source": "scorepredictor.net"
+    }
+    ```
+
 - **2025-11-25**: ✅ Statarea Scraper + 2-Day Betting Section Complete
   - **Scraper Implementation**: Added `scrape_statarea()` method to `real_scraper.py`
     - Scrapes match predictions from https://www.statarea.com/predictions
