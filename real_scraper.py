@@ -399,9 +399,18 @@ class RealSportsScraperService:
     def get_all_predictions(self, api_key: Optional[str] = None) -> List[Dict[str, Any]]:
         """
         Get all predictions from multiple sources
-        Aggregates real data from MyBets, Statarea, ScorePrediction, ESPN, and APIs
+        Aggregates real data from FlashScore, MyBets, Statarea, ScorePrediction, ESPN, and APIs
         """
         all_matches = []
+        
+        # Try FlashScore scraping (REAL DATA - primary source)
+        try:
+            fs_matches = self.scrape_flashscore_soccer()
+            if fs_matches:
+                all_matches.extend(fs_matches)
+                print(f"✅ Scraped {len(fs_matches)} matches from FlashScore")
+        except Exception as e:
+            print(f"❌ FlashScore scraping failed: {e}")
         
         # Try MyBets.today scraping (REAL DATA)
         try:
@@ -433,8 +442,9 @@ class RealSportsScraperService:
         # Try ESPN scraping (REAL DATA)
         try:
             espn_matches = self.scrape_espn_scores("soccer")
-            all_matches.extend(espn_matches)
-            print(f"✅ Scraped {len(espn_matches)} matches from ESPN")
+            if espn_matches:
+                all_matches.extend(espn_matches)
+                print(f"✅ Scraped {len(espn_matches)} matches from ESPN")
         except Exception as e:
             print(f"❌ ESPN scraping failed: {e}")
         
@@ -442,19 +452,11 @@ class RealSportsScraperService:
         if api_key:
             try:
                 api_matches = self.fetch_api_football_data(api_key)
-                all_matches.extend(api_matches)
-                print(f"✅ Fetched {len(api_matches)} matches from API-Football")
+                if api_matches:
+                    all_matches.extend(api_matches)
+                    print(f"✅ Fetched {len(api_matches)} matches from API-Football")
             except Exception as e:
                 print(f"❌ API-Football failed: {e}")
-        
-        # Try FlashScore scraping (fallback)
-        if len(all_matches) < 5:
-            try:
-                fs_matches = self.scrape_flashscore_soccer()
-                all_matches.extend(fs_matches)
-                print(f"✅ Scraped {len(fs_matches)} matches from FlashScore")
-            except Exception as e:
-                print(f"❌ FlashScore scraping failed: {e}")
         
         # If everything fails, return sample data
         if not all_matches:
@@ -475,7 +477,7 @@ class RealSportsScraperService:
                 except:
                     continue
         
-        print(f"📊 Total predictions: {len(result)} from multiple sources")
+        print(f"📊 Total predictions: {len(result)} from multiple sources (FlashScore, MyBets, Statarea, ScorePrediction, ESPN)")
         return result
     
     def _generate_ml_prediction(self, match: LiveMatch) -> Dict[str, Any]:

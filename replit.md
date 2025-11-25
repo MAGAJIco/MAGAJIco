@@ -42,39 +42,44 @@ The platform is built with a FastAPI backend (Python 3.11) and a Next.js 16 fron
 ### 2025-11-25: Real Multi-Source Web Scraper Implementation ✅
 **Live Sports Predictions from Multiple Sources:**
 
-#### **Implemented Scrapers**
-1. **MyBets.today** - Real soccer predictions with odds
+#### **Implemented Scrapers (5 Real Sources)**
+1. **FlashScore** - Live soccer matches with scores/times (PRIMARY)
+   - Scrapes: `https://www.flashscore.mobi/?d=0&s=5` (mobile version)
+   - Extracts: Teams, live scores, match times, odds (1X2 format)
+   - Method: `scrape_flashscore_soccer()`
+
+2. **MyBets.today** - Real soccer predictions with betting odds
    - Scrapes: `/recommended-soccer-predictions/`
    - Extracts: Teams, prediction types (1/X/2/OVER/UNDER), odds
    - Method: `scrape_mybets_today()`
 
-2. **Statarea.com** - Soccer prediction percentages
+3. **Statarea.com** - Soccer prediction percentages
    - Scrapes: `https://www.statarea.com/predictions`
    - Extracts: Home/Draw/Away percentages (46% / 25% / 29% format)
    - Confidence: ~78% based on prediction dominance
    - Method: `scrape_statarea()`
 
-3. **ScorePrediction.net** - Exact score predictions
+4. **ScorePrediction.net** - Exact score predictions
    - Scrapes: `https://scorepredictor.net/`
    - Extracts: Predicted scores (e.g., 3:1), total goals, confidence
    - Filters: Only scores with total goals > 1
    - Method: `scrape_scoreprediction()`
 
-4. **ESPN API** - Live scores (Soccer, NFL, NBA, MLB)
+5. **ESPN** - Live scores (Soccer, NFL, NBA, MLB)
    - Scrapes: ESPN scoreboard pages
    - Parses: Embedded JSON with real-time match data
    - Method: `scrape_espn_scores(sport)`
 
 #### **Data Pipeline**
-Updated `get_all_predictions()` to aggregate from **all sources**:
+Updated `get_all_predictions()` to aggregate from **all 5 sources**:
 ```
 Priority Order:
-1. MyBets.today predictions (real odds data)
-2. Statarea predictions (percentage-based)
-3. ScorePrediction (score predictions)
-4. ESPN matches (live scores)
-5. API-Football (if API key provided)
-6. FlashScore (fallback if < 5 matches)
+1. FlashScore matches (live soccer - primary)
+2. MyBets.today predictions (real odds data)
+3. Statarea predictions (percentage-based)
+4. ScorePrediction (score predictions)
+5. ESPN matches (live scores)
+6. API-Football (if API key provided)
 7. Sample data (ultimate fallback)
 ```
 
