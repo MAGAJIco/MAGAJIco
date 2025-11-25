@@ -371,27 +371,6 @@ async def get_statarea_high_confidence(min_confidence: int = Query(78, ge=50, le
         raise HTTPException(status_code=500, detail=f"Failed to fetch Statarea high-confidence predictions: {str(e)}")
 
 
-@app.get("/api/predictions/scoreprediction")
-async def get_scoreprediction():
-    """
-    Get score predictions from ScorePrediction.net
-    Features: Predicted match scores with >1:0 or 0:1 filtering
-    Returns: All games with total goals > 1
-    """
-    try:
-        predictions = scraper.scrape_scoreprediction()
-        
-        return {
-            "status": "success",
-            "source": "scorepredictor.net",
-            "count": len(predictions),
-            "predictions": predictions,
-            "timestamp": datetime.now().isoformat()
-        }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to fetch ScorePrediction: {str(e)}")
-
-
 @app.get("/api/odds/soccerapi")
 async def get_soccerapi_odds(
     bookmaker: str = Query("888sport", description="Bookmaker: 888sport, bet365, or unibet"),
