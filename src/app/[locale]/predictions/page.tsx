@@ -1,6 +1,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { Trophy, Clock, TrendingUp, AlertCircle, RefreshCw, Filter } from 'lucide-react';
+import { getApiBaseUrl } from '@/lib/api';
 
 export default function LivePredictionsPage() {
   const [predictions, setPredictions] = useState([]);
@@ -21,7 +22,8 @@ export default function LivePredictionsPage() {
   const fetchPredictions = async () => {
     try {
       setError(null);
-      const response = await fetch('http://localhost:8000/api/predictions/live');
+      const apiBaseUrl = getApiBaseUrl();
+      const response = await fetch(`${apiBaseUrl}/api/predictions/live`);
       
       if (!response.ok) throw new Error('Failed to fetch predictions');
       
