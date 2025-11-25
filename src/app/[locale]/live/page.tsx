@@ -1,19 +1,9 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect } from "react";
-import {
-  Trophy,
-  RefreshCw,
-  Filter,
-  Clock,
-  Flame,
-  Activity,
-  Circle,
-  Share2,
-} from "lucide-react";
-import { useSmartRetry } from "../../hook/useSmartRetry";
-import StatCard from "../../components/StatCard";
-import { getApiBaseUrl } from "../../../lib/api";
+import React, { useState, useEffect } from 'react';
+import { RefreshCw, Zap, Filter, TrendingUp } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { getApiBaseUrl } from '@/lib/api';
 
 interface LiveMatch {
   id: string;
@@ -23,549 +13,140 @@ interface LiveMatch {
   homeScore: number;
   awayScore: number;
   status: string;
-  period: string;
-  time: string;
   league: string;
-  venue?: string;
-  prediction?: {
-    winner: string;
-    confidence: number;
-    odds?: number;
-  };
-  stats?: {
-    homeForm: number[];
-    awayForm: number[];
-    possession?: { home: number; away: number };
-    shots?: { home: number; away: number };
-  };
+  time: string;
 }
 
-type SportFilter = "all" | "NFL" | "NBA" | "MLB" | "Soccer";
+type SportFilter = 'all' | 'Football' | 'Basketball' | 'Baseball' | 'Soccer';
 
-export default function LiveMatchesPage() {
+export default function LivePage() {
   const [matches, setMatches] = useState<LiveMatch[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [sportFilter, setSportFilter] = useState<SportFilter>("all");
-  const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
-  const [usingStaticData, setUsingStaticData] = useState(false);
-  
-  // Check if we're in production (Vercel deployment)
-  const isProduction = process.env.NODE_ENV === 'production' || process.env.VERCEL === '1';
-
-  // Smart retry hook
-  const { executeWithRetry, isRetrying, retryCount } = useSmartRetry({
-    maxRetries: 3,
-    baseDelay: 1000,
-    onRetry: (attempt, error) => {
-      console.log(`Retry attempt ${attempt} for live matches:`, error.message);
-    }
-  });
+  const [sport, setSport] = useState<SportFilter>('all');
+  const [lastUpdate, setLastUpdate] = useState(new Date());
 
   useEffect(() => {
-    fetchLiveMatches();
-    // Auto-refresh every 15 seconds for live updates
-    const interval = setInterval(() => {
-      fetchLiveMatches();
-    }, 15000);
+    fetchLive();
+    const interval = setInterval(fetchLive, 15000);
     return () => clearInterval(interval);
-  }, [sportFilter]);
+  }, [sport]);
 
-  const fetchLiveMatches = async () => {
-    setLoading(true);
-    setError(null);
-
+  const fetchLive = async () => {
     try {
-      const result = await executeWithRetry(async () => {
-        const apiBaseUrl = getApiBaseUrl();
-        // Fetch live data from API
-        const endpoints = sportFilter === "all" 
-          ? [
-              { url: `${apiBaseUrl}/api/nfl?source=espn`, sport: "NFL" },
-              { url: `${apiBaseUrl}/api/nba?source=espn`, sport: "NBA" },
-              { url: `${apiBaseUrl}/api/mlb?source=espn`, sport: "MLB" },
-              { url: `${apiBaseUrl}/api/soccer`, sport: "Soccer" }
-            ]
-          : [{ url: `${apiBaseUrl}/api/${sportFilter.toLowerCase()}?source=espn`, sport: sportFilter }];
+      setLoading(true);
+      const apiBaseUrl = getApiBaseUrl();
+      const response = await fetch(`${apiBaseUrl}/api/predictions/live`);
+      const data = await response.json();
+      const preds = data.predictions || [];
 
-        const [matchesResponses, predictionsResponse] = await Promise.all([
-          Promise.allSettled(
-            endpoints.map(endpoint => 
-              fetch(endpoint.url, { signal: AbortSignal.timeout(5000) })
-                .then(r => {
-                  if (!r.ok) throw new Error(`API returned ${r.status}`);
-                  return r.json();
-                })
-                .then(data => ({
-                  sport: endpoint.sport,
-                  data
-                }))
-            )
-          ),
-          fetch(`${apiBaseUrl}/api/predictions/combined?min_confidence=75&date=today`, { 
-            signal: AbortSignal.timeout(5000) 
-          })
-            .then(r => r.ok ? r.json() : { predictions: [] })
-            .catch(() => ({ predictions: [] }))
-        ]);
+      const liveMatches = preds
+        .filter((p: any) => p.status === 'live' || p.status === 'in_progress')
+        .map((p: any) => ({
+          id: p.id,
+          sport: p.sport || 'Football',
+          homeTeam: p.home_team || 'Team A',
+          awayTeam: p.away_team || 'Team B',
+          homeScore: p.home_score || 0,
+          awayScore: p.away_score || 0,
+          status: 'live',
+          league: p.league || 'League',
+          time: p.game_time || 'Live',
+        }));
 
-        // Extract predictions
-        const predictions = Array.isArray(predictionsResponse?.predictions) 
-          ? predictionsResponse.predictions 
-          : Array.isArray(predictionsResponse) 
-          ? predictionsResponse 
-          : [];
-
-        const allMatches: LiveMatch[] = [];
-        let hasApiData = false;
-
-        matchesResponses.forEach((result) => {
-          if (result.status === 'fulfilled') {
-            hasApiData = true;
-            const { sport, data } = result.value;
-            const matchesArray = data.matches || [];
-            
-            matchesArray.forEach((match: any, idx: number) => {
-              // Find prediction for this match
-              const prediction = predictions.find((p: any) => 
-                (p.home_team === match.homeTeam || p.home_team === match.home_team) &&
-                (p.away_team === match.awayTeam || p.away_team === match.away_team)
-              );
-
-              allMatches.push({
-                id: match.id || `${sport}-${idx}-${Date.now()}`,
-                sport: sport,
-                homeTeam: match.homeTeam || match.home_team || "TBD",
-                awayTeam: match.awayTeam || match.away_team || "TBD",
-                homeScore: match.homeScore || match.home_score || 0,
-                awayScore: match.awayScore || match.away_score || 0,
-                status: match.status || "scheduled",
-                period: match.period || match.quarter || match.inning || "Q1",
-                time: match.gameTime || match.game_time || "TBD",
-                league: data.league || sport,
-                venue: match.venue || match.stadium,
-                prediction: prediction ? {
-                  winner: prediction.prediction || prediction.mybets_prediction || "Unknown",
-                  confidence: prediction.confidence || prediction.average_confidence || 0,
-                  odds: prediction.odds || prediction.mybets_odds
-                } : undefined,
-                stats: {
-                  homeForm: match.homeForm || [],
-                  awayForm: match.awayForm || [],
-                  possession: match.possession,
-                  shots: match.shots
-                }
-              });
-            });
-          }
-        });
-
-        // If no API data was retrieved, return empty array and show error
-        if (allMatches.length === 0 && !hasApiData) {
-          throw new Error('Backend server unavailable - no live match data available');
-        }
-
-        setUsingStaticData(false);
-        return allMatches;
-      });
-
-      setMatches(result);
+      setMatches(liveMatches);
       setLastUpdate(new Date());
     } catch (err) {
-      console.error('API error:', err);
-      setError(err instanceof Error ? err.message : 'Failed to load live matches. Please check your backend connection.');
-      setMatches([]);
-      setUsingStaticData(false);
+      console.error('Error fetching live matches:', err);
     } finally {
       setLoading(false);
     }
   };
 
-  const filteredMatches = matches.filter(match => 
-    match.status.toLowerCase().includes('live') || 
-    match.status.toLowerCase().includes('in progress') ||
-    match.status === 'IN_PLAY'
-  );
-
-  const upcomingMatches = matches.filter(match => 
-    !match.status.toLowerCase().includes('live') && 
-    !match.status.toLowerCase().includes('in progress') &&
-    !match.status.toLowerCase().includes('finished') &&
-    match.status !== 'IN_PLAY'
-  );
-
-  const getSportIcon = (sport: string) => {
-    switch(sport.toUpperCase()) {
-      case 'NFL': return '🏈';
-      case 'NBA': return '🏀';
-      case 'MLB': return '⚾';
-      case 'SOCCER': return '⚽';
-      default: return '🏆';
-    }
-  };
-
-  const getSportColor = (sport: string) => {
-    switch(sport.toUpperCase()) {
-      case 'NFL': return 'from-orange-500/20 to-orange-600/10 border-orange-500/30';
-      case 'NBA': return 'from-blue-500/20 to-blue-600/10 border-blue-500/30';
-      case 'MLB': return 'from-green-500/20 to-green-600/10 border-green-500/30';
-      case 'SOCCER': return 'from-purple-500/20 to-purple-600/10 border-purple-500/30';
-      default: return 'from-gray-500/20 to-gray-600/10 border-gray-500/30';
-    }
-  };
-
-  const shareMatch = async (match: LiveMatch) => {
-    const shareText = `🔴 LIVE: ${match.homeTeam} ${match.homeScore} - ${match.awayScore} ${match.awayTeam}\n${match.period} - ${match.league}`;
-    
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: `${match.sport} Live Match`,
-          text: shareText,
-          url: window.location.href
-        });
-      } catch (err) {
-        console.log('Share cancelled');
-      }
-    } else {
-      navigator.clipboard.writeText(shareText);
-      alert('Live score copied to clipboard!');
-    }
-  };
-
-  const renderFormIndicator = (form: number[]) => (
-    <div className="flex gap-1">
-      {form.map((result, idx) => (
-        <div
-          key={idx}
-          className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold ${
-            result === 1 ? "bg-green-500 text-white" :
-            result === 0 ? "bg-gray-400 text-white" :
-            "bg-red-500 text-white"
-          }`}
-        >
-          {result === 1 ? "W" : result === 0 ? "D" : "L"}
-        </div>
-      ))}
-    </div>
-  );
+  const filtered = sport === 'all' ? matches : matches.filter(m => m.sport === sport);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <div className="p-3 bg-red-500/10 rounded-lg">
-              <Flame className="w-8 h-8 text-red-400" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold text-white">Live Matches</h1>
-              <p className="text-gray-400 flex items-center gap-2">
-                <Activity className="w-4 h-4" />
-                Real-time scores • Auto-updating
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="text-right text-sm text-gray-400">
-              <p>Last update</p>
-              <p className="font-mono">{lastUpdate.toLocaleTimeString()}</p>
-            </div>
-            <button
-              onClick={fetchLiveMatches}
-              disabled={loading}
-              className="p-3 bg-white/5 hover:bg-white/10 rounded-lg transition-colors relative"
-              title={isRetrying ? `Retrying... (${retryCount}/3)` : "Refresh"}
-            >
-              <RefreshCw className={`w-6 h-6 text-gray-400 ${loading ? "animate-spin" : ""}`} />
-              {isRetrying && (
-                <span className="absolute -top-1 -right-1 flex h-3 w-3">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-3 w-3 bg-amber-500"></span>
-                </span>
-              )}
-            </button>
-          </div>
-        </div>
-
-        {/* Static Data Banner */}
-        {usingStaticData && (
-          <div className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-4 mb-6">
-            <div className="flex items-center gap-3">
-              <Activity className="w-5 h-5 text-blue-400" />
-              <div>
-                <p className="text-blue-400 font-semibold">Demo Mode</p>
-                <p className="text-sm text-gray-400">Showing sample data - Start backend server for live data</p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Retry Status */}
-        {isRetrying && (
-          <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 mb-6">
-            <div className="flex items-center gap-3">
-              <RefreshCw className="w-5 h-5 text-amber-400 animate-spin" />
-              <div>
-                <p className="text-amber-400 font-semibold">Retrying connection...</p>
-                <p className="text-sm text-gray-400">Attempt {retryCount} of 3</p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Sport Filter */}
-        <div className="bg-slate-800/50 p-4 rounded-2xl backdrop-blur-sm border border-white/10 mb-6">
-          <div className="flex items-center gap-4 flex-wrap">
+    <div className="min-h-screen bg-white dark:bg-gray-900">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-red-600 to-red-700 dark:from-red-900 dark:to-red-800 text-white px-4 py-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <Filter className="w-5 h-5 text-gray-400" />
-              <span className="text-sm text-gray-400 font-medium">Sport:</span>
+              <Zap className="w-6 h-6" />
+              <h1 className="text-3xl font-bold">Live Now</h1>
+              {filtered.length > 0 && (
+                <span className="bg-white text-red-600 px-3 py-1 rounded-full font-bold ml-2">{filtered.length}</span>
+              )}
             </div>
-            {(['all', 'NFL', 'NBA', 'MLB', 'Soccer'] as SportFilter[]).map((sport) => (
-              <button
-                key={sport}
-                onClick={() => setSportFilter(sport)}
-                className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
-                  sportFilter === sport
-                    ? 'bg-purple-500 text-white'
-                    : 'bg-slate-700 text-gray-300 hover:bg-slate-600'
-                }`}
-              >
-                {sport === 'all' ? '🌐 All Sports' : `${getSportIcon(sport)} ${sport}`}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <StatCard
-            icon={<Circle className="w-5 h-5 text-red-400 fill-red-400 animate-pulse" />}
-            label="Live Now"
-            value={filteredMatches.length}
-            gradient="from-red-500/20 to-red-600/10 border-red-500/30"
-          />
-          <StatCard
-            icon={<Clock className="w-5 h-5 text-blue-400" />}
-            label="Upcoming"
-            value={upcomingMatches.length}
-            gradient="from-blue-500/20 to-blue-600/10 border-blue-500/30"
-          />
-          <StatCard
-            icon={<Trophy className="w-5 h-5 text-purple-400" />}
-            label="Total Matches"
-            value={matches.length}
-            gradient="from-purple-500/20 to-purple-600/10 border-purple-500/30"
-          />
-        </div>
-
-        {/* Live Matches Section */}
-        {filteredMatches.length > 0 && (
-          <div className="mb-6">
-            <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-              <Circle className="w-4 h-4 text-red-500 fill-red-500 animate-pulse" />
-              Live Now
-            </h2>
-            <div className="grid grid-cols-1 gap-4">
-              {filteredMatches.map((match) => (
-                <div
-                  key={match.id}
-                  className={`bg-gradient-to-br ${getSportColor(match.sport)} rounded-xl p-6 border`}
-                >
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center gap-2">
-                      <span className="text-2xl">{getSportIcon(match.sport)}</span>
-                      <div>
-                        <span className="text-xs text-gray-400">{match.league}</span>
-                        <div className="flex items-center gap-2 mt-1">
-                          <span className="px-2 py-1 bg-red-500 text-white text-xs font-bold rounded-full animate-pulse flex items-center gap-1">
-                            <Circle className="w-2 h-2 fill-white" />
-                            LIVE
-                          </span>
-                          <span className="text-sm text-gray-300">{match.period}</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {match.venue && (
-                        <span className="text-xs text-gray-400">{match.venue}</span>
-                      )}
-                      <button
-                        onClick={() => shareMatch(match)}
-                        className="p-2 bg-white/5 hover:bg-white/10 rounded-lg transition-colors"
-                        title="Share live score"
-                      >
-                        <Share2 className="w-5 h-5 text-gray-400 hover:text-purple-400" />
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Score Display */}
-                  <div className="bg-black/20 rounded-lg p-4">
-                    <div className="grid grid-cols-3 gap-4 items-center mb-4">
-                      {/* Home Team */}
-                      <div className="text-right">
-                        <p className="text-lg font-bold text-white">{match.homeTeam}</p>
-                      </div>
-                      
-                      {/* Score */}
-                      <div className="flex items-center justify-center gap-3">
-                        <span className="text-4xl font-bold text-white">{match.homeScore}</span>
-                        <span className="text-2xl text-gray-400">-</span>
-                        <span className="text-4xl font-bold text-white">{match.awayScore}</span>
-                      </div>
-                      
-                      {/* Away Team */}
-                      <div className="text-left">
-                        <p className="text-lg font-bold text-white">{match.awayTeam}</p>
-                      </div>
-                    </div>
-
-                    {/* Live Stats */}
-                    {match.stats?.possession && (
-                      <div className="grid grid-cols-2 gap-4 mb-3">
-                        <div>
-                          <p className="text-xs text-gray-400 mb-1">Possession</p>
-                          <div className="flex items-center gap-2">
-                            <div className="flex-1 h-2 bg-gray-700 rounded-full overflow-hidden">
-                              <div 
-                                className="h-full bg-blue-500" 
-                                style={{ width: `${match.stats.possession.home}%` }}
-                              />
-                            </div>
-                            <span className="text-sm text-white font-semibold">{match.stats.possession.home}%</span>
-                          </div>
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-400 mb-1">Possession</p>
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm text-white font-semibold">{match.stats.possession.away}%</span>
-                            <div className="flex-1 h-2 bg-gray-700 rounded-full overflow-hidden">
-                              <div 
-                                className="h-full bg-purple-500" 
-                                style={{ width: `${match.stats.possession.away}%` }}
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {match.stats?.shots && (
-                      <div className="grid grid-cols-2 gap-4 mb-3">
-                        <div className="text-center">
-                          <p className="text-2xl font-bold text-white">{match.stats.shots.home}</p>
-                          <p className="text-xs text-gray-400">Shots</p>
-                        </div>
-                        <div className="text-center">
-                          <p className="text-2xl font-bold text-white">{match.stats.shots.away}</p>
-                          <p className="text-xs text-gray-400">Shots</p>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Team Form */}
-                    {match.stats && (
-                      <div className="grid grid-cols-2 gap-4 pt-3 border-t border-white/10">
-                        <div>
-                          <p className="text-xs text-gray-400 mb-2">Form</p>
-                          {renderFormIndicator(match.stats.homeForm)}
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-400 mb-2">Form</p>
-                          {renderFormIndicator(match.stats.awayForm)}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Prediction */}
-                    {match.prediction && (
-                      <div className="mt-4 pt-4 border-t border-white/10">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="text-xs text-gray-400 mb-1">AI Prediction</p>
-                            <p className="text-sm font-bold text-purple-400">{match.prediction.winner}</p>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-xs text-gray-400 mb-1">Confidence</p>
-                            <p className="text-sm font-bold text-green-400">{match.prediction.confidence.toFixed(1)}%</p>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Upcoming Matches */}
-        {upcomingMatches.length > 0 && (
-          <div>
-            <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-              <Clock className="w-5 h-5 text-blue-400" />
-              Upcoming Matches
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {upcomingMatches.map((match) => (
-                <div
-                  key={match.id}
-                  className="bg-slate-800/50 rounded-xl p-4 border border-white/10 hover:border-purple-500/50 transition-all"
-                >
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className="text-xl">{getSportIcon(match.sport)}</span>
-                    <div className="flex-1">
-                      <p className="text-xs text-gray-400">{match.league}</p>
-                      <p className="text-sm text-gray-300">{match.time}</p>
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-white font-semibold">{match.homeTeam}</span>
-                      <span className="text-gray-500">vs</span>
-                      <span className="text-white font-semibold">{match.awayTeam}</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Error State */}
-        {error && (
-          <div className="text-center py-12 bg-red-900/20 rounded-xl border border-red-500/30">
-            <div className="text-6xl mb-4">⚠️</div>
-            <p className="text-red-400 text-lg font-semibold mb-2">{error}</p>
             <button
-              onClick={fetchLiveMatches}
-              className="mt-4 px-6 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors"
+              onClick={fetchLive}
+              disabled={loading}
+              className="p-2 hover:bg-red-500 rounded-lg transition"
             >
-              Retry
+              <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
             </button>
           </div>
-        )}
+          <p className="text-red-100 text-sm">Last updated: {lastUpdate.toLocaleTimeString()}</p>
+        </div>
+      </div>
 
-        {/* Empty State */}
-        {!loading && !error && matches.length === 0 && (
-          <div className="text-center py-12 bg-slate-800/30 rounded-xl border border-white/5">
-            <div className="text-6xl mb-4">🏆</div>
-            <p className="text-gray-400 text-lg">No matches available right now</p>
-            <p className="text-gray-500 text-sm mt-2">Check back later for live updates</p>
+      {/* Sport Filter */}
+      <div className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3">
+        <div className="max-w-7xl mx-auto flex gap-2 overflow-x-auto">
+          {(['all', 'Football', 'Basketball', 'Baseball', 'Soccer'] as const).map(s => (
+            <button
+              key={s}
+              onClick={() => setSport(s)}
+              className={`px-4 py-2 rounded-lg font-semibold whitespace-nowrap transition ${
+                sport === s
+                  ? 'bg-red-600 text-white'
+                  : 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-600'
+              }`}
+            >
+              {s === 'all' ? 'All Sports' : s}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Matches */}
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        {loading ? (
+          <div className="flex justify-center py-12">
+            <RefreshCw className="w-8 h-8 animate-spin text-red-600" />
           </div>
-        )}
+        ) : filtered.length > 0 ? (
+          <div className="space-y-2">
+            {filtered.map((match, idx) => (
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: idx * 0.05 }}
+                className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-md transition cursor-pointer"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mb-1 font-semibold">{match.league}</div>
+                    <div className="font-semibold text-gray-900 dark:text-white">
+                      {match.homeTeam} <span className="text-gray-600 dark:text-gray-400">vs</span> {match.awayTeam}
+                    </div>
+                  </div>
 
-        {/* Loading State */}
-        {loading && matches.length === 0 && (
-          <div className="grid grid-cols-1 gap-4">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="bg-slate-800/50 rounded-xl p-6 animate-pulse">
-                <div className="h-6 bg-white/10 rounded w-3/4 mb-4"></div>
-                <div className="h-20 bg-white/10 rounded w-full"></div>
-              </div>
+                  <div className="text-right">
+                    <div className="font-bold text-2xl text-gray-900 dark:text-white">
+                      {match.homeScore} - {match.awayScore}
+                    </div>
+                    <div className="text-xs text-red-600 font-bold animate-pulse mt-1">● LIVE</div>
+                  </div>
+                </div>
+              </motion.div>
             ))}
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <div className="text-gray-400 mb-3 text-4xl">⚽</div>
+            <p className="text-gray-500 dark:text-gray-400 font-semibold">No live matches right now</p>
+            <p className="text-sm text-gray-500 dark:text-gray-500 mt-2">Check back soon for upcoming matches</p>
           </div>
         )}
       </div>
