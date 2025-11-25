@@ -271,42 +271,9 @@ class RealSportsScraperService:
                 except Exception as e:
                     print(f"FlashScore fetch failed for day {day_offset}: {e}")
                 
-                # TRY other real sources before falling back to generated data
-                print(f"🔄 Day {day_offset} ({date_label}): Trying alternative sources...")
-                
-                # Try MyBets
-                try:
-                    mybets_matches = self._fetch_mybets_odds_for_day(day_offset, max_odds)
-                    if mybets_matches and len(mybets_matches) > 0:
-                        day_matches = mybets_matches
-                        print(f"✅ Day {day_offset} ({date_label}): {len(day_matches)} matches from MyBets")
-                except Exception as e:
-                    pass
-                
-                # Try Statarea if MyBets didn't work
-                if not day_matches or len(day_matches) == 0:
-                    try:
-                        statarea_matches = self._fetch_statarea_odds_for_day(day_offset, max_odds)
-                        if statarea_matches and len(statarea_matches) > 0:
-                            day_matches = statarea_matches
-                            print(f"✅ Day {day_offset} ({date_label}): {len(day_matches)} matches from Statarea")
-                    except Exception as e:
-                        pass
-                
-                # Try ScorePrediction if still no matches
-                if not day_matches or len(day_matches) == 0:
-                    try:
-                        scorepred_matches = self._fetch_scoreprediction_odds_for_day(day_offset, max_odds)
-                        if scorepred_matches and len(scorepred_matches) > 0:
-                            day_matches = scorepred_matches
-                            print(f"✅ Day {day_offset} ({date_label}): {len(day_matches)} matches from ScorePrediction")
-                    except Exception as e:
-                        pass
-                
-                # Fall back to realistic generated data if all sources fail
-                if not day_matches or len(day_matches) == 0:
-                    print(f"📊 Day {day_offset} ({date_label}): All sources failed, using realistic generated data")
-                    day_matches = self._generate_realistic_matches(day_offset, max_odds)
+                # FlashScore failed - use realistic generated data as fallback
+                print(f"📊 Day {day_offset} ({date_label}): Using realistic generated data (odds from 1.0)")
+                day_matches = self._generate_realistic_matches(day_offset, max_odds)
                 
                 week_calendar[full_date] = {
                     "day_name": day_name,
@@ -454,52 +421,6 @@ class RealSportsScraperService:
         # Sort by time
         day_matches.sort(key=lambda x: x['time'])
         return day_matches
-
-    def _fetch_mybets_odds_for_day(self, day_offset: int, max_odds: float = 1.16) -> list:
-        """Try to fetch real odds from MyBets for the given day"""
-        try:
-            url = f"https://mybets.today"
-            response = requests.get(url, headers=self.headers, timeout=10)
-            if response.status_code == 200:
-                # Extract odds from MyBets page
-                soup = BeautifulSoup(response.text, 'html.parser')
-                matches = []
-                # Parse matches with odds...
-                return matches
-        except:
-            pass
-        return []
-
-    def _fetch_statarea_odds_for_day(self, day_offset: int, max_odds: float = 1.16) -> list:
-        """Try to fetch real odds from Statarea for the given day"""
-        try:
-            url = f"https://www.statarea.com"
-            response = requests.get(url, headers=self.headers, timeout=10)
-            if response.status_code == 200:
-                # Extract odds from Statarea page
-                soup = BeautifulSoup(response.text, 'html.parser')
-                matches = []
-                # Parse matches with odds...
-                return matches
-        except:
-            pass
-        return []
-
-    def _fetch_scoreprediction_odds_for_day(self, day_offset: int, max_odds: float = 1.16) -> list:
-        """Try to fetch real odds from ScorePrediction for the given day"""
-        try:
-            url = f"https://www.scoreprediction.com"
-            response = requests.get(url, headers=self.headers, timeout=10)
-            if response.status_code == 200:
-                # Extract odds from ScorePrediction page
-                soup = BeautifulSoup(response.text, 'html.parser')
-                matches = []
-                # Parse matches with odds...
-                return matches
-        except:
-            pass
-        return []
-
 
 # OLD FALLBACK METHOD BELOW - DEPRECATED
     def _scrape_flashscore_odds_fallback(self, max_odds: float = 1.16) -> Dict[str, Any]:
