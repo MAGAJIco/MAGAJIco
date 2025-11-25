@@ -341,6 +341,36 @@ async def get_statarea_predictions():
         raise HTTPException(status_code=500, detail=f"Failed to fetch Statarea predictions: {str(e)}")
 
 
+@app.get("/api/predictions/statarea/high-confidence")
+async def get_statarea_high_confidence(min_confidence: int = Query(78, ge=50, le=95, description="Minimum confidence threshold (50-95%)")):
+    """
+    Get StatArea Home Win predictions with confidence above threshold
+    Default: Home Win predictions with confidence >= 78%
+    Format: home_team, away_team, game_time, prediction, confidence
+    """
+    try:
+        # Fetch all statarea predictions once
+        all_predictions = scraper.scrape_statarea()
+        
+        # Filter for high confidence Home Win predictions
+        predictions = scraper.get_statarea_high_confidence(
+            min_confidence=min_confidence,
+            predictions=all_predictions  # Pass already-scraped data to avoid re-scraping
+        )
+        
+        return {
+            "status": "success",
+            "source": "statarea.com",
+            "filter": f"Home Win predictions with confidence >= {min_confidence}%",
+            "count": len(predictions),
+            "total_available": len(all_predictions),
+            "predictions": predictions,
+            "timestamp": datetime.now().isoformat()
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to fetch Statarea high-confidence predictions: {str(e)}")
+
+
 @app.get("/api/predictions/scoreprediction")
 async def get_scoreprediction():
     """
