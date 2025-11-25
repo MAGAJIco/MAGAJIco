@@ -14,6 +14,7 @@ export default function HomePage() {
     { id: "home", icon: "🏠", name: "Portal", href: `/${locale}` },
     { id: "bets", icon: "💰", name: "Today's Bets", href: `/${locale}/bets` },
     { id: "predictions", icon: "🤖", name: "Predictions", href: `/${locale}/predictions` },
+    { id: "ml-dashboard", icon: "🧠", name: "AI Dashboard", href: `/ml-report` },
     { id: "live", icon: "⚡", name: "Live", href: `/${locale}/live` },
     { id: "social", icon: "👥", name: "Social", href: `/${locale}/social` },
     { id: "kids", icon: "🎮", name: "Kids Mode", href: `/${locale}/kids` },
