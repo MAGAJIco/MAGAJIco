@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Star, Calendar, CalendarDays, TrendingUp, Clock, AlertCircle, Lock, Menu, X } from 'lucide-react';
+import { Star, Calendar, CalendarDays, TrendingUp, Clock, AlertCircle, Lock, Menu, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { use } from 'react';
@@ -158,6 +158,9 @@ export default function SecretsPage({ params }: { params: Promise<{ locale: stri
   const [filter, setFilter] = useState<FilterType>('starred');
   const [starredTeams, setStarredTeams] = useState<Record<string, number>>({});
   const [menuOpen, setMenuOpen] = useState(false);
+  const [calendarOpen, setCalendarOpen] = useState(false);
+  const [calendarMonth, setCalendarMonth] = useState(new Date(2025, 10));
+  const [selectedDate, setSelectedDate] = useState(new Date(2025, 10, 26));
 
   const isActive = (path: string) => pathname === `/${locale}${path}` || pathname === `/${locale}/`;
 
@@ -250,6 +253,25 @@ export default function SecretsPage({ params }: { params: Promise<{ locale: stri
 
   const today = new Date().toLocaleDateString('en-US', { weekday: 'short', day: '2-digit', month: '2-digit' });
 
+  const getDaysInMonth = (date: Date) => {
+    return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+  };
+
+  const getFirstDayOfMonth = (date: Date) => {
+    return new Date(date.getFullYear(), date.getMonth(), 1).getDay();
+  };
+
+  const getIgboMarketDay = (date: Date) => {
+    const igboDays = ['Eke', 'Oye', 'Afo', 'Nkwo'];
+    const epoch = new Date(2025, 10, 24);
+    const diffTime = Math.abs(date.getTime() - epoch.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return igboDays[diffDays % 4];
+  };
+
+  const calendarDays = Array.from({ length: getDaysInMonth(calendarMonth) }, (_, i) => i + 1);
+  const emptyDays = Array.from({ length: getFirstDayOfMonth(calendarMonth) }, () => null);
+
   const filteredMatches = matches.filter(match => {
     if (filter === 'starred') return starredTeams[match.home_team] || starredTeams[match.away_team];
     if (filter === 'today') return match.date.includes('27/11');
@@ -319,6 +341,90 @@ export default function SecretsPage({ params }: { params: Promise<{ locale: stri
         {/* Description Banner */}
         <div style={{ backgroundColor: '#f3f3f3', borderBottomColor: '#d5d9d9', padding: '24px' }} className="border-b dark:bg-[#1c1c1e] dark:border-[#38383a]">
           <p style={{ fontSize: '15px', color: '#565959', fontWeight: 500 }} className="dark:text-gray-400">Discover high-value betting opportunities with our curated secret predictions</p>
+        </div>
+
+        {/* Calendar Picker - Full Grid */}
+        <div style={{ backgroundColor: '#f3f3f3', borderBottomColor: '#d5d9d9', padding: '20px 24px', position: 'relative' }} className="border-b dark:bg-[#1c1c1e] dark:border-[#38383a]">
+          <button 
+            onClick={() => setCalendarOpen(!calendarOpen)}
+            style={{ backgroundColor: 'white', borderRadius: '12px', padding: '12px 16px', cursor: 'pointer', border: '1px solid #d5d9d9', width: '100%', textAlign: 'center', fontSize: '15px', fontWeight: 600, color: '#0f1111' }}
+            className="dark:bg-[#2c2c2e] dark:text-white dark:border-[#38383a]"
+          >
+            📅 {selectedDate.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}
+          </button>
+
+          {calendarOpen && (
+            <div style={{ position: 'absolute', top: '100%', left: '24px', marginTop: '12px', backgroundColor: 'white', borderRadius: '12px', boxShadow: '0 8px 24px rgba(0,0,0,0.15)', padding: '20px', zIndex: 50, minWidth: '320px' }} className="dark:bg-[#2c2c2e]">
+              {/* Month Navigation */}
+              <div className="flex items-center justify-between mb-6">
+                <button 
+                  onClick={() => setCalendarMonth(new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() - 1))}
+                  className="cursor-pointer hover:opacity-70 transition-opacity"
+                >
+                  <ChevronLeft className="w-5 h-5" style={{ color: '#0f1111' }} />
+                </button>
+                <span style={{ fontSize: '15px', fontWeight: 600, color: '#0f1111' }} className="dark:text-white">
+                  {['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'][calendarMonth.getMonth()]} {calendarMonth.getFullYear()}
+                </span>
+                <button 
+                  onClick={() => setCalendarMonth(new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1))}
+                  className="cursor-pointer hover:opacity-70 transition-opacity"
+                >
+                  <ChevronRight className="w-5 h-5" style={{ color: '#0f1111' }} />
+                </button>
+              </div>
+
+              {/* Days of Week */}
+              <div className="grid grid-cols-7 gap-2 mb-4">
+                {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(day => (
+                  <div key={day} style={{ textAlign: 'center', fontSize: '12px', fontWeight: 600, color: '#565959' }} className="dark:text-gray-400 h-8 flex items-center justify-center">
+                    {day}
+                  </div>
+                ))}
+              </div>
+
+              {/* Calendar Days */}
+              <div className="grid grid-cols-7 gap-2">
+                {emptyDays.map((_, idx) => (
+                  <div key={`empty-${idx}`} style={{ height: '32px' }}></div>
+                ))}
+                {calendarDays.map(day => {
+                  const dateObj = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth(), day);
+                  const isSelected = selectedDate.toDateString() === dateObj.toDateString();
+                  const marketDay = getIgboMarketDay(dateObj);
+                  const marketDayColors = { 'Eke': '#667eea', 'Oye': '#764ba2', 'Afo': '#f093fb', 'Nkwo': '#4facfe' };
+                  return (
+                    <div key={day} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
+                      <button
+                        onClick={() => {
+                          setSelectedDate(dateObj);
+                          setCalendarOpen(false);
+                        }}
+                        style={{
+                          height: '32px',
+                          width: '32px',
+                          borderRadius: '6px',
+                          backgroundColor: isSelected ? '#ff9900' : 'transparent',
+                          color: isSelected ? 'white' : '#0f1111',
+                          border: 'none',
+                          cursor: 'pointer',
+                          fontSize: '13px',
+                          fontWeight: 500,
+                          transition: 'all 0.2s ease'
+                        }}
+                        className="hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white"
+                      >
+                        {day}
+                      </button>
+                      <span style={{ fontSize: '9px', fontWeight: 600, color: marketDayColors[marketDay], letterSpacing: '0.3px', minHeight: '10px' }} className="dark:text-opacity-80">
+                        {marketDay}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Filter Buttons - Premium Style */}
