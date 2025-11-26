@@ -235,7 +235,33 @@ export default function PredictionsPage({ params }: { params: Promise<{ locale: 
       <div style={{ backgroundColor: '#eaeded', padding: '32px 24px' }} className="dark:bg-black">
         <div style={{ background: 'linear-gradient(to right, #ff9900, #ffad33)', borderRadius: '12px', padding: '32px 24px', textAlign: 'center' }} className="text-white shadow-lg">
           <h2 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '12px' }}>Ready to Start Winning?</h2>
-          <p style={{ fontSize: '14px', opacity: 0.95, marginBottom: '20px' }}>Access premium predictions from three trusted sources right now</p>
+          <p style={{ fontSize: '14px', opacity: 0.95, marginBottom: '24px' }}>Access premium predictions from three trusted sources right now</p>
+          
+          {/* Three Sources Mini Cards */}
+          <div className="grid grid-cols-3 gap-3 mb-6">
+            {sources.map((source) => (
+              <Link key={source.name} href={`/${locale}/live`}>
+                <div 
+                  style={{ 
+                    backgroundColor: 'rgba(255,255,255,0.95)', 
+                    borderRadius: '8px', 
+                    padding: '12px', 
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    border: '2px solid rgba(255,255,255,0.5)'
+                  }}
+                  className="hover:shadow-xl hover:scale-105"
+                >
+                  <div style={{ width: '32px', height: '32px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 8px', background: source.color === 'blue' ? '#667eea' : source.color === 'purple' ? '#764ba2' : '#10b981' }}>
+                    <Star className="w-4 h-4 text-white" style={{ fill: 'white' }} />
+                  </div>
+                  <p style={{ fontSize: '12px', fontWeight: 600, color: '#0f1111', marginBottom: '4px' }}>{source.name}</p>
+                  <p style={{ fontSize: '10px', color: '#565959', lineHeight: '1.3' }}>{source.features[0]}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+          
           <button 
             onClick={() => window.location.href = `/${locale}/live`}
             style={{ backgroundColor: 'white', color: '#ff9900', padding: '12px 28px', borderRadius: '8px', fontWeight: 600, fontSize: '14px', border: 'none', cursor: 'pointer', transition: 'all 0.3s ease', boxShadow: '0 4px 12px rgba(255,153,0,0.3)' }}
