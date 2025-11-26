@@ -1,7 +1,10 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Star, Calendar, CalendarDays, TrendingUp, Clock, AlertCircle } from 'lucide-react';
+import { Star, Calendar, CalendarDays, TrendingUp, Clock, AlertCircle, Lock, Menu, X } from 'lucide-react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { use } from 'react';
 
 interface SecretMatch {
   id: string;
@@ -147,11 +150,16 @@ function SecretMatchCard({ match, starredCount }: SecretMatchCardProps) {
 
 type FilterType = 'starred' | 'today' | 'week';
 
-export default function SecretsPage() {
+export default function SecretsPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = use(params);
+  const pathname = usePathname();
   const [matches, setMatches] = useState<SecretMatch[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<FilterType>('starred');
   const [starredTeams, setStarredTeams] = useState<Record<string, number>>({});
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const isActive = (path: string) => pathname === `/${locale}${path}` || pathname === `/${locale}/`;
 
   // Mock data for demonstration
   const mockMatches: SecretMatch[] = [
@@ -256,87 +264,198 @@ export default function SecretsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      <div className="p-4 md:p-8 max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">Secret Matches</h1>
-          <p className="text-gray-600">Discover high-value betting opportunities</p>
-        </div>
-
-        {/* Filter Buttons */}
-        <div className="flex flex-wrap gap-3 mb-8">
-          <button
-            className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center gap-2 ${
-              filter === 'starred' 
-                ? 'bg-gradient-to-r from-yellow-400 to-orange-400 text-white shadow-lg scale-105' 
-                : 'bg-white text-gray-700 hover:bg-gray-50 shadow-md'
-            }`}
-            onClick={() => handleFilterChange('starred')}
+    <div style={{ backgroundColor: '#eaeded', minHeight: '100vh' }} className="dark:bg-black">
+      {/* Header - Dark Navy Amazon Style */}
+      <header style={{ backgroundColor: '#131921' }} className="text-white sticky top-0 z-50 shadow-lg">
+        <div style={{ padding: '18px 24px' }} className="flex items-center justify-between">
+          <div className="flex items-center" style={{ gap: '18px' }}>
+            <Lock className="w-12 h-12" style={{ color: '#ff9900', filter: 'drop-shadow(0 3px 12px rgba(255,153,0,0.6))', strokeWidth: 1.5 }} />
+            <div>
+              <h1 style={{ letterSpacing: '0.8px', fontSize: '24px', fontWeight: 700 }}>SECRET</h1>
+              <p style={{ fontSize: '11px', color: '#999', letterSpacing: '1px', marginTop: '2px', fontWeight: 500 }}>OPPORTUNITIES</p>
+            </div>
+          </div>
+          <button 
+            onClick={() => setMenuOpen(!menuOpen)}
+            className="cursor-pointer hover:opacity-80 transition-opacity"
           >
-            <Star className={`w-5 h-5 ${filter === 'starred' ? 'fill-white' : ''}`} />
-            Starred Teams
-          </button>
-          <button
-            className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center gap-2 ${
-              filter === 'today' 
-                ? 'bg-gradient-to-r from-blue-400 to-cyan-400 text-white shadow-lg scale-105' 
-                : 'bg-white text-gray-700 hover:bg-gray-50 shadow-md'
-            }`}
-            onClick={() => handleFilterChange('today')}
-          >
-            <Calendar className="w-5 h-5" />
-            Today's Matches
-          </button>
-          <button
-            className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center gap-2 ${
-              filter === 'week' 
-                ? 'bg-gradient-to-r from-purple-400 to-pink-400 text-white shadow-lg scale-105' 
-                : 'bg-white text-gray-700 hover:bg-gray-50 shadow-md'
-            }`}
-            onClick={() => handleFilterChange('week')}
-          >
-            <CalendarDays className="w-5 h-5" />
-            This Week
+            <Menu className="w-8 h-8" style={{ filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.4))', strokeWidth: 1.5 }} />
           </button>
         </div>
+      </header>
 
-        {/* Stats Bar */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <div className="bg-white rounded-xl p-4 shadow-md">
-            <div className="text-sm text-gray-500">Total Matches</div>
-            <div className="text-2xl font-bold text-gray-800">{matches.length}</div>
+      {/* Hamburger Menu Overlay */}
+      {menuOpen && (
+        <>
+          <div 
+            onClick={() => setMenuOpen(false)}
+            style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 40 }}
+          />
+          <div style={{ position: 'fixed', top: 0, left: 0, width: '280px', height: '100vh', backgroundColor: '#131921', zIndex: 50, overflow: 'auto', animation: 'slideInLeft 0.3s ease-out' }} className="text-white">
+            <div style={{ padding: '20px 24px', borderBottomColor: '#374151' }} className="border-b dark:border-[#38383a] flex items-center justify-between">
+              <h2 style={{ fontSize: '18px', fontWeight: 700 }}>Menu</h2>
+              <button onClick={() => setMenuOpen(false)} className="cursor-pointer hover:opacity-80 transition-opacity">
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            <nav style={{ padding: '24px 16px' }} className="space-y-2">
+              <Link href={`/${locale}`} onClick={() => setMenuOpen(false)}>
+                <div className="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors hover:bg-gray-800" style={{ cursor: 'pointer' }}>
+                  <span style={{ fontSize: '15px', fontWeight: 500 }}>Dashboard</span>
+                </div>
+              </Link>
+              <Link href={`/${locale}/secrets`} onClick={() => setMenuOpen(false)}>
+                <div className="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors bg-orange-600" style={{ cursor: 'pointer' }}>
+                  <Lock className="w-5 h-5" style={{ color: '#ff9900' }} />
+                  <span style={{ fontSize: '15px', fontWeight: 500 }}>Secrets</span>
+                </div>
+              </Link>
+            </nav>
           </div>
-          <div className="bg-white rounded-xl p-4 shadow-md">
-            <div className="text-sm text-gray-500">Starred Teams</div>
-            <div className="text-2xl font-bold text-yellow-500">{Object.keys(starredTeams).length}</div>
+        </>
+      )}
+
+      <div style={{ paddingBottom: '100px' }}>
+        {/* Description Banner */}
+        <div style={{ backgroundColor: '#f3f3f3', borderBottomColor: '#d5d9d9', padding: '24px' }} className="border-b dark:bg-[#1c1c1e] dark:border-[#38383a]">
+          <p style={{ fontSize: '15px', color: '#565959', fontWeight: 500 }} className="dark:text-gray-400">Discover high-value betting opportunities with our curated secret predictions</p>
+        </div>
+
+        {/* Filter Buttons - Premium Style */}
+        <div style={{ backgroundColor: '#f3f3f3', borderBottomColor: '#d5d9d9', padding: '20px 24px' }} className="border-b dark:bg-[#1c1c1e] dark:border-[#38383a]">
+          <div className="flex flex-wrap gap-3">
+            <button
+              style={{
+                backgroundColor: filter === 'starred' ? '#ff9900' : 'white',
+                color: filter === 'starred' ? 'white' : '#0f1111',
+                borderColor: '#d5d9d9',
+                padding: '12px 20px',
+                borderRadius: '8px',
+                fontSize: '14px',
+                fontWeight: 600,
+                border: '1px solid',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                boxShadow: filter === 'starred' ? '0 4px 12px rgba(255,153,0,0.3)' : '0 2px 8px rgba(0,0,0,0.08)'
+              }}
+              className="dark:bg-[#2c2c2e] dark:text-white dark:border-[#38383a]"
+              onClick={() => handleFilterChange('starred')}
+            >
+              <Star className="w-4 h-4 inline mr-2" />
+              Starred Teams
+            </button>
+            <button
+              style={{
+                backgroundColor: filter === 'today' ? '#ff9900' : 'white',
+                color: filter === 'today' ? 'white' : '#0f1111',
+                borderColor: '#d5d9d9',
+                padding: '12px 20px',
+                borderRadius: '8px',
+                fontSize: '14px',
+                fontWeight: 600,
+                border: '1px solid',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                boxShadow: filter === 'today' ? '0 4px 12px rgba(255,153,0,0.3)' : '0 2px 8px rgba(0,0,0,0.08)'
+              }}
+              className="dark:bg-[#2c2c2e] dark:text-white dark:border-[#38383a]"
+              onClick={() => handleFilterChange('today')}
+            >
+              <Calendar className="w-4 h-4 inline mr-2" />
+              Today's Matches
+            </button>
+            <button
+              style={{
+                backgroundColor: filter === 'week' ? '#ff9900' : 'white',
+                color: filter === 'week' ? 'white' : '#0f1111',
+                borderColor: '#d5d9d9',
+                padding: '12px 20px',
+                borderRadius: '8px',
+                fontSize: '14px',
+                fontWeight: 600,
+                border: '1px solid',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                boxShadow: filter === 'week' ? '0 4px 12px rgba(255,153,0,0.3)' : '0 2px 8px rgba(0,0,0,0.08)'
+              }}
+              className="dark:bg-[#2c2c2e] dark:text-white dark:border-[#38383a]"
+              onClick={() => handleFilterChange('week')}
+            >
+              <CalendarDays className="w-4 h-4 inline mr-2" />
+              This Week
+            </button>
           </div>
-          <div className="bg-white rounded-xl p-4 shadow-md">
-            <div className="text-sm text-gray-500">Current Filter</div>
-            <div className="text-2xl font-bold text-indigo-600 capitalize">{filter}</div>
+        </div>
+
+        {/* Stats Bar - Premium Cards */}
+        <div style={{ backgroundColor: '#f3f3f3', padding: '20px 24px' }} className="dark:bg-[#1c1c1e]">
+          <div className="grid grid-cols-3 gap-3">
+            <div style={{ backgroundColor: 'white', borderRadius: '12px', padding: '16px 20px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', border: '1px solid #d5d9d9' }} className="dark:bg-[#2c2c2e] dark:border-[#38383a]">
+              <div style={{ fontSize: '12px', color: '#565959', marginBottom: '8px' }} className="dark:text-gray-500">Total Matches</div>
+              <div style={{ fontSize: '24px', fontWeight: 700, color: '#0f1111' }} className="dark:text-white">{matches.length}</div>
+            </div>
+            <div style={{ backgroundColor: 'white', borderRadius: '12px', padding: '16px 20px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', border: '1px solid #d5d9d9' }} className="dark:bg-[#2c2c2e] dark:border-[#38383a]">
+              <div style={{ fontSize: '12px', color: '#565959', marginBottom: '8px' }} className="dark:text-gray-500">Starred Teams</div>
+              <div style={{ fontSize: '24px', fontWeight: 700, color: '#ff9900' }}>{Object.keys(starredTeams).length}</div>
+            </div>
+            <div style={{ backgroundColor: 'white', borderRadius: '12px', padding: '16px 20px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', border: '1px solid #d5d9d9' }} className="dark:bg-[#2c2c2e] dark:border-[#38383a]">
+              <div style={{ fontSize: '12px', color: '#565959', marginBottom: '8px' }} className="dark:text-gray-500">Current Filter</div>
+              <div style={{ fontSize: '18px', fontWeight: 700, color: '#ff9900', textTransform: 'capitalize' }}>{filter}</div>
+            </div>
           </div>
         </div>
 
         {/* Matches Grid */}
-        {loading ? (
-          <div className="text-center py-20">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
-            <div className="mt-4 text-gray-600 font-medium">Loading secret matches...</div>
-          </div>
-        ) : filteredMatches.length === 0 ? (
-          <div className="text-center py-20 bg-white rounded-xl shadow-md">
-            <AlertCircle className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <div className="text-xl font-semibold text-gray-800 mb-2">No matches found</div>
-            <p className="text-gray-600">Try selecting a different filter</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {filteredMatches.map(match => (
-              <SecretMatchCard key={match.id} match={match} starredCount={starredTeams} />
-            ))}
-          </div>
-        )}
+        <div style={{ backgroundColor: '#eaeded', padding: '20px 24px' }} className="dark:bg-black">
+          {loading ? (
+            <div className="text-center py-20">
+              <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2" style={{ borderRightColor: '#ff9900' }}></div>
+              <div style={{ marginTop: '16px', color: '#565959', fontWeight: 500 }} className="dark:text-gray-400">Loading secret matches...</div>
+            </div>
+          ) : filteredMatches.length === 0 ? (
+            <div style={{ backgroundColor: 'white', borderRadius: '12px', padding: '40px 24px', textAlign: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', border: '1px solid #d5d9d9' }} className="dark:bg-[#2c2c2e] dark:border-[#38383a]">
+              <AlertCircle className="w-16 h-16 mx-auto mb-4" style={{ color: '#d5d9d9' }} />
+              <div style={{ fontSize: '18px', fontWeight: 600, color: '#0f1111', marginBottom: '8px' }} className="dark:text-white">No matches found</div>
+              <p style={{ color: '#565959' }} className="dark:text-gray-400">Try selecting a different filter</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              {filteredMatches.map(match => (
+                <SecretMatchCard key={match.id} match={match} starredCount={starredTeams} />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
+
+      {/* Bottom Navigation */}
+      <nav style={{ backgroundColor: '#f3f3f3', borderTopColor: '#d5d9d9', padding: '14px 0 env(safe-area-inset-bottom)' }} className="border-t dark:bg-[#1c1c1e] dark:border-[#38383a] fixed bottom-0 left-0 right-0 safe-area-inset-bottom backdrop-blur-xl bg-opacity-98 dark:bg-opacity-98 shadow-2xl">
+        <div className="flex items-center justify-around max-w-2xl mx-auto">
+          <Link href={`/${locale}/`} className="flex flex-col items-center justify-center" style={{ color: '#565959', gap: '6px', padding: '8px 0', transition: 'color 0.3s ease' }}>
+            <span style={{ fontSize: '11px', fontWeight: 500, letterSpacing: '0.2px' }}>Dashboard</span>
+          </Link>
+          <Link href={`/${locale}/secrets`} className="flex flex-col items-center justify-center" style={{ color: '#ff9900', gap: '6px', padding: '8px 0', transition: 'color 0.3s ease' }}>
+            <Lock className="w-9 h-9" style={{ filter: 'drop-shadow(0 3px 8px rgba(255,153,0,0.5))', strokeWidth: 1.5 }} />
+            <span style={{ fontSize: '11px', fontWeight: 500, letterSpacing: '0.2px' }}>Secrets</span>
+          </Link>
+        </div>
+      </nav>
+
+      <style jsx>{`
+        @keyframes slideInLeft {
+          from { 
+            transform: translateX(-100%);
+            opacity: 0;
+          }
+          to { 
+            transform: translateX(0);
+            opacity: 1;
+          }
+        }
+        .safe-area-inset-bottom {
+          padding-bottom: env(safe-area-inset-bottom);
+        }
+      `}</style>
     </div>
   );
 }
