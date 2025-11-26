@@ -30,3 +30,4 @@ selenium
 webdriver-manager
 soccerapi
 pymongo
+numpy

@@ -42,6 +42,22 @@ export default function LivePage({ params }: { params: Promise<{ locale: string 
       setLoading(true);
       // Use sport predictions endpoint
       const response = await fetch(`/api/predictions/sport/soccer`);
+      
+      if (!response.ok) {
+        console.error('API returned status:', response.status);
+        setMatches([]);
+        setLastUpdate(new Date());
+        return;
+      }
+
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        console.error('API returned non-JSON response:', contentType);
+        setMatches([]);
+        setLastUpdate(new Date());
+        return;
+      }
+
       const data = await response.json();
       const matches = data.matches || [];
 
@@ -63,6 +79,7 @@ export default function LivePage({ params }: { params: Promise<{ locale: string 
       setLastUpdate(new Date());
     } catch (err) {
       console.error('Error fetching live matches:', err);
+      setMatches([]);
     } finally {
       setLoading(false);
     }
