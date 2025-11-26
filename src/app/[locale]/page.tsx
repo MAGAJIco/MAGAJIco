@@ -149,7 +149,7 @@ export default function SoccerPredictionsHome({ params }: { params: Promise<{ lo
           />
           
           {/* Menu Sidebar */}
-          <div style={{ position: 'fixed', top: 0, left: 0, width: '280px', height: '100vh', backgroundColor: '#131921', zIndex: 50, overflow: 'auto' }} className="text-white">
+          <div style={{ position: 'fixed', top: 0, left: 0, width: '280px', height: '100vh', backgroundColor: '#131921', zIndex: 50, overflow: 'auto', animation: 'slideInLeft 0.3s ease-out' }} className="text-white">
             <div style={{ padding: '20px 24px', borderBottomColor: '#374151' }} className="border-b dark:border-[#38383a] flex items-center justify-between">
               <h2 style={{ fontSize: '18px', fontWeight: 700 }}>Menu</h2>
               <button onClick={() => setMenuOpen(false)} className="cursor-pointer hover:opacity-80 transition-opacity">
@@ -429,6 +429,16 @@ export default function SoccerPredictionsHome({ params }: { params: Promise<{ lo
         }
         .animate-fade-in {
           animation: fade-in 0.5s ease-out;
+        }
+        @keyframes slideInLeft {
+          from { 
+            transform: translateX(-100%);
+            opacity: 0;
+          }
+          to { 
+            transform: translateX(0);
+            opacity: 1;
+          }
         }
         .safe-area-inset-bottom {
           padding-bottom: env(safe-area-inset-bottom);
