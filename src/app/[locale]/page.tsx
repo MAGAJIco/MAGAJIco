@@ -147,6 +147,19 @@ export default function SoccerPredictionsHome({ params }: { params: Promise<{ lo
           
           {/* Menu Sidebar - Google Style */}
           <div style={{ position: 'fixed', top: '80px', left: '0px', width: '240px', height: 'calc(100vh - 180px)', backgroundColor: '#f3f3f3', zIndex: 50, overflow: 'auto', animation: 'slideInLeft 0.3s ease-out', borderRadius: '20px' }} className="dark:bg-[#1c1c1e]">
+            {/* Search Box */}
+            <div style={{ padding: '16px 12px', borderBottomColor: '#d5d9d9' }} className="border-b dark:border-[#38383a]">
+              <div className="relative">
+                <Search className="absolute w-5 h-5" style={{ color: '#565959', left: '16px', top: '50%', transform: 'translateY(-50%)', strokeWidth: 1.5 }} />
+                <input
+                  type="text"
+                  placeholder="Search games..."
+                  style={{ color: '#0f1111', fontSize: '14px', paddingLeft: '40px', paddingRight: '12px', paddingTop: '10px', paddingBottom: '10px', width: '100%' }}
+                  className="bg-white dark:bg-[#1c1c1e] rounded-lg text-sm dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-400 shadow-sm dark:border dark:border-[#38383a]"
+                />
+              </div>
+            </div>
+            
             <nav style={{ padding: '24px 12px' }} className="space-y-0">
               <Link href={`/${locale}/predictions`} onClick={() => setMenuOpen(false)}>
                 <div className={`flex items-center gap-6 px-6 py-4 rounded-lg transition-colors ${isActive('/predictions') ? 'bg-orange-100 dark:bg-orange-600' : 'hover:bg-gray-100 dark:hover:bg-gray-800'}`} style={{ cursor: 'pointer' }}>
@@ -461,19 +474,6 @@ export default function SoccerPredictionsHome({ params }: { params: Promise<{ lo
         ) : (
           <div style={{ textAlign: 'center', padding: '20px', color: '#565959', fontSize: '13px' }} className="dark:text-gray-400">No results yet</div>
         )}
-      </div>
-
-      {/* Search Bar */}
-      <div style={{ backgroundColor: '#f3f3f3', borderBottomColor: '#d5d9d9', padding: '18px 24px' }} className="border-b dark:bg-[#1c1c1e] dark:border-[#38383a]">
-        <div className="relative">
-          <Search className="absolute w-6 h-6" style={{ color: '#565959', left: '14px', top: '50%', transform: 'translateY(-50%)', filter: 'drop-shadow(0 1px 4px rgba(0,0,0,0.15))', strokeWidth: 1.5 }} />
-          <input
-            type="text"
-            placeholder="Search game..."
-            style={{ color: '#0f1111', fontSize: '15px', paddingLeft: '44px', paddingRight: '16px', paddingTop: '12px', paddingBottom: '12px' }}
-            className="w-full bg-white dark:bg-[#2c2c2e] rounded-xl text-sm dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-400 shadow-md"
-          />
-        </div>
       </div>
 
       {/* Live Matches List - Real Data from Scraper */}
