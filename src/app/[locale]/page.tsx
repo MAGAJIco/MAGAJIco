@@ -304,7 +304,7 @@ export default function SoccerPredictionsHome({ params }: { params: Promise<{ lo
       </div>
 
       {/* App Grid - Google-style Feature Tiles */}
-      <div style={{ backgroundColor: '#eaeded', padding: '32px 24px' }} className="dark:bg-black">
+      <div style={{ backgroundColor: '#eaeded', padding: '32px 24px', position: 'relative', zIndex: 1 }} className="dark:bg-black">
         <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#0f1111', marginBottom: '20px', letterSpacing: '0.5px' }} className="dark:text-white">Quick Features</h2>
         <div className="grid grid-cols-3 gap-4" style={{ maxWidth: '100%' }}>
           {/* Trending Predictions */}
