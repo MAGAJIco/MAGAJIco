@@ -221,85 +221,49 @@ export default function SoccerPredictionsHome({ params }: { params: Promise<{ lo
           </button>
         </div>
 
-        {/* Calendar Picker */}
+        {/* Date List Picker - 4 Days Ahead */}
         {calendarOpen && (
-          <div style={{ position: 'absolute', top: '100%', right: '24px', marginTop: '12px', backgroundColor: 'white', borderRadius: '12px', boxShadow: '0 8px 24px rgba(0,0,0,0.15)', padding: '20px', zIndex: 50, minWidth: '320px' }} className="dark:bg-[#2c2c2e]">
-            {/* Month Navigation */}
-            <div className="flex items-center justify-between mb-6">
-              <button 
-                onClick={() => setCalendarMonth(new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() - 1))}
-                className="cursor-pointer hover:opacity-70 transition-opacity"
-              >
-                <ChevronLeft className="w-5 h-5" style={{ color: '#0f1111' }} />
-              </button>
-              <span style={{ fontSize: '15px', fontWeight: 600, color: '#0f1111' }} className="dark:text-white">
-                {['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'][calendarMonth.getMonth()]} {calendarMonth.getFullYear()}
-              </span>
-              <button 
-                onClick={() => setCalendarMonth(new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1))}
-                className="cursor-pointer hover:opacity-70 transition-opacity"
-              >
-                <ChevronRight className="w-5 h-5" style={{ color: '#0f1111' }} />
-              </button>
-            </div>
-
-            {/* Days of Week */}
-            <div className="grid grid-cols-7 gap-2 mb-4">
-              {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(day => (
-                <div key={day} style={{ textAlign: 'center', fontSize: '12px', fontWeight: 600, color: '#565959' }} className="dark:text-gray-400 h-8 flex items-center justify-center">
-                  {day}
-                </div>
-              ))}
-            </div>
-
-            {/* Calendar Days - Only 4 Days Ahead */}
-            <div className="grid grid-cols-7 gap-2">
-              {emptyDays.map((_, idx) => (
-                <div key={`empty-${idx}`} style={{ height: '32px' }}></div>
-              ))}
-              {calendarDays.map(day => {
-                const dateObj = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth(), day);
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
-                const maxDate = new Date(today);
-                maxDate.setDate(maxDate.getDate() + 4);
-                const isDisabled = dateObj < today || dateObj > maxDate;
+          <div style={{ position: 'absolute', top: '100%', right: '24px', marginTop: '12px', backgroundColor: 'white', borderRadius: '12px', boxShadow: '0 8px 24px rgba(0,0,0,0.15)', zIndex: 50, minWidth: '280px', overflow: 'hidden' }} className="dark:bg-[#2c2c2e]">
+            {(() => {
+              const today = new Date();
+              today.setHours(0, 0, 0, 0);
+              const dates = [];
+              for (let i = 0; i <= 4; i++) {
+                const date = new Date(today);
+                date.setDate(date.getDate() + i);
+                dates.push(date);
+              }
+              return dates.map((dateObj) => {
                 const isSelected = selectedDate.toDateString() === dateObj.toDateString();
-                const marketDay = getIgboMarketDay(dateObj);
-                const marketDayColors = { 'Eke': '#667eea', 'Oye': '#764ba2', 'Afo': '#f093fb', 'Nkwo': '#4facfe' };
-                
-                if (isDisabled) return null;
-                
+                const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+                const dateStr = `${dateObj.getDate()} ${monthNames[dateObj.getMonth()]}`;
                 return (
-                  <div key={day} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
-                    <button
-                      onClick={() => {
-                        setSelectedDate(dateObj);
-                        setCalendarOpen(false);
-                      }}
-                      style={{
-                        height: '32px',
-                        width: '32px',
-                        borderRadius: '6px',
-                        backgroundColor: isSelected ? '#ff9900' : 'transparent',
-                        color: isSelected ? 'white' : '#0f1111',
-                        border: 'none',
-                        cursor: 'pointer',
-                        fontSize: '13px',
-                        fontWeight: 500,
-                        transition: 'all 0.2s ease'
-                      }}
-                      className="hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white"
-                    >
-                      {day}
-                    </button>
-                    <span style={{ fontSize: '9px', fontWeight: 600, color: marketDayColors[marketDay], letterSpacing: '0.3px', minHeight: '10px' }} className="dark:text-opacity-80">
-                      {marketDay}
-                    </span>
-                  </div>
+                  <button
+                    key={dateObj.toDateString()}
+                    onClick={() => {
+                      setSelectedDate(dateObj);
+                      setCalendarOpen(false);
+                    }}
+                    style={{
+                      width: '100%',
+                      padding: '16px 20px',
+                      backgroundColor: isSelected ? '#ff9900' : 'transparent',
+                      color: isSelected ? 'white' : '#565959',
+                      border: 'none',
+                      cursor: 'pointer',
+                      fontSize: '15px',
+                      fontWeight: 500,
+                      textAlign: 'center',
+                      transition: 'all 0.2s ease',
+                      borderBottomColor: '#d5d9d9'
+                    }}
+                    className="dark:hover:bg-gray-700 border-b dark:border-[#38383a] hover:bg-gray-50 dark:text-white"
+                  >
+                    {dateStr}
+                  </button>
                 );
-              })}
-            </div>
+              });
+            })()}
           </div>
         )}
       </div>
