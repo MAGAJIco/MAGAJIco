@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, use } from 'react';
-import { RefreshCw, Zap, Filter, TrendingUp, Menu, X, Clock } from 'lucide-react';
+import { RefreshCw, Zap, Filter, TrendingUp, Menu, X, Clock, Eye } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
