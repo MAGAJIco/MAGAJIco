@@ -312,6 +312,7 @@ class LiveMatch:
         self.source = kwargs.get('source', 'Unknown')
         self.prediction = kwargs.get('prediction', 'TBD')
         self.confidence = kwargs.get('confidence', 0)
+        self.result = kwargs.get('result', None)
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -324,7 +325,8 @@ class LiveMatch:
             "odds": self.odds,
             "source": self.source,
             "prediction": self.prediction,
-            "confidence": self.confidence
+            "confidence": self.confidence,
+            "result": self.result
         }
 
 

@@ -18,7 +18,8 @@ class LiveMatch:
         home_score: Optional[int] = None,
         away_score: Optional[int] = None,
         prediction: Optional[str] = None,
-        confidence: Optional[int] = None
+        confidence: Optional[int] = None,
+        result: Optional[Dict[str, Any]] = None
     ):
         self.id = id
         self.sport = sport
@@ -30,6 +31,7 @@ class LiveMatch:
         self.away_score = away_score
         self.prediction = prediction
         self.confidence = confidence
+        self.result = result
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -42,7 +44,8 @@ class LiveMatch:
             "homeScore": self.home_score,
             "awayScore": self.away_score,
             "prediction": self.prediction,
-            "confidence": self.confidence
+            "confidence": self.confidence,
+            "result": self.result
         }
 
 
