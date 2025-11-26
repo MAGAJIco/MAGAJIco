@@ -14,8 +14,30 @@ export default function SoccerPredictionsHome({ params }: { params: Promise<{ lo
   const [menuOpen, setMenuOpen] = useState(false);
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [calendarMonth, setCalendarMonth] = useState(new Date(2025, 10));
+  const [results, setResults] = useState<any[]>([]);
+  const [resultsLoading, setResultsLoading] = useState(false);
   
   const isActive = (path: string) => pathname === `/${locale}${path}` || pathname === `/${locale}/`;
+
+  // Fetch results from secrets endpoint
+  useEffect(() => {
+    const fetchResults = async () => {
+      try {
+        setResultsLoading(true);
+        const response = await fetch('/api/secrets');
+        if (!response.ok) return;
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) return;
+        const data = await response.json();
+        setResults(data.matches || []);
+      } catch (err) {
+        console.error('Error fetching results:', err);
+      } finally {
+        setResultsLoading(false);
+      }
+    };
+    fetchResults();
+  }, []);
 
   const formatDate = (date: Date) => {
     const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -449,6 +471,33 @@ export default function SoccerPredictionsHome({ params }: { params: Promise<{ lo
             </div>
           </Link>
         </div>
+      </div>
+
+      {/* Results Section */}
+      <div style={{ backgroundColor: '#eaeded', padding: '24px 24px' }} className="dark:bg-black">
+        <h2 style={{ fontSize: '16px', fontWeight: 700, color: '#0f1111', marginBottom: '16px', letterSpacing: '0.5px' }} className="dark:text-white">Recent Results</h2>
+        {resultsLoading ? (
+          <div style={{ textAlign: 'center', padding: '20px', color: '#565959' }} className="dark:text-gray-400">Loading results...</div>
+        ) : results.length > 0 ? (
+          <div className="space-y-2">
+            {results.slice(0, 5).map((result, idx) => (
+              <div key={idx} style={{ backgroundColor: 'white', borderRadius: '8px', padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 1px 3px rgba(0,0,0,0.08)', border: '1px solid #d5d9d9' }} className="dark:bg-[#2c2c2e] dark:border-[#38383a]">
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: '12px', fontWeight: 600, color: '#0f1111' }} className="dark:text-white">{result.home_team} vs {result.away_team}</div>
+                  <div style={{ fontSize: '10px', color: '#565959', marginTop: '4px' }} className="dark:text-gray-400">{result.league}</div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{ fontSize: '12px', fontWeight: 600, color: '#0f1111' }} className="dark:text-white">{result.prediction || '-'}</div>
+                  <div style={{ fontSize: '18px', fontWeight: 700 }}>
+                    {result.correct ? '✅' : '❌'}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div style={{ textAlign: 'center', padding: '20px', color: '#565959', fontSize: '13px' }} className="dark:text-gray-400">No results yet</div>
+        )}
       </div>
 
       {/* Tabs */}

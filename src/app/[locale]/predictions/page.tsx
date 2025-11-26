@@ -10,8 +10,36 @@ export default function PredictionsPage({ params }: { params: Promise<{ locale: 
   const pathname = usePathname();
   const [currentStat, setCurrentStat] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [allPredictions, setAllPredictions] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
   
   const isActive = (path: string) => pathname === `/${locale}${path}` || pathname === `/${locale}/`;
+
+  // Fetch all predictions
+  useEffect(() => {
+    const fetchPredictions = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('/api/predictions');
+        if (!response.ok) {
+          console.error('API returned status:', response.status);
+          return;
+        }
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          console.error('API returned non-JSON response');
+          return;
+        }
+        const data = await response.json();
+        setAllPredictions(data.matches || []);
+      } catch (err) {
+        console.error('Error fetching predictions:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPredictions();
+  }, []);
   
   const stats = [
     { label: 'Active Predictions', value: '2,500+', icon: Target },
@@ -229,6 +257,62 @@ export default function PredictionsPage({ params }: { params: Promise<{ locale: 
             </div>
           ))}
         </div>
+      </div>
+
+      {/* All Predictions Section */}
+      <div style={{ backgroundColor: '#eaeded', padding: '32px 24px' }} className="dark:bg-black">
+        <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#0f1111', marginBottom: '20px', letterSpacing: '0.5px' }} className="dark:text-white">All Predictions</h2>
+        {loading ? (
+          <div style={{ textAlign: 'center', padding: '40px', color: '#565959' }} className="dark:text-gray-400">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600"></div>
+            <p style={{ marginTop: '12px' }}>Loading predictions...</p>
+          </div>
+        ) : allPredictions.length > 0 ? (
+          <div className="space-y-4">
+            {allPredictions.map((pred, idx) => (
+              <div key={idx} style={{ backgroundColor: 'white', borderRadius: '12px', padding: '16px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', border: '1px solid #d5d9d9' }} className="dark:bg-[#2c2c2e] dark:border-[#38383a]">
+                <div className="flex items-start justify-between">
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: '14px', fontWeight: 600, color: '#0f1111', marginBottom: '8px' }} className="dark:text-white">
+                      {pred.home_team} vs {pred.away_team}
+                    </div>
+                    <div style={{ fontSize: '12px', color: '#565959', marginBottom: '8px' }} className="dark:text-gray-400">
+                      {pred.league}
+                    </div>
+                    <div className="flex gap-2 flex-wrap">
+                      {pred.prediction_1x2 && (
+                        <span style={{ backgroundColor: '#667eea', color: 'white', padding: '4px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: 600 }}>
+                          1X2: {pred.prediction_1x2}
+                        </span>
+                      )}
+                      {pred.prediction_over_under && (
+                        <span style={{ backgroundColor: '#764ba2', color: 'white', padding: '4px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: 600 }}>
+                          O/U: {pred.prediction_over_under}
+                        </span>
+                      )}
+                      {pred.prediction_btts && (
+                        <span style={{ backgroundColor: '#10b981', color: 'white', padding: '4px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: 600 }}>
+                          BTTS: {pred.prediction_btts}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div style={{ marginLeft: '16px', textAlign: 'right' }}>
+                    {pred.confidence && (
+                      <div style={{ fontSize: '12px', color: '#ff9900', fontWeight: 700 }}>
+                        {pred.confidence}% confidence
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div style={{ textAlign: 'center', padding: '40px', color: '#565959' }} className="dark:text-gray-400">
+            <p>No predictions available</p>
+          </div>
+        )}
       </div>
 
       {/* CTA Section */}
