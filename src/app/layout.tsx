@@ -1,7 +1,10 @@
-'use client';
-
 import './globals.css';
 import { ReactNode } from 'react';
+
+export const metadata = {
+  title: 'MagajiCo Sports Platform',
+  description: 'AI-powered sports predictions and insights',
+};
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
