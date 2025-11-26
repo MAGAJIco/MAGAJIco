@@ -369,13 +369,13 @@ export default function BrainstormPage() {
                 Brainstorm
               </button>
               <button
-                onClick={handleLiveClick}
+                onClick={() => router.push('/en/live')}
                 className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors text-sm"
               >
                 Live
               </button>
               <button
-                onClick={handleSecretClick}
+                onClick={() => router.push('/en/secrets')}
                 className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors text-sm"
               >
                 Secret
@@ -488,7 +488,7 @@ export default function BrainstormPage() {
             <span className="text-xs font-medium">Live</span>
           </button>
           <button 
-            onClick={() => router.push('/en/secret')}
+            onClick={() => router.push('/en/secrets')}
             className="flex flex-col items-center gap-1 text-gray-600 dark:text-gray-400 hover:text-indigo-500 transition-colors p-2 hover:opacity-80 active:opacity-60"
             title="Secret Features"
           >
