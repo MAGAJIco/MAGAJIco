@@ -318,124 +318,136 @@ export default function SoccerPredictionsHome({ params }: { params: Promise<{ lo
         <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#0f1111', marginBottom: '20px', letterSpacing: '0.5px' }} className="dark:text-white">Quick Features</h2>
         <div className="grid grid-cols-3 gap-4" style={{ maxWidth: '100%' }}>
           {/* Trending Predictions */}
-          <div 
-            style={{ 
-              backgroundColor: 'white', 
-              borderRadius: '12px', 
-              padding: '18px 16px', 
-              cursor: 'pointer',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-              transition: 'all 0.3s ease',
-              border: '1px solid #d5d9d9'
-            }}
-            className="dark:bg-[#2c2c2e] dark:border-[#38383a] hover:shadow-xl hover:scale-105"
-          >
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', textAlign: 'center' }}>
-              <Flame className="w-8 h-8" style={{ color: '#ff9900' }} />
-              <span style={{ fontSize: '13px', fontWeight: 600, color: '#0f1111' }} className="dark:text-white">Trending</span>
-              <span style={{ fontSize: '11px', color: '#565959' }} className="dark:text-gray-400">Hot Picks</span>
+          <Link href={`/${locale}/live`}>
+            <div 
+              style={{ 
+                backgroundColor: 'white', 
+                borderRadius: '12px', 
+                padding: '18px 16px', 
+                cursor: 'pointer',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                transition: 'all 0.3s ease',
+                border: '1px solid #d5d9d9'
+              }}
+              className="dark:bg-[#2c2c2e] dark:border-[#38383a] hover:shadow-xl hover:scale-105"
+            >
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', textAlign: 'center' }}>
+                <Flame className="w-8 h-8" style={{ color: '#ff9900' }} />
+                <span style={{ fontSize: '13px', fontWeight: 600, color: '#0f1111' }} className="dark:text-white">Trending</span>
+                <span style={{ fontSize: '11px', color: '#565959' }} className="dark:text-gray-400">Hot Picks</span>
+              </div>
             </div>
-          </div>
+          </Link>
 
           {/* Expert Tips */}
-          <div 
-            style={{ 
-              backgroundColor: 'white', 
-              borderRadius: '12px', 
-              padding: '18px 16px', 
-              cursor: 'pointer',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-              transition: 'all 0.3s ease',
-              border: '1px solid #d5d9d9'
-            }}
-            className="dark:bg-[#2c2c2e] dark:border-[#38383a] hover:shadow-xl hover:scale-105"
-          >
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', textAlign: 'center' }}>
-              <Target className="w-8 h-8" style={{ color: '#667eea' }} />
-              <span style={{ fontSize: '13px', fontWeight: 600, color: '#0f1111' }} className="dark:text-white">Expert Tips</span>
-              <span style={{ fontSize: '11px', color: '#565959' }} className="dark:text-gray-400">Pro Advice</span>
+          <Link href={`/${locale}/live`}>
+            <div 
+              style={{ 
+                backgroundColor: 'white', 
+                borderRadius: '12px', 
+                padding: '18px 16px', 
+                cursor: 'pointer',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                transition: 'all 0.3s ease',
+                border: '1px solid #d5d9d9'
+              }}
+              className="dark:bg-[#2c2c2e] dark:border-[#38383a] hover:shadow-xl hover:scale-105"
+            >
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', textAlign: 'center' }}>
+                <Target className="w-8 h-8" style={{ color: '#667eea' }} />
+                <span style={{ fontSize: '13px', fontWeight: 600, color: '#0f1111' }} className="dark:text-white">Expert Tips</span>
+                <span style={{ fontSize: '11px', color: '#565959' }} className="dark:text-gray-400">Pro Advice</span>
+              </div>
             </div>
-          </div>
+          </Link>
 
           {/* Win Streaks */}
-          <div 
-            style={{ 
-              backgroundColor: 'white', 
-              borderRadius: '12px', 
-              padding: '18px 16px', 
-              cursor: 'pointer',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-              transition: 'all 0.3s ease',
-              border: '1px solid #d5d9d9'
-            }}
-            className="dark:bg-[#2c2c2e] dark:border-[#38383a] hover:shadow-xl hover:scale-105"
-          >
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', textAlign: 'center' }}>
-              <TrendingUp className="w-8 h-8" style={{ color: '#10b981' }} />
-              <span style={{ fontSize: '13px', fontWeight: 600, color: '#0f1111' }} className="dark:text-white">Win Streaks</span>
-              <span style={{ fontSize: '11px', color: '#565959' }} className="dark:text-gray-400">Top Picks</span>
+          <Link href={`/${locale}/live`}>
+            <div 
+              style={{ 
+                backgroundColor: 'white', 
+                borderRadius: '12px', 
+                padding: '18px 16px', 
+                cursor: 'pointer',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                transition: 'all 0.3s ease',
+                border: '1px solid #d5d9d9'
+              }}
+              className="dark:bg-[#2c2c2e] dark:border-[#38383a] hover:shadow-xl hover:scale-105"
+            >
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', textAlign: 'center' }}>
+                <TrendingUp className="w-8 h-8" style={{ color: '#10b981' }} />
+                <span style={{ fontSize: '13px', fontWeight: 600, color: '#0f1111' }} className="dark:text-white">Win Streaks</span>
+                <span style={{ fontSize: '11px', color: '#565959' }} className="dark:text-gray-400">Top Picks</span>
+              </div>
             </div>
-          </div>
+          </Link>
 
           {/* Predictions */}
-          <div 
-            style={{ 
-              backgroundColor: 'white', 
-              borderRadius: '12px', 
-              padding: '18px 16px', 
-              cursor: 'pointer',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-              transition: 'all 0.3s ease',
-              border: '1px solid #d5d9d9'
-            }}
-            className="dark:bg-[#2c2c2e] dark:border-[#38383a] hover:shadow-xl hover:scale-105"
-          >
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', textAlign: 'center' }}>
-              <Eye className="w-8 h-8" style={{ color: '#f59e0b' }} />
-              <span style={{ fontSize: '13px', fontWeight: 600, color: '#0f1111' }} className="dark:text-white">All Predictions</span>
-              <span style={{ fontSize: '11px', color: '#565959' }} className="dark:text-gray-400">Full Coverage</span>
+          <Link href={`/${locale}/live`}>
+            <div 
+              style={{ 
+                backgroundColor: 'white', 
+                borderRadius: '12px', 
+                padding: '18px 16px', 
+                cursor: 'pointer',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                transition: 'all 0.3s ease',
+                border: '1px solid #d5d9d9'
+              }}
+              className="dark:bg-[#2c2c2e] dark:border-[#38383a] hover:shadow-xl hover:scale-105"
+            >
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', textAlign: 'center' }}>
+                <Eye className="w-8 h-8" style={{ color: '#f59e0b' }} />
+                <span style={{ fontSize: '13px', fontWeight: 600, color: '#0f1111' }} className="dark:text-white">All Predictions</span>
+                <span style={{ fontSize: '11px', color: '#565959' }} className="dark:text-gray-400">Full Coverage</span>
+              </div>
             </div>
-          </div>
+          </Link>
 
           {/* Favorites */}
-          <div 
-            style={{ 
-              backgroundColor: 'white', 
-              borderRadius: '12px', 
-              padding: '18px 16px', 
-              cursor: 'pointer',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-              transition: 'all 0.3s ease',
-              border: '1px solid #d5d9d9'
-            }}
-            className="dark:bg-[#2c2c2e] dark:border-[#38383a] hover:shadow-xl hover:scale-105"
-          >
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', textAlign: 'center' }}>
-              <Heart className="w-8 h-8" style={{ color: '#ef4444' }} />
-              <span style={{ fontSize: '13px', fontWeight: 600, color: '#0f1111' }} className="dark:text-white">My Favorites</span>
-              <span style={{ fontSize: '11px', color: '#565959' }} className="dark:text-gray-400">Saved Matches</span>
+          <Link href={`/${locale}/live`}>
+            <div 
+              style={{ 
+                backgroundColor: 'white', 
+                borderRadius: '12px', 
+                padding: '18px 16px', 
+                cursor: 'pointer',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                transition: 'all 0.3s ease',
+                border: '1px solid #d5d9d9'
+              }}
+              className="dark:bg-[#2c2c2e] dark:border-[#38383a] hover:shadow-xl hover:scale-105"
+            >
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', textAlign: 'center' }}>
+                <Heart className="w-8 h-8" style={{ color: '#ef4444' }} />
+                <span style={{ fontSize: '13px', fontWeight: 600, color: '#0f1111' }} className="dark:text-white">My Favorites</span>
+                <span style={{ fontSize: '11px', color: '#565959' }} className="dark:text-gray-400">Saved Matches</span>
+              </div>
             </div>
-          </div>
+          </Link>
 
           {/* Analytics */}
-          <div 
-            style={{ 
-              backgroundColor: 'white', 
-              borderRadius: '12px', 
-              padding: '18px 16px', 
-              cursor: 'pointer',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-              transition: 'all 0.3s ease',
-              border: '1px solid #d5d9d9'
-            }}
-            className="dark:bg-[#2c2c2e] dark:border-[#38383a] hover:shadow-xl hover:scale-105"
-          >
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', textAlign: 'center' }}>
-              <BarChart3 className="w-8 h-8" style={{ color: '#8b5cf6' }} />
-              <span style={{ fontSize: '13px', fontWeight: 600, color: '#0f1111' }} className="dark:text-white">Analytics</span>
-              <span style={{ fontSize: '11px', color: '#565959' }} className="dark:text-gray-400">Statistics</span>
+          <Link href={`/${locale}/live`}>
+            <div 
+              style={{ 
+                backgroundColor: 'white', 
+                borderRadius: '12px', 
+                padding: '18px 16px', 
+                cursor: 'pointer',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                transition: 'all 0.3s ease',
+                border: '1px solid #d5d9d9'
+              }}
+              className="dark:bg-[#2c2c2e] dark:border-[#38383a] hover:shadow-xl hover:scale-105"
+            >
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', textAlign: 'center' }}>
+                <BarChart3 className="w-8 h-8" style={{ color: '#8b5cf6' }} />
+                <span style={{ fontSize: '13px', fontWeight: 600, color: '#0f1111' }} className="dark:text-white">Analytics</span>
+                <span style={{ fontSize: '11px', color: '#565959' }} className="dark:text-gray-400">Statistics</span>
+              </div>
             </div>
-          </div>
+          </Link>
         </div>
       </div>
 
