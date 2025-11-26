@@ -456,8 +456,23 @@ export default function BrainstormPage() {
               >
                 Home
               </button>
-              <button className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors text-sm">
+              <button 
+                onClick={() => setIsBrainstormOpen(true)}
+                className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors text-sm"
+              >
                 Brainstorm
+              </button>
+              <button
+                onClick={handleLiveClick}
+                className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors text-sm"
+              >
+                Live
+              </button>
+              <button
+                onClick={handleSecretClick}
+                className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors text-sm"
+              >
+                Secret
               </button>
             </div>
           </div>
@@ -558,8 +573,8 @@ export default function BrainstormPage() {
         <div className="px-4 py-2 sm:py-3 flex justify-around items-center">
           <button 
             onClick={handleLiveClick}
-            className="flex flex-col items-center gap-1 text-gray-600 dark:text-gray-400 hover:text-purple-500 transition-colors p-2"
-            title="Live"
+            className="flex flex-col items-center gap-1 text-gray-600 dark:text-gray-400 hover:text-red-500 transition-colors p-2 hover:opacity-80 active:opacity-60"
+            title="Live Matches"
           >
             <div className="w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center">
               <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
@@ -568,16 +583,16 @@ export default function BrainstormPage() {
           </button>
           <button 
             onClick={handleSecretClick}
-            className="flex flex-col items-center gap-1 text-gray-600 dark:text-gray-400 hover:text-purple-500 transition-colors p-2"
-            title="Secret"
+            className="flex flex-col items-center gap-1 text-gray-600 dark:text-gray-400 hover:text-indigo-500 transition-colors p-2 hover:opacity-80 active:opacity-60"
+            title="Secret Features"
           >
             <Lock className="w-5 h-5 sm:w-6 sm:h-6" />
             <span className="text-xs font-medium">Secret</span>
           </button>
           <button 
             onClick={() => setIsBrainstormOpen(true)}
-            className="flex flex-col items-center gap-1 text-purple-500 hover:text-purple-600 transition-colors p-2"
-            title="Generate"
+            className="flex flex-col items-center gap-1 text-purple-500 hover:text-purple-600 transition-colors p-2 hover:opacity-80 active:opacity-60"
+            title="Generate AI Ideas"
           >
             <Zap className="w-5 h-5 sm:w-6 sm:h-6" />
             <span className="text-xs font-medium">Generate</span>
