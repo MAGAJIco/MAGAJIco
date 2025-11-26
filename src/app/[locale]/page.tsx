@@ -324,24 +324,105 @@ export default function BrainstormPage() {
   const [isBrainstormOpen, setIsBrainstormOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [currentView, setCurrentView] = useState('home');
+  const [showLiveMatches, setShowLiveMatches] = useState(false);
+  const [showSecretPage, setShowSecretPage] = useState(false);
 
   const handleNavigate = (view) => {
     setCurrentView(view);
-    // In real implementation, this would use Next.js router or similar
-    console.log(`Navigating to: ${view}`);
+    setIsMenuOpen(false);
   };
 
   const handleSecretClick = () => {
-    // Navigate to secret page
-    handleNavigate('secret');
-    console.log('Opening Secret page');
+    setShowSecretPage(true);
+    setCurrentView('secret');
   };
 
   const handleLiveClick = () => {
-    // Navigate to live page
-    handleNavigate('live');
-    console.log('Opening Live page');
+    setShowLiveMatches(true);
+    setCurrentView('live');
   };
+
+  // Show live matches view
+  if (showLiveMatches) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900">
+        <nav className="border-b border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm sticky top-0 z-30">
+          <div className="max-w-6xl mx-auto px-4 py-4">
+            <div className="flex items-center justify-between">
+              <button
+                onClick={() => setShowLiveMatches(false)}
+                className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+              >
+                ← Back
+              </button>
+              <h1 className="text-xl font-bold text-gray-900 dark:text-white">Live Matches</h1>
+              <div className="w-16" />
+            </div>
+          </div>
+        </nav>
+        <div className="max-w-4xl mx-auto px-4 py-8">
+          <div className="animate-pulse space-y-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="p-6 bg-gray-100 dark:bg-gray-800 rounded-lg">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+                  <span className="text-sm font-medium text-red-500">LIVE</span>
+                </div>
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded" />
+                  <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded" />
+                  <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show secret page
+  if (showSecretPage) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-indigo-950 to-purple-900">
+        <nav className="border-b border-purple-800 bg-purple-900/80 backdrop-blur-sm sticky top-0 z-30">
+          <div className="max-w-6xl mx-auto px-4 py-4">
+            <div className="flex items-center justify-between">
+              <button
+                onClick={() => setShowSecretPage(false)}
+                className="px-4 py-2 text-purple-400 hover:bg-purple-800 rounded-lg transition-colors"
+              >
+                ← Back
+              </button>
+              <div className="flex items-center gap-2">
+                <Lock className="w-6 h-6 text-purple-400" />
+                <h1 className="text-xl font-bold text-purple-100">Secret Features</h1>
+              </div>
+              <div className="w-16" />
+            </div>
+          </div>
+        </nav>
+        <div className="max-w-4xl mx-auto px-4 py-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {[
+              { title: 'Advanced Analytics', description: 'Deep dive into your data with ML-powered insights' },
+              { title: 'Predictive Models', description: 'Forecast future trends with high accuracy' },
+              { title: 'Custom Reports', description: 'Generate tailored reports in seconds' },
+              { title: 'Data Export', description: 'Export all your data in multiple formats' },
+            ].map((feature, i) => (
+              <div
+                key={i}
+                className="p-6 bg-purple-800/40 border border-purple-700 rounded-lg hover:bg-purple-800/60 transition-colors cursor-pointer"
+              >
+                <h3 className="font-semibold text-purple-100 mb-2">{feature.title}</h3>
+                <p className="text-purple-300 text-sm">{feature.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900">
@@ -448,6 +529,14 @@ export default function BrainstormPage() {
         </div>
       </div>
 
+      {/* Overlay for menu */}
+      {isMenuOpen && (
+        <div
+          className="fixed inset-0 z-40 opacity-0"
+          onClick={() => setIsMenuOpen(false)}
+        />
+      )}
+
       {/* Menu Drawer */}
       <MenuDrawer
         isOpen={isMenuOpen}
@@ -528,6 +617,15 @@ export default function BrainstormPage() {
           }
         }
 
+        @keyframes fadeInOverlay {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+
         .animate-fadeIn {
           animation: fadeIn 0.5s ease-out;
         }
@@ -539,6 +637,10 @@ export default function BrainstormPage() {
 
         .animate-slideInLeft {
           animation: slideInLeft 0.3s ease-out;
+        }
+
+        .animate-fadeInOverlay {
+          animation: fadeInOverlay 0.3s ease-out;
         }
       `}</style>
     </div>
