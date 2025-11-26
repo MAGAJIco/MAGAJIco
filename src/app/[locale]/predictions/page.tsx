@@ -124,6 +124,12 @@ export default function PredictionsPage({ params }: { params: Promise<{ locale: 
                   <span style={{ fontSize: '15px', fontWeight: 500 }}>Dashboard</span>
                 </div>
               </Link>
+              <Link href={`/${locale}/live`} onClick={() => setMenuOpen(false)}>
+                <div className="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors hover:bg-gray-800" style={{ cursor: 'pointer' }}>
+                  <Clock className="w-5 h-5" style={{ color: '#999' }} />
+                  <span style={{ fontSize: '15px', fontWeight: 500 }}>LIVE</span>
+                </div>
+              </Link>
               <Link href={`/${locale}/predictions`} onClick={() => setMenuOpen(false)}>
                 <div className="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors bg-orange-600" style={{ cursor: 'pointer' }}>
                   <Eye className="w-5 h-5" style={{ color: '#ff9900' }} />
