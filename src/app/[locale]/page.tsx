@@ -146,14 +146,8 @@ export default function SoccerPredictionsHome({ params }: { params: Promise<{ lo
           />
           
           {/* Menu Sidebar - Google Style */}
-          <div style={{ position: 'fixed', top: 0, left: 0, width: '280px', height: '100vh', backgroundColor: '#f3f3f3', zIndex: 50, overflow: 'auto', animation: 'slideInLeft 0.3s ease-out' }} className="dark:bg-[#1c1c1e]">
-            <div style={{ padding: '16px 24px', display: 'flex', justifyContent: 'flex-end' }}>
-              <button onClick={() => setMenuOpen(false)} className="cursor-pointer hover:opacity-60 transition-opacity dark:text-white" style={{ color: '#565959' }}>
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-
-            <nav style={{ padding: '20px 12px' }} className="space-y-0">
+          <div style={{ position: 'fixed', top: 0, left: 0, width: '280px', height: '100vh', backgroundColor: '#f3f3f3', zIndex: 50, overflow: 'auto', animation: 'slideInLeft 0.3s ease-out', borderRadius: '0 20px 20px 0' }} className="dark:bg-[#1c1c1e]">
+            <nav style={{ padding: '24px 12px' }} className="space-y-0">
               <Link href={`/${locale}`} onClick={() => setMenuOpen(false)}>
                 <div className={`flex items-center gap-6 px-6 py-4 rounded-lg transition-colors ${isActive('') ? 'bg-orange-100 dark:bg-orange-600' : 'hover:bg-gray-100 dark:hover:bg-gray-800'}`} style={{ cursor: 'pointer' }}>
                   <Trophy className="w-6 h-6" style={{ color: isActive('') ? '#ff9900' : '#565959', flexShrink: 0 }} />
