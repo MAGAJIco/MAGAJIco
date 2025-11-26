@@ -16,8 +16,32 @@ export default function SoccerPredictionsHome({ params }: { params: Promise<{ lo
   const [calendarMonth, setCalendarMonth] = useState(new Date(2025, 10));
   const [results, setResults] = useState<any[]>([]);
   const [resultsLoading, setResultsLoading] = useState(false);
+  const [liveMatches, setLiveMatches] = useState<any[]>([]);
+  const [liveLoading, setLiveLoading] = useState(true);
   
   const isActive = (path: string) => pathname === `/${locale}${path}` || pathname === `/${locale}/`;
+
+  // Fetch live matches from soccer scraper
+  useEffect(() => {
+    const fetchLiveMatches = async () => {
+      try {
+        setLiveLoading(true);
+        const response = await fetch('/api/soccer');
+        if (!response.ok) return;
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) return;
+        const data = await response.json();
+        setLiveMatches(data.matches || []);
+      } catch (err) {
+        console.error('Error fetching live matches:', err);
+      } finally {
+        setLiveLoading(false);
+      }
+    };
+    fetchLiveMatches();
+    const interval = setInterval(fetchLiveMatches, 30000); // Refresh every 30s
+    return () => clearInterval(interval);
+  }, []);
 
   // Fetch results from secrets endpoint
   useEffect(() => {
@@ -80,48 +104,6 @@ export default function SoccerPredictionsHome({ params }: { params: Promise<{ lo
     { id: '1x2', label: 'Predictions 1X2' },
     { id: 'over', label: 'Under/Over 2.5' },
     { id: 'btts', label: 'Both Teams To Score' }
-  ];
-
-  const matches = [
-    {
-      league: 'BOLIVIA COPA DE LA DIVISIÓN PROFESIONAL',
-      flag: '🇧🇴',
-      games: [
-        { time: '19:00', home: 'Guabirá', away: 'The Strongest', prediction: '1' },
-        { time: '22:00', home: 'Gualberto Villarroel SJ', away: 'Nacional Potosí', prediction: '1' }
-      ]
-    },
-    {
-      league: 'BOSNIA 1ST LEAGUE - RS',
-      flag: '🇧🇦',
-      games: [
-        { time: '12:00', home: 'BSK Banja Luka', away: 'Leotar', prediction: '1' }
-      ]
-    },
-    {
-      league: 'BRAZIL SERIE A',
-      flag: '🇧🇷',
-      games: [
-        { time: '00:30', home: 'Atletico Mineiro', away: 'Flamengo', prediction: '2' },
-        { time: '00:30', home: 'Gremio', away: 'Palmeiras', prediction: '1' },
-        { time: '22:00', home: 'Bragantino', away: 'Fortaleza', prediction: '1' }
-      ]
-    },
-    {
-      league: 'COLOMBIA PRIMERA A',
-      flag: '🇨🇴',
-      games: [
-        { time: '00:30', home: 'Independiente Santa Fe', away: 'Deportes Tolima', prediction: '1' },
-        { time: '23:30', home: 'Atletico Bucaramanga', away: 'Fortaleza CEIF', prediction: '1' }
-      ]
-    },
-    {
-      league: 'ECUADOR COPA ECUADOR',
-      flag: '🇪🇨',
-      games: [
-        { time: '00:00', home: 'Universidad Catolica', away: 'Deportivo Cuenca', prediction: '1' }
-      ]
-    }
   ];
 
   const competitions = [
@@ -538,53 +520,75 @@ export default function SoccerPredictionsHome({ params }: { params: Promise<{ lo
         </div>
       </div>
 
-      {/* Matches List */}
+      {/* Live Matches List - Real Data from Scraper */}
       <div style={{ paddingBottom: '100px' }}>
-        {matches.map((league, idx) => (
-          <div key={idx} style={{ marginBottom: '8px' }}>
-            {/* League Header - Subtle Gray / iPhone Dark */}
-            <div style={{ backgroundColor: '#d5d9d9', padding: '14px 24px', gap: '12px' }} className="dark:bg-[#2c2c2e] flex items-center">
-              <span style={{ fontSize: '20px' }}>{league.flag}</span>
-              <span style={{ fontSize: '12px', fontWeight: 600, color: '#0f1111', letterSpacing: '0.8px' }} className="uppercase">
-                {league.league}
-              </span>
-            </div>
-            {/* Games */}
-            <div style={{ backgroundColor: '#f3f3f3' }} className="dark:bg-black">
-              {league.games.map((game, gidx) => (
-                <div
-                  key={gidx}
-                  style={{ borderBottomColor: '#d5d9d9', padding: '18px 24px' }}
-                  className="flex items-center justify-between border-b dark:border-[#38383a] dark:hover:bg-[#1c1c1e] transition-colors"
-                >
-                  <div className="flex items-center flex-1 min-w-0" style={{ gap: '16px' }}>
-                    <div className="flex items-center justify-center text-sm font-medium flex-shrink-0" style={{ color: '#565959', gap: '6px', minWidth: '50px' }}>
-                      <Clock className="w-5 h-5" style={{ filter: 'drop-shadow(0 1px 4px rgba(0,0,0,0.2))', strokeWidth: 1.5 }} />
-                      <span style={{ fontSize: '14px', fontWeight: 500 }}>{game.time}</span>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div style={{ fontWeight: 600, fontSize: '15px', color: '#0f1111' }} className="dark:text-white truncate">
-                        {game.home}
-                      </div>
-                      <div className="flex items-center mt-2" style={{ gap: '8px' }}>
-                        <span className="bg-white dark:bg-[#2c2c2e] rounded" style={{ color: '#565959', fontSize: '12px', padding: '4px 8px', fontWeight: 500 }}>
-                          vs
-                        </span>
-                        <span style={{ fontSize: '14px', color: '#565959' }} className="truncate">
-                          {game.away}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  {/* Prediction Badge - Amazon Orange */}
-                  <div style={{ backgroundColor: '#ff9900', width: '44px', height: '44px', marginLeft: '16px', borderRadius: '12px' }} className="flex items-center justify-center text-white flex-shrink-0 shadow-lg">
-                    <span style={{ fontSize: '20px', fontWeight: 700 }}>{game.prediction}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
+        {liveLoading ? (
+          <div style={{ padding: '40px 24px', textAlign: 'center', color: '#565959' }} className="dark:text-gray-400">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600" style={{ marginBottom: '12px' }}></div>
+            <p>Loading live matches and odds...</p>
           </div>
-        ))}
+        ) : liveMatches.length > 0 ? (
+          Object.entries(
+            liveMatches.reduce((acc: any, match: any) => {
+              const league = match.league || 'Unknown League';
+              if (!acc[league]) acc[league] = [];
+              acc[league].push(match);
+              return acc;
+            }, {})
+          ).map(([league, games]: any, idx) => (
+            <div key={idx} style={{ marginBottom: '8px' }}>
+              {/* League Header - Subtle Gray / iPhone Dark */}
+              <div style={{ backgroundColor: '#d5d9d9', padding: '14px 24px', gap: '12px' }} className="dark:bg-[#2c2c2e] flex items-center">
+                <span style={{ fontSize: '20px' }}>⚽</span>
+                <span style={{ fontSize: '12px', fontWeight: 600, color: '#0f1111', letterSpacing: '0.8px' }} className="uppercase">
+                  {league}
+                </span>
+              </div>
+              {/* Games */}
+              <div style={{ backgroundColor: '#f3f3f3' }} className="dark:bg-black">
+                {games.map((game: any, gidx: number) => (
+                  <div
+                    key={gidx}
+                    style={{ borderBottomColor: '#d5d9d9', padding: '18px 24px' }}
+                    className="flex items-center justify-between border-b dark:border-[#38383a] dark:hover:bg-[#1c1c1e] transition-colors"
+                  >
+                    <div className="flex items-center flex-1 min-w-0" style={{ gap: '16px' }}>
+                      <div className="flex items-center justify-center text-sm font-medium flex-shrink-0" style={{ color: '#565959', gap: '6px', minWidth: '50px' }}>
+                        <Clock className="w-5 h-5" style={{ filter: 'drop-shadow(0 1px 4px rgba(0,0,0,0.2))', strokeWidth: 1.5 }} />
+                        <span style={{ fontSize: '14px', fontWeight: 500 }}>{game.time || 'TBD'}</span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div style={{ fontWeight: 600, fontSize: '15px', color: '#0f1111' }} className="dark:text-white truncate">
+                          {game.home_team || game.home || 'Team A'}
+                        </div>
+                        <div className="flex items-center mt-2" style={{ gap: '8px' }}>
+                          <span className="bg-white dark:bg-[#2c2c2e] rounded" style={{ color: '#565959', fontSize: '12px', padding: '4px 8px', fontWeight: 500 }}>
+                            vs
+                          </span>
+                          <span style={{ fontSize: '14px', color: '#565959' }} className="truncate">
+                            {game.away_team || game.away || 'Team B'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    {/* Odds Badge */}
+                    <div style={{ marginLeft: '16px', textAlign: 'right' }}>
+                      {game.odds && (
+                        <div style={{ backgroundColor: '#ff9900', width: '44px', height: '44px', borderRadius: '12px' }} className="flex items-center justify-center text-white flex-shrink-0 shadow-lg">
+                          <span style={{ fontSize: '12px', fontWeight: 700 }}>{game.odds}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))
+        ) : (
+          <div style={{ padding: '40px 24px', textAlign: 'center', color: '#565959', fontSize: '14px' }} className="dark:text-gray-400">
+            <p>No live matches available. Refresh to check again.</p>
+          </div>
+        )}
       </div>
 
       {/* Bottom Navigation - iPhone Style */}
