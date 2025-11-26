@@ -475,31 +475,6 @@ export default function SoccerPredictionsHome({ params }: { params: Promise<{ lo
         )}
       </div>
 
-      {/* Tabs */}
-      <div style={{ backgroundColor: '#f3f3f3', borderBottomColor: '#d5d9d9' }} className="border-b dark:bg-[#1c1c1e] dark:border-[#38383a] overflow-x-auto">
-        <div className="flex" style={{ gap: '32px', padding: '16px 24px' }}>
-          {tabs.map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              style={{
-                color: activeTab === tab.id ? '#ff9900' : '#565959',
-                borderBottomColor: activeTab === tab.id ? '#ff9900' : 'transparent',
-                fontSize: '15px',
-                fontWeight: 500,
-                letterSpacing: '0.2px',
-                paddingBottom: '8px',
-                borderBottom: '2px solid',
-                transition: 'all 0.3s ease'
-              }}
-              className="whitespace-nowrap dark:text-gray-400"
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
       {/* Search Bar */}
       <div style={{ backgroundColor: '#f3f3f3', borderBottomColor: '#d5d9d9', padding: '18px 24px' }} className="border-b dark:bg-[#1c1c1e] dark:border-[#38383a]">
         <div className="relative">
