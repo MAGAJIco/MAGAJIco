@@ -483,12 +483,7 @@ export default function SoccerPredictionsHome({ params }: { params: Promise<{ lo
 
       {/* Live Matches List - Real Data from Scraper */}
       <div style={{ paddingBottom: '100px' }}>
-        {liveLoading ? (
-          <div style={{ padding: '40px 24px', textAlign: 'center', color: '#565959' }} className="dark:text-gray-400">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600" style={{ marginBottom: '12px' }}></div>
-            <p>Loading live matches and odds...</p>
-          </div>
-        ) : liveMatches.length > 0 ? (
+        {liveMatches.length > 0 ? (
           Object.entries(
             liveMatches.reduce((acc: any, match: any) => {
               const league = match.league || 'Unknown League';
