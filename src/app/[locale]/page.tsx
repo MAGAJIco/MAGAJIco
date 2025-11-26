@@ -190,40 +190,40 @@ const MenuDrawer = ({ isOpen, onClose, onSelectComponent, selectedComponent, onN
         onClick={onClose}
       />
       
-      <div className="fixed top-0 left-0 bottom-0 w-80 bg-white dark:bg-gray-900 shadow-2xl z-50 animate-slideInLeft overflow-y-auto">
-        <div className="p-6 border-b border-gray-200 dark:border-gray-800">
+      <div className="fixed top-0 left-0 bottom-0 w-72 sm:w-80 bg-white dark:bg-gray-900 shadow-2xl z-50 animate-slideInLeft overflow-y-auto">
+        <div className="p-4 sm:p-6 border-b border-gray-200 dark:border-gray-800">
           <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2">
-              <Brain className="w-6 h-6 text-purple-500" />
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+            <div className="flex items-center gap-2 min-w-0">
+              <Brain className="w-5 sm:w-6 h-5 sm:h-6 text-purple-500 flex-shrink-0" />
+              <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white truncate">
                 Menu
               </h2>
             </div>
             <button
               onClick={onClose}
-              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors flex-shrink-0 ml-2"
             >
               <X className="w-5 h-5 text-gray-500" />
             </button>
           </div>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+          <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
             Navigate or select a component
           </p>
         </div>
 
         {/* Search Box */}
-        <div className="p-4 border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800">
+        <div className="p-3 sm:p-4 border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800">
           <div className="flex items-center gap-2 bg-white dark:bg-gray-900 rounded-lg px-3 py-2 border border-gray-300 dark:border-gray-700">
             <Search className="w-4 h-4 text-gray-500 flex-shrink-0" />
             <input
               type="text"
-              placeholder="Search components..."
+              placeholder="Search..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="flex-1 bg-transparent border-none outline-none text-sm text-gray-900 dark:text-white"
+              className="flex-1 bg-transparent border-none outline-none text-xs sm:text-sm text-gray-900 dark:text-white placeholder-gray-400"
             />
             {searchQuery && (
-              <button onClick={() => setSearchQuery('')} className="p-1 hover:opacity-70">
+              <button onClick={() => setSearchQuery('')} className="p-1 hover:opacity-70 flex-shrink-0">
                 <X className="w-4 h-4 text-gray-500" />
               </button>
             )}
@@ -231,7 +231,7 @@ const MenuDrawer = ({ isOpen, onClose, onSelectComponent, selectedComponent, onN
         </div>
 
         {/* Navigation Links */}
-        <div className="p-4 border-b border-gray-200 dark:border-gray-800">
+        <div className="p-3 sm:p-4 border-b border-gray-200 dark:border-gray-800">
           <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-2 px-2">
             Navigation
           </h3>
@@ -243,8 +243,8 @@ const MenuDrawer = ({ isOpen, onClose, onSelectComponent, selectedComponent, onN
               }}
               className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-left"
             >
-              <Lightbulb className="w-5 h-5 text-yellow-500" />
-              <span className="text-sm font-medium text-gray-900 dark:text-white">Home</span>
+              <Lightbulb className="w-4 sm:w-5 h-4 sm:h-5 text-yellow-500 flex-shrink-0" />
+              <span className="text-xs sm:text-sm font-medium text-gray-900 dark:text-white truncate">Home</span>
             </button>
             <button
               onClick={() => {
@@ -253,8 +253,8 @@ const MenuDrawer = ({ isOpen, onClose, onSelectComponent, selectedComponent, onN
               }}
               className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-left"
             >
-              <Eye className="w-5 h-5 text-blue-500" />
-              <span className="text-sm font-medium text-gray-900 dark:text-white">Predictions</span>
+              <Eye className="w-4 sm:w-5 h-4 sm:h-5 text-blue-500 flex-shrink-0" />
+              <span className="text-xs sm:text-sm font-medium text-gray-900 dark:text-white truncate">Predictions</span>
             </button>
             <button
               onClick={() => {
@@ -263,8 +263,8 @@ const MenuDrawer = ({ isOpen, onClose, onSelectComponent, selectedComponent, onN
               }}
               className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-left"
             >
-              <Settings className="w-5 h-5 text-gray-500" />
-              <span className="text-sm font-medium text-gray-900 dark:text-white">Settings</span>
+              <Settings className="w-4 sm:w-5 h-4 sm:h-5 text-gray-500 flex-shrink-0" />
+              <span className="text-xs sm:text-sm font-medium text-gray-900 dark:text-white truncate">Settings</span>
             </button>
             <button
               onClick={() => {
@@ -273,14 +273,14 @@ const MenuDrawer = ({ isOpen, onClose, onSelectComponent, selectedComponent, onN
               }}
               className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-left"
             >
-              <Mail className="w-5 h-5 text-green-500" />
-              <span className="text-sm font-medium text-gray-900 dark:text-white">Contact</span>
+              <Mail className="w-4 sm:w-5 h-4 sm:h-5 text-green-500 flex-shrink-0" />
+              <span className="text-xs sm:text-sm font-medium text-gray-900 dark:text-white truncate">Contact</span>
             </button>
           </div>
         </div>
 
         {/* Components List */}
-        <div className="p-4">
+        <div className="p-3 sm:p-4">
           <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-2 px-2">
             Components
           </h3>
@@ -295,19 +295,19 @@ const MenuDrawer = ({ isOpen, onClose, onSelectComponent, selectedComponent, onN
                   onClose();
                 }}
                 style={{ animationDelay: `${idx * 30}ms` }}
-                className={`w-full p-4 rounded-lg transition-all text-left flex items-center justify-between group animate-slideUp ${
+                className={`w-full p-3 sm:p-4 rounded-lg transition-all text-left flex items-center justify-between group animate-slideUp ${
                   selectedComponent === component
                     ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
                     : 'bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-white'
                 }`}
               >
-                <div className="flex items-center gap-3">
-                  <Brain className={`w-5 h-5 ${
+                <div className="flex items-center gap-2 min-w-0">
+                  <Brain className={`w-4 sm:w-5 h-4 sm:h-5 flex-shrink-0 ${
                     selectedComponent === component ? 'text-white' : 'text-purple-500'
                   }`} />
-                  <span className="font-medium">{component}</span>
+                  <span className="font-medium text-xs sm:text-sm truncate">{component}</span>
                 </div>
-                <ChevronRight className={`w-5 h-5 transition-transform group-hover:translate-x-1 ${
+                <ChevronRight className={`w-4 sm:w-5 h-4 sm:h-5 transition-transform group-hover:translate-x-1 flex-shrink-0 ml-2 ${
                   selectedComponent === component ? 'text-white' : 'text-gray-400'
                 }`} />
               </button>
@@ -352,23 +352,30 @@ export default function BrainstormPage() {
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setIsMenuOpen(true)}
-                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors"
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors flex-shrink-0"
               >
                 <Menu className="w-6 h-6 text-gray-700 dark:text-gray-300" />
               </button>
-              <Lightbulb className="w-6 h-6 text-yellow-500" />
-              <span className="font-bold text-xl text-gray-900 dark:text-white">
-                MagajiCo AI Hub
-              </span>
+              <div className="hidden sm:flex items-center gap-2">
+                <Lightbulb className="w-6 h-6 text-yellow-500" />
+                <span className="font-bold text-lg sm:text-xl text-gray-900 dark:text-white">
+                  MagajiCo AI Hub
+                </span>
+              </div>
+              <div className="sm:hidden">
+                <span className="font-bold text-sm text-gray-900 dark:text-white">
+                  AI Hub
+                </span>
+              </div>
             </div>
-            <div className="flex gap-2">
+            <div className="hidden md:flex gap-2">
               <button 
                 onClick={() => handleNavigate('home')}
-                className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors text-sm"
               >
                 Home
               </button>
-              <button className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors">
+              <button className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors text-sm">
                 Brainstorm
               </button>
             </div>
@@ -376,40 +383,40 @@ export default function BrainstormPage() {
         </div>
       </nav>
 
-      <div className="max-w-4xl mx-auto px-4 py-8 pb-24">
+      <div className="max-w-4xl mx-auto px-4 py-6 sm:py-8 pb-24">
         {/* Header */}
-        <div className="mb-8 animate-fadeIn">
-          <div className="flex items-center gap-3 mb-4">
-            <Lightbulb className="w-8 h-8 text-yellow-500" />
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+        <div className="mb-6 sm:mb-8 animate-fadeIn">
+          <div className="flex items-center gap-3 mb-3 sm:mb-4">
+            <Lightbulb className="w-6 sm:w-8 h-6 sm:h-8 text-yellow-500 flex-shrink-0" />
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
               AI Brainstorming Hub
             </h1>
           </div>
-          <p className="text-gray-600 dark:text-gray-400 text-lg">
+          <p className="text-gray-600 dark:text-gray-400 text-base sm:text-lg">
             Get AI-powered feature enhancement ideas for any component. Open the menu to select a component and let our AI help you innovate.
           </p>
         </div>
 
         {/* Current Selection Card */}
-        <div className="mb-8 p-6 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border-2 border-purple-200 dark:border-purple-800 rounded-xl animate-fadeIn">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <p className="text-sm text-purple-600 dark:text-purple-400 font-medium mb-1">
+        <div className="mb-6 sm:mb-8 p-4 sm:p-6 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border-2 border-purple-200 dark:border-purple-800 rounded-lg sm:rounded-xl animate-fadeIn">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-0 mb-3 sm:mb-4">
+            <div className="min-w-0">
+              <p className="text-xs sm:text-sm text-purple-600 dark:text-purple-400 font-medium mb-1">
                 Currently Selected
               </p>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                <Brain className="w-6 h-6 text-purple-500" />
-                {selectedComponent}
+              <h2 className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2 break-words">
+                <Brain className="w-5 sm:w-6 h-5 sm:h-6 text-purple-500 flex-shrink-0" />
+                <span className="truncate">{selectedComponent}</span>
               </h2>
             </div>
             <button
               onClick={() => setIsMenuOpen(true)}
-              className="px-4 py-2 bg-white dark:bg-gray-800 text-purple-600 dark:text-purple-400 rounded-lg hover:bg-purple-100 dark:hover:bg-gray-700 transition-colors font-medium"
+              className="px-3 sm:px-4 py-2 bg-white dark:bg-gray-800 text-purple-600 dark:text-purple-400 rounded-lg hover:bg-purple-100 dark:hover:bg-gray-700 transition-colors font-medium text-sm whitespace-nowrap"
             >
               Change
             </button>
           </div>
-          <p className="text-gray-600 dark:text-gray-400 text-sm">
+          <p className="text-gray-600 dark:text-gray-400 text-xs sm:text-sm">
             Click the button below to generate AI-powered feature ideas for this component.
           </p>
         </div>
@@ -417,20 +424,21 @@ export default function BrainstormPage() {
         {/* Generate Button */}
         <button
           onClick={() => setIsBrainstormOpen(true)}
-          className="w-full px-6 py-4 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white rounded-lg font-semibold hover:shadow-lg transition-all flex items-center justify-center gap-3 animate-fadeIn"
+          className="w-full px-4 sm:px-6 py-3 sm:py-4 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white rounded-lg font-semibold hover:shadow-lg transition-all flex items-center justify-center gap-2 sm:gap-3 animate-fadeIn text-sm sm:text-base"
         >
-          <Sparkles className="w-5 h-5" />
-          Generate Ideas for {selectedComponent}
-          <Zap className="w-5 h-5" />
+          <Sparkles className="w-4 sm:w-5 h-4 sm:h-5 flex-shrink-0" />
+          <span className="hidden sm:inline">Generate Ideas for {selectedComponent}</span>
+          <span className="sm:hidden">Generate Ideas</span>
+          <Zap className="w-4 sm:w-5 h-4 sm:h-5 flex-shrink-0" />
         </button>
 
         {/* Info Box */}
-        <div className="mt-8 p-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg animate-fadeIn">
-          <h3 className="font-semibold text-blue-900 dark:text-blue-100 mb-2 flex items-center gap-2">
-            <Brain className="w-5 h-5" />
+        <div className="mt-6 sm:mt-8 p-4 sm:p-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg sm:rounded-lg animate-fadeIn">
+          <h3 className="font-semibold text-blue-900 dark:text-blue-100 mb-2 flex items-center gap-2 text-sm sm:text-base">
+            <Brain className="w-4 sm:w-5 h-4 sm:h-5 flex-shrink-0" />
             How It Works
           </h3>
-          <ul className="text-blue-800 dark:text-blue-200 text-sm space-y-1">
+          <ul className="text-blue-800 dark:text-blue-200 text-xs sm:text-sm space-y-1">
             <li>• Open the menu to select a component from MagajiCo</li>
             <li>• Add optional context about what you want to improve</li>
             <li>• AI will generate 5 innovative feature ideas</li>
@@ -458,28 +466,31 @@ export default function BrainstormPage() {
 
       {/* Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 z-30">
-        <div className="max-w-6xl mx-auto px-4 py-3 flex justify-around items-center">
+        <div className="px-4 py-2 sm:py-3 flex justify-around items-center">
           <button 
             onClick={handleLiveClick}
-            className="flex flex-col items-center gap-1 text-gray-600 dark:text-gray-400 hover:text-purple-500 transition-colors"
+            className="flex flex-col items-center gap-1 text-gray-600 dark:text-gray-400 hover:text-purple-500 transition-colors p-2"
+            title="Live"
           >
-            <div className="w-6 h-6 flex items-center justify-center">
+            <div className="w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center">
               <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
             </div>
             <span className="text-xs font-medium">Live</span>
           </button>
           <button 
             onClick={handleSecretClick}
-            className="flex flex-col items-center gap-1 text-gray-600 dark:text-gray-400 hover:text-purple-500 transition-colors"
+            className="flex flex-col items-center gap-1 text-gray-600 dark:text-gray-400 hover:text-purple-500 transition-colors p-2"
+            title="Secret"
           >
-            <Lock className="w-6 h-6" />
+            <Lock className="w-5 h-5 sm:w-6 sm:h-6" />
             <span className="text-xs font-medium">Secret</span>
           </button>
           <button 
             onClick={() => setIsBrainstormOpen(true)}
-            className="flex flex-col items-center gap-1 text-purple-500 hover:text-purple-600 transition-colors"
+            className="flex flex-col items-center gap-1 text-purple-500 hover:text-purple-600 transition-colors p-2"
+            title="Generate"
           >
-            <Zap className="w-6 h-6" />
+            <Zap className="w-5 h-5 sm:w-6 sm:h-6" />
             <span className="text-xs font-medium">Generate</span>
           </button>
         </div>
