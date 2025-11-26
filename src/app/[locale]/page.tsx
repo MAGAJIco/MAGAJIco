@@ -30,6 +30,14 @@ export default function SoccerPredictionsHome({ params }: { params: Promise<{ lo
     return new Date(date.getFullYear(), date.getMonth(), 1).getDay();
   };
 
+  const getIgboMarketDay = (date: Date) => {
+    const igboDays = ['Eke', 'Oye', 'Afo', 'Nkwo'];
+    const epoch = new Date(2025, 10, 24); // November 24, 2025 is Eke
+    const diffTime = Math.abs(date.getTime() - epoch.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return igboDays[diffDays % 4];
+  };
+
   const calendarDays = Array.from({ length: getDaysInMonth(calendarMonth) }, (_, i) => i + 1);
   const emptyDays = Array.from({ length: getFirstDayOfMonth(calendarMonth) }, () => null);
 
@@ -260,28 +268,35 @@ export default function SoccerPredictionsHome({ params }: { params: Promise<{ lo
               {calendarDays.map(day => {
                 const dateObj = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth(), day);
                 const isSelected = selectedDate.toDateString() === dateObj.toDateString();
+                const marketDay = getIgboMarketDay(dateObj);
+                const marketDayColors = { 'Eke': '#667eea', 'Oye': '#764ba2', 'Afo': '#f093fb', 'Nkwo': '#4facfe' };
                 return (
-                  <button
-                    key={day}
-                    onClick={() => {
-                      setSelectedDate(dateObj);
-                      setCalendarOpen(false);
-                    }}
-                    style={{
-                      height: '32px',
-                      borderRadius: '6px',
-                      backgroundColor: isSelected ? '#ff9900' : 'transparent',
-                      color: isSelected ? 'white' : '#0f1111',
-                      border: 'none',
-                      cursor: 'pointer',
-                      fontSize: '13px',
-                      fontWeight: 500,
-                      transition: 'all 0.2s ease'
-                    }}
-                    className="hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white"
-                  >
-                    {day}
-                  </button>
+                  <div key={day} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
+                    <button
+                      onClick={() => {
+                        setSelectedDate(dateObj);
+                        setCalendarOpen(false);
+                      }}
+                      style={{
+                        height: '32px',
+                        width: '32px',
+                        borderRadius: '6px',
+                        backgroundColor: isSelected ? '#ff9900' : 'transparent',
+                        color: isSelected ? 'white' : '#0f1111',
+                        border: 'none',
+                        cursor: 'pointer',
+                        fontSize: '13px',
+                        fontWeight: 500,
+                        transition: 'all 0.2s ease'
+                      }}
+                      className="hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white"
+                    >
+                      {day}
+                    </button>
+                    <span style={{ fontSize: '9px', fontWeight: 600, color: marketDayColors[marketDay], letterSpacing: '0.3px', minHeight: '10px' }} className="dark:text-opacity-80">
+                      {marketDay}
+                    </span>
+                  </div>
                 );
               })}
             </div>
