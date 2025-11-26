@@ -123,7 +123,7 @@ export default function SoccerPredictionsHome({ params }: { params: Promise<{ lo
       </div>
 
       {/* Date Selector - Softer Light / iPhone Dark */}
-      <div style={{ backgroundColor: '#f3f3f3', borderBottomColor: '#d5d9d9', padding: '16px 24px' }} className="border-b dark:bg-[#1c1c1e] dark:border-[#38383a] sticky top-[68px] z-40">
+      <div style={{ backgroundColor: '#f3f3f3', borderBottomColor: '#d5d9d9', padding: '16px 24px' }} className="border-b dark:bg-[#1c1c1e] dark:border-[#38383a]">
         <div className="flex items-center justify-between">
           <div className="flex items-center" style={{ gap: '12px' }}>
             <Calendar className="w-7 h-7" style={{ color: '#565959', filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.15))', strokeWidth: 1.5 }} />
