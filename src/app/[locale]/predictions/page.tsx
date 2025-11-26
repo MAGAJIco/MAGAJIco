@@ -12,6 +12,8 @@ export default function PredictionsPage({ params }: { params: Promise<{ locale: 
   const [menuOpen, setMenuOpen] = useState(false);
   const [allPredictions, setAllPredictions] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [hasAIAccess, setHasAIAccess] = useState(false);
+  const [showAISignup, setShowAISignup] = useState(false);
   
   const isActive = (path: string) => pathname === `/${locale}${path}` || pathname === `/${locale}/`;
 
@@ -235,6 +237,75 @@ export default function PredictionsPage({ params }: { params: Promise<{ locale: 
         </div>
       </div>
 
+      {/* AI Suggestions Section - With SignUp Gate */}
+      <div style={{ backgroundColor: '#eaeded', padding: '32px 24px' }} className="dark:bg-black">
+        <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#0f1111', marginBottom: '20px', letterSpacing: '0.5px' }} className="dark:text-white">AI-Powered Suggestions</h2>
+        {hasAIAccess ? (
+          <div style={{ backgroundColor: 'white', borderRadius: '12px', padding: '24px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', border: '1px solid #d5d9d9' }} className="dark:bg-[#2c2c2e] dark:border-[#38383a]">
+            <div className="flex items-start gap-3 mb-4">
+              <Zap className="w-6 h-6 flex-shrink-0" style={{ color: '#ff9900' }} />
+              <div>
+                <h3 style={{ fontSize: '15px', fontWeight: 600, color: '#0f1111', marginBottom: '8px' }} className="dark:text-white">Smart Analysis</h3>
+                <p style={{ fontSize: '13px', color: '#565959' }} className="dark:text-gray-400">AI analyzes all three data sources to recommend the highest-confidence picks for today's matches</p>
+              </div>
+            </div>
+            <div style={{ backgroundColor: '#fff5e6', borderRadius: '8px', padding: '12px', marginTop: '16px' }} className="dark:bg-orange-900/20">
+              <p style={{ fontSize: '12px', color: '#ff7f00', fontWeight: 500 }}>✨ AI insights are now available for all predictions below</p>
+            </div>
+          </div>
+        ) : (
+          <div style={{ backgroundColor: 'linear-gradient(135deg, #ff9900 0%, #ffad33 100%)', borderRadius: '12px', padding: '32px 24px', textAlign: 'center' }} className="text-white shadow-lg">
+            <Zap className="w-10 h-10 mx-auto mb-4" />
+            <h3 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '8px' }}>Unlock AI Suggestions</h3>
+            <p style={{ fontSize: '13px', opacity: 0.95, marginBottom: '24px' }}>Get AI-powered insights that analyze all three data sources and recommend top picks</p>
+            <button
+              onClick={() => setShowAISignup(true)}
+              style={{ backgroundColor: 'white', color: '#ff9900', padding: '12px 28px', borderRadius: '8px', fontWeight: 600, fontSize: '14px', border: 'none', cursor: 'pointer', transition: 'all 0.3s ease' }}
+              className="hover:shadow-xl hover:scale-105"
+            >
+              Sign Up for AI Access
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* AI Signup Modal */}
+      {showAISignup && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 60 }} className="p-4">
+          <div style={{ backgroundColor: 'white', borderRadius: '16px', padding: '32px 24px', maxWidth: '400px', width: '100%', boxShadow: '0 10px 40px rgba(0,0,0,0.2)' }} className="dark:bg-[#2c2c2e]">
+            <div className="flex items-center justify-between mb-6">
+              <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#0f1111' }} className="dark:text-white">Enable AI Suggestions</h2>
+              <button onClick={() => setShowAISignup(false)} className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">✕</button>
+            </div>
+            
+            <p style={{ fontSize: '13px', color: '#565959', marginBottom: '20px' }} className="dark:text-gray-400">Sign up to get AI-powered predictions and smart analysis of all matches</p>
+            
+            <input type="email" placeholder="Email address" style={{ width: '100%', padding: '12px 16px', borderRadius: '8px', border: '1px solid #d5d9d9', fontSize: '13px', marginBottom: '12px' }} className="dark:bg-[#1c1c1e] dark:border-[#38383a] dark:text-white" />
+            
+            <input type="password" placeholder="Password" style={{ width: '100%', padding: '12px 16px', borderRadius: '8px', border: '1px solid #d5d9d9', fontSize: '13px', marginBottom: '20px' }} className="dark:bg-[#1c1c1e] dark:border-[#38383a] dark:text-white" />
+            
+            <button
+              onClick={() => {
+                setHasAIAccess(true);
+                setShowAISignup(false);
+              }}
+              style={{ width: '100%', backgroundColor: '#ff9900', color: 'white', padding: '12px', borderRadius: '8px', fontWeight: 600, fontSize: '14px', border: 'none', cursor: 'pointer', transition: 'all 0.3s ease', marginBottom: '12px' }}
+              className="hover:shadow-lg hover:scale-105"
+            >
+              Continue with AI Access
+            </button>
+            
+            <button
+              onClick={() => setShowAISignup(false)}
+              style={{ width: '100%', backgroundColor: '#f3f3f3', color: '#0f1111', padding: '12px', borderRadius: '8px', fontWeight: 600, fontSize: '14px', border: 'none', cursor: 'pointer' }}
+              className="dark:bg-[#1c1c1e] dark:text-white"
+            >
+              Maybe Later
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Benefits Section */}
       <div style={{ backgroundColor: '#f3f3f3', borderTopColor: '#d5d9d9', borderBottomColor: '#d5d9d9', padding: '32px 24px' }} className="border-y dark:bg-[#1c1c1e] dark:border-[#38383a]">
         <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#0f1111', marginBottom: '24px', letterSpacing: '0.5px' }} className="dark:text-white">Why Choose Us?</h2>
@@ -301,6 +372,11 @@ export default function PredictionsPage({ params }: { params: Promise<{ locale: 
                             {pred.prediction_btts && (
                               <span style={{ backgroundColor: '#10b981', color: 'white', padding: '3px 8px', borderRadius: '4px', fontSize: '10px', fontWeight: 600 }}>
                                 BTTS: {pred.prediction_btts}
+                              </span>
+                            )}
+                            {hasAIAccess && (
+                              <span style={{ backgroundColor: '#ff9900', color: 'white', padding: '3px 8px', borderRadius: '4px', fontSize: '10px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                ✨ AI Recommended
                               </span>
                             )}
                           </div>
