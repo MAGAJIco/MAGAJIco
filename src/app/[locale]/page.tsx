@@ -3,7 +3,7 @@
 import React, { useState, useEffect, use } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { Search, Menu, Calendar, ChevronRight, ChevronLeft, Trophy, Clock, TrendingUp, Quote, Eye, Lock, Users, X, BarChart3, Zap, Flame, Target, TrendingDown, Heart, Settings, Mail } from 'lucide-react';
+import { Search, Menu, Calendar, ChevronRight, ChevronLeft, Trophy, Clock, TrendingUp, Quote, Eye, Lock, Users, X, BarChart3, Zap, Flame, Target, TrendingDown, Heart, Settings, Mail, ChevronUp, ChevronDown } from 'lucide-react';
 
 export default function SoccerPredictionsHome({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = use(params);
@@ -17,6 +17,7 @@ export default function SoccerPredictionsHome({ params }: { params: Promise<{ lo
   const [resultsLoading, setResultsLoading] = useState(false);
   const [liveMatches, setLiveMatches] = useState<any[]>([]);
   const [liveLoading, setLiveLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
   
   const isActive = (path: string) => pathname === `/${locale}${path}` || pathname === `/${locale}/`;
 
@@ -147,16 +148,27 @@ export default function SoccerPredictionsHome({ params }: { params: Promise<{ lo
           
           {/* Menu Sidebar - Google Style */}
           <div style={{ position: 'fixed', top: '80px', left: '0px', width: '240px', height: 'calc(100vh - 180px)', backgroundColor: '#f3f3f3', zIndex: 50, overflow: 'auto', animation: 'slideInLeft 0.3s ease-out', borderRadius: '20px' }} className="dark:bg-[#1c1c1e]">
-            {/* Search Box */}
-            <div style={{ padding: '16px 12px', borderBottomColor: '#d5d9d9' }} className="border-b dark:border-[#38383a]">
-              <div className="relative">
-                <Search className="absolute w-5 h-5" style={{ color: '#565959', left: '16px', top: '50%', transform: 'translateY(-50%)', strokeWidth: 1.5 }} />
-                <input
-                  type="text"
-                  placeholder="Search games..."
-                  style={{ color: '#0f1111', fontSize: '14px', paddingLeft: '40px', paddingRight: '12px', paddingTop: '10px', paddingBottom: '10px', width: '100%' }}
-                  className="bg-white dark:bg-[#1c1c1e] rounded-lg text-sm dark:text-white focus:outline-none focus:ring-2 focus:ring-orange-400 shadow-sm dark:border dark:border-[#38383a]"
-                />
+            {/* Search Box - Google "Find in Page" Style */}
+            <div style={{ padding: '12px 16px', borderBottomColor: '#d5d9d9', display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: '#ffffff' }} className="border-b dark:border-[#38383a] dark:bg-[#2c2c2e]">
+              <Search className="w-4 h-4" style={{ color: '#565959', flexShrink: 0, strokeWidth: 2 }} />
+              <input
+                type="text"
+                placeholder="Search games..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                style={{ color: '#0f1111', fontSize: '14px', flex: 1, border: 'none', outline: 'none', backgroundColor: 'transparent', padding: '0px' }}
+                className="dark:text-white"
+              />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <button className="p-1 hover:opacity-70 transition-opacity cursor-pointer">
+                  <ChevronUp className="w-4 h-4" style={{ color: '#565959', strokeWidth: 2 }} />
+                </button>
+                <button className="p-1 hover:opacity-70 transition-opacity cursor-pointer">
+                  <ChevronDown className="w-4 h-4" style={{ color: '#565959', strokeWidth: 2 }} />
+                </button>
+                <button onClick={() => { setSearchQuery(''); setMenuOpen(false); }} className="p-1 hover:opacity-70 transition-opacity cursor-pointer">
+                  <X className="w-4 h-4" style={{ color: '#565959', strokeWidth: 2 }} />
+                </button>
               </div>
             </div>
             
