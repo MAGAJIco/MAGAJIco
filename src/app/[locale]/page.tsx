@@ -146,55 +146,55 @@ export default function SoccerPredictionsHome({ params }: { params: Promise<{ lo
           />
           
           {/* Menu Sidebar */}
-          <div style={{ position: 'fixed', top: 0, left: 0, width: '280px', height: '100vh', backgroundColor: '#131921', zIndex: 50, overflow: 'auto', animation: 'slideInLeft 0.3s ease-out' }} className="text-white">
-            <div style={{ padding: '20px 24px', borderBottomColor: '#374151' }} className="border-b dark:border-[#38383a] flex items-center justify-between">
-              <h2 style={{ fontSize: '18px', fontWeight: 700 }}>Menu</h2>
-              <button onClick={() => setMenuOpen(false)} className="cursor-pointer hover:opacity-80 transition-opacity">
+          <div style={{ position: 'fixed', top: 0, left: 0, width: '280px', height: '100vh', backgroundColor: '#f3f3f3', zIndex: 50, overflow: 'auto', animation: 'slideInLeft 0.3s ease-out' }} className="dark:bg-[#1c1c1e]">
+            <div style={{ padding: '20px 24px', borderBottomColor: '#d5d9d9' }} className="border-b dark:border-[#38383a] flex items-center justify-between">
+              <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#0f1111' }} className="dark:text-white">Menu</h2>
+              <button onClick={() => setMenuOpen(false)} className="cursor-pointer hover:opacity-80 transition-opacity dark:text-white">
                 <X className="w-6 h-6" />
               </button>
             </div>
 
             <nav style={{ padding: '24px 16px' }} className="space-y-2">
               <Link href={`/${locale}`} onClick={() => setMenuOpen(false)}>
-                <div className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isActive('') ? 'bg-orange-600' : 'hover:bg-gray-800'}`} style={{ cursor: 'pointer' }}>
+                <div className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isActive('') ? 'bg-orange-100 dark:bg-orange-600' : 'hover:bg-gray-100 dark:hover:bg-gray-800'}`} style={{ cursor: 'pointer', color: isActive('') ? '#ff9900' : '#565959' }}>
                   <Trophy className="w-5 h-5" style={{ color: '#ff9900' }} />
-                  <span style={{ fontSize: '15px', fontWeight: 500 }}>Dashboard</span>
+                  <span style={{ fontSize: '15px', fontWeight: 500 }} className="dark:text-white">Dashboard</span>
                 </div>
               </Link>
 
               <Link href={`/${locale}/predictions`} onClick={() => setMenuOpen(false)}>
-                <div className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isActive('/predictions') ? 'bg-orange-600' : 'hover:bg-gray-800'}`} style={{ cursor: 'pointer' }}>
+                <div className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isActive('/predictions') ? 'bg-orange-100 dark:bg-orange-600' : 'hover:bg-gray-100 dark:hover:bg-gray-800'}`} style={{ cursor: 'pointer', color: isActive('/predictions') ? '#ff9900' : '#565959' }}>
                   <Eye className="w-5 h-5" style={{ color: '#ff9900' }} />
-                  <span style={{ fontSize: '15px', fontWeight: 500 }}>Predictions</span>
+                  <span style={{ fontSize: '15px', fontWeight: 500 }} className="dark:text-white">Predictions</span>
                 </div>
               </Link>
 
               <Link href={`/${locale}/live`} onClick={() => setMenuOpen(false)}>
-                <div className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isActive('/live') ? 'bg-orange-600' : 'hover:bg-gray-800'}`} style={{ cursor: 'pointer' }}>
+                <div className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isActive('/live') ? 'bg-orange-100 dark:bg-orange-600' : 'hover:bg-gray-100 dark:hover:bg-gray-800'}`} style={{ cursor: 'pointer', color: isActive('/live') ? '#ff9900' : '#565959' }}>
                   <Clock className="w-5 h-5" style={{ color: '#ff9900' }} />
-                  <span style={{ fontSize: '15px', fontWeight: 500 }}>LIVE</span>
+                  <span style={{ fontSize: '15px', fontWeight: 500 }} className="dark:text-white">LIVE</span>
                 </div>
               </Link>
 
               <Link href={`/${locale}/secrets`} onClick={() => setMenuOpen(false)}>
-                <div className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isActive('/secrets') ? 'bg-orange-600' : 'hover:bg-gray-800'}`} style={{ cursor: 'pointer' }}>
+                <div className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isActive('/secrets') ? 'bg-orange-100 dark:bg-orange-600' : 'hover:bg-gray-100 dark:hover:bg-gray-800'}`} style={{ cursor: 'pointer', color: isActive('/secrets') ? '#ff9900' : '#565959' }}>
                   <Lock className="w-5 h-5" style={{ color: '#ff9900' }} />
-                  <span style={{ fontSize: '15px', fontWeight: 500 }}>Secrets</span>
+                  <span style={{ fontSize: '15px', fontWeight: 500 }} className="dark:text-white">Secrets</span>
                 </div>
               </Link>
 
               <Link href={`/${locale}/social`} onClick={() => setMenuOpen(false)}>
-                <div className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isActive('/social') ? 'bg-orange-600' : 'hover:bg-gray-800'}`} style={{ cursor: 'pointer' }}>
+                <div className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isActive('/social') ? 'bg-orange-100 dark:bg-orange-600' : 'hover:bg-gray-100 dark:hover:bg-gray-800'}`} style={{ cursor: 'pointer', color: isActive('/social') ? '#ff9900' : '#565959' }}>
                   <Users className="w-5 h-5" style={{ color: '#ff9900' }} />
-                  <span style={{ fontSize: '15px', fontWeight: 500 }}>Social</span>
+                  <span style={{ fontSize: '15px', fontWeight: 500 }} className="dark:text-white">Social</span>
                 </div>
               </Link>
 
-              <div style={{ borderTopColor: '#374151', marginTop: '24px', paddingTop: '24px' }} className="border-t">
+              <div style={{ borderTopColor: '#d5d9d9', marginTop: '24px', paddingTop: '24px' }} className="border-t dark:border-[#38383a]">
                 <Link href={`/${locale}`} onClick={() => setMenuOpen(false)}>
-                  <div className="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors hover:bg-gray-800" style={{ cursor: 'pointer' }}>
+                  <div className="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-gray-800" style={{ cursor: 'pointer', color: '#565959' }}>
                     <Settings className="w-5 h-5" style={{ color: '#ff9900' }} />
-                    <span style={{ fontSize: '15px', fontWeight: 500 }}>Settings</span>
+                    <span style={{ fontSize: '15px', fontWeight: 500 }} className="dark:text-white">Settings</span>
                   </div>
                 </Link>
               </div>
