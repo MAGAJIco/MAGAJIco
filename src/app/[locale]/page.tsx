@@ -8,7 +8,6 @@ import { Search, Menu, Calendar, ChevronRight, ChevronLeft, Trophy, Clock, Trend
 export default function SoccerPredictionsHome({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = use(params);
   const pathname = usePathname();
-  const [activeTab, setActiveTab] = useState('1x2');
   const [selectedDate, setSelectedDate] = useState(new Date(2025, 10, 26));
   const [currentQuoteIndex, setCurrentQuoteIndex] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -98,12 +97,6 @@ export default function SoccerPredictionsHome({ params }: { params: Promise<{ lo
     { author: 'Elon Musk', quote: 'When something is important enough, you do it even if the odds are not in your favor.', count: 1 },
     { author: 'Jack Ma', quote: 'Today is hard, tomorrow will be worse, but the day after tomorrow will be sunshine.', count: 2 },
     { author: 'Jack Ma', quote: 'If you don\'t give up, you still have a chance.', count: 2 }
-  ];
-
-  const tabs = [
-    { id: '1x2', label: 'Predictions 1X2' },
-    { id: 'over', label: 'Under/Over 2.5' },
-    { id: 'btts', label: 'Both Teams To Score' }
   ];
 
   const competitions = [
