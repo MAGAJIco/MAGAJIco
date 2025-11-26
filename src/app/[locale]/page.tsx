@@ -209,7 +209,7 @@ export default function SoccerPredictionsHome({ params }: { params: Promise<{ lo
         <div className="flex items-center justify-between">
           <div className="flex items-center" style={{ gap: '12px' }}>
             <Calendar className="w-7 h-7" style={{ color: '#565959', filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.15))', strokeWidth: 1.5 }} />
-            <span style={{ fontSize: '15px', color: '#565959', fontWeight: 500 }}>Select date</span>
+            <span style={{ fontSize: '15px', color: '#565959', fontWeight: 500 }}>View calendar</span>
           </div>
           <button 
             onClick={() => setCalendarOpen(!calendarOpen)}
@@ -252,16 +252,24 @@ export default function SoccerPredictionsHome({ params }: { params: Promise<{ lo
               ))}
             </div>
 
-            {/* Calendar Days */}
+            {/* Calendar Days - Only 4 Days Ahead */}
             <div className="grid grid-cols-7 gap-2">
               {emptyDays.map((_, idx) => (
                 <div key={`empty-${idx}`} style={{ height: '32px' }}></div>
               ))}
               {calendarDays.map(day => {
                 const dateObj = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth(), day);
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const maxDate = new Date(today);
+                maxDate.setDate(maxDate.getDate() + 4);
+                const isDisabled = dateObj < today || dateObj > maxDate;
                 const isSelected = selectedDate.toDateString() === dateObj.toDateString();
                 const marketDay = getIgboMarketDay(dateObj);
                 const marketDayColors = { 'Eke': '#667eea', 'Oye': '#764ba2', 'Afo': '#f093fb', 'Nkwo': '#4facfe' };
+                
+                if (isDisabled) return null;
+                
                 return (
                   <div key={day} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
                     <button
