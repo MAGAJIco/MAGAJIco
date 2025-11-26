@@ -3,7 +3,7 @@
 import React, { useState, useEffect, use } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { Search, Menu, Calendar, ChevronRight, ChevronLeft, Trophy, Clock, TrendingUp, Quote, Eye, Lock, Users, X, BarChart3, Zap, Flame, Target, TrendingDown, Heart, Settings } from 'lucide-react';
+import { Search, Menu, Calendar, ChevronRight, ChevronLeft, Trophy, Clock, TrendingUp, Quote, Eye, Lock, Users, X, BarChart3, Zap, Flame, Target, TrendingDown, Heart, Settings, Mail } from 'lucide-react';
 
 export default function SoccerPredictionsHome({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = use(params);
@@ -148,13 +148,6 @@ export default function SoccerPredictionsHome({ params }: { params: Promise<{ lo
           {/* Menu Sidebar - Google Style */}
           <div style={{ position: 'fixed', top: '80px', left: '0px', width: '240px', height: 'calc(100vh - 180px)', backgroundColor: '#f3f3f3', zIndex: 50, overflow: 'auto', animation: 'slideInLeft 0.3s ease-out', borderRadius: '20px' }} className="dark:bg-[#1c1c1e]">
             <nav style={{ padding: '24px 12px' }} className="space-y-0">
-              <Link href={`/${locale}`} onClick={() => setMenuOpen(false)}>
-                <div className={`flex items-center gap-6 px-6 py-4 rounded-lg transition-colors ${isActive('') ? 'bg-orange-100 dark:bg-orange-600' : 'hover:bg-gray-100 dark:hover:bg-gray-800'}`} style={{ cursor: 'pointer' }}>
-                  <Trophy className="w-6 h-6" style={{ color: isActive('') ? '#ff9900' : '#565959', flexShrink: 0 }} />
-                  <span style={{ fontSize: '15px', fontWeight: 500, color: isActive('') ? '#ff9900' : '#0f1111' }} className="dark:text-white">Dashboard</span>
-                </div>
-              </Link>
-
               <Link href={`/${locale}/predictions`} onClick={() => setMenuOpen(false)}>
                 <div className={`flex items-center gap-6 px-6 py-4 rounded-lg transition-colors ${isActive('/predictions') ? 'bg-orange-100 dark:bg-orange-600' : 'hover:bg-gray-100 dark:hover:bg-gray-800'}`} style={{ cursor: 'pointer' }}>
                   <Eye className="w-6 h-6" style={{ color: isActive('/predictions') ? '#ff9900' : '#565959', flexShrink: 0 }} />
@@ -162,24 +155,24 @@ export default function SoccerPredictionsHome({ params }: { params: Promise<{ lo
                 </div>
               </Link>
 
-              <Link href={`/${locale}/live`} onClick={() => setMenuOpen(false)}>
-                <div className={`flex items-center gap-6 px-6 py-4 rounded-lg transition-colors ${isActive('/live') ? 'bg-orange-100 dark:bg-orange-600' : 'hover:bg-gray-100 dark:hover:bg-gray-800'}`} style={{ cursor: 'pointer' }}>
-                  <Clock className="w-6 h-6" style={{ color: isActive('/live') ? '#ff9900' : '#565959', flexShrink: 0 }} />
-                  <span style={{ fontSize: '15px', fontWeight: 500, color: isActive('/live') ? '#ff9900' : '#0f1111' }} className="dark:text-white">LIVE</span>
-                </div>
-              </Link>
-
               <Link href={`/${locale}/secrets`} onClick={() => setMenuOpen(false)}>
                 <div className={`flex items-center gap-6 px-6 py-4 rounded-lg transition-colors ${isActive('/secrets') ? 'bg-orange-100 dark:bg-orange-600' : 'hover:bg-gray-100 dark:hover:bg-gray-800'}`} style={{ cursor: 'pointer' }}>
                   <Lock className="w-6 h-6" style={{ color: isActive('/secrets') ? '#ff9900' : '#565959', flexShrink: 0 }} />
-                  <span style={{ fontSize: '15px', fontWeight: 500, color: isActive('/secrets') ? '#ff9900' : '#0f1111' }} className="dark:text-white">Secrets</span>
+                  <span style={{ fontSize: '15px', fontWeight: 500, color: isActive('/secrets') ? '#ff9900' : '#0f1111' }} className="dark:text-white">Secret</span>
                 </div>
               </Link>
 
-              <Link href={`/${locale}/social`} onClick={() => setMenuOpen(false)}>
-                <div className={`flex items-center gap-6 px-6 py-4 rounded-lg transition-colors ${isActive('/social') ? 'bg-orange-100 dark:bg-orange-600' : 'hover:bg-gray-100 dark:hover:bg-gray-800'}`} style={{ cursor: 'pointer' }}>
-                  <Users className="w-6 h-6" style={{ color: isActive('/social') ? '#ff9900' : '#565959', flexShrink: 0 }} />
-                  <span style={{ fontSize: '15px', fontWeight: 500, color: isActive('/social') ? '#ff9900' : '#0f1111' }} className="dark:text-white">Social</span>
+              <Link href={`/${locale}/live`} onClick={() => setMenuOpen(false)}>
+                <div className={`flex items-center gap-6 px-6 py-4 rounded-lg transition-colors ${isActive('/live') ? 'bg-orange-100 dark:bg-orange-600' : 'hover:bg-gray-100 dark:hover:bg-gray-800'}`} style={{ cursor: 'pointer' }}>
+                  <Clock className="w-6 h-6" style={{ color: isActive('/live') ? '#ff9900' : '#565959', flexShrink: 0 }} />
+                  <span style={{ fontSize: '15px', fontWeight: 500, color: isActive('/live') ? '#ff9900' : '#0f1111' }} className="dark:text-white">Live</span>
+                </div>
+              </Link>
+
+              <Link href={`/${locale}/contact`} onClick={() => setMenuOpen(false)}>
+                <div className={`flex items-center gap-6 px-6 py-4 rounded-lg transition-colors ${isActive('/contact') ? 'bg-orange-100 dark:bg-orange-600' : 'hover:bg-gray-100 dark:hover:bg-gray-800'}`} style={{ cursor: 'pointer' }}>
+                  <Mail className="w-6 h-6" style={{ color: isActive('/contact') ? '#ff9900' : '#565959', flexShrink: 0 }} />
+                  <span style={{ fontSize: '15px', fontWeight: 500, color: isActive('/contact') ? '#ff9900' : '#0f1111' }} className="dark:text-white">Contact</span>
                 </div>
               </Link>
 
@@ -550,13 +543,13 @@ export default function SoccerPredictionsHome({ params }: { params: Promise<{ lo
       {/* Bottom Navigation - iPhone Style */}
       <nav style={{ backgroundColor: '#f3f3f3', borderTopColor: '#d5d9d9', padding: '14px 0 env(safe-area-inset-bottom)' }} className="border-t dark:bg-[#1c1c1e] dark:border-[#38383a] fixed bottom-0 left-0 right-0 safe-area-inset-bottom backdrop-blur-xl bg-opacity-98 dark:bg-opacity-98 shadow-2xl">
         <div className="flex items-center justify-around max-w-2xl mx-auto">
-          <Link href={`/${locale}/`} className="flex flex-col items-center justify-center" style={{ color: isActive('/') ? '#ff9900' : '#565959', gap: '6px', padding: '8px 0', transition: 'color 0.3s ease' }}>
-            <Trophy className="w-9 h-9" style={{ filter: isActive('/') ? 'drop-shadow(0 3px 8px rgba(255,153,0,0.5))' : 'drop-shadow(0 2px 6px rgba(0,0,0,0.3))', strokeWidth: 1.5 }} />
-            <span style={{ fontSize: '11px', fontWeight: 500, letterSpacing: '0.2px' }}>Dashboard</span>
-          </Link>
           <Link href={`/${locale}/predictions`} className="flex flex-col items-center justify-center" style={{ color: isActive('/predictions') ? '#ff9900' : '#565959', gap: '6px', padding: '8px 0', transition: 'color 0.3s ease' }}>
             <Eye className="w-9 h-9" style={{ filter: isActive('/predictions') ? 'drop-shadow(0 3px 8px rgba(255,153,0,0.5))' : 'drop-shadow(0 2px 6px rgba(0,0,0,0.3))', strokeWidth: 1.5 }} />
             <span style={{ fontSize: '11px', fontWeight: 500, letterSpacing: '0.2px' }}>Predictions</span>
+          </Link>
+          <Link href={`/${locale}/secrets`} className="flex flex-col items-center justify-center" style={{ color: isActive('/secrets') ? '#ff9900' : '#565959', gap: '6px', padding: '8px 0', transition: 'color 0.3s ease' }}>
+            <Lock className="w-9 h-9" style={{ filter: isActive('/secrets') ? 'drop-shadow(0 3px 8px rgba(255,153,0,0.5))' : 'drop-shadow(0 2px 6px rgba(0,0,0,0.3))', strokeWidth: 1.5 }} />
+            <span style={{ fontSize: '11px', fontWeight: 500, letterSpacing: '0.2px' }}>Secret</span>
           </Link>
           <Link href={`/${locale}/live`} className="flex flex-col items-center justify-center relative" style={{ color: isActive('/live') ? '#ff9900' : '#565959', gap: '6px', padding: '8px 0', transition: 'color 0.3s ease' }}>
             <div className="relative flex items-center justify-center">
@@ -565,15 +558,11 @@ export default function SoccerPredictionsHome({ params }: { params: Promise<{ lo
                 1
               </span>
             </div>
-            <span style={{ fontSize: '11px', fontWeight: 500, letterSpacing: '0.2px' }}>LIVE</span>
+            <span style={{ fontSize: '11px', fontWeight: 500, letterSpacing: '0.2px' }}>Live</span>
           </Link>
-          <Link href={`/${locale}/secrets`} className="flex flex-col items-center justify-center" style={{ color: isActive('/secrets') ? '#ff9900' : '#565959', gap: '6px', padding: '8px 0', transition: 'color 0.3s ease' }}>
-            <Lock className="w-9 h-9" style={{ filter: isActive('/secrets') ? 'drop-shadow(0 3px 8px rgba(255,153,0,0.5))' : 'drop-shadow(0 2px 6px rgba(0,0,0,0.3))', strokeWidth: 1.5 }} />
-            <span style={{ fontSize: '11px', fontWeight: 500, letterSpacing: '0.2px' }}>Secrets</span>
-          </Link>
-          <Link href={`/${locale}/social`} className="flex flex-col items-center justify-center" style={{ color: isActive('/social') ? '#ff9900' : '#565959', gap: '6px', padding: '8px 0', transition: 'color 0.3s ease' }}>
-            <Users className="w-9 h-9" style={{ filter: isActive('/social') ? 'drop-shadow(0 3px 8px rgba(255,153,0,0.5))' : 'drop-shadow(0 2px 6px rgba(0,0,0,0.3))', strokeWidth: 1.5 }} />
-            <span style={{ fontSize: '11px', fontWeight: 500, letterSpacing: '0.2px' }}>Social</span>
+          <Link href={`/${locale}/contact`} className="flex flex-col items-center justify-center" style={{ color: isActive('/contact') ? '#ff9900' : '#565959', gap: '6px', padding: '8px 0', transition: 'color 0.3s ease' }}>
+            <Mail className="w-9 h-9" style={{ filter: isActive('/contact') ? 'drop-shadow(0 3px 8px rgba(255,153,0,0.5))' : 'drop-shadow(0 2px 6px rgba(0,0,0,0.3))', strokeWidth: 1.5 }} />
+            <span style={{ fontSize: '11px', fontWeight: 500, letterSpacing: '0.2px' }}>Contact</span>
           </Link>
         </div>
       </nav>
