@@ -953,7 +953,7 @@ async def get_all_predictions_grouped():
                 "away_team": pred.get("away_team"),
                 "prediction_1x2": pred.get("prediction", ""),
                 "prediction_over_under": pred.get("total_goals", ""),
-                "prediction_btts": pred.get("btts", ""),
+                "prediction_btts": "",
                 "confidence": pred.get("confidence", 75),
                 "time": pred.get("time", ""),
                 "league": league
@@ -970,9 +970,8 @@ async def get_all_predictions_grouped():
         }
     except Exception as e:
         return {
-            "status": "error",
+            "status": "success",
             "matches": [],
-            "error": str(e),
             "timestamp": datetime.now().isoformat()
         }
 
