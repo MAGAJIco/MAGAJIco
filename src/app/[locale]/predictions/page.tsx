@@ -230,6 +230,7 @@ export default function PredictionsPage({ params }: { params: Promise<{ locale: 
           <h2 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '12px' }}>Ready to Start Winning?</h2>
           <p style={{ fontSize: '14px', opacity: 0.95, marginBottom: '20px' }}>Access premium predictions from three trusted sources right now</p>
           <button 
+            onClick={() => window.location.href = `/${locale}/live`}
             style={{ backgroundColor: 'white', color: '#ff9900', padding: '12px 28px', borderRadius: '8px', fontWeight: 600, fontSize: '14px', border: 'none', cursor: 'pointer', transition: 'all 0.3s ease', boxShadow: '0 4px 12px rgba(255,153,0,0.3)' }}
             className="hover:shadow-xl hover:scale-105"
           >
