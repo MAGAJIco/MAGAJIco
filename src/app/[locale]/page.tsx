@@ -192,6 +192,15 @@ export default function SoccerPredictionsHome({ params }: { params: Promise<{ lo
                   <span style={{ fontSize: '15px', fontWeight: 500 }}>Social</span>
                 </div>
               </Link>
+
+              <div style={{ borderTopColor: '#374151', marginTop: '24px', paddingTop: '24px' }} className="border-t">
+                <Link href={`/${locale}`} onClick={() => setMenuOpen(false)}>
+                  <div className="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors hover:bg-gray-800" style={{ cursor: 'pointer' }}>
+                    <Settings className="w-5 h-5" style={{ color: '#ff9900' }} />
+                    <span style={{ fontSize: '15px', fontWeight: 500 }}>Settings</span>
+                  </div>
+                </Link>
+              </div>
             </nav>
           </div>
         </>

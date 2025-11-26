@@ -62,5 +62,5 @@ export default {
       },
     },
   },
-  darkMode: 'class',
+  darkMode: 'media',
 };
