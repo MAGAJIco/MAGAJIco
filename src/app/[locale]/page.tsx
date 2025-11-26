@@ -3,17 +3,35 @@
 import React, { useState, useEffect, use } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { Search, Menu, Calendar, ChevronRight, Trophy, Clock, TrendingUp, Quote, Eye, Lock, Users, X, BarChart3, Zap } from 'lucide-react';
+import { Search, Menu, Calendar, ChevronRight, ChevronLeft, Trophy, Clock, TrendingUp, Quote, Eye, Lock, Users, X, BarChart3, Zap } from 'lucide-react';
 
 export default function SoccerPredictionsHome({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = use(params);
   const pathname = usePathname();
   const [activeTab, setActiveTab] = useState('1x2');
-  const [selectedDate, setSelectedDate] = useState('26 November');
+  const [selectedDate, setSelectedDate] = useState(new Date(2025, 10, 26));
   const [currentQuoteIndex, setCurrentQuoteIndex] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [calendarOpen, setCalendarOpen] = useState(false);
+  const [calendarMonth, setCalendarMonth] = useState(new Date(2025, 10));
   
   const isActive = (path: string) => pathname === `/${locale}${path}` || pathname === `/${locale}/`;
+
+  const formatDate = (date: Date) => {
+    const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    return `${date.getDate()} ${months[date.getMonth()]}`;
+  };
+
+  const getDaysInMonth = (date: Date) => {
+    return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+  };
+
+  const getFirstDayOfMonth = (date: Date) => {
+    return new Date(date.getFullYear(), date.getMonth(), 1).getDay();
+  };
+
+  const calendarDays = Array.from({ length: getDaysInMonth(calendarMonth) }, (_, i) => i + 1);
+  const emptyDays = Array.from({ length: getFirstDayOfMonth(calendarMonth) }, () => null);
 
   const techQuotes = [
     { author: 'Larry Page', quote: 'Always deliver more than expected.', count: 2 },
@@ -187,17 +205,88 @@ export default function SoccerPredictionsHome({ params }: { params: Promise<{ lo
       </div>
 
       {/* Date Selector - Softer Light / iPhone Dark */}
-      <div style={{ backgroundColor: '#f3f3f3', borderBottomColor: '#d5d9d9', padding: '16px 24px' }} className="border-b dark:bg-[#1c1c1e] dark:border-[#38383a]">
+      <div style={{ backgroundColor: '#f3f3f3', borderBottomColor: '#d5d9d9', padding: '16px 24px', position: 'relative' }} className="border-b dark:bg-[#1c1c1e] dark:border-[#38383a]">
         <div className="flex items-center justify-between">
           <div className="flex items-center" style={{ gap: '12px' }}>
             <Calendar className="w-7 h-7" style={{ color: '#565959', filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.15))', strokeWidth: 1.5 }} />
             <span style={{ fontSize: '15px', color: '#565959', fontWeight: 500 }}>Select date</span>
           </div>
-          <div className="flex items-center gap-3 bg-white dark:bg-[#2c2c2e] rounded-xl shadow-md" style={{ padding: '12px 16px' }}>
-            <span style={{ fontSize: '15px', fontWeight: 600, color: '#0f1111' }}>26 November</span>
-            <ChevronRight className="w-5 h-5" style={{ color: '#565959', filter: 'drop-shadow(0 1px 4px rgba(0,0,0,0.15))', strokeWidth: 2.5 }} />
-          </div>
+          <button 
+            onClick={() => setCalendarOpen(!calendarOpen)}
+            className="flex items-center gap-3 bg-white dark:bg-[#2c2c2e] rounded-xl shadow-md hover:shadow-lg transition-all" 
+            style={{ padding: '12px 16px', cursor: 'pointer', border: 'none' }}
+          >
+            <span style={{ fontSize: '15px', fontWeight: 600, color: '#0f1111' }} className="dark:text-white">{formatDate(selectedDate)}</span>
+            <ChevronRight className="w-5 h-5" style={{ color: '#565959', filter: 'drop-shadow(0 1px 4px rgba(0,0,0,0.15))', strokeWidth: 2.5, transform: calendarOpen ? 'rotate(90deg)' : 'rotate(0deg)', transition: 'transform 0.3s ease' }} />
+          </button>
         </div>
+
+        {/* Calendar Picker */}
+        {calendarOpen && (
+          <div style={{ position: 'absolute', top: '100%', right: '24px', marginTop: '12px', backgroundColor: 'white', borderRadius: '12px', boxShadow: '0 8px 24px rgba(0,0,0,0.15)', padding: '20px', zIndex: 50, minWidth: '320px' }} className="dark:bg-[#2c2c2e]">
+            {/* Month Navigation */}
+            <div className="flex items-center justify-between mb-6">
+              <button 
+                onClick={() => setCalendarMonth(new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() - 1))}
+                className="cursor-pointer hover:opacity-70 transition-opacity"
+              >
+                <ChevronLeft className="w-5 h-5" style={{ color: '#0f1111' }} />
+              </button>
+              <span style={{ fontSize: '15px', fontWeight: 600, color: '#0f1111' }} className="dark:text-white">
+                {['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'][calendarMonth.getMonth()]} {calendarMonth.getFullYear()}
+              </span>
+              <button 
+                onClick={() => setCalendarMonth(new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1))}
+                className="cursor-pointer hover:opacity-70 transition-opacity"
+              >
+                <ChevronRight className="w-5 h-5" style={{ color: '#0f1111' }} />
+              </button>
+            </div>
+
+            {/* Days of Week */}
+            <div className="grid grid-cols-7 gap-2 mb-4">
+              {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(day => (
+                <div key={day} style={{ textAlign: 'center', fontSize: '12px', fontWeight: 600, color: '#565959' }} className="dark:text-gray-400 h-8 flex items-center justify-center">
+                  {day}
+                </div>
+              ))}
+            </div>
+
+            {/* Calendar Days */}
+            <div className="grid grid-cols-7 gap-2">
+              {emptyDays.map((_, idx) => (
+                <div key={`empty-${idx}`} style={{ height: '32px' }}></div>
+              ))}
+              {calendarDays.map(day => {
+                const dateObj = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth(), day);
+                const isSelected = selectedDate.toDateString() === dateObj.toDateString();
+                return (
+                  <button
+                    key={day}
+                    onClick={() => {
+                      setSelectedDate(dateObj);
+                      setCalendarOpen(false);
+                    }}
+                    style={{
+                      height: '32px',
+                      borderRadius: '6px',
+                      backgroundColor: isSelected ? '#ff9900' : 'transparent',
+                      color: isSelected ? 'white' : '#0f1111',
+                      border: 'none',
+                      cursor: 'pointer',
+                      fontSize: '13px',
+                      fontWeight: 500,
+                      transition: 'all 0.2s ease'
+                    }}
+                    className="hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white"
+                  >
+                    {day}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Tabs */}
