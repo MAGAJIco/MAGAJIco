@@ -1,12 +1,17 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Search, Menu, Calendar, ChevronRight, Trophy, Clock, TrendingUp, Quote } from 'lucide-react';
+import { usePathname } from 'next/navigation';
+import Link from 'next/link';
+import { Search, Menu, Calendar, ChevronRight, Trophy, Clock, TrendingUp, Quote, Eye, Lock, Users } from 'lucide-react';
 
-export default function SoccerPredictionsHome() {
+export default function SoccerPredictionsHome({ params }: { params: { locale: string } }) {
+  const pathname = usePathname();
   const [activeTab, setActiveTab] = useState('1x2');
   const [selectedDate, setSelectedDate] = useState('26 November');
   const [currentQuoteIndex, setCurrentQuoteIndex] = useState(0);
+  
+  const isActive = (path: string) => pathname === `/${params.locale}${path}` || pathname === `/${params.locale}/`;
 
   const techQuotes = [
     { author: 'Larry Page', quote: 'Always deliver more than expected.', count: 2 },
@@ -220,38 +225,31 @@ export default function SoccerPredictionsHome() {
       {/* Bottom Navigation - iPhone Style */}
       <nav style={{ backgroundColor: '#f3f3f3', borderTopColor: '#d5d9d9', padding: '14px 0 env(safe-area-inset-bottom)' }} className="border-t dark:bg-[#1c1c1e] dark:border-[#38383a] fixed bottom-0 left-0 right-0 safe-area-inset-bottom backdrop-blur-xl bg-opacity-98 dark:bg-opacity-98 shadow-2xl">
         <div className="flex items-center justify-around max-w-2xl mx-auto">
-          <button className="flex flex-col items-center justify-center" style={{ color: '#ff9900', gap: '6px', padding: '8px 0' }}>
-            <Trophy className="w-9 h-9" style={{ filter: 'drop-shadow(0 3px 8px rgba(255,153,0,0.5))', strokeWidth: 1.5 }} />
-            <span style={{ fontSize: '11px', fontWeight: 500, letterSpacing: '0.2px' }}>All Games</span>
-          </button>
-          <button className="flex flex-col items-center justify-center relative" style={{ color: '#565959', gap: '6px', padding: '8px 0' }}>
+          <Link href={`/${params.locale}/`} className="flex flex-col items-center justify-center" style={{ color: isActive('/') ? '#ff9900' : '#565959', gap: '6px', padding: '8px 0', transition: 'color 0.3s ease' }}>
+            <Trophy className="w-9 h-9" style={{ filter: isActive('/') ? 'drop-shadow(0 3px 8px rgba(255,153,0,0.5))' : 'drop-shadow(0 2px 6px rgba(0,0,0,0.3))', strokeWidth: 1.5 }} />
+            <span style={{ fontSize: '11px', fontWeight: 500, letterSpacing: '0.2px' }}>Dashboard</span>
+          </Link>
+          <Link href={`/${params.locale}/predictions`} className="flex flex-col items-center justify-center" style={{ color: isActive('/predictions') ? '#ff9900' : '#565959', gap: '6px', padding: '8px 0', transition: 'color 0.3s ease' }}>
+            <Eye className="w-9 h-9" style={{ filter: isActive('/predictions') ? 'drop-shadow(0 3px 8px rgba(255,153,0,0.5))' : 'drop-shadow(0 2px 6px rgba(0,0,0,0.3))', strokeWidth: 1.5 }} />
+            <span style={{ fontSize: '11px', fontWeight: 500, letterSpacing: '0.2px' }}>Predictions</span>
+          </Link>
+          <Link href={`/${params.locale}/live`} className="flex flex-col items-center justify-center relative" style={{ color: isActive('/live') ? '#ff9900' : '#565959', gap: '6px', padding: '8px 0', transition: 'color 0.3s ease' }}>
             <div className="relative flex items-center justify-center">
-              <Clock className="w-9 h-9" style={{ filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.3))', strokeWidth: 1.5 }} />
+              <Clock className="w-9 h-9" style={{ filter: isActive('/live') ? 'drop-shadow(0 3px 8px rgba(255,153,0,0.5))' : 'drop-shadow(0 2px 6px rgba(0,0,0,0.3))', strokeWidth: 1.5 }} />
               <span style={{ backgroundColor: '#ff3b30', width: '20px', height: '20px', fontSize: '10px', fontWeight: 700 }} className="absolute -top-1.5 -right-1.5 text-white rounded-full flex items-center justify-center shadow-lg">
                 1
               </span>
             </div>
             <span style={{ fontSize: '11px', fontWeight: 500, letterSpacing: '0.2px' }}>LIVE</span>
-          </button>
-          <button className="flex flex-col items-center justify-center relative" style={{ color: '#565959', gap: '6px', padding: '8px 0' }}>
-            <div className="relative flex items-center justify-center">
-              <svg className="w-9 h-9" fill="currentColor" viewBox="0 0 24 24" style={{ filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.3))' }}>
-                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-              </svg>
-              <span style={{ backgroundColor: '#ff9900', width: '20px', height: '20px', fontSize: '10px', fontWeight: 700 }} className="absolute -top-1.5 -right-1.5 text-white rounded-full flex items-center justify-center shadow-lg">
-                3
-              </span>
-            </div>
-            <span style={{ fontSize: '11px', fontWeight: 500, letterSpacing: '0.2px' }}>Favorites</span>
-          </button>
-          <button className="flex flex-col items-center justify-center" style={{ color: '#565959', gap: '6px', padding: '8px 0' }}>
-            <TrendingUp className="w-9 h-9" style={{ filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.3))', strokeWidth: 1.5 }} />
-            <span style={{ fontSize: '11px', fontWeight: 500, letterSpacing: '0.2px' }}>News</span>
-          </button>
-          <button className="flex flex-col items-center justify-center" style={{ color: '#565959', gap: '6px', padding: '8px 0' }}>
-            <Trophy className="w-9 h-9" style={{ filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.3))', strokeWidth: 1.5 }} />
-            <span style={{ fontSize: '11px', fontWeight: 500, letterSpacing: '0.2px' }}>Leagues</span>
-          </button>
+          </Link>
+          <Link href={`/${params.locale}/secrets`} className="flex flex-col items-center justify-center" style={{ color: isActive('/secrets') ? '#ff9900' : '#565959', gap: '6px', padding: '8px 0', transition: 'color 0.3s ease' }}>
+            <Lock className="w-9 h-9" style={{ filter: isActive('/secrets') ? 'drop-shadow(0 3px 8px rgba(255,153,0,0.5))' : 'drop-shadow(0 2px 6px rgba(0,0,0,0.3))', strokeWidth: 1.5 }} />
+            <span style={{ fontSize: '11px', fontWeight: 500, letterSpacing: '0.2px' }}>Secrets</span>
+          </Link>
+          <Link href={`/${params.locale}/social`} className="flex flex-col items-center justify-center" style={{ color: isActive('/social') ? '#ff9900' : '#565959', gap: '6px', padding: '8px 0', transition: 'color 0.3s ease' }}>
+            <Users className="w-9 h-9" style={{ filter: isActive('/social') ? 'drop-shadow(0 3px 8px rgba(255,153,0,0.5))' : 'drop-shadow(0 2px 6px rgba(0,0,0,0.3))', strokeWidth: 1.5 }} />
+            <span style={{ fontSize: '11px', fontWeight: 500, letterSpacing: '0.2px' }}>Social</span>
+          </Link>
         </div>
       </nav>
 
