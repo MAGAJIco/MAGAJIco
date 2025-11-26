@@ -40,8 +40,8 @@ export default function LivePage({ params }: { params: Promise<{ locale: string 
   const fetchLive = async () => {
     try {
       setLoading(true);
-      // Use sport predictions endpoint
-      const response = await fetch(`/api/predictions/sport/soccer`);
+      // Use live predictions endpoint
+      const response = await fetch(`/api/live`);
       
       if (!response.ok) {
         console.error('API returned status:', response.status);
