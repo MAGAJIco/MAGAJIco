@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState } from 'react';
 import { Lightbulb, Brain, Sparkles, Zap, X, TrendingUp, Clock, Star, Menu, ChevronRight, Search, ChevronUp, ChevronDown, Eye, Lock, Settings, Mail } from 'lucide-react';
 
