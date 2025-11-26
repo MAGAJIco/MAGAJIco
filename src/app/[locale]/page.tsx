@@ -3,7 +3,7 @@
 import React, { useState, useEffect, use } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { Search, Menu, Calendar, ChevronRight, Trophy, Clock, TrendingUp, Quote, Eye, Lock, Users } from 'lucide-react';
+import { Search, Menu, Calendar, ChevronRight, Trophy, Clock, TrendingUp, Quote, Eye, Lock, Users, X, BarChart3, Zap } from 'lucide-react';
 
 export default function SoccerPredictionsHome({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = use(params);
@@ -11,6 +11,7 @@ export default function SoccerPredictionsHome({ params }: { params: Promise<{ lo
   const [activeTab, setActiveTab] = useState('1x2');
   const [selectedDate, setSelectedDate] = useState('26 November');
   const [currentQuoteIndex, setCurrentQuoteIndex] = useState(0);
+  const [menuOpen, setMenuOpen] = useState(false);
   
   const isActive = (path: string) => pathname === `/${locale}${path}` || pathname === `/${locale}/`;
 
@@ -103,9 +104,72 @@ export default function SoccerPredictionsHome({ params }: { params: Promise<{ lo
               <p style={{ fontSize: '11px', color: '#999', letterSpacing: '1px', marginTop: '2px', fontWeight: 500 }}>PREDICTIONS</p>
             </div>
           </div>
-          <Menu className="w-8 h-8" style={{ filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.4))', strokeWidth: 1.5 }} />
+          <button 
+            onClick={() => setMenuOpen(!menuOpen)}
+            className="cursor-pointer hover:opacity-80 transition-opacity"
+          >
+            <Menu className="w-8 h-8" style={{ filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.4))', strokeWidth: 1.5 }} />
+          </button>
         </div>
       </header>
+
+      {/* Hamburger Menu Overlay */}
+      {menuOpen && (
+        <>
+          {/* Backdrop */}
+          <div 
+            onClick={() => setMenuOpen(false)}
+            style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 40 }}
+          />
+          
+          {/* Menu Sidebar */}
+          <div style={{ position: 'fixed', top: 0, left: 0, width: '280px', height: '100vh', backgroundColor: '#131921', zIndex: 50, overflow: 'auto' }} className="text-white">
+            <div style={{ padding: '20px 24px', borderBottomColor: '#374151' }} className="border-b dark:border-[#38383a] flex items-center justify-between">
+              <h2 style={{ fontSize: '18px', fontWeight: 700 }}>Menu</h2>
+              <button onClick={() => setMenuOpen(false)} className="cursor-pointer hover:opacity-80 transition-opacity">
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <nav style={{ padding: '24px 16px' }} className="space-y-2">
+              <Link href={`/${locale}`} onClick={() => setMenuOpen(false)}>
+                <div className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isActive('') ? 'bg-orange-600' : 'hover:bg-gray-800'}`} style={{ cursor: 'pointer' }}>
+                  <Trophy className="w-5 h-5" style={{ color: '#ff9900' }} />
+                  <span style={{ fontSize: '15px', fontWeight: 500 }}>Dashboard</span>
+                </div>
+              </Link>
+
+              <Link href={`/${locale}/predictions`} onClick={() => setMenuOpen(false)}>
+                <div className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isActive('/predictions') ? 'bg-orange-600' : 'hover:bg-gray-800'}`} style={{ cursor: 'pointer' }}>
+                  <Eye className="w-5 h-5" style={{ color: '#ff9900' }} />
+                  <span style={{ fontSize: '15px', fontWeight: 500 }}>Predictions</span>
+                </div>
+              </Link>
+
+              <Link href={`/${locale}/live`} onClick={() => setMenuOpen(false)}>
+                <div className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isActive('/live') ? 'bg-orange-600' : 'hover:bg-gray-800'}`} style={{ cursor: 'pointer' }}>
+                  <Clock className="w-5 h-5" style={{ color: '#ff9900' }} />
+                  <span style={{ fontSize: '15px', fontWeight: 500 }}>LIVE</span>
+                </div>
+              </Link>
+
+              <Link href={`/${locale}/secrets`} onClick={() => setMenuOpen(false)}>
+                <div className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isActive('/secrets') ? 'bg-orange-600' : 'hover:bg-gray-800'}`} style={{ cursor: 'pointer' }}>
+                  <Lock className="w-5 h-5" style={{ color: '#ff9900' }} />
+                  <span style={{ fontSize: '15px', fontWeight: 500 }}>Secrets</span>
+                </div>
+              </Link>
+
+              <Link href={`/${locale}/social`} onClick={() => setMenuOpen(false)}>
+                <div className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isActive('/social') ? 'bg-orange-600' : 'hover:bg-gray-800'}`} style={{ cursor: 'pointer' }}>
+                  <Users className="w-5 h-5" style={{ color: '#ff9900' }} />
+                  <span style={{ fontSize: '15px', fontWeight: 500 }}>Social</span>
+                </div>
+              </Link>
+            </nav>
+          </div>
+        </>
+      )}
 
       {/* Tech Quote Banner - Amazon Orange */}
       <div style={{ background: 'linear-gradient(to right, #ff9900, #ffad33)', padding: '20px 24px' }} className="text-white overflow-hidden shadow-lg">
