@@ -86,25 +86,25 @@ export default function SoccerPredictionsHome() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#eaeded] dark:bg-black">
+    <div style={{ backgroundColor: '#eaeded', minHeight: '100vh' }} className="dark:bg-black">
       {/* Main Header Bar - Amazon Dark Navy / iPhone Dark */}
-      <header className="bg-[#131921] dark:bg-[#131921] text-white sticky top-0 z-50 shadow-md">
+      <header style={{ backgroundColor: '#131921' }} className="text-white sticky top-0 z-50 shadow-md">
         <div className="px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Trophy className="w-10 h-10 text-[#ff9900] drop-shadow-[0_2px_8px_rgba(255,153,0,0.5)]" />
+            <Trophy className="w-10 h-10" style={{ color: '#ff9900', filter: 'drop-shadow(0 2px 8px rgba(255,153,0,0.5))' }} />
             <div>
               <h1 className="text-xl font-bold tracking-tight">SOCCER</h1>
               <p className="text-xs text-gray-400">PREDICTIONS</p>
             </div>
           </div>
-          <Menu className="w-7 h-7 drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]" />
+          <Menu className="w-7 h-7" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
         </div>
       </header>
 
       {/* Tech Quote Banner - Amazon Orange */}
-      <div className="bg-gradient-to-r from-[#ff9900] to-[#ffad33] text-white px-4 py-3 overflow-hidden shadow-sm">
+      <div style={{ background: 'linear-gradient(to right, #ff9900, #ffad33)' }} className="text-white px-4 py-3 overflow-hidden shadow-sm">
         <div className="flex items-start gap-2 animate-fade-in">
-          <Quote className="w-5 h-5 mt-0.5 flex-shrink-0 drop-shadow-[0_2px_4px_rgba(255,255,255,0.3)]" />
+          <Quote className="w-5 h-5 mt-0.5 flex-shrink-0" style={{ filter: 'drop-shadow(0 2px 4px rgba(255,255,255,0.3))' }} />
           <div className="min-w-0">
             <p className="text-sm font-medium leading-tight line-clamp-2">
               "{techQuotes[currentQuoteIndex].quote}"
@@ -117,31 +117,31 @@ export default function SoccerPredictionsHome() {
       </div>
 
       {/* Date Selector - Softer Light / iPhone Dark */}
-      <div className="bg-[#f3f3f3] dark:bg-[#1c1c1e] border-b border-[#d5d9d9] dark:border-[#38383a] sticky top-[60px] z-40">
+      <div style={{ backgroundColor: '#f3f3f3', borderBottomColor: '#d5d9d9' }} className="border-b dark:bg-[#1c1c1e] dark:border-[#38383a] sticky top-[60px] z-40">
         <div className="px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Calendar className="w-6 h-6 text-[#565959] dark:text-[#98989d] drop-shadow-[0_2px_4px_rgba(0,0,0,0.2)]" />
-            <span className="text-sm text-[#565959] dark:text-[#98989d]">Select date</span>
+            <Calendar className="w-6 h-6" style={{ color: '#565959', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))' }} />
+            <span className="text-sm" style={{ color: '#565959' }}>Select date</span>
           </div>
           <div className="flex items-center gap-2 bg-white dark:bg-[#2c2c2e] px-4 py-2 rounded-lg shadow-sm">
-            <span className="font-semibold text-[#0f1111] dark:text-white">{selectedDate}</span>
-            <ChevronRight className="w-5 h-5 text-[#565959] dark:text-[#98989d] drop-shadow-[0_2px_4px_rgba(0,0,0,0.2)]" />
+            <span className="font-semibold" style={{ color: '#0f1111' }}>26 November</span>
+            <ChevronRight className="w-5 h-5" style={{ color: '#565959', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))' }} />
           </div>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="bg-[#f3f3f3] dark:bg-[#1c1c1e] border-b border-[#d5d9d9] dark:border-[#38383a] overflow-x-auto">
+      <div style={{ backgroundColor: '#f3f3f3', borderBottomColor: '#d5d9d9' }} className="border-b dark:bg-[#1c1c1e] dark:border-[#38383a] overflow-x-auto">
         <div className="flex gap-4 px-4 py-3">
           {tabs.map(tab => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`whitespace-nowrap pb-2 px-2 font-medium text-sm transition-colors border-b-2 ${
-                activeTab === tab.id
-                  ? 'text-[#ff9900] dark:text-[#ff9900] border-[#ff9900]'
-                  : 'text-[#565959] dark:text-[#98989d] border-transparent'
-              }`}
+              style={{
+                color: activeTab === tab.id ? '#ff9900' : '#565959',
+                borderBottomColor: activeTab === tab.id ? '#ff9900' : 'transparent'
+              }}
+              className="whitespace-nowrap pb-2 px-2 font-medium text-sm transition-colors border-b-2 dark:text-gray-400"
             >
               {tab.label}
             </button>
@@ -150,13 +150,14 @@ export default function SoccerPredictionsHome() {
       </div>
 
       {/* Search Bar */}
-      <div className="bg-[#f3f3f3] dark:bg-[#1c1c1e] px-4 py-3 border-b border-[#d5d9d9] dark:border-[#38383a]">
+      <div style={{ backgroundColor: '#f3f3f3', borderBottomColor: '#d5d9d9' }} className="border-b dark:bg-[#1c1c1e] dark:border-[#38383a] px-4 py-3">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-6 h-6 text-[#565959] dark:text-[#98989d] drop-shadow-[0_2px_4px_rgba(0,0,0,0.2)]" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-6 h-6" style={{ color: '#565959', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))' }} />
           <input
             type="text"
             placeholder="Search game..."
-            className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-[#2c2c2e] rounded-lg text-sm text-[#0f1111] dark:text-white placeholder-[#565959] dark:placeholder-[#98989d] focus:outline-none focus:ring-2 focus:ring-[#ff9900] shadow-sm"
+            style={{ color: '#0f1111', placeholderColor: '#565959' }}
+            className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-[#2c2c2e] rounded-lg text-sm dark:text-white focus:outline-none focus:ring-2 shadow-sm"
           />
         </div>
       </div>
@@ -166,40 +167,41 @@ export default function SoccerPredictionsHome() {
         {matches.map((league, idx) => (
           <div key={idx} className="mb-2">
             {/* League Header - Subtle Gray / iPhone Dark */}
-            <div className="bg-[#d5d9d9] dark:bg-[#2c2c2e] px-4 py-2.5 flex items-center gap-2">
+            <div style={{ backgroundColor: '#d5d9d9' }} className="dark:bg-[#2c2c2e] px-4 py-2.5 flex items-center gap-2">
               <span className="text-xl">{league.flag}</span>
-              <span className="text-xs font-semibold text-[#0f1111] dark:text-[#e5e5ea] uppercase tracking-wide">
+              <span className="text-xs font-semibold uppercase tracking-wide" style={{ color: '#0f1111' }}>
                 {league.league}
               </span>
             </div>
             {/* Games */}
-            <div className="bg-[#f3f3f3] dark:bg-black">
+            <div style={{ backgroundColor: '#f3f3f3' }} className="dark:bg-black">
               {league.games.map((game, gidx) => (
                 <div
                   key={gidx}
-                  className="flex items-center justify-between px-4 py-3 border-b border-[#d5d9d9] dark:border-[#38383a] hover:bg-[#eaeded] dark:hover:bg-[#1c1c1e] transition-colors"
+                  style={{ borderBottomColor: '#d5d9d9' }}
+                  className="flex items-center justify-between px-4 py-3 border-b dark:border-[#38383a] dark:hover:bg-[#1c1c1e] transition-colors"
                 >
                   <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <div className="flex items-center justify-center w-12 text-sm font-medium text-[#565959] dark:text-[#98989d]">
-                      <Clock className="w-5 h-5 mr-1 drop-shadow-[0_2px_4px_rgba(0,0,0,0.2)]" />
+                    <div className="flex items-center justify-center w-12 text-sm font-medium" style={{ color: '#565959' }}>
+                      <Clock className="w-5 h-5 mr-1" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))' }} />
                       {game.time}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="font-semibold text-sm text-[#0f1111] dark:text-white truncate">
+                      <div className="font-semibold text-sm dark:text-white truncate" style={{ color: '#0f1111' }}>
                         {game.home}
                       </div>
                       <div className="flex items-center gap-2 mt-0.5">
-                        <span className="text-xs text-[#565959] dark:text-[#98989d] px-2 py-0.5 bg-white dark:bg-[#2c2c2e] rounded">
+                        <span className="text-xs px-2 py-0.5 bg-white dark:bg-[#2c2c2e] rounded" style={{ color: '#565959' }}>
                           vs
                         </span>
-                        <span className="text-sm text-[#565959] dark:text-[#98989d] truncate">
+                        <span className="text-sm truncate" style={{ color: '#565959' }}>
                           {game.away}
                         </span>
                       </div>
                     </div>
                   </div>
                   {/* Prediction Badge - Amazon Orange */}
-                  <div className="flex items-center justify-center w-10 h-10 bg-[#ff9900] dark:bg-[#ff9900] text-white rounded-lg font-bold text-lg ml-2 flex-shrink-0 shadow-md">
+                  <div style={{ backgroundColor: '#ff9900' }} className="flex items-center justify-center w-10 h-10 text-white rounded-lg font-bold text-lg ml-2 flex-shrink-0 shadow-md">
                     {game.prediction}
                   </div>
                 </div>
@@ -210,38 +212,38 @@ export default function SoccerPredictionsHome() {
       </div>
 
       {/* Bottom Navigation - iPhone Style */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-[#f3f3f3] dark:bg-[#1c1c1e] border-t border-[#d5d9d9] dark:border-[#38383a] px-4 py-2 safe-area-inset-bottom backdrop-blur-lg bg-opacity-95 dark:bg-opacity-95 shadow-lg">
+      <nav style={{ backgroundColor: '#f3f3f3', borderTopColor: '#d5d9d9' }} className="border-t dark:bg-[#1c1c1e] dark:border-[#38383a] fixed bottom-0 left-0 right-0 px-4 py-2 safe-area-inset-bottom backdrop-blur-lg bg-opacity-95 dark:bg-opacity-95 shadow-lg">
         <div className="flex items-center justify-around max-w-2xl mx-auto">
-          <button className="flex flex-col items-center gap-1 text-[#ff9900] dark:text-[#ff9900]">
-            <Trophy className="w-7 h-7 drop-shadow-[0_2px_6px_rgba(255,153,0,0.4)]" />
+          <button className="flex flex-col items-center gap-1" style={{ color: '#ff9900' }}>
+            <Trophy className="w-7 h-7" style={{ filter: 'drop-shadow(0 2px 6px rgba(255,153,0,0.4))' }} />
             <span className="text-xs font-medium">All Games</span>
           </button>
-          <button className="flex flex-col items-center gap-1 text-[#565959] dark:text-[#98989d]">
+          <button className="flex flex-col items-center gap-1" style={{ color: '#565959' }}>
             <div className="relative">
-              <Clock className="w-7 h-7 drop-shadow-[0_2px_6px_rgba(0,0,0,0.3)]" />
-              <span className="absolute -top-1 -right-1 bg-[#ff3b30] text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-bold shadow-md">
+              <Clock className="w-7 h-7" style={{ filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.3))' }} />
+              <span style={{ backgroundColor: '#ff3b30' }} className="absolute -top-1 -right-1 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-bold shadow-md">
                 1
               </span>
             </div>
             <span className="text-xs">LIVE</span>
           </button>
-          <button className="flex flex-col items-center gap-1 text-[#565959] dark:text-[#98989d]">
+          <button className="flex flex-col items-center gap-1" style={{ color: '#565959' }}>
             <div className="relative">
-              <svg className="w-7 h-7 drop-shadow-[0_2px_6px_rgba(0,0,0,0.3)]" fill="currentColor" viewBox="0 0 24 24">
+              <svg className="w-7 h-7" fill="currentColor" viewBox="0 0 24 24" style={{ filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.3))' }}>
                 <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
               </svg>
-              <span className="absolute -top-1 -right-1 bg-[#ff9900] text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-bold shadow-md">
+              <span style={{ backgroundColor: '#ff9900' }} className="absolute -top-1 -right-1 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-bold shadow-md">
                 3
               </span>
             </div>
             <span className="text-xs">Favorites</span>
           </button>
-          <button className="flex flex-col items-center gap-1 text-[#565959] dark:text-[#98989d]">
-            <TrendingUp className="w-7 h-7 drop-shadow-[0_2px_6px_rgba(0,0,0,0.3)]" />
+          <button className="flex flex-col items-center gap-1" style={{ color: '#565959' }}>
+            <TrendingUp className="w-7 h-7" style={{ filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.3))' }} />
             <span className="text-xs">News</span>
           </button>
-          <button className="flex flex-col items-center gap-1 text-[#565959] dark:text-[#98989d]">
-            <Trophy className="w-7 h-7 drop-shadow-[0_2px_6px_rgba(0,0,0,0.3)]" />
+          <button className="flex flex-col items-center gap-1" style={{ color: '#565959' }}>
+            <Trophy className="w-7 h-7" style={{ filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.3))' }} />
             <span className="text-xs">Leagues</span>
           </button>
         </div>
