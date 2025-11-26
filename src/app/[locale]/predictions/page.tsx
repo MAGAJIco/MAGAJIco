@@ -259,9 +259,9 @@ export default function PredictionsPage({ params }: { params: Promise<{ locale: 
         </div>
       </div>
 
-      {/* All Predictions Section */}
+      {/* All Predictions Section - Grouped by League */}
       <div style={{ backgroundColor: '#eaeded', padding: '32px 24px' }} className="dark:bg-black">
-        <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#0f1111', marginBottom: '20px', letterSpacing: '0.5px' }} className="dark:text-white">All Predictions</h2>
+        <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#0f1111', marginBottom: '20px', letterSpacing: '0.5px' }} className="dark:text-white">All Predictions by League</h2>
         {loading ? (
           <div style={{ textAlign: 'center', padding: '40px', color: '#565959' }} className="dark:text-gray-400">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600"></div>
@@ -269,41 +269,52 @@ export default function PredictionsPage({ params }: { params: Promise<{ locale: 
           </div>
         ) : allPredictions.length > 0 ? (
           <div className="space-y-4">
-            {allPredictions.map((pred, idx) => (
-              <div key={idx} style={{ backgroundColor: 'white', borderRadius: '12px', padding: '16px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', border: '1px solid #d5d9d9' }} className="dark:bg-[#2c2c2e] dark:border-[#38383a]">
-                <div className="flex items-start justify-between">
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: '14px', fontWeight: 600, color: '#0f1111', marginBottom: '8px' }} className="dark:text-white">
-                      {pred.home_team} vs {pred.away_team}
-                    </div>
-                    <div style={{ fontSize: '12px', color: '#565959', marginBottom: '8px' }} className="dark:text-gray-400">
-                      {pred.league}
-                    </div>
-                    <div className="flex gap-2 flex-wrap">
-                      {pred.prediction_1x2 && (
-                        <span style={{ backgroundColor: '#667eea', color: 'white', padding: '4px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: 600 }}>
-                          1X2: {pred.prediction_1x2}
-                        </span>
-                      )}
-                      {pred.prediction_over_under && (
-                        <span style={{ backgroundColor: '#764ba2', color: 'white', padding: '4px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: 600 }}>
-                          O/U: {pred.prediction_over_under}
-                        </span>
-                      )}
-                      {pred.prediction_btts && (
-                        <span style={{ backgroundColor: '#10b981', color: 'white', padding: '4px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: 600 }}>
-                          BTTS: {pred.prediction_btts}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <div style={{ marginLeft: '16px', textAlign: 'right' }}>
-                    {pred.confidence && (
-                      <div style={{ fontSize: '12px', color: '#ff9900', fontWeight: 700 }}>
-                        {pred.confidence}% confidence
+            {allPredictions.map((league, idx) => (
+              <div key={idx}>
+                {/* League Header */}
+                <div style={{ backgroundColor: '#d5d9d9', padding: '12px 16px', gap: '12px', marginBottom: '8px', borderRadius: '8px' }} className="dark:bg-[#2c2c2e] flex items-center">
+                  <span style={{ fontSize: '18px' }}>⚽</span>
+                  <span style={{ fontSize: '12px', fontWeight: 600, color: '#0f1111', letterSpacing: '0.5px' }} className="dark:text-white uppercase">
+                    {league.league}
+                  </span>
+                </div>
+                {/* Predictions Grid */}
+                <div className="grid gap-3">
+                  {league.games && league.games.map((pred: any, pidx: number) => (
+                    <div key={pidx} style={{ backgroundColor: 'white', borderRadius: '12px', padding: '14px', boxShadow: '0 1px 4px rgba(0,0,0,0.08)', border: '1px solid #d5d9d9' }} className="dark:bg-[#2c2c2e] dark:border-[#38383a]">
+                      <div className="flex items-start justify-between gap-3">
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontSize: '13px', fontWeight: 600, color: '#0f1111', marginBottom: '6px' }} className="dark:text-white">
+                            {pred.home_team} vs {pred.away_team}
+                          </div>
+                          <div className="flex gap-2 flex-wrap">
+                            {pred.prediction_1x2 && (
+                              <span style={{ backgroundColor: '#667eea', color: 'white', padding: '3px 8px', borderRadius: '4px', fontSize: '10px', fontWeight: 600 }}>
+                                1X2: {pred.prediction_1x2}
+                              </span>
+                            )}
+                            {pred.prediction_over_under && (
+                              <span style={{ backgroundColor: '#764ba2', color: 'white', padding: '3px 8px', borderRadius: '4px', fontSize: '10px', fontWeight: 600 }}>
+                                O/U: {pred.prediction_over_under}
+                              </span>
+                            )}
+                            {pred.prediction_btts && (
+                              <span style={{ backgroundColor: '#10b981', color: 'white', padding: '3px 8px', borderRadius: '4px', fontSize: '10px', fontWeight: 600 }}>
+                                BTTS: {pred.prediction_btts}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        {pred.confidence && (
+                          <div style={{ textAlign: 'right', minWidth: '60px' }}>
+                            <div style={{ fontSize: '12px', color: '#ff9900', fontWeight: 700 }}>
+                              {pred.confidence}%
+                            </div>
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             ))}
