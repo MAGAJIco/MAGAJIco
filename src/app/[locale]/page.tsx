@@ -1,608 +1,473 @@
-'use client';
+'use client',
+import React, { useState } from 'react';
+import { Lightbulb, Brain, Sparkles, Zap, X, TrendingUp, Clock, Star, Menu, ChevronRight, Search, ChevronUp, ChevronDown, Eye, Lock, Settings, Mail } from 'lucide-react';
 
-import React, { useState, useEffect, use } from 'react';
-import { usePathname } from 'next/navigation';
-import Link from 'next/link';
-import { Search, Menu, Calendar, ChevronRight, ChevronLeft, Trophy, Clock, TrendingUp, Quote, Eye, Lock, Users, X, BarChart3, Zap, Flame, Target, TrendingDown, Heart, Settings, Mail, ChevronUp, ChevronDown } from 'lucide-react';
+const COMPONENTS = [
+  'Predictions Dashboard',
+  'Live Matches Feed',
+  'ML Report Dashboard',
+  'User Profile',
+  'Settings Page',
+  'Leaderboard',
+  'Odds Display',
+  'Betting Recommendations',
+  'Social Features',
+  'Mobile Experience',
+];
 
-export default function SoccerPredictionsHome({ params }: { params: Promise<{ locale: string }> }) {
-  const { locale } = use(params);
-  const pathname = usePathname();
-  const [selectedDate, setSelectedDate] = useState(new Date(2025, 10, 26));
-  const [currentQuoteIndex, setCurrentQuoteIndex] = useState(0);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [calendarOpen, setCalendarOpen] = useState(false);
-  const [calendarMonth, setCalendarMonth] = useState(new Date(2025, 10));
-  const [results, setResults] = useState<any[]>([]);
-  const [resultsLoading, setResultsLoading] = useState(false);
-  const [liveMatches, setLiveMatches] = useState<any[]>([]);
-  const [liveLoading, setLiveLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  
-  const isActive = (path: string) => pathname === `/${locale}${path}` || pathname === `/${locale}/`;
+const AIBrainstormingModal = ({ component, isOpen, onClose }) => {
+  const [context, setContext] = useState('');
+  const [ideas, setIdeas] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  // Fetch live matches from soccer scraper
-  useEffect(() => {
-    const fetchLiveMatches = async () => {
-      try {
-        setLiveLoading(true);
-        const response = await fetch('/api/soccer');
-        if (!response.ok) return;
-        const contentType = response.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json')) return;
-        const data = await response.json();
-        setLiveMatches(data.matches || []);
-      } catch (err) {
-        console.error('Error fetching live matches:', err);
-      } finally {
-        setLiveLoading(false);
-      }
-    };
-    fetchLiveMatches();
-    const interval = setInterval(fetchLiveMatches, 30000); // Refresh every 30s
-    return () => clearInterval(interval);
-  }, []);
-
-  // Fetch results from secrets endpoint
-  useEffect(() => {
-    const fetchResults = async () => {
-      try {
-        setResultsLoading(true);
-        const response = await fetch('/api/secrets');
-        if (!response.ok) return;
-        const contentType = response.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json')) return;
-        const data = await response.json();
-        setResults(data.results_by_date || []);
-      } catch (err) {
-        console.error('Error fetching results:', err);
-      } finally {
-        setResultsLoading(false);
-      }
-    };
-    fetchResults();
-  }, []);
-
-  const formatDate = (date: Date) => {
-    const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-    return `${date.getDate()} ${months[date.getMonth()]}`;
+  const generateIdeas = () => {
+    setLoading(true);
+    setTimeout(() => {
+      setIdeas([
+        {
+          title: 'Real-time Collaboration',
+          description: `Enable users to share ${component} insights with teams in real-time`,
+          priority: 'High',
+          effort: 'Medium',
+          aiScore: 92,
+        },
+        {
+          title: 'Smart Notifications',
+          description: 'AI-powered alerts based on user behavior patterns',
+          priority: 'Medium',
+          effort: 'Low',
+          aiScore: 88,
+        },
+        {
+          title: 'Predictive Analytics',
+          description: 'Machine learning models to forecast trends',
+          priority: 'High',
+          effort: 'High',
+          aiScore: 95,
+        },
+        {
+          title: 'Personalization Engine',
+          description: 'Adaptive UI based on user preferences and usage',
+          priority: 'Medium',
+          effort: 'Medium',
+          aiScore: 85,
+        },
+        {
+          title: 'Voice Commands',
+          description: 'Hands-free interaction with natural language processing',
+          priority: 'Low',
+          effort: 'High',
+          aiScore: 78,
+        },
+      ]);
+      setLoading(false);
+    }, 1500);
   };
 
-  const getDaysInMonth = (date: Date) => {
-    return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
-  };
-
-  const getFirstDayOfMonth = (date: Date) => {
-    return new Date(date.getFullYear(), date.getMonth(), 1).getDay();
-  };
-
-  const getIgboMarketDay = (date: Date) => {
-    const igboDays = ['Eke', 'Oye', 'Afo', 'Nkwo'];
-    const epoch = new Date(2025, 10, 24); // November 24, 2025 is Eke
-    const diffTime = Math.abs(date.getTime() - epoch.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return igboDays[diffDays % 4];
-  };
-
-  const calendarDays = Array.from({ length: getDaysInMonth(calendarMonth) }, (_, i) => i + 1);
-  const emptyDays = Array.from({ length: getFirstDayOfMonth(calendarMonth) }, () => null);
-
-  const techQuotes = [
-    { author: 'Larry Page', quote: 'Always deliver more than expected.', count: 2 },
-    { author: 'Larry Page', quote: 'If you\'re changing the world, you\'re working on important things.', count: 2 },
-    { author: 'Jeff Bezos', quote: 'We see our customers as invited guests to a party.', count: 3 },
-    { author: 'Jeff Bezos', quote: 'If you double the number of experiments you do per year, you\'re going to double your inventiveness.', count: 3 },
-    { author: 'Jeff Bezos', quote: 'The best customer service is if the customer doesn\'t need to call you.', count: 3 },
-    { author: 'Mark Zuckerberg', quote: 'Move fast and break things.', count: 2 },
-    { author: 'Mark Zuckerberg', quote: 'The biggest risk is not taking any risk.', count: 2 },
-    { author: 'Elon Musk', quote: 'When something is important enough, you do it even if the odds are not in your favor.', count: 1 },
-    { author: 'Jack Ma', quote: 'Today is hard, tomorrow will be worse, but the day after tomorrow will be sunshine.', count: 2 },
-    { author: 'Jack Ma', quote: 'If you don\'t give up, you still have a chance.', count: 2 }
-  ];
-
-  const competitions = [
-    { name: 'Champions League', flag: '🇪🇺', region: 'EUROPE', count: 9 },
-    { name: 'Primera División', flag: '🇦🇩', region: 'ANDORRA', count: 2 },
-    { name: 'Girabola', flag: '🇦🇴', region: 'ANGOLA', count: 1 },
-    { name: 'First League', flag: '🇦🇲', region: 'ARMENIA', count: 5 },
-    { name: 'AFC Champions League', flag: '🌏', region: 'ASIA', count: 2 },
-    { name: 'AFC Champions League 2', flag: '🌏', region: 'ASIA', count: 6 }
-  ];
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentQuoteIndex((prev) => (prev + 1) % techQuotes.length);
-    }, 6000);
-    return () => clearInterval(interval);
-  }, []);
+  if (!isOpen) return null;
 
   return (
-    <div style={{ backgroundColor: '#eaeded', minHeight: '100vh' }} className="dark:bg-black">
-      {/* Main Header Bar - Amazon Dark Navy / iPhone Dark */}
-      <header style={{ backgroundColor: '#131921' }} className="text-white sticky top-0 z-50 shadow-lg">
-        <div style={{ padding: '18px 24px' }} className="flex items-center justify-between">
-          <div className="flex items-center" style={{ gap: '18px' }}>
-            <Trophy className="w-12 h-12" style={{ color: '#ff9900', filter: 'drop-shadow(0 3px 12px rgba(255,153,0,0.6))', strokeWidth: 1.5 }} />
-            <div>
-              <h1 style={{ letterSpacing: '0.8px', fontSize: '24px', fontWeight: 700 }}>SOCCER</h1>
-              <p style={{ fontSize: '11px', color: '#999', letterSpacing: '1px', marginTop: '2px', fontWeight: 500 }}>PREDICTIONS</p>
-            </div>
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+        <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-6 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Brain className="w-6 h-6 text-purple-500" />
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+              AI Ideas: {component}
+            </h2>
           </div>
-          <button 
-            onClick={() => setMenuOpen(!menuOpen)}
-            className="cursor-pointer hover:opacity-80 transition-opacity"
+          <button
+            onClick={onClose}
+            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
           >
-            <Menu className="w-8 h-8" style={{ filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.4))', strokeWidth: 1.5 }} />
-          </button>
-        </div>
-      </header>
-
-      {/* Hamburger Menu Overlay */}
-      {menuOpen && (
-        <>
-          {/* Backdrop */}
-          <div 
-            onClick={() => setMenuOpen(false)}
-            style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 40 }}
-          />
-          
-          {/* Menu Sidebar - Google Style */}
-          <div style={{ position: 'fixed', top: '80px', left: '0px', width: '240px', height: 'calc(100vh - 180px)', backgroundColor: '#f3f3f3', zIndex: 50, overflow: 'auto', animation: 'slideInLeft 0.3s ease-out', borderRadius: '20px' }} className="dark:bg-[#1c1c1e]">
-            {/* Search Box - Google "Find in Page" Style */}
-            <div style={{ padding: '12px 16px', borderBottomColor: '#d5d9d9', display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: '#ffffff' }} className="border-b dark:border-[#38383a] dark:bg-[#2c2c2e]">
-              <Search className="w-4 h-4" style={{ color: '#565959', flexShrink: 0, strokeWidth: 2 }} />
-              <input
-                type="text"
-                placeholder="Search games..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                style={{ color: '#0f1111', fontSize: '14px', flex: 1, border: 'none', outline: 'none', backgroundColor: 'transparent', padding: '0px' }}
-                className="dark:text-white"
-              />
-              <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <button className="p-1 hover:opacity-70 transition-opacity cursor-pointer">
-                  <ChevronUp className="w-4 h-4" style={{ color: '#565959', strokeWidth: 2 }} />
-                </button>
-                <button className="p-1 hover:opacity-70 transition-opacity cursor-pointer">
-                  <ChevronDown className="w-4 h-4" style={{ color: '#565959', strokeWidth: 2 }} />
-                </button>
-                <button onClick={() => { setSearchQuery(''); setMenuOpen(false); }} className="p-1 hover:opacity-70 transition-opacity cursor-pointer">
-                  <X className="w-4 h-4" style={{ color: '#565959', strokeWidth: 2 }} />
-                </button>
-              </div>
-            </div>
-            
-            <nav style={{ padding: '24px 12px' }} className="space-y-0">
-              <Link href={`/${locale}/predictions`} onClick={() => setMenuOpen(false)}>
-                <div className={`flex items-center gap-6 px-6 py-4 rounded-lg transition-colors ${isActive('/predictions') ? 'bg-orange-100 dark:bg-orange-600' : 'hover:bg-gray-100 dark:hover:bg-gray-800'}`} style={{ cursor: 'pointer' }}>
-                  <Eye className="w-6 h-6" style={{ color: isActive('/predictions') ? '#ff9900' : '#565959', flexShrink: 0 }} />
-                  <span style={{ fontSize: '15px', fontWeight: 500, color: isActive('/predictions') ? '#ff9900' : '#0f1111' }} className="dark:text-white">Predictions</span>
-                </div>
-              </Link>
-
-              <Link href={`/${locale}/secrets`} onClick={() => setMenuOpen(false)}>
-                <div className={`flex items-center gap-6 px-6 py-4 rounded-lg transition-colors ${isActive('/secrets') ? 'bg-orange-100 dark:bg-orange-600' : 'hover:bg-gray-100 dark:hover:bg-gray-800'}`} style={{ cursor: 'pointer' }}>
-                  <Lock className="w-6 h-6" style={{ color: isActive('/secrets') ? '#ff9900' : '#565959', flexShrink: 0 }} />
-                  <span style={{ fontSize: '15px', fontWeight: 500, color: isActive('/secrets') ? '#ff9900' : '#0f1111' }} className="dark:text-white">Secret</span>
-                </div>
-              </Link>
-
-              <Link href={`/${locale}/live`} onClick={() => setMenuOpen(false)}>
-                <div className={`flex items-center gap-6 px-6 py-4 rounded-lg transition-colors ${isActive('/live') ? 'bg-orange-100 dark:bg-orange-600' : 'hover:bg-gray-100 dark:hover:bg-gray-800'}`} style={{ cursor: 'pointer' }}>
-                  <Clock className="w-6 h-6" style={{ color: isActive('/live') ? '#ff9900' : '#565959', flexShrink: 0 }} />
-                  <span style={{ fontSize: '15px', fontWeight: 500, color: isActive('/live') ? '#ff9900' : '#0f1111' }} className="dark:text-white">Live</span>
-                </div>
-              </Link>
-
-              <Link href={`/${locale}/contact`} onClick={() => setMenuOpen(false)}>
-                <div className={`flex items-center gap-6 px-6 py-4 rounded-lg transition-colors ${isActive('/contact') ? 'bg-orange-100 dark:bg-orange-600' : 'hover:bg-gray-100 dark:hover:bg-gray-800'}`} style={{ cursor: 'pointer' }}>
-                  <Mail className="w-6 h-6" style={{ color: isActive('/contact') ? '#ff9900' : '#565959', flexShrink: 0 }} />
-                  <span style={{ fontSize: '15px', fontWeight: 500, color: isActive('/contact') ? '#ff9900' : '#0f1111' }} className="dark:text-white">Contact</span>
-                </div>
-              </Link>
-
-              <div style={{ borderTopColor: '#d5d9d9', marginTop: '20px', paddingTop: '20px' }} className="border-t dark:border-[#38383a]">
-                <Link href={`/${locale}`} onClick={() => setMenuOpen(false)}>
-                  <div className="flex items-center gap-6 px-6 py-4 rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-gray-800" style={{ cursor: 'pointer' }}>
-                    <Settings className="w-6 h-6" style={{ color: '#565959', flexShrink: 0 }} />
-                    <span style={{ fontSize: '15px', fontWeight: 500, color: '#0f1111' }} className="dark:text-white">Settings</span>
-                  </div>
-                </Link>
-              </div>
-            </nav>
-          </div>
-        </>
-      )}
-
-      {/* Tech Quote Banner - Amazon Orange */}
-      <div style={{ background: 'linear-gradient(to right, #ff9900, #ffad33)', padding: '20px 24px' }} className="text-white overflow-hidden shadow-lg">
-        <div className="flex items-start" style={{ gap: '14px' }}>
-          <Quote className="w-6 h-6 flex-shrink-0" style={{ marginTop: '4px', filter: 'drop-shadow(0 2px 6px rgba(255,255,255,0.4))', strokeWidth: 1.5 }} />
-          <div className="min-w-0">
-            <p style={{ fontSize: '16px', fontWeight: 500, lineHeight: '1.5', marginBottom: '8px' }}>
-              "{techQuotes[currentQuoteIndex].quote}"
-            </p>
-            <p style={{ fontSize: '13px', opacity: 0.95, fontWeight: 400 }}>
-              — {techQuotes[currentQuoteIndex].author}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Date Selector - Softer Light / iPhone Dark */}
-      <div style={{ backgroundColor: '#f3f3f3', borderBottomColor: '#d5d9d9', padding: '16px 24px', position: 'relative' }} className="border-b dark:bg-[#1c1c1e] dark:border-[#38383a]">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center" style={{ gap: '12px' }}>
-            <Calendar className="w-7 h-7" style={{ color: '#565959', filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.15))', strokeWidth: 1.5 }} />
-            <span style={{ fontSize: '15px', color: '#565959', fontWeight: 500 }}>View calendar</span>
-          </div>
-          <button 
-            onClick={() => setCalendarOpen(!calendarOpen)}
-            className="flex items-center gap-3 bg-white dark:bg-[#2c2c2e] rounded-xl shadow-md hover:shadow-lg transition-all" 
-            style={{ padding: '12px 16px', cursor: 'pointer', border: 'none' }}
-          >
-            <span style={{ fontSize: '15px', fontWeight: 600, color: '#0f1111' }} className="dark:text-white">{formatDate(selectedDate)}</span>
-            <ChevronRight className="w-5 h-5" style={{ color: '#565959', filter: 'drop-shadow(0 1px 4px rgba(0,0,0,0.15))', strokeWidth: 2.5, transform: calendarOpen ? 'rotate(90deg)' : 'rotate(0deg)', transition: 'transform 0.3s ease' }} />
+            <X className="w-5 h-5 text-gray-500" />
           </button>
         </div>
 
-        {/* Date List Picker - 4 Days Ahead */}
-        {calendarOpen && (
-          <div style={{ position: 'absolute', top: '100%', right: '24px', marginTop: '12px', backgroundColor: 'white', borderRadius: '12px', boxShadow: '0 8px 24px rgba(0,0,0,0.15)', zIndex: 50, minWidth: '280px', overflow: 'hidden' }} className="dark:bg-[#2c2c2e]">
-            {(() => {
-              const today = new Date();
-              today.setHours(0, 0, 0, 0);
-              const dates = [];
-              for (let i = 0; i <= 4; i++) {
-                const date = new Date(today);
-                date.setDate(date.getDate() + i);
-                dates.push(date);
-              }
-              return dates.map((dateObj) => {
-                const isSelected = selectedDate.toDateString() === dateObj.toDateString();
-                const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-                const dateStr = `${dateObj.getDate()} ${monthNames[dateObj.getMonth()]}`;
-                return (
-                  <button
-                    key={dateObj.toDateString()}
-                    onClick={() => {
-                      setSelectedDate(dateObj);
-                      setCalendarOpen(false);
-                    }}
-                    style={{
-                      width: '100%',
-                      padding: '16px 20px',
-                      backgroundColor: isSelected ? '#ff9900' : 'transparent',
-                      color: isSelected ? 'white' : '#565959',
-                      border: 'none',
-                      cursor: 'pointer',
-                      fontSize: '15px',
-                      fontWeight: 500,
-                      textAlign: 'center',
-                      transition: 'all 0.2s ease',
-                      borderBottomColor: '#d5d9d9'
-                    }}
-                    className="dark:hover:bg-gray-700 border-b dark:border-[#38383a] hover:bg-gray-50 dark:text-white"
-                  >
-                    {dateStr}
-                  </button>
-                );
-              });
-            })()}
+        <div className="p-6 space-y-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Additional Context (Optional)
+            </label>
+            <textarea
+              value={context}
+              onChange={(e) => setContext(e.target.value)}
+              placeholder="e.g., Focus on mobile usability, improve performance, add social features..."
+              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              rows="3"
+            />
           </div>
-        )}
-      </div>
 
-      {/* App Grid - Google-style Feature Tiles */}
-      <div style={{ backgroundColor: '#eaeded', padding: '32px 24px', position: 'relative', zIndex: 1 }} className="dark:bg-black">
-        <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#0f1111', marginBottom: '20px', letterSpacing: '0.5px' }} className="dark:text-white">Quick Features</h2>
-        <div className="grid grid-cols-3 gap-4" style={{ maxWidth: '100%' }}>
-          {/* Trending Predictions */}
-          <Link href={`/${locale}/live`}>
-            <div 
-              style={{ 
-                backgroundColor: 'white', 
-                borderRadius: '12px', 
-                padding: '18px 16px', 
-                cursor: 'pointer',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-                transition: 'all 0.3s ease',
-                border: '1px solid #d5d9d9'
-              }}
-              className="dark:bg-[#2c2c2e] dark:border-[#38383a] hover:shadow-xl hover:scale-105"
-            >
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', textAlign: 'center' }}>
-                <Flame className="w-8 h-8" style={{ color: '#ff9900' }} />
-                <span style={{ fontSize: '13px', fontWeight: 600, color: '#0f1111' }} className="dark:text-white">Trending</span>
-                <span style={{ fontSize: '11px', color: '#565959' }} className="dark:text-gray-400">Hot Picks</span>
-              </div>
-            </div>
-          </Link>
+          <button
+            onClick={generateIdeas}
+            disabled={loading}
+            className="w-full px-6 py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg font-semibold hover:shadow-lg transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+          >
+            {loading ? (
+              <>
+                <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
+                Generating Ideas...
+              </>
+            ) : (
+              <>
+                <Sparkles className="w-5 h-5" />
+                Generate AI Ideas
+              </>
+            )}
+          </button>
 
-          {/* Expert Tips */}
-          <Link href={`/${locale}/live`}>
-            <div 
-              style={{ 
-                backgroundColor: 'white', 
-                borderRadius: '12px', 
-                padding: '18px 16px', 
-                cursor: 'pointer',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-                transition: 'all 0.3s ease',
-                border: '1px solid #d5d9d9'
-              }}
-              className="dark:bg-[#2c2c2e] dark:border-[#38383a] hover:shadow-xl hover:scale-105"
-            >
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', textAlign: 'center' }}>
-                <Target className="w-8 h-8" style={{ color: '#667eea' }} />
-                <span style={{ fontSize: '13px', fontWeight: 600, color: '#0f1111' }} className="dark:text-white">Expert Tips</span>
-                <span style={{ fontSize: '11px', color: '#565959' }} className="dark:text-gray-400">Pro Advice</span>
-              </div>
-            </div>
-          </Link>
-
-          {/* Win Streaks */}
-          <Link href={`/${locale}/live`}>
-            <div 
-              style={{ 
-                backgroundColor: 'white', 
-                borderRadius: '12px', 
-                padding: '18px 16px', 
-                cursor: 'pointer',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-                transition: 'all 0.3s ease',
-                border: '1px solid #d5d9d9'
-              }}
-              className="dark:bg-[#2c2c2e] dark:border-[#38383a] hover:shadow-xl hover:scale-105"
-            >
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', textAlign: 'center' }}>
-                <TrendingUp className="w-8 h-8" style={{ color: '#10b981' }} />
-                <span style={{ fontSize: '13px', fontWeight: 600, color: '#0f1111' }} className="dark:text-white">Win Streaks</span>
-                <span style={{ fontSize: '11px', color: '#565959' }} className="dark:text-gray-400">Top Picks</span>
-              </div>
-            </div>
-          </Link>
-
-          {/* Predictions */}
-          <Link href={`/${locale}/live`}>
-            <div 
-              style={{ 
-                backgroundColor: 'white', 
-                borderRadius: '12px', 
-                padding: '18px 16px', 
-                cursor: 'pointer',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-                transition: 'all 0.3s ease',
-                border: '1px solid #d5d9d9'
-              }}
-              className="dark:bg-[#2c2c2e] dark:border-[#38383a] hover:shadow-xl hover:scale-105"
-            >
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', textAlign: 'center' }}>
-                <Eye className="w-8 h-8" style={{ color: '#f59e0b' }} />
-                <span style={{ fontSize: '13px', fontWeight: 600, color: '#0f1111' }} className="dark:text-white">All Predictions</span>
-                <span style={{ fontSize: '11px', color: '#565959' }} className="dark:text-gray-400">Full Coverage</span>
-              </div>
-            </div>
-          </Link>
-
-          {/* Favorites */}
-          <Link href={`/${locale}/live`}>
-            <div 
-              style={{ 
-                backgroundColor: 'white', 
-                borderRadius: '12px', 
-                padding: '18px 16px', 
-                cursor: 'pointer',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-                transition: 'all 0.3s ease',
-                border: '1px solid #d5d9d9'
-              }}
-              className="dark:bg-[#2c2c2e] dark:border-[#38383a] hover:shadow-xl hover:scale-105"
-            >
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', textAlign: 'center' }}>
-                <Heart className="w-8 h-8" style={{ color: '#ef4444' }} />
-                <span style={{ fontSize: '13px', fontWeight: 600, color: '#0f1111' }} className="dark:text-white">My Favorites</span>
-                <span style={{ fontSize: '11px', color: '#565959' }} className="dark:text-gray-400">Saved Matches</span>
-              </div>
-            </div>
-          </Link>
-
-          {/* Analytics */}
-          <Link href={`/${locale}/live`}>
-            <div 
-              style={{ 
-                backgroundColor: 'white', 
-                borderRadius: '12px', 
-                padding: '18px 16px', 
-                cursor: 'pointer',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-                transition: 'all 0.3s ease',
-                border: '1px solid #d5d9d9'
-              }}
-              className="dark:bg-[#2c2c2e] dark:border-[#38383a] hover:shadow-xl hover:scale-105"
-            >
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', textAlign: 'center' }}>
-                <BarChart3 className="w-8 h-8" style={{ color: '#8b5cf6' }} />
-                <span style={{ fontSize: '13px', fontWeight: 600, color: '#0f1111' }} className="dark:text-white">Analytics</span>
-                <span style={{ fontSize: '11px', color: '#565959' }} className="dark:text-gray-400">Statistics</span>
-              </div>
-            </div>
-          </Link>
-        </div>
-      </div>
-
-      {/* Results Section - Yesterday & Today */}
-      <div style={{ backgroundColor: '#eaeded', padding: '24px 24px' }} className="dark:bg-black">
-        <h2 style={{ fontSize: '16px', fontWeight: 700, color: '#0f1111', marginBottom: '16px', letterSpacing: '0.5px' }} className="dark:text-white">📊 Results (Yesterday & Today)</h2>
-        {resultsLoading ? (
-          <div style={{ textAlign: 'center', padding: '20px', color: '#565959' }} className="dark:text-gray-400">Loading results...</div>
-        ) : results.length > 0 ? (
-          <div className="space-y-3">
-            {results.map((dateGroup: any, groupIdx: number) => (
-              <div key={groupIdx} style={{ backgroundColor: 'white', borderRadius: '12px', overflow: 'hidden', border: '1px solid #d5d9d9', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }} className="dark:bg-[#2c2c2e] dark:border-[#38383a]">
-                {/* Date Header */}
-                <div style={{ backgroundColor: '#f3f3f3', padding: '12px 16px', borderBottomColor: '#d5d9d9', fontSize: '13px', fontWeight: 700, color: '#0f1111', letterSpacing: '0.5px' }} className="border-b dark:bg-[#1c1c1e] dark:text-white dark:border-[#38383a]">
-                  {dateGroup.date}
-                </div>
-                
-                {/* Matches */}
-                <div className="space-y-0">
-                  {dateGroup.matches.map((match: any, idx: number) => (
-                    <div key={idx} style={{ padding: '12px 16px', borderBottomColor: '#d5d9d9' }} className="border-b dark:border-[#38383a] last:border-b-0 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-[#1c1c1e] transition-colors">
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: '12px', fontWeight: 600, color: '#0f1111' }} className="dark:text-white truncate">
-                          {match.home_team}
-                        </div>
-                        <div style={{ fontSize: '10px', color: '#565959', marginTop: '2px' }} className="dark:text-gray-400">
-                          {match.league}
-                        </div>
-                      </div>
-                      
-                      {/* Score */}
-                      <div style={{ textAlign: 'center', marginLeft: '12px', marginRight: '12px', minWidth: '50px' }}>
-                        <div style={{ fontSize: '13px', fontWeight: 700, color: '#0f1111' }} className="dark:text-white">
-                          {match.home_score} - {match.away_score}
-                        </div>
-                        <div style={{ fontSize: '9px', color: '#565959', marginTop: '2px' }} className="dark:text-gray-400">
-                          vs {match.away_team}
-                        </div>
-                      </div>
-                      
-                      {/* Prediction & Result */}
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: '8px' }}>
-                        <div style={{ fontSize: '10px', fontWeight: 600, color: '#565959', minWidth: '30px', textAlign: 'right' }} className="dark:text-gray-400">
-                          {match.prediction || '-'}
-                        </div>
-                        <div style={{ fontSize: '16px' }}>
-                          {match.correct ? '✅' : '❌'}
-                        </div>
-                      </div>
+          {ideas.length > 0 && (
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                <Zap className="w-5 h-5 text-yellow-500" />
+                5 Innovative Ideas
+              </h3>
+              {ideas.map((idea, idx) => (
+                <div
+                  key={idx}
+                  className="p-4 border-2 border-gray-200 dark:border-gray-700 rounded-lg hover:border-purple-300 dark:hover:border-purple-600 transition-all"
+                >
+                  <div className="flex items-start justify-between mb-2">
+                    <h4 className="font-semibold text-gray-900 dark:text-white">
+                      {idea.title}
+                    </h4>
+                    <div className="flex items-center gap-1 px-2 py-1 bg-purple-100 dark:bg-purple-900/30 rounded-full">
+                      <Star className="w-4 h-4 text-purple-600" />
+                      <span className="text-sm font-medium text-purple-600 dark:text-purple-400">
+                        {idea.aiScore}
+                      </span>
                     </div>
-                  ))}
+                  </div>
+                  <p className="text-gray-600 dark:text-gray-400 text-sm mb-3">
+                    {idea.description}
+                  </p>
+                  <div className="flex gap-2 flex-wrap">
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-medium ${
+                        idea.priority === 'High'
+                          ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                          : idea.priority === 'Medium'
+                          ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
+                          : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                      }`}
+                    >
+                      <TrendingUp className="w-3 h-3 inline mr-1" />
+                      {idea.priority} Priority
+                    </span>
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-medium ${
+                        idea.effort === 'High'
+                          ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400'
+                          : idea.effort === 'Medium'
+                          ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                          : 'bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400'
+                      }`}
+                    >
+                      <Clock className="w-3 h-3 inline mr-1" />
+                      {idea.effort} Effort
+                    </span>
+                  </div>
                 </div>
-              </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const MenuDrawer = ({ isOpen, onClose, onSelectComponent, selectedComponent, onNavigate }) => {
+  const [searchQuery, setSearchQuery] = useState('');
+
+  if (!isOpen) return null;
+
+  return (
+    <>
+      <div 
+        className="fixed inset-0 bg-black/50 z-40 animate-fadeIn"
+        onClick={onClose}
+      />
+      
+      <div className="fixed top-0 left-0 bottom-0 w-80 bg-white dark:bg-gray-900 shadow-2xl z-50 animate-slideInLeft overflow-y-auto">
+        <div className="p-6 border-b border-gray-200 dark:border-gray-800">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <Brain className="w-6 h-6 text-purple-500" />
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                Menu
+              </h2>
+            </div>
+            <button
+              onClick={onClose}
+              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+            >
+              <X className="w-5 h-5 text-gray-500" />
+            </button>
+          </div>
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            Navigate or select a component
+          </p>
+        </div>
+
+        {/* Search Box */}
+        <div className="p-4 border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800">
+          <div className="flex items-center gap-2 bg-white dark:bg-gray-900 rounded-lg px-3 py-2 border border-gray-300 dark:border-gray-700">
+            <Search className="w-4 h-4 text-gray-500 flex-shrink-0" />
+            <input
+              type="text"
+              placeholder="Search components..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="flex-1 bg-transparent border-none outline-none text-sm text-gray-900 dark:text-white"
+            />
+            {searchQuery && (
+              <button onClick={() => setSearchQuery('')} className="p-1 hover:opacity-70">
+                <X className="w-4 h-4 text-gray-500" />
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Navigation Links */}
+        <div className="p-4 border-b border-gray-200 dark:border-gray-800">
+          <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-2 px-2">
+            Navigation
+          </h3>
+          <div className="space-y-1">
+            <button
+              onClick={() => {
+                onNavigate('home');
+                onClose();
+              }}
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-left"
+            >
+              <Lightbulb className="w-5 h-5 text-yellow-500" />
+              <span className="text-sm font-medium text-gray-900 dark:text-white">Home</span>
+            </button>
+            <button
+              onClick={() => {
+                onNavigate('predictions');
+                onClose();
+              }}
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-left"
+            >
+              <Eye className="w-5 h-5 text-blue-500" />
+              <span className="text-sm font-medium text-gray-900 dark:text-white">Predictions</span>
+            </button>
+            <button
+              onClick={() => {
+                onNavigate('settings');
+                onClose();
+              }}
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-left"
+            >
+              <Settings className="w-5 h-5 text-gray-500" />
+              <span className="text-sm font-medium text-gray-900 dark:text-white">Settings</span>
+            </button>
+            <button
+              onClick={() => {
+                onNavigate('contact');
+                onClose();
+              }}
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-left"
+            >
+              <Mail className="w-5 h-5 text-green-500" />
+              <span className="text-sm font-medium text-gray-900 dark:text-white">Contact</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Components List */}
+        <div className="p-4">
+          <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-2 px-2">
+            Components
+          </h3>
+          <div className="space-y-2">
+            {COMPONENTS.filter(comp => 
+              comp.toLowerCase().includes(searchQuery.toLowerCase())
+            ).map((component, idx) => (
+              <button
+                key={component}
+                onClick={() => {
+                  onSelectComponent(component);
+                  onClose();
+                }}
+                style={{ animationDelay: `${idx * 30}ms` }}
+                className={`w-full p-4 rounded-lg transition-all text-left flex items-center justify-between group animate-slideUp ${
+                  selectedComponent === component
+                    ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
+                    : 'bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-white'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <Brain className={`w-5 h-5 ${
+                    selectedComponent === component ? 'text-white' : 'text-purple-500'
+                  }`} />
+                  <span className="font-medium">{component}</span>
+                </div>
+                <ChevronRight className={`w-5 h-5 transition-transform group-hover:translate-x-1 ${
+                  selectedComponent === component ? 'text-white' : 'text-gray-400'
+                }`} />
+              </button>
             ))}
           </div>
-        ) : (
-          <div style={{ textAlign: 'center', padding: '20px', color: '#565959', fontSize: '13px' }} className="dark:text-gray-400">No results yet</div>
-        )}
+        </div>
       </div>
+    </>
+  );
+};
 
-      {/* Live Matches List - Real Data from Scraper */}
-      <div style={{ paddingBottom: '100px' }}>
-        {liveMatches.length > 0 ? (
-          Object.entries(
-            liveMatches.reduce((acc: any, match: any) => {
-              const league = match.league || 'Unknown League';
-              if (!acc[league]) acc[league] = [];
-              acc[league].push(match);
-              return acc;
-            }, {})
-          ).map(([league, games]: any, idx) => (
-            <div key={idx} style={{ marginBottom: '8px' }}>
-              {/* League Header - Subtle Gray / iPhone Dark */}
-              <div style={{ backgroundColor: '#d5d9d9', padding: '14px 24px', gap: '12px' }} className="dark:bg-[#2c2c2e] flex items-center">
-                <span style={{ fontSize: '20px' }}>⚽</span>
-                <span style={{ fontSize: '12px', fontWeight: 600, color: '#0f1111', letterSpacing: '0.8px' }} className="uppercase">
-                  {league}
-                </span>
-              </div>
-              {/* Games */}
-              <div style={{ backgroundColor: '#f3f3f3' }} className="dark:bg-black">
-                {games.map((game: any, gidx: number) => (
-                  <div
-                    key={gidx}
-                    style={{ borderBottomColor: '#d5d9d9', padding: '18px 24px' }}
-                    className="flex items-center justify-between border-b dark:border-[#38383a] dark:hover:bg-[#1c1c1e] transition-colors"
-                  >
-                    <div className="flex items-center flex-1 min-w-0" style={{ gap: '16px' }}>
-                      <div className="flex items-center justify-center text-sm font-medium flex-shrink-0" style={{ color: '#565959', gap: '6px', minWidth: '50px' }}>
-                        <Clock className="w-5 h-5" style={{ filter: 'drop-shadow(0 1px 4px rgba(0,0,0,0.2))', strokeWidth: 1.5 }} />
-                        <span style={{ fontSize: '14px', fontWeight: 500 }}>{game.time || 'TBD'}</span>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div style={{ fontWeight: 600, fontSize: '15px', color: '#0f1111' }} className="dark:text-white truncate">
-                          {game.home_team || game.home || 'Team A'}
-                        </div>
-                        <div className="flex items-center mt-2" style={{ gap: '8px' }}>
-                          <span className="bg-white dark:bg-[#2c2c2e] rounded" style={{ color: '#565959', fontSize: '12px', padding: '4px 8px', fontWeight: 500 }}>
-                            vs
-                          </span>
-                          <span style={{ fontSize: '14px', color: '#565959' }} className="truncate">
-                            {game.away_team || game.away || 'Team B'}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    {/* Odds Badge */}
-                    <div style={{ marginLeft: '16px', textAlign: 'right' }}>
-                      {game.odds && (
-                        <div style={{ backgroundColor: '#ff9900', width: '44px', height: '44px', borderRadius: '12px' }} className="flex items-center justify-center text-white flex-shrink-0 shadow-lg">
-                          <span style={{ fontSize: '12px', fontWeight: 700 }}>{game.odds}</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))
-        ) : (
-          <div style={{ padding: '40px 24px', textAlign: 'center', color: '#565959', fontSize: '14px' }} className="dark:text-gray-400">
-            <p>No live matches available. Refresh to check again.</p>
-          </div>
-        )}
-      </div>
+export default function BrainstormPage() {
+  const [selectedComponent, setSelectedComponent] = useState('Predictions Dashboard');
+  const [isBrainstormOpen, setIsBrainstormOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [currentView, setCurrentView] = useState('home');
 
-      {/* Bottom Navigation - iPhone Style */}
-      <nav style={{ backgroundColor: '#f3f3f3', borderTopColor: '#d5d9d9', padding: '14px 0 env(safe-area-inset-bottom)' }} className="border-t dark:bg-[#1c1c1e] dark:border-[#38383a] fixed bottom-0 left-0 right-0 safe-area-inset-bottom backdrop-blur-xl bg-opacity-98 dark:bg-opacity-98 shadow-2xl">
-        <div className="flex items-center justify-around max-w-2xl mx-auto">
-          <Link href={`/${locale}/predictions`} className="flex flex-col items-center justify-center" style={{ color: isActive('/predictions') ? '#ff9900' : '#565959', gap: '6px', padding: '8px 0', transition: 'color 0.3s ease' }}>
-            <Eye className="w-9 h-9" style={{ filter: isActive('/predictions') ? 'drop-shadow(0 3px 8px rgba(255,153,0,0.5))' : 'drop-shadow(0 2px 6px rgba(0,0,0,0.3))', strokeWidth: 1.5 }} />
-            <span style={{ fontSize: '11px', fontWeight: 500, letterSpacing: '0.2px' }}>Predictions</span>
-          </Link>
-          <Link href={`/${locale}/secrets`} className="flex flex-col items-center justify-center" style={{ color: isActive('/secrets') ? '#ff9900' : '#565959', gap: '6px', padding: '8px 0', transition: 'color 0.3s ease' }}>
-            <Lock className="w-9 h-9" style={{ filter: isActive('/secrets') ? 'drop-shadow(0 3px 8px rgba(255,153,0,0.5))' : 'drop-shadow(0 2px 6px rgba(0,0,0,0.3))', strokeWidth: 1.5 }} />
-            <span style={{ fontSize: '11px', fontWeight: 500, letterSpacing: '0.2px' }}>Secret</span>
-          </Link>
-          <Link href={`/${locale}/live`} className="flex flex-col items-center justify-center relative" style={{ color: isActive('/live') ? '#ff9900' : '#565959', gap: '6px', padding: '8px 0', transition: 'color 0.3s ease' }}>
-            <div className="relative flex items-center justify-center">
-              <Clock className="w-9 h-9" style={{ filter: isActive('/live') ? 'drop-shadow(0 3px 8px rgba(255,153,0,0.5))' : 'drop-shadow(0 2px 6px rgba(0,0,0,0.3))', strokeWidth: 1.5 }} />
-              <span style={{ backgroundColor: '#ff3b30', width: '20px', height: '20px', fontSize: '10px', fontWeight: 700 }} className="absolute -top-1.5 -right-1.5 text-white rounded-full flex items-center justify-center shadow-lg">
-                1
+  const handleNavigate = (view) => {
+    setCurrentView(view);
+    // In real implementation, this would use Next.js router or similar
+    console.log(`Navigating to: ${view}`);
+  };
+
+  const handleSecretClick = () => {
+    // Navigate to secret page
+    handleNavigate('secret');
+    console.log('Opening Secret page');
+  };
+
+  const handleLiveClick = () => {
+    // Navigate to live page
+    handleNavigate('live');
+    console.log('Opening Live page');
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900">
+      {/* Top Navigation */}
+      <nav className="border-b border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm sticky top-0 z-30">
+        <div className="max-w-6xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setIsMenuOpen(true)}
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors"
+              >
+                <Menu className="w-6 h-6 text-gray-700 dark:text-gray-300" />
+              </button>
+              <Lightbulb className="w-6 h-6 text-yellow-500" />
+              <span className="font-bold text-xl text-gray-900 dark:text-white">
+                MagajiCo AI Hub
               </span>
             </div>
-            <span style={{ fontSize: '11px', fontWeight: 500, letterSpacing: '0.2px' }}>Live</span>
-          </Link>
-          <Link href={`/${locale}/contact`} className="flex flex-col items-center justify-center" style={{ color: isActive('/contact') ? '#ff9900' : '#565959', gap: '6px', padding: '8px 0', transition: 'color 0.3s ease' }}>
-            <Mail className="w-9 h-9" style={{ filter: isActive('/contact') ? 'drop-shadow(0 3px 8px rgba(255,153,0,0.5))' : 'drop-shadow(0 2px 6px rgba(0,0,0,0.3))', strokeWidth: 1.5 }} />
-            <span style={{ fontSize: '11px', fontWeight: 500, letterSpacing: '0.2px' }}>Contact</span>
-          </Link>
+            <div className="flex gap-2">
+              <button 
+                onClick={() => handleNavigate('home')}
+                className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+              >
+                Home
+              </button>
+              <button className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors">
+                Brainstorm
+              </button>
+            </div>
+          </div>
         </div>
       </nav>
 
-      <style jsx>{`
-        @keyframes fade-in {
-          from { opacity: 0; transform: translateY(-10px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fade-in {
-          animation: fade-in 0.5s ease-out;
-        }
-        @keyframes slideInLeft {
-          from { 
-            transform: translateX(-100%);
-            opacity: 0;
-          }
-          to { 
-            transform: translateX(0);
-            opacity: 1;
-          }
-        }
-        .safe-area-inset-bottom {
-          padding-bottom: env(safe-area-inset-bottom);
-        }
-      `}</style>
-    </div>
-  );
-}
+      <div className="max-w-4xl mx-auto px-4 py-8 pb-24">
+        {/* Header */}
+        <div className="mb-8 animate-fadeIn">
+          <div className="flex items-center gap-3 mb-4">
+            <Lightbulb className="w-8 h-8 text-yellow-500" />
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+              AI Brainstorming Hub
+            </h1>
+          </div>
+          <p className="text-gray-600 dark:text-gray-400 text-lg">
+            Get AI-powered feature enhancement ideas for any component. Open the menu to select a component and let our AI help you innovate.
+          </p>
+        </div>
+
+        {/* Current Selection Card */}
+        <div className="mb-8 p-6 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border-2 border-purple-200 dark:border-purple-800 rounded-xl animate-fadeIn">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <p className="text-sm text-purple-600 dark:text-purple-400 font-medium mb-1">
+                Currently Selected
+              </p>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                <Brain className="w-6 h-6 text-purple-500" />
+                {selectedComponent}
+              </h2>
+            </div>
+            <button
+              onClick={() => setIsMenuOpen(true)}
+              className="px-4 py-2 bg-white dark:bg-gray-800 text-purple-600 dark:text-purple-400 rounded-lg hover:bg-purple-100 dark:hover:bg-gray-700 transition-colors font-medium"
+            >
+              Change
+            </button>
+          </div>
+          <p className="text-gray-600 dark:text-gray-400 text-sm">
+            Click the button below to generate AI-powered feature ideas for this component.
+          </p>
+        </div>
+
+        {/* Generate Button */}
+        <button
+          onClick={() => setIsBrainstormOpen(true)}
+          className="w-full px-6 py-4 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white rounded-lg font-semibold hover:shadow-lg transition-all flex items-center justify-center gap-3 animate-fadeIn"
+        >
+          <Sparkles className="w-5 h-5" />
+          Generate Ideas for {selectedComponent}
+          <Zap className="w-5 h-5" />
+        </button>
+
+        {/* Info Box */}
+        <div className="mt-8 p-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg animate-fadeIn">
+          <h3 className="font-semibold text-blue-900 dark:text-blue-100 mb-2 flex items-center gap-2">
+            <Brain className="w-5 h-5" />
+            How It Works
+          </h3>
+          <ul className="text-blue-800 dark:text-blue-200 text-sm space-y-1">
+            <li>• Open the menu to select a component from MagajiCo</li>
+            <li>• Add optional context about what you want to improve</li>
+            <li>• AI will generate 5 innovative feature ideas</li>
+            <li>• Each idea includes priority, effort level, and AI potential score</li>
+            <li>• Use insights to plan your next development sprint</li>
+          </ul>
+        </div>
+      </div>
+
+      {/* Menu Drawer */}
+      <MenuDrawer
+        isOpen={isMenuOpen}
+        onClose={() => setIsMenuOpen(false)}
+        onSelectComponent={setSelectedComponent}
+        selectedComponent={selectedComponent}
+        onNavigate={handleNavigate}
+      />
+
+      {/* Brainstorming Modal */}
+      <AIBrainstormingModal
+        component={selectedComponent}
+        isOpen={isBrainstormOpen}
+        onClose={() => setIsBrainstormOpen(false)}
+      />
+
+      {/* Bottom Navigation */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 z-30">
+        <div className="max-w-6xl mx-auto px-4 py-3 flex justify-around items-center">
+          <button 
+            onClick={handleLiveClick}
+            className="flex flex-col items-center gap-1 text-gray-600 dark:text-gray-400 hover:text-purple-500 transition-colors"
+          >
+            <div className="w-6 h-6 flex items-center justify-center">
+              <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+            </div>
+            <span className="text-xs font-medium">Live</span>
+          </button>
+          <button 
+            onClick={handleSecretClick}
+            className="flex flex-col items-center gap-1 text-gray-600 dark:text-gray-400 hover:text-purple-500 transition-colors"
+   
