@@ -1,4 +1,3 @@
-'use client',
 import React, { useState } from 'react';
 import { Lightbulb, Brain, Sparkles, Zap, X, TrendingUp, Clock, Star, Menu, ChevronRight, Search, ChevronUp, ChevronDown, Eye, Lock, Settings, Mail } from 'lucide-react';
 
@@ -470,4 +469,65 @@ export default function BrainstormPage() {
           <button 
             onClick={handleSecretClick}
             className="flex flex-col items-center gap-1 text-gray-600 dark:text-gray-400 hover:text-purple-500 transition-colors"
-   
+          >
+            <Lock className="w-6 h-6" />
+            <span className="text-xs font-medium">Secret</span>
+          </button>
+          <button 
+            onClick={() => setIsBrainstormOpen(true)}
+            className="flex flex-col items-center gap-1 text-purple-500 hover:text-purple-600 transition-colors"
+          >
+            <Zap className="w-6 h-6" />
+            <span className="text-xs font-medium">Generate</span>
+          </button>
+        </div>
+      </nav>
+
+      <style>{`
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        @keyframes slideUp {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        @keyframes slideInLeft {
+          from {
+            transform: translateX(-100%);
+          }
+          to {
+            transform: translateX(0);
+          }
+        }
+
+        .animate-fadeIn {
+          animation: fadeIn 0.5s ease-out;
+        }
+
+        .animate-slideUp {
+          animation: slideUp 0.4s ease-out;
+          animation-fill-mode: both;
+        }
+
+        .animate-slideInLeft {
+          animation: slideInLeft 0.3s ease-out;
+        }
+      `}</style>
+    </div>
+  );
+}
