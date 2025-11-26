@@ -169,33 +169,34 @@ export default function PredictionsPage({ params }: { params: Promise<{ locale: 
         <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#0f1111', marginBottom: '20px', letterSpacing: '0.5px' }} className="dark:text-white">Three Premium Sources</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {sources.map((source, index) => (
-            <div
-              key={source.name}
-              style={{ backgroundColor: 'white', borderRadius: '12px', padding: '24px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', border: '1px solid #d5d9d9', cursor: 'pointer', transition: 'all 0.3s ease' }}
-              className="dark:bg-[#2c2c2e] dark:border-[#38383a] hover:shadow-xl hover:scale-105"
-            >
-              <div className="flex items-center gap-3 mb-4">
-                <div style={{ width: '44px', height: '44px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: source.color === 'blue' ? '#667eea' : source.color === 'purple' ? '#764ba2' : '#10b981' }}>
-                  <Star className="w-6 h-6 text-white" style={{ fill: 'white' }} />
-                </div>
-                <h3 style={{ fontSize: '15px', fontWeight: 600, color: '#0f1111' }} className="dark:text-white">
-                  {source.name}
-                </h3>
-              </div>
-              
-              <p style={{ fontSize: '13px', color: '#565959', marginBottom: '16px' }} className="dark:text-gray-400">
-                {source.description}
-              </p>
-              
-              <div className="space-y-2">
-                {source.features.map((feature, idx) => (
-                  <div key={idx} className="flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4" style={{ color: source.color === 'blue' ? '#667eea' : source.color === 'purple' ? '#764ba2' : '#10b981' }} />
-                    <span style={{ fontSize: '12px', color: '#565959' }} className="dark:text-gray-400">{feature}</span>
+            <Link key={source.name} href={`/${locale}/live`}>
+              <div
+                style={{ backgroundColor: 'white', borderRadius: '12px', padding: '24px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', border: '1px solid #d5d9d9', cursor: 'pointer', transition: 'all 0.3s ease' }}
+                className="dark:bg-[#2c2c2e] dark:border-[#38383a] hover:shadow-xl hover:scale-105"
+              >
+                <div className="flex items-center gap-3 mb-4">
+                  <div style={{ width: '44px', height: '44px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: source.color === 'blue' ? '#667eea' : source.color === 'purple' ? '#764ba2' : '#10b981' }}>
+                    <Star className="w-6 h-6 text-white" style={{ fill: 'white' }} />
                   </div>
-                ))}
+                  <h3 style={{ fontSize: '15px', fontWeight: 600, color: '#0f1111' }} className="dark:text-white">
+                    {source.name}
+                  </h3>
+                </div>
+                
+                <p style={{ fontSize: '13px', color: '#565959', marginBottom: '16px' }} className="dark:text-gray-400">
+                  {source.description}
+                </p>
+                
+                <div className="space-y-2">
+                  {source.features.map((feature, idx) => (
+                    <div key={idx} className="flex items-center gap-2">
+                      <CheckCircle className="w-4 h-4" style={{ color: source.color === 'blue' ? '#667eea' : source.color === 'purple' ? '#764ba2' : '#10b981' }} />
+                      <span style={{ fontSize: '12px', color: '#565959' }} className="dark:text-gray-400">{feature}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       </div>
