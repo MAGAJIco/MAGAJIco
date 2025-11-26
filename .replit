@@ -1,4 +1,4 @@
-modules = ["nodejs-20", "python-3.11", "web"]
+modules = ["nodejs-20", "python-3.11", "web", "python3"]
 [agent]
 expertMode = true
 integrations = ["javascript_log_in_with_replit:1.0.0"]

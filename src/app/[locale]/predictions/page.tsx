@@ -1,9 +1,47 @@
-'use client',
-import React, { useState, useEffect } from 'react';
-import { Zap, TrendingUp, Shield, Clock, ArrowRight, CheckCircle, Star, Trophy, BarChart3, Target } from 'lucide-react';
+'use client';
 
-export default function HomePage() {
+import React, { useState, useEffect, use } from 'react';
+import { Zap, TrendingUp, Shield, Clock, ArrowRight, CheckCircle, Star, Trophy, BarChart3, Target, Eye, Home } from 'lucide-react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+
+export default function PredictionsPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = use(params);
+  const pathname = usePathname();
   const [currentStat, setCurrentStat] = useState(0);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [allPredictions, setAllPredictions] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [hasAIAccess, setHasAIAccess] = useState(false);
+  const [showAISignup, setShowAISignup] = useState(false);
+  
+  const isActive = (path: string) => pathname === `/${locale}${path}` || pathname === `/${locale}/`;
+
+  // Fetch all predictions
+  useEffect(() => {
+    const fetchPredictions = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('/api/predictions');
+        if (!response.ok) {
+          console.error('API returned status:', response.status);
+          return;
+        }
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          console.error('API returned non-JSON response');
+          return;
+        }
+        const data = await response.json();
+        setAllPredictions(data.matches || []);
+      } catch (err) {
+        console.error('Error fetching predictions:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPredictions();
+  }, []);
   
   const stats = [
     { label: 'Active Predictions', value: '2,500+', icon: Target },
@@ -76,168 +114,322 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
-      {/* Hero Section */}
-      <div className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 opacity-90"></div>
-        <div className="absolute inset-0">
-          <div className="absolute top-20 left-20 w-72 h-72 bg-blue-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
-          <div className="absolute bottom-20 right-20 w-72 h-72 bg-purple-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse delay-700"></div>
+    <div style={{ backgroundColor: '#eaeded', minHeight: '100vh' }} className="dark:bg-black">
+      {/* Header - Dark Navy Amazon Style */}
+      <header style={{ backgroundColor: '#131921' }} className="text-white sticky top-0 z-50 shadow-lg">
+        <div style={{ padding: '18px 24px' }} className="flex items-center justify-between">
+          <div className="flex items-center" style={{ gap: '18px' }}>
+            <Eye className="w-12 h-12" style={{ color: '#ff9900', filter: 'drop-shadow(0 3px 12px rgba(255,153,0,0.6))', strokeWidth: 1.5 }} />
+            <div>
+              <h1 style={{ letterSpacing: '0.8px', fontSize: '24px', fontWeight: 700 }}>PREDICTIONS</h1>
+              <p style={{ fontSize: '11px', color: '#999', letterSpacing: '1px', marginTop: '2px', fontWeight: 500 }}>PREMIUM</p>
+            </div>
+          </div>
         </div>
-        
-        <div className="relative max-w-7xl mx-auto px-4 py-20 sm:py-28">
-          <div className="text-center">
-            <div className="flex items-center justify-center gap-3 mb-6">
-              <Zap className="w-12 h-12 text-yellow-300" />
-              <h1 className="text-5xl sm:text-6xl font-bold text-white">
-                Premium Predictions
-              </h1>
-            </div>
-            
-            <p className="text-xl sm:text-2xl text-blue-100 mb-4 max-w-3xl mx-auto">
-              Harness the power of three industry-leading prediction platforms
-            </p>
-            
-            <p className="text-lg text-blue-200 mb-8 max-w-2xl mx-auto">
-              Get real-time predictions from Statarea, ScorePrediction, and MyBets—all in one powerful dashboard
-            </p>
-            
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
-              <button 
-                onClick={() => window.location.href = '/predictions'}
-                className="group px-8 py-4 bg-white text-blue-600 rounded-lg font-semibold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all flex items-center gap-2"
-              >
-                View Predictions
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </button>
-              <button className="px-8 py-4 bg-transparent border-2 border-white text-white rounded-lg font-semibold text-lg hover:bg-white hover:text-blue-600 transition-all">
-                Learn More
-              </button>
-            </div>
+      </header>
 
-            {/* Rotating Stats */}
-            <div className="bg-white/10 backdrop-blur-md rounded-lg p-6 max-w-md mx-auto border border-white/20">
-              <div className="flex items-center justify-center gap-4">
-                {React.createElement(stats[currentStat].icon, { className: "w-8 h-8 text-yellow-300" })}
-                <div className="text-left">
-                  <p className="text-3xl font-bold text-white">{stats[currentStat].value}</p>
-                  <p className="text-blue-200">{stats[currentStat].label}</p>
-                </div>
-              </div>
+      <div style={{ paddingBottom: '100px' }}>
+        {/* Hero Banner - Premium Style */}
+        <div style={{ background: 'linear-gradient(to right, #ff9900, #ffad33)', padding: '32px 24px' }} className="text-white overflow-hidden shadow-lg">
+          <div className="flex items-start" style={{ gap: '14px' }}>
+            <Zap className="w-8 h-8 flex-shrink-0" style={{ marginTop: '4px', filter: 'drop-shadow(0 2px 6px rgba(255,255,255,0.4))', strokeWidth: 1.5 }} />
+            <div className="min-w-0">
+              <p style={{ fontSize: '16px', fontWeight: 600, lineHeight: '1.5', marginBottom: '8px' }}>
+                Premium Predictions from Industry Leaders
+              </p>
+              <p style={{ fontSize: '13px', opacity: 0.95, fontWeight: 400 }}>
+                Real-time insights from Statarea, ScorePrediction, and MyBets—all verified and curated for you
+              </p>
+            </div>
+          </div>
+        </div>
+
+      {/* Rotating Stats */}
+      <div style={{ backgroundColor: '#f3f3f3', borderBottomColor: '#d5d9d9', padding: '24px' }} className="border-b dark:bg-[#1c1c1e] dark:border-[#38383a]">
+        <div style={{ backgroundColor: 'white', borderRadius: '12px', padding: '20px 24px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', border: '1px solid #d5d9d9' }} className="dark:bg-[#2c2c2e] dark:border-[#38383a]">
+          <div className="flex items-center" style={{ gap: '16px' }}>
+            {React.createElement(stats[currentStat].icon, { className: "w-8 h-8 flex-shrink-0", style: { color: '#ff9900' } })}
+            <div>
+              <p style={{ fontSize: '12px', color: '#565959', marginBottom: '4px' }} className="dark:text-gray-500">{stats[currentStat].label}</p>
+              <p style={{ fontSize: '24px', fontWeight: 700, color: '#ff9900' }}>{stats[currentStat].value}</p>
             </div>
           </div>
         </div>
       </div>
 
       {/* Sources Section */}
-      <div className="max-w-7xl mx-auto px-4 py-16">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-            Three Premium Sources, One Platform
-          </h2>
-          <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-            We aggregate predictions from the most trusted names in sports analytics
-          </p>
-        </div>
-
-        <div className="grid md:grid-cols-3 gap-8">
+      <div style={{ backgroundColor: '#eaeded', padding: '32px 24px' }} className="dark:bg-black">
+        <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#0f1111', marginBottom: '20px', letterSpacing: '0.5px' }} className="dark:text-white">Three Premium Sources</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {sources.map((source, index) => (
-            <div
-              key={source.name}
-              className="group bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-200 dark:border-gray-700 hover:-translate-y-2"
-            >
-              <div className={`h-2 bg-gradient-to-r ${colorMap[source.color]}`}></div>
-              <div className="p-6">
+            <Link key={source.name} href={`/${locale}/live`}>
+              <div
+                style={{ backgroundColor: 'white', borderRadius: '12px', padding: '24px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', border: '1px solid #d5d9d9', cursor: 'pointer', transition: 'all 0.3s ease' }}
+                className="dark:bg-[#2c2c2e] dark:border-[#38383a] hover:shadow-xl hover:scale-105"
+              >
                 <div className="flex items-center gap-3 mb-4">
-                  <div className={`w-12 h-12 rounded-lg bg-gradient-to-r ${colorMap[source.color]} flex items-center justify-center`}>
-                    <Star className="w-6 h-6 text-white" />
+                  <div style={{ width: '44px', height: '44px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: source.color === 'blue' ? '#667eea' : source.color === 'purple' ? '#764ba2' : '#10b981' }}>
+                    <Star className="w-6 h-6 text-white" style={{ fill: 'white' }} />
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                  <h3 style={{ fontSize: '15px', fontWeight: 600, color: '#0f1111' }} className="dark:text-white">
                     {source.name}
                   </h3>
                 </div>
                 
-                <p className="text-gray-600 dark:text-gray-400 mb-6">
+                <p style={{ fontSize: '13px', color: '#565959', marginBottom: '16px' }} className="dark:text-gray-400">
                   {source.description}
                 </p>
                 
                 <div className="space-y-2">
                   {source.features.map((feature, idx) => (
                     <div key={idx} className="flex items-center gap-2">
-                      <CheckCircle className={`w-4 h-4 text-${source.color}-600`} />
-                      <span className="text-sm text-gray-700 dark:text-gray-300">{feature}</span>
+                      <CheckCircle className="w-4 h-4" style={{ color: source.color === 'blue' ? '#667eea' : source.color === 'purple' ? '#764ba2' : '#10b981' }} />
+                      <span style={{ fontSize: '12px', color: '#565959' }} className="dark:text-gray-400">{feature}</span>
                     </div>
                   ))}
                 </div>
               </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      {/* AI Suggestions Section - With SignUp Gate */}
+      <div style={{ backgroundColor: '#eaeded', padding: '32px 24px' }} className="dark:bg-black">
+        <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#0f1111', marginBottom: '20px', letterSpacing: '0.5px' }} className="dark:text-white">AI-Powered Suggestions</h2>
+        {hasAIAccess ? (
+          <div style={{ backgroundColor: 'white', borderRadius: '12px', padding: '24px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', border: '1px solid #d5d9d9' }} className="dark:bg-[#2c2c2e] dark:border-[#38383a]">
+            <div className="flex items-start gap-3 mb-4">
+              <Zap className="w-6 h-6 flex-shrink-0" style={{ color: '#ff9900' }} />
+              <div>
+                <h3 style={{ fontSize: '15px', fontWeight: 600, color: '#0f1111', marginBottom: '8px' }} className="dark:text-white">Smart Analysis</h3>
+                <p style={{ fontSize: '13px', color: '#565959' }} className="dark:text-gray-400">AI analyzes all three data sources to recommend the highest-confidence picks for today's matches</p>
+              </div>
+            </div>
+            <div style={{ backgroundColor: '#fff5e6', borderRadius: '8px', padding: '12px', marginTop: '16px' }} className="dark:bg-orange-900/20">
+              <p style={{ fontSize: '12px', color: '#ff7f00', fontWeight: 500 }}>✨ AI insights are now available for all predictions below</p>
+            </div>
+          </div>
+        ) : (
+          <div style={{ backgroundColor: 'linear-gradient(135deg, #ff9900 0%, #ffad33 100%)', borderRadius: '12px', padding: '32px 24px', textAlign: 'center' }} className="text-white shadow-lg">
+            <Zap className="w-10 h-10 mx-auto mb-4" />
+            <h3 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '8px' }}>Unlock AI Suggestions</h3>
+            <p style={{ fontSize: '13px', opacity: 0.95, marginBottom: '24px' }}>Get AI-powered insights that analyze all three data sources and recommend top picks</p>
+            <button
+              onClick={() => setShowAISignup(true)}
+              style={{ backgroundColor: 'white', color: '#ff9900', padding: '12px 28px', borderRadius: '8px', fontWeight: 600, fontSize: '14px', border: 'none', cursor: 'pointer', transition: 'all 0.3s ease' }}
+              className="hover:shadow-xl hover:scale-105"
+            >
+              Sign Up for AI Access
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* AI Signup Modal */}
+      {showAISignup && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 60 }} className="p-4">
+          <div style={{ backgroundColor: 'white', borderRadius: '16px', padding: '32px 24px', maxWidth: '400px', width: '100%', boxShadow: '0 10px 40px rgba(0,0,0,0.2)' }} className="dark:bg-[#2c2c2e]">
+            <div className="flex items-center justify-between mb-6">
+              <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#0f1111' }} className="dark:text-white">Enable AI Suggestions</h2>
+              <button onClick={() => setShowAISignup(false)} className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">✕</button>
+            </div>
+            
+            <p style={{ fontSize: '13px', color: '#565959', marginBottom: '20px' }} className="dark:text-gray-400">Sign up to get AI-powered predictions and smart analysis of all matches</p>
+            
+            <input type="email" placeholder="Email address" style={{ width: '100%', padding: '12px 16px', borderRadius: '8px', border: '1px solid #d5d9d9', fontSize: '13px', marginBottom: '12px' }} className="dark:bg-[#1c1c1e] dark:border-[#38383a] dark:text-white" />
+            
+            <input type="password" placeholder="Password" style={{ width: '100%', padding: '12px 16px', borderRadius: '8px', border: '1px solid #d5d9d9', fontSize: '13px', marginBottom: '20px' }} className="dark:bg-[#1c1c1e] dark:border-[#38383a] dark:text-white" />
+            
+            <button
+              onClick={() => {
+                setHasAIAccess(true);
+                setShowAISignup(false);
+              }}
+              style={{ width: '100%', backgroundColor: '#ff9900', color: 'white', padding: '12px', borderRadius: '8px', fontWeight: 600, fontSize: '14px', border: 'none', cursor: 'pointer', transition: 'all 0.3s ease', marginBottom: '12px' }}
+              className="hover:shadow-lg hover:scale-105"
+            >
+              Continue with AI Access
+            </button>
+            
+            <button
+              onClick={() => setShowAISignup(false)}
+              style={{ width: '100%', backgroundColor: '#f3f3f3', color: '#0f1111', padding: '12px', borderRadius: '8px', fontWeight: 600, fontSize: '14px', border: 'none', cursor: 'pointer' }}
+              className="dark:bg-[#1c1c1e] dark:text-white"
+            >
+              Maybe Later
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Benefits Section */}
+      <div style={{ backgroundColor: '#f3f3f3', borderTopColor: '#d5d9d9', borderBottomColor: '#d5d9d9', padding: '32px 24px' }} className="border-y dark:bg-[#1c1c1e] dark:border-[#38383a]">
+        <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#0f1111', marginBottom: '24px', letterSpacing: '0.5px' }} className="dark:text-white">Why Choose Us?</h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {benefits.map((benefit, index) => (
+            <div
+              key={index}
+              style={{ backgroundColor: 'white', borderRadius: '12px', padding: '20px 16px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', border: '1px solid #d5d9d9' }}
+              className="dark:bg-[#2c2c2e] dark:border-[#38383a]"
+            >
+              <div style={{ width: '40px', height: '40px', margin: '0 auto 12px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#ff9900', borderRadius: '10px' }}>
+                {React.createElement(benefit.icon, { className: "w-5 h-5 text-white" })}
+              </div>
+              <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#0f1111', marginBottom: '8px', textAlign: 'center' }} className="dark:text-white">
+                {benefit.title}
+              </h3>
+              <p style={{ fontSize: '12px', color: '#565959', textAlign: 'center' }} className="dark:text-gray-400">
+                {benefit.description}
+              </p>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Benefits Section */}
-      <div className="bg-white dark:bg-gray-800 py-16">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-              Why Choose Us?
-            </h2>
-            <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-              Experience the advantage of consolidated, verified predictions
-            </p>
+      {/* All Predictions Section - Grouped by League */}
+      <div style={{ backgroundColor: '#eaeded', padding: '32px 24px' }} className="dark:bg-black">
+        <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#0f1111', marginBottom: '20px', letterSpacing: '0.5px' }} className="dark:text-white">All Predictions by League</h2>
+        {loading ? (
+          <div style={{ textAlign: 'center', padding: '40px', color: '#565959' }} className="dark:text-gray-400">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600"></div>
+            <p style={{ marginTop: '12px' }}>Loading predictions...</p>
           </div>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {benefits.map((benefit, index) => (
-              <div
-                key={index}
-                className="text-center p-6 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-              >
-                <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center">
-                  {React.createElement(benefit.icon, { className: "w-8 h-8 text-white" })}
+        ) : allPredictions.length > 0 ? (
+          <div className="space-y-4">
+            {allPredictions.map((league, idx) => (
+              <div key={idx}>
+                {/* League Header */}
+                <div style={{ backgroundColor: '#d5d9d9', padding: '12px 16px', gap: '12px', marginBottom: '8px', borderRadius: '8px' }} className="dark:bg-[#2c2c2e] flex items-center">
+                  <span style={{ fontSize: '18px' }}>⚽</span>
+                  <span style={{ fontSize: '12px', fontWeight: 600, color: '#0f1111', letterSpacing: '0.5px' }} className="dark:text-white uppercase">
+                    {league.league}
+                  </span>
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                  {benefit.title}
-                </h3>
-                <p className="text-gray-600 dark:text-gray-400">
-                  {benefit.description}
-                </p>
+                {/* Predictions Grid */}
+                <div className="grid gap-3">
+                  {league.games && league.games.map((pred: any, pidx: number) => (
+                    <div key={pidx} style={{ backgroundColor: 'white', borderRadius: '12px', padding: '14px', boxShadow: '0 1px 4px rgba(0,0,0,0.08)', border: '1px solid #d5d9d9' }} className="dark:bg-[#2c2c2e] dark:border-[#38383a]">
+                      <div className="flex items-start justify-between gap-3">
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontSize: '13px', fontWeight: 600, color: '#0f1111', marginBottom: '6px' }} className="dark:text-white">
+                            {pred.home_team} vs {pred.away_team}
+                          </div>
+                          <div className="flex gap-2 flex-wrap">
+                            {pred.prediction_1x2 && (
+                              <span style={{ backgroundColor: '#667eea', color: 'white', padding: '3px 8px', borderRadius: '4px', fontSize: '10px', fontWeight: 600 }}>
+                                1X2: {pred.prediction_1x2}
+                              </span>
+                            )}
+                            {pred.prediction_over_under && (
+                              <span style={{ backgroundColor: '#764ba2', color: 'white', padding: '3px 8px', borderRadius: '4px', fontSize: '10px', fontWeight: 600 }}>
+                                O/U: {pred.prediction_over_under}
+                              </span>
+                            )}
+                            {pred.prediction_btts && (
+                              <span style={{ backgroundColor: '#10b981', color: 'white', padding: '3px 8px', borderRadius: '4px', fontSize: '10px', fontWeight: 600 }}>
+                                BTTS: {pred.prediction_btts}
+                              </span>
+                            )}
+                            {hasAIAccess && (
+                              <span style={{ backgroundColor: '#ff9900', color: 'white', padding: '3px 8px', borderRadius: '4px', fontSize: '10px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                ✨ AI Recommended
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        {pred.confidence && (
+                          <div style={{ textAlign: 'right', minWidth: '60px' }}>
+                            <div style={{ fontSize: '12px', color: '#ff9900', fontWeight: 700 }}>
+                              {pred.confidence}%
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             ))}
           </div>
-        </div>
+        ) : (
+          <div style={{ textAlign: 'center', padding: '40px', color: '#565959' }} className="dark:text-gray-400">
+            <p>No predictions available</p>
+          </div>
+        )}
       </div>
 
       {/* CTA Section */}
-      <div className="max-w-7xl mx-auto px-4 py-16">
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl shadow-2xl overflow-hidden">
-          <div className="px-8 py-12 sm:px-12 sm:py-16 text-center">
-            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
-              Ready to Start Winning?
-            </h2>
-            <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-              Access premium predictions from three trusted sources right now
-            </p>
-            <button 
-              onClick={() => window.location.href = '/predictions'}
-              className="group px-10 py-5 bg-white text-blue-600 rounded-lg font-bold text-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all inline-flex items-center gap-3"
-            >
-              View Live Predictions
-              <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform" />
-            </button>
+      <div style={{ backgroundColor: '#eaeded', padding: '32px 24px' }} className="dark:bg-black">
+        <div style={{ background: 'linear-gradient(to right, #ff9900, #ffad33)', borderRadius: '12px', padding: '32px 24px', textAlign: 'center' }} className="text-white shadow-lg">
+          <h2 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '12px' }}>Ready to Start Winning?</h2>
+          <p style={{ fontSize: '14px', opacity: 0.95, marginBottom: '24px' }}>Access premium predictions from three trusted sources right now</p>
+          
+          {/* Three Sources Mini Cards */}
+          <div className="grid grid-cols-3 gap-3 mb-6">
+            {sources.map((source) => (
+              <Link key={source.name} href={`/${locale}/live`}>
+                <div 
+                  style={{ 
+                    backgroundColor: 'rgba(255,255,255,0.95)', 
+                    borderRadius: '8px', 
+                    padding: '12px', 
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    border: '2px solid rgba(255,255,255,0.5)'
+                  }}
+                  className="hover:shadow-xl hover:scale-105"
+                >
+                  <div style={{ width: '32px', height: '32px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 8px', background: source.color === 'blue' ? '#667eea' : source.color === 'purple' ? '#764ba2' : '#10b981' }}>
+                    <Star className="w-4 h-4 text-white" style={{ fill: 'white' }} />
+                  </div>
+                  <p style={{ fontSize: '12px', fontWeight: 600, color: '#0f1111', marginBottom: '4px' }}>{source.name}</p>
+                  <p style={{ fontSize: '10px', color: '#565959', lineHeight: '1.3' }}>{source.features[0]}</p>
+                </div>
+              </Link>
+            ))}
           </div>
+          
+          <button 
+            onClick={() => window.location.href = `/${locale}/live`}
+            style={{ backgroundColor: 'white', color: '#ff9900', padding: '12px 28px', borderRadius: '8px', fontWeight: 600, fontSize: '14px', border: 'none', cursor: 'pointer', transition: 'all 0.3s ease', boxShadow: '0 4px 12px rgba(255,153,0,0.3)' }}
+            className="hover:shadow-xl hover:scale-105"
+          >
+            View Live Predictions
+          </button>
         </div>
+      </div>
       </div>
 
-      {/* Footer */}
-      <div className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-        <div className="max-w-7xl mx-auto px-4 py-8">
-          <div className="text-center text-gray-600 dark:text-gray-400">
-            <p className="mb-2">© 2024 Premium Predictions. All rights reserved.</p>
-            <p className="text-sm">Powered by Statarea, ScorePrediction & MyBets</p>
-          </div>
+      {/* Bottom Navigation */}
+      <nav style={{ backgroundColor: '#f3f3f3', borderTopColor: '#d5d9d9', padding: '14px 0 env(safe-area-inset-bottom)' }} className="border-t dark:bg-[#1c1c1e] dark:border-[#38383a] fixed bottom-0 left-0 right-0 safe-area-inset-bottom backdrop-blur-xl bg-opacity-98 dark:bg-opacity-98 shadow-2xl">
+        <div className="flex items-center justify-around max-w-2xl mx-auto">
+          <Link href={`/${locale}/`} className="flex flex-col items-center justify-center" style={{ color: isActive('/') ? '#ff9900' : '#565959', gap: '6px', padding: '8px 0', transition: 'color 0.3s ease' }}>
+            <Home className="w-9 h-9" style={{ filter: isActive('/') ? 'drop-shadow(0 3px 8px rgba(255,153,0,0.5))' : 'drop-shadow(0 2px 6px rgba(0,0,0,0.3))', strokeWidth: 1.5 }} />
+            <span style={{ fontSize: '11px', fontWeight: 500, letterSpacing: '0.2px' }}>Home</span>
+          </Link>
+          <Link href={`/${locale}/predictions`} className="flex flex-col items-center justify-center" style={{ color: '#ff9900', gap: '6px', padding: '8px 0', transition: 'color 0.3s ease' }}>
+            <Eye className="w-9 h-9" style={{ filter: 'drop-shadow(0 3px 8px rgba(255,153,0,0.5))', strokeWidth: 1.5 }} />
+            <span style={{ fontSize: '11px', fontWeight: 500, letterSpacing: '0.2px' }}>Predictions</span>
+          </Link>
         </div>
-      </div>
+      </nav>
+
+      <style jsx>{`
+        @keyframes slideInLeft {
+          from { 
+            transform: translateX(-100%);
+            opacity: 0;
+          }
+          to { 
+            transform: translateX(0);
+            opacity: 1;
+          }
+        }
+        .safe-area-inset-bottom {
+          padding-bottom: env(safe-area-inset-bottom);
+        }
+      `}</style>
     </div>
   );
 }

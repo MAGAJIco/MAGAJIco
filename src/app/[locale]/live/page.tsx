@@ -1,8 +1,10 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { RefreshCw, Zap, Filter, TrendingUp } from 'lucide-react';
+import React, { useState, useEffect, use } from 'react';
+import { RefreshCw, Zap, Filter, TrendingUp, Clock, Eye, Home } from 'lucide-react';
 import { motion } from 'framer-motion';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { getApiBaseUrl } from '@/lib/api';
 
 interface LiveMatch {
@@ -19,11 +21,15 @@ interface LiveMatch {
 
 type SportFilter = 'all' | 'Football' | 'Basketball' | 'Baseball' | 'Soccer';
 
-export default function LivePage() {
+export default function LivePage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = use(params);
+  const pathname = usePathname();
+  const isActive = (path: string) => pathname === `/${locale}${path}` || pathname === `/${locale}/`;
   const [matches, setMatches] = useState<LiveMatch[]>([]);
   const [loading, setLoading] = useState(false);
   const [sport, setSport] = useState<SportFilter>('all');
   const [lastUpdate, setLastUpdate] = useState(new Date());
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     fetchLive();
@@ -34,8 +40,24 @@ export default function LivePage() {
   const fetchLive = async () => {
     try {
       setLoading(true);
-      // Use sport predictions endpoint
-      const response = await fetch(`/api/predictions/sport/soccer`);
+      // Use live predictions endpoint
+      const response = await fetch(`/api/live`);
+      
+      if (!response.ok) {
+        console.error('API returned status:', response.status);
+        setMatches([]);
+        setLastUpdate(new Date());
+        return;
+      }
+
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        console.error('API returned non-JSON response:', contentType);
+        setMatches([]);
+        setLastUpdate(new Date());
+        return;
+      }
+
       const data = await response.json();
       const matches = data.matches || [];
 
@@ -57,6 +79,7 @@ export default function LivePage() {
       setLastUpdate(new Date());
     } catch (err) {
       console.error('Error fetching live matches:', err);
+      setMatches([]);
     } finally {
       setLoading(false);
     }
@@ -65,126 +88,181 @@ export default function LivePage() {
   const filtered = sport === 'all' ? matches : matches.filter(m => m.sport === sport);
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-red-600 to-red-700 dark:from-red-900 dark:to-red-800 text-white px-4 py-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <Zap className="w-6 h-6" />
-              <h1 className="text-3xl font-bold">Live Now</h1>
-              {filtered.length > 0 && (
-                <span className="bg-white text-red-600 px-3 py-1 rounded-full font-bold ml-2">{filtered.length}</span>
-              )}
+    <div style={{ backgroundColor: '#eaeded', minHeight: '100vh' }} className="dark:bg-black">
+      {/* Header - Dark Navy Amazon Style */}
+      <header style={{ backgroundColor: '#131921' }} className="text-white sticky top-0 z-50 shadow-lg">
+        <div style={{ padding: '18px 24px' }} className="flex items-center justify-between">
+          <div className="flex items-center" style={{ gap: '18px' }}>
+            <Clock className="w-12 h-12" style={{ color: '#ff9900', filter: 'drop-shadow(0 3px 12px rgba(255,153,0,0.6))', strokeWidth: 1.5 }} />
+            <div>
+              <h1 style={{ letterSpacing: '0.8px', fontSize: '24px', fontWeight: 700 }}>LIVE</h1>
+              <p style={{ fontSize: '11px', color: '#999', letterSpacing: '1px', marginTop: '2px', fontWeight: 500 }}>MATCHES</p>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div style={{ paddingBottom: '100px' }}>
+        {/* Orange Gradient Banner */}
+        <div style={{ background: 'linear-gradient(to right, #ff3b30, #ff6b6b)', padding: '20px 24px' }} className="text-white shadow-lg">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center" style={{ gap: '12px' }}>
+              <div className="relative flex items-center justify-center">
+                <div className="absolute animate-pulse" style={{ width: '12px', height: '12px', backgroundColor: '#ff3b30', borderRadius: '50%' }}></div>
+              </div>
+              <span style={{ fontSize: '14px', fontWeight: 600, letterSpacing: '0.5px' }}>{filtered.length} LIVE MATCHES</span>
             </div>
             <button
               onClick={fetchLive}
               disabled={loading}
-              className="p-2 hover:bg-red-500 rounded-lg transition"
+              className="cursor-pointer hover:opacity-80 transition-opacity"
             >
-              <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} style={{ strokeWidth: 2 }} />
             </button>
           </div>
-          <p className="text-red-100 text-sm">Last updated: {lastUpdate.toLocaleTimeString()}</p>
         </div>
-      </div>
 
-      {/* Sport Filter */}
-      <div className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3">
-        <div className="max-w-7xl mx-auto flex gap-2 overflow-x-auto">
-          {(['all', 'Football', 'Basketball', 'Baseball', 'Soccer'] as const).map(s => (
-            <button
-              key={s}
-              onClick={() => setSport(s)}
-              className={`px-4 py-2 rounded-lg font-semibold whitespace-nowrap transition ${
-                sport === s
-                  ? 'bg-red-600 text-white'
-                  : 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-600'
-              }`}
-            >
-              {s === 'all' ? 'All Sports' : s}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Matches - Grouped by League */}
-      <div className="max-w-7xl mx-auto px-4 py-6">
-        {loading ? (
-          <div className="flex justify-center py-12">
-            <RefreshCw className="w-8 h-8 animate-spin text-red-600" />
-          </div>
-        ) : filtered.length > 0 ? (
-          <div className="space-y-6">
-            {/* Group matches by league */}
-            {Object.entries(
-              filtered.reduce((acc, match) => {
-                if (!acc[match.league]) acc[match.league] = [];
-                acc[match.league].push(match);
-                return acc;
-              }, {} as Record<string, LiveMatch[]>)
-            ).map(([league, leagueMatches], leagueIdx) => (
-              <motion.div
-                key={league}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: leagueIdx * 0.1 }}
+        {/* Sport Filter */}
+        <div style={{ backgroundColor: '#f3f3f3', borderBottomColor: '#d5d9d9', padding: '16px 24px' }} className="border-b dark:bg-[#1c1c1e] dark:border-[#38383a] overflow-x-auto">
+          <div className="flex gap-3">
+            {(['all', 'Football', 'Basketball', 'Baseball', 'Soccer'] as const).map(s => (
+              <button
+                key={s}
+                onClick={() => setSport(s)}
+                style={{
+                  backgroundColor: sport === s ? '#ff3b30' : 'white',
+                  color: sport === s ? 'white' : '#0f1111',
+                  padding: '10px 16px',
+                  borderRadius: '8px',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  border: 'none',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  boxShadow: sport === s ? '0 4px 12px rgba(255,59,48,0.3)' : '0 1px 3px rgba(0,0,0,0.08)',
+                  whiteSpace: 'nowrap'
+                }}
+                className="dark:bg-[#2c2c2e] dark:text-white dark:border-[#38383a]"
               >
-                {/* League Header */}
-                <div className="bg-gradient-to-r from-red-100 to-red-50 dark:from-red-900/30 dark:to-red-800/20 px-4 py-2 rounded-lg mb-3 border border-red-200 dark:border-red-800/50">
-                  <p className="font-bold text-red-900 dark:text-red-300">{league}</p>
-                </div>
-
-                {/* Matches in this league */}
-                <div className="space-y-2">
-                  {leagueMatches.map((match, idx) => (
-                    <motion.div
-                      key={idx}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: leagueIdx * 0.1 + idx * 0.05 }}
-                      className="bg-white dark:bg-gray-800 border-2 border-red-200 dark:border-red-900/50 rounded-lg p-4 hover:shadow-md transition cursor-pointer"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1">
-                          <div className="font-semibold text-gray-900 dark:text-white">
-                            {match.homeTeam}
-                          </div>
-                          <div className="font-semibold text-gray-900 dark:text-white">
-                            {match.awayTeam}
-                          </div>
-                        </div>
-
-                        <div className="text-right mx-4">
-                          <div className="font-bold text-3xl text-gray-900 dark:text-white leading-none">
-                            {match.homeScore}
-                          </div>
-                          <div className="text-sm text-gray-500 dark:text-gray-400 my-1">-</div>
-                          <div className="font-bold text-3xl text-gray-900 dark:text-white leading-none">
-                            {match.awayScore}
-                          </div>
-                        </div>
-
-                        <div className="text-right">
-                          <div className="px-3 py-2 bg-red-500 text-white rounded font-bold text-sm animate-pulse whitespace-nowrap">
-                            ● LIVE
-                          </div>
-                        </div>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              </motion.div>
+                {s === 'all' ? 'All Sports' : s}
+              </button>
             ))}
           </div>
-        ) : (
-          <div className="text-center py-12">
-            <div className="text-gray-400 mb-3 text-4xl">⚽</div>
-            <p className="text-gray-500 dark:text-gray-400 font-semibold">No live matches right now</p>
-            <p className="text-sm text-gray-500 dark:text-gray-500 mt-2">Check back soon for upcoming matches</p>
-          </div>
-        )}
+        </div>
+
+        {/* Matches - Grouped by League */}
+        <div style={{ backgroundColor: '#eaeded', padding: '20px 24px' }} className="dark:bg-black">
+          {loading ? (
+            <div className="text-center py-20">
+              <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2" style={{ borderRightColor: '#ff3b30' }}></div>
+              <div style={{ marginTop: '16px', color: '#565959', fontWeight: 500 }} className="dark:text-gray-400">Loading live matches...</div>
+            </div>
+          ) : filtered.length > 0 ? (
+            <div className="space-y-4">
+              {Object.entries(
+                filtered.reduce((acc, match) => {
+                  if (!acc[match.league]) acc[match.league] = [];
+                  acc[match.league].push(match);
+                  return acc;
+                }, {} as Record<string, LiveMatch[]>)
+              ).map(([league, leagueMatches], leagueIdx) => (
+                <motion.div
+                  key={league}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: leagueIdx * 0.1 }}
+                >
+                  {/* League Header */}
+                  <div style={{ backgroundColor: '#d5d9d9', padding: '12px 16px', borderRadius: '8px', marginBottom: '12px' }} className="dark:bg-[#2c2c2e]">
+                    <p style={{ fontSize: '12px', fontWeight: 600, color: '#0f1111', letterSpacing: '0.5px' }} className="dark:text-white uppercase">{league}</p>
+                  </div>
+
+                  {/* Matches in this league */}
+                  <div className="space-y-3">
+                    {leagueMatches.map((match, idx) => (
+                      <motion.div
+                        key={idx}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: leagueIdx * 0.1 + idx * 0.05 }}
+                        style={{ backgroundColor: 'white', borderRadius: '12px', padding: '16px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', border: '1px solid #d5d9d9', cursor: 'pointer', transition: 'all 0.3s ease' }}
+                        className="dark:bg-[#2c2c2e] dark:border-[#38383a] hover:shadow-lg"
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1">
+                            <div style={{ fontWeight: 600, fontSize: '14px', color: '#0f1111', marginBottom: '8px' }} className="dark:text-white">
+                              {match.homeTeam}
+                            </div>
+                            <div style={{ fontSize: '13px', color: '#565959' }} className="dark:text-gray-400">
+                              vs {match.awayTeam}
+                            </div>
+                          </div>
+
+                          <div style={{ textAlign: 'right', marginLeft: '16px', marginRight: '16px' }}>
+                            <div style={{ fontSize: '28px', fontWeight: 700, color: '#0f1111', lineHeight: '1' }} className="dark:text-white">
+                              {match.homeScore}
+                            </div>
+                            <div style={{ fontSize: '12px', color: '#565959', margin: '4px 0' }} className="dark:text-gray-400">-</div>
+                            <div style={{ fontSize: '28px', fontWeight: 700, color: '#0f1111', lineHeight: '1' }} className="dark:text-white">
+                              {match.awayScore}
+                            </div>
+                          </div>
+
+                          <div style={{ textAlign: 'right' }}>
+                            <div style={{ backgroundColor: '#ff3b30', color: 'white', padding: '6px 12px', borderRadius: '6px', fontWeight: 700, fontSize: '11px', whiteSpace: 'nowrap', animation: 'pulse 2s infinite' }}>
+                              ● LIVE
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          ) : (
+            <div style={{ backgroundColor: 'white', borderRadius: '12px', padding: '40px 24px', textAlign: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', border: '1px solid #d5d9d9' }} className="dark:bg-[#2c2c2e] dark:border-[#38383a]">
+              <div style={{ fontSize: '48px', marginBottom: '16px' }}>⚽</div>
+              <div style={{ fontSize: '16px', fontWeight: 600, color: '#0f1111', marginBottom: '8px' }} className="dark:text-white">No live matches right now</div>
+              <p style={{ fontSize: '13px', color: '#565959' }} className="dark:text-gray-400">Check back soon for upcoming matches</p>
+            </div>
+          )}
+        </div>
       </div>
+
+      {/* Bottom Navigation */}
+      <nav style={{ backgroundColor: '#f3f3f3', borderTopColor: '#d5d9d9', padding: '14px 0 env(safe-area-inset-bottom)' }} className="border-t dark:bg-[#1c1c1e] dark:border-[#38383a] fixed bottom-0 left-0 right-0 safe-area-inset-bottom backdrop-blur-xl bg-opacity-98 dark:bg-opacity-98 shadow-2xl">
+        <div className="flex items-center justify-around max-w-2xl mx-auto">
+          <Link href={`/${locale}/`} className="flex flex-col items-center justify-center" style={{ color: isActive('/') ? '#ff9900' : '#565959', gap: '6px', padding: '8px 0', transition: 'color 0.3s ease' }}>
+            <Home className="w-9 h-9" style={{ filter: isActive('/') ? 'drop-shadow(0 3px 8px rgba(255,153,0,0.5))' : 'drop-shadow(0 2px 6px rgba(0,0,0,0.3))', strokeWidth: 1.5 }} />
+            <span style={{ fontSize: '11px', fontWeight: 500, letterSpacing: '0.2px' }}>Home</span>
+          </Link>
+          <Link href={`/${locale}/live`} className="flex flex-col items-center justify-center" style={{ color: '#ff3b30', gap: '6px', padding: '8px 0', transition: 'color 0.3s ease' }}>
+            <Clock className="w-9 h-9" style={{ filter: 'drop-shadow(0 3px 8px rgba(255,59,48,0.5))', strokeWidth: 1.5 }} />
+            <span style={{ fontSize: '11px', fontWeight: 500, letterSpacing: '0.2px' }}>LIVE</span>
+          </Link>
+        </div>
+      </nav>
+
+      <style jsx>{`
+        @keyframes slideInLeft {
+          from { 
+            transform: translateX(-100%);
+            opacity: 0;
+          }
+          to { 
+            transform: translateX(0);
+            opacity: 1;
+          }
+        }
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.7; }
+        }
+        .safe-area-inset-bottom {
+          padding-bottom: env(safe-area-inset-bottom);
+        }
+      `}</style>
     </div>
   );
 }

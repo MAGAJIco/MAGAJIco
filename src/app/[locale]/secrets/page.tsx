@@ -1,7 +1,10 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Star, Calendar, CalendarDays, TrendingUp, Clock, AlertCircle } from 'lucide-react';
+import { Star, Calendar, CalendarDays, TrendingUp, Clock, AlertCircle, Lock, ChevronLeft, ChevronRight, Home } from 'lucide-react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { use } from 'react';
 
 interface SecretMatch {
   id: string;
@@ -147,11 +150,19 @@ function SecretMatchCard({ match, starredCount }: SecretMatchCardProps) {
 
 type FilterType = 'starred' | 'today' | 'week';
 
-export default function SecretsPage() {
+export default function SecretsPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = use(params);
+  const pathname = usePathname();
   const [matches, setMatches] = useState<SecretMatch[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<FilterType>('starred');
   const [starredTeams, setStarredTeams] = useState<Record<string, number>>({});
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [calendarOpen, setCalendarOpen] = useState(false);
+  const [calendarMonth, setCalendarMonth] = useState(new Date(2025, 10));
+  const [selectedDate, setSelectedDate] = useState(new Date(2025, 10, 26));
+
+  const isActive = (path: string) => pathname === `/${locale}${path}` || pathname === `/${locale}/`;
 
   // Mock data for demonstration
   const mockMatches: SecretMatch[] = [
@@ -242,6 +253,25 @@ export default function SecretsPage() {
 
   const today = new Date().toLocaleDateString('en-US', { weekday: 'short', day: '2-digit', month: '2-digit' });
 
+  const getDaysInMonth = (date: Date) => {
+    return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+  };
+
+  const getFirstDayOfMonth = (date: Date) => {
+    return new Date(date.getFullYear(), date.getMonth(), 1).getDay();
+  };
+
+  const getIgboMarketDay = (date: Date) => {
+    const igboDays = ['Eke', 'Oye', 'Afo', 'Nkwo'];
+    const epoch = new Date(2025, 10, 24);
+    const diffTime = Math.abs(date.getTime() - epoch.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return igboDays[diffDays % 4];
+  };
+
+  const calendarDays = Array.from({ length: getDaysInMonth(calendarMonth) }, (_, i) => i + 1);
+  const emptyDays = Array.from({ length: getFirstDayOfMonth(calendarMonth) }, () => null);
+
   const filteredMatches = matches.filter(match => {
     if (filter === 'starred') return starredTeams[match.home_team] || starredTeams[match.away_team];
     if (filter === 'today') return match.date.includes('27/11');
@@ -256,87 +286,246 @@ export default function SecretsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      <div className="p-4 md:p-8 max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">Secret Matches</h1>
-          <p className="text-gray-600">Discover high-value betting opportunities</p>
+    <div style={{ backgroundColor: '#eaeded', minHeight: '100vh' }} className="dark:bg-black">
+      {/* Header - Dark Navy Amazon Style */}
+      <header style={{ backgroundColor: '#131921' }} className="text-white sticky top-0 z-50 shadow-lg">
+        <div style={{ padding: '18px 24px' }} className="flex items-center justify-between">
+          <div className="flex items-center" style={{ gap: '18px' }}>
+            <Lock className="w-12 h-12" style={{ color: '#ff9900', filter: 'drop-shadow(0 3px 12px rgba(255,153,0,0.6))', strokeWidth: 1.5 }} />
+            <div>
+              <h1 style={{ letterSpacing: '0.8px', fontSize: '24px', fontWeight: 700 }}>SECRET</h1>
+              <p style={{ fontSize: '11px', color: '#999', letterSpacing: '1px', marginTop: '2px', fontWeight: 500 }}>OPPORTUNITIES</p>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div style={{ paddingBottom: '100px' }}>
+        {/* Description Banner */}
+        <div style={{ backgroundColor: '#f3f3f3', borderBottomColor: '#d5d9d9', padding: '24px' }} className="border-b dark:bg-[#1c1c1e] dark:border-[#38383a]">
+          <p style={{ fontSize: '15px', color: '#565959', fontWeight: 500 }} className="dark:text-gray-400">Discover high-value betting opportunities with our curated secret predictions</p>
         </div>
 
-        {/* Filter Buttons */}
-        <div className="flex flex-wrap gap-3 mb-8">
-          <button
-            className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center gap-2 ${
-              filter === 'starred' 
-                ? 'bg-gradient-to-r from-yellow-400 to-orange-400 text-white shadow-lg scale-105' 
-                : 'bg-white text-gray-700 hover:bg-gray-50 shadow-md'
-            }`}
-            onClick={() => handleFilterChange('starred')}
+        {/* Calendar Picker - Full Grid */}
+        <div style={{ backgroundColor: '#f3f3f3', borderBottomColor: '#d5d9d9', padding: '20px 24px', position: 'relative' }} className="border-b dark:bg-[#1c1c1e] dark:border-[#38383a]">
+          <button 
+            onClick={() => setCalendarOpen(!calendarOpen)}
+            style={{ backgroundColor: 'white', borderRadius: '12px', padding: '12px 16px', cursor: 'pointer', border: '1px solid #d5d9d9', width: '100%', textAlign: 'center', fontSize: '15px', fontWeight: 600, color: '#0f1111' }}
+            className="dark:bg-[#2c2c2e] dark:text-white dark:border-[#38383a]"
           >
-            <Star className={`w-5 h-5 ${filter === 'starred' ? 'fill-white' : ''}`} />
-            Starred Teams
+            📅 {selectedDate.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}
           </button>
-          <button
-            className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center gap-2 ${
-              filter === 'today' 
-                ? 'bg-gradient-to-r from-blue-400 to-cyan-400 text-white shadow-lg scale-105' 
-                : 'bg-white text-gray-700 hover:bg-gray-50 shadow-md'
-            }`}
-            onClick={() => handleFilterChange('today')}
-          >
-            <Calendar className="w-5 h-5" />
-            Today's Matches
-          </button>
-          <button
-            className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center gap-2 ${
-              filter === 'week' 
-                ? 'bg-gradient-to-r from-purple-400 to-pink-400 text-white shadow-lg scale-105' 
-                : 'bg-white text-gray-700 hover:bg-gray-50 shadow-md'
-            }`}
-            onClick={() => handleFilterChange('week')}
-          >
-            <CalendarDays className="w-5 h-5" />
-            This Week
-          </button>
+
+          {calendarOpen && (
+            <div style={{ position: 'absolute', top: '100%', left: '24px', marginTop: '12px', backgroundColor: 'white', borderRadius: '12px', boxShadow: '0 8px 24px rgba(0,0,0,0.15)', padding: '20px', zIndex: 50, minWidth: '320px' }} className="dark:bg-[#2c2c2e]">
+              {/* Month Navigation */}
+              <div className="flex items-center justify-between mb-6">
+                <button 
+                  onClick={() => setCalendarMonth(new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() - 1))}
+                  className="cursor-pointer hover:opacity-70 transition-opacity"
+                >
+                  <ChevronLeft className="w-5 h-5" style={{ color: '#0f1111' }} />
+                </button>
+                <span style={{ fontSize: '15px', fontWeight: 600, color: '#0f1111' }} className="dark:text-white">
+                  {['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'][calendarMonth.getMonth()]} {calendarMonth.getFullYear()}
+                </span>
+                <button 
+                  onClick={() => setCalendarMonth(new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1))}
+                  className="cursor-pointer hover:opacity-70 transition-opacity"
+                >
+                  <ChevronRight className="w-5 h-5" style={{ color: '#0f1111' }} />
+                </button>
+              </div>
+
+              {/* Days of Week */}
+              <div className="grid grid-cols-7 gap-2 mb-4">
+                {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(day => (
+                  <div key={day} style={{ textAlign: 'center', fontSize: '12px', fontWeight: 600, color: '#565959' }} className="dark:text-gray-400 h-8 flex items-center justify-center">
+                    {day}
+                  </div>
+                ))}
+              </div>
+
+              {/* Calendar Days */}
+              <div className="grid grid-cols-7 gap-2">
+                {emptyDays.map((_, idx) => (
+                  <div key={`empty-${idx}`} style={{ height: '32px' }}></div>
+                ))}
+                {calendarDays.map(day => {
+                  const dateObj = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth(), day);
+                  const isSelected = selectedDate.toDateString() === dateObj.toDateString();
+                  const marketDay = getIgboMarketDay(dateObj);
+                  const marketDayColors = { 'Eke': '#667eea', 'Oye': '#764ba2', 'Afo': '#f093fb', 'Nkwo': '#4facfe' };
+                  return (
+                    <div key={day} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
+                      <button
+                        onClick={() => {
+                          setSelectedDate(dateObj);
+                          setCalendarOpen(false);
+                        }}
+                        style={{
+                          height: '32px',
+                          width: '32px',
+                          borderRadius: '6px',
+                          backgroundColor: isSelected ? '#ff9900' : 'transparent',
+                          color: isSelected ? 'white' : '#0f1111',
+                          border: 'none',
+                          cursor: 'pointer',
+                          fontSize: '13px',
+                          fontWeight: 500,
+                          transition: 'all 0.2s ease'
+                        }}
+                        className="hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white"
+                      >
+                        {day}
+                      </button>
+                      <span style={{ fontSize: '9px', fontWeight: 600, color: marketDayColors[marketDay], letterSpacing: '0.3px', minHeight: '10px' }} className="dark:text-opacity-80">
+                        {marketDay}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Stats Bar */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <div className="bg-white rounded-xl p-4 shadow-md">
-            <div className="text-sm text-gray-500">Total Matches</div>
-            <div className="text-2xl font-bold text-gray-800">{matches.length}</div>
+        {/* Filter Buttons - Premium Style */}
+        <div style={{ backgroundColor: '#f3f3f3', borderBottomColor: '#d5d9d9', padding: '20px 24px' }} className="border-b dark:bg-[#1c1c1e] dark:border-[#38383a]">
+          <div className="flex flex-wrap gap-3">
+            <button
+              style={{
+                backgroundColor: filter === 'starred' ? '#ff9900' : 'white',
+                color: filter === 'starred' ? 'white' : '#0f1111',
+                borderColor: '#d5d9d9',
+                padding: '12px 20px',
+                borderRadius: '8px',
+                fontSize: '14px',
+                fontWeight: 600,
+                border: '1px solid',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                boxShadow: filter === 'starred' ? '0 4px 12px rgba(255,153,0,0.3)' : '0 2px 8px rgba(0,0,0,0.08)'
+              }}
+              className="dark:bg-[#2c2c2e] dark:text-white dark:border-[#38383a]"
+              onClick={() => handleFilterChange('starred')}
+            >
+              <Star className="w-4 h-4 inline mr-2" />
+              Starred Teams
+            </button>
+            <button
+              style={{
+                backgroundColor: filter === 'today' ? '#ff9900' : 'white',
+                color: filter === 'today' ? 'white' : '#0f1111',
+                borderColor: '#d5d9d9',
+                padding: '12px 20px',
+                borderRadius: '8px',
+                fontSize: '14px',
+                fontWeight: 600,
+                border: '1px solid',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                boxShadow: filter === 'today' ? '0 4px 12px rgba(255,153,0,0.3)' : '0 2px 8px rgba(0,0,0,0.08)'
+              }}
+              className="dark:bg-[#2c2c2e] dark:text-white dark:border-[#38383a]"
+              onClick={() => handleFilterChange('today')}
+            >
+              <Calendar className="w-4 h-4 inline mr-2" />
+              Today's Matches
+            </button>
+            <button
+              style={{
+                backgroundColor: filter === 'week' ? '#ff9900' : 'white',
+                color: filter === 'week' ? 'white' : '#0f1111',
+                borderColor: '#d5d9d9',
+                padding: '12px 20px',
+                borderRadius: '8px',
+                fontSize: '14px',
+                fontWeight: 600,
+                border: '1px solid',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                boxShadow: filter === 'week' ? '0 4px 12px rgba(255,153,0,0.3)' : '0 2px 8px rgba(0,0,0,0.08)'
+              }}
+              className="dark:bg-[#2c2c2e] dark:text-white dark:border-[#38383a]"
+              onClick={() => handleFilterChange('week')}
+            >
+              <CalendarDays className="w-4 h-4 inline mr-2" />
+              This Week
+            </button>
           </div>
-          <div className="bg-white rounded-xl p-4 shadow-md">
-            <div className="text-sm text-gray-500">Starred Teams</div>
-            <div className="text-2xl font-bold text-yellow-500">{Object.keys(starredTeams).length}</div>
-          </div>
-          <div className="bg-white rounded-xl p-4 shadow-md">
-            <div className="text-sm text-gray-500">Current Filter</div>
-            <div className="text-2xl font-bold text-indigo-600 capitalize">{filter}</div>
+        </div>
+
+        {/* Stats Bar - Premium Cards */}
+        <div style={{ backgroundColor: '#f3f3f3', padding: '20px 24px' }} className="dark:bg-[#1c1c1e]">
+          <div className="grid grid-cols-3 gap-3">
+            <div style={{ backgroundColor: 'white', borderRadius: '12px', padding: '16px 20px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', border: '1px solid #d5d9d9' }} className="dark:bg-[#2c2c2e] dark:border-[#38383a]">
+              <div style={{ fontSize: '12px', color: '#565959', marginBottom: '8px' }} className="dark:text-gray-500">Total Matches</div>
+              <div style={{ fontSize: '24px', fontWeight: 700, color: '#0f1111' }} className="dark:text-white">{matches.length}</div>
+            </div>
+            <div style={{ backgroundColor: 'white', borderRadius: '12px', padding: '16px 20px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', border: '1px solid #d5d9d9' }} className="dark:bg-[#2c2c2e] dark:border-[#38383a]">
+              <div style={{ fontSize: '12px', color: '#565959', marginBottom: '8px' }} className="dark:text-gray-500">Starred Teams</div>
+              <div style={{ fontSize: '24px', fontWeight: 700, color: '#ff9900' }}>{Object.keys(starredTeams).length}</div>
+            </div>
+            <div style={{ backgroundColor: 'white', borderRadius: '12px', padding: '16px 20px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', border: '1px solid #d5d9d9' }} className="dark:bg-[#2c2c2e] dark:border-[#38383a]">
+              <div style={{ fontSize: '12px', color: '#565959', marginBottom: '8px' }} className="dark:text-gray-500">Current Filter</div>
+              <div style={{ fontSize: '18px', fontWeight: 700, color: '#ff9900', textTransform: 'capitalize' }}>{filter}</div>
+            </div>
           </div>
         </div>
 
         {/* Matches Grid */}
-        {loading ? (
-          <div className="text-center py-20">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
-            <div className="mt-4 text-gray-600 font-medium">Loading secret matches...</div>
-          </div>
-        ) : filteredMatches.length === 0 ? (
-          <div className="text-center py-20 bg-white rounded-xl shadow-md">
-            <AlertCircle className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <div className="text-xl font-semibold text-gray-800 mb-2">No matches found</div>
-            <p className="text-gray-600">Try selecting a different filter</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {filteredMatches.map(match => (
-              <SecretMatchCard key={match.id} match={match} starredCount={starredTeams} />
-            ))}
-          </div>
-        )}
+        <div style={{ backgroundColor: '#eaeded', padding: '20px 24px' }} className="dark:bg-black">
+          {loading ? (
+            <div className="text-center py-20">
+              <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2" style={{ borderRightColor: '#ff9900' }}></div>
+              <div style={{ marginTop: '16px', color: '#565959', fontWeight: 500 }} className="dark:text-gray-400">Loading secret matches...</div>
+            </div>
+          ) : filteredMatches.length === 0 ? (
+            <div style={{ backgroundColor: 'white', borderRadius: '12px', padding: '40px 24px', textAlign: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', border: '1px solid #d5d9d9' }} className="dark:bg-[#2c2c2e] dark:border-[#38383a]">
+              <AlertCircle className="w-16 h-16 mx-auto mb-4" style={{ color: '#d5d9d9' }} />
+              <div style={{ fontSize: '18px', fontWeight: 600, color: '#0f1111', marginBottom: '8px' }} className="dark:text-white">No matches found</div>
+              <p style={{ color: '#565959' }} className="dark:text-gray-400">Try selecting a different filter</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              {filteredMatches.map(match => (
+                <SecretMatchCard key={match.id} match={match} starredCount={starredTeams} />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
+
+      {/* Bottom Navigation */}
+      <nav style={{ backgroundColor: '#f3f3f3', borderTopColor: '#d5d9d9', padding: '14px 0 env(safe-area-inset-bottom)' }} className="border-t dark:bg-[#1c1c1e] dark:border-[#38383a] fixed bottom-0 left-0 right-0 safe-area-inset-bottom backdrop-blur-xl bg-opacity-98 dark:bg-opacity-98 shadow-2xl">
+        <div className="flex items-center justify-around max-w-2xl mx-auto">
+          <Link href={`/${locale}/`} className="flex flex-col items-center justify-center" style={{ color: isActive('/') ? '#ff9900' : '#565959', gap: '6px', padding: '8px 0', transition: 'color 0.3s ease' }}>
+            <Home className="w-9 h-9" style={{ filter: isActive('/') ? 'drop-shadow(0 3px 8px rgba(255,153,0,0.5))' : 'drop-shadow(0 2px 6px rgba(0,0,0,0.3))', strokeWidth: 1.5 }} />
+            <span style={{ fontSize: '11px', fontWeight: 500, letterSpacing: '0.2px' }}>Home</span>
+          </Link>
+          <Link href={`/${locale}/secrets`} className="flex flex-col items-center justify-center" style={{ color: '#ff9900', gap: '6px', padding: '8px 0', transition: 'color 0.3s ease' }}>
+            <Lock className="w-9 h-9" style={{ filter: 'drop-shadow(0 3px 8px rgba(255,153,0,0.5))', strokeWidth: 1.5 }} />
+            <span style={{ fontSize: '11px', fontWeight: 500, letterSpacing: '0.2px' }}>Secrets</span>
+          </Link>
+        </div>
+      </nav>
+
+      <style jsx>{`
+        @keyframes slideInLeft {
+          from { 
+            transform: translateX(-100%);
+            opacity: 0;
+          }
+          to { 
+            transform: translateX(0);
+            opacity: 1;
+          }
+        }
+        .safe-area-inset-bottom {
+          padding-bottom: env(safe-area-inset-bottom);
+        }
+      `}</style>
     </div>
   );
 }

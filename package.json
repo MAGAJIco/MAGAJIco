@@ -30,6 +30,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@tailwindcss/postcss": "^4.1.17",
     "@tanstack/react-query": "^5.90.10",
     "@types/memoizee": "^0.4.12",
     "@types/node": "^24.10.1",
