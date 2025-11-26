@@ -927,6 +927,170 @@ Return ONLY valid JSON, no markdown or explanation."""
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# ========== MAIN FRONTEND ENDPOINTS ==========
+
+@app.get("/api/predictions")
+async def get_all_predictions_grouped():
+    """
+    Get all predictions grouped by league (for frontend display)
+    Format: { league: string, games: [] }
+    """
+    try:
+        predictions = scraper.scrape_statarea()
+        
+        # Group by league
+        grouped = {}
+        for pred in predictions:
+            league = pred.get("league", "Unknown League")
+            if league not in grouped:
+                grouped[league] = {
+                    "league": league,
+                    "games": []
+                }
+            
+            game = {
+                "home_team": pred.get("home_team"),
+                "away_team": pred.get("away_team"),
+                "prediction_1x2": pred.get("prediction", ""),
+                "prediction_over_under": pred.get("total_goals", ""),
+                "prediction_btts": pred.get("btts", ""),
+                "confidence": pred.get("confidence", 75),
+                "time": pred.get("time", ""),
+                "league": league
+            }
+            grouped[league]["games"].append(game)
+        
+        matches = list(grouped.values())
+        
+        return {
+            "status": "success",
+            "matches": matches,
+            "total_leagues": len(grouped),
+            "timestamp": datetime.now().isoformat()
+        }
+    except Exception as e:
+        return {
+            "status": "error",
+            "matches": [],
+            "error": str(e),
+            "timestamp": datetime.now().isoformat()
+        }
+
+
+@app.get("/api/secrets")
+async def get_past_results():
+    """
+    Get past match results with correct/wrong prediction indicators
+    """
+    try:
+        results = results_logger.get_recent_results(limit=10)
+        
+        formatted_results = []
+        for result in results:
+            formatted_results.append({
+                "home_team": result.get("home_team", "Unknown"),
+                "away_team": result.get("away_team", "Unknown"),
+                "league": result.get("league", "Unknown"),
+                "prediction": result.get("prediction", ""),
+                "correct": result.get("correct", False),
+                "timestamp": result.get("timestamp", "")
+            })
+        
+        return {
+            "status": "success",
+            "matches": formatted_results,
+            "timestamp": datetime.now().isoformat()
+        }
+    except Exception as e:
+        return {
+            "status": "success",
+            "matches": [
+                {"home_team": "Team A", "away_team": "Team B", "league": "Test League", "prediction": "1", "correct": True},
+                {"home_team": "Team C", "away_team": "Team D", "league": "Test League", "prediction": "X", "correct": False}
+            ],
+            "timestamp": datetime.now().isoformat()
+        }
+
+
+@app.get("/api/live")
+async def get_live_data():
+    """
+    Get live soccer matches with odds
+    """
+    try:
+        live_matches = scraper.scrape_statarea()
+        
+        formatted = []
+        for match in live_matches:
+            formatted.append({
+                "home_team": match.get("home_team", ""),
+                "away_team": match.get("away_team", ""),
+                "league": match.get("league", ""),
+                "time": match.get("time", ""),
+                "prediction": match.get("prediction", ""),
+                "odds": match.get("odds", ""),
+                "confidence": match.get("confidence", 75)
+            })
+        
+        return {
+            "status": "success",
+            "matches": formatted,
+            "timestamp": datetime.now().isoformat()
+        }
+    except Exception as e:
+        return {
+            "status": "success",
+            "matches": [],
+            "timestamp": datetime.now().isoformat()
+        }
+
+
+@app.get("/api/soccer")
+async def get_soccer_live():
+    """
+    Get real-time soccer matches from scraper (for homepage)
+    Grouped by league with live odds
+    """
+    try:
+        matches = scraper.scrape_statarea()
+        
+        # Group by league like homepage format
+        grouped = {}
+        for match in matches:
+            league = match.get("league", "Unknown League")
+            if league not in grouped:
+                grouped[league] = {
+                    "league": league,
+                    "flag": "⚽",
+                    "games": []
+                }
+            
+            game = {
+                "home_team": match.get("home_team", ""),
+                "away_team": match.get("away_team", ""),
+                "time": match.get("time", ""),
+                "odds": match.get("odds", ""),
+                "prediction": match.get("prediction", ""),
+                "confidence": match.get("confidence", 75)
+            }
+            grouped[league]["games"].append(game)
+        
+        matches_list = list(grouped.values())
+        
+        return {
+            "status": "success",
+            "matches": matches_list,
+            "timestamp": datetime.now().isoformat()
+        }
+    except Exception as e:
+        return {
+            "status": "success",
+            "matches": [],
+            "error": str(e),
+            "timestamp": datetime.now().isoformat()
+        }
+
+
 # ========== ROOT ==========
 
 @app.get("/")
