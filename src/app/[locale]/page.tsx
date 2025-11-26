@@ -52,7 +52,7 @@ export default function SoccerPredictionsHome({ params }: { params: Promise<{ lo
         const contentType = response.headers.get('content-type');
         if (!contentType || !contentType.includes('application/json')) return;
         const data = await response.json();
-        setResults(data.matches || []);
+        setResults(data.results_by_date || []);
       } catch (err) {
         console.error('Error fetching results:', err);
       } finally {
@@ -406,24 +406,54 @@ export default function SoccerPredictionsHome({ params }: { params: Promise<{ lo
         </div>
       </div>
 
-      {/* Results Section */}
+      {/* Results Section - Yesterday & Today */}
       <div style={{ backgroundColor: '#eaeded', padding: '24px 24px' }} className="dark:bg-black">
-        <h2 style={{ fontSize: '16px', fontWeight: 700, color: '#0f1111', marginBottom: '16px', letterSpacing: '0.5px' }} className="dark:text-white">Recent Results</h2>
+        <h2 style={{ fontSize: '16px', fontWeight: 700, color: '#0f1111', marginBottom: '16px', letterSpacing: '0.5px' }} className="dark:text-white">📊 Results (Yesterday & Today)</h2>
         {resultsLoading ? (
           <div style={{ textAlign: 'center', padding: '20px', color: '#565959' }} className="dark:text-gray-400">Loading results...</div>
         ) : results.length > 0 ? (
-          <div className="space-y-2">
-            {results.slice(0, 5).map((result, idx) => (
-              <div key={idx} style={{ backgroundColor: 'white', borderRadius: '8px', padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 1px 3px rgba(0,0,0,0.08)', border: '1px solid #d5d9d9' }} className="dark:bg-[#2c2c2e] dark:border-[#38383a]">
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: '12px', fontWeight: 600, color: '#0f1111' }} className="dark:text-white">{result.home_team} vs {result.away_team}</div>
-                  <div style={{ fontSize: '10px', color: '#565959', marginTop: '4px' }} className="dark:text-gray-400">{result.league}</div>
+          <div className="space-y-3">
+            {results.map((dateGroup: any, groupIdx: number) => (
+              <div key={groupIdx} style={{ backgroundColor: 'white', borderRadius: '12px', overflow: 'hidden', border: '1px solid #d5d9d9', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }} className="dark:bg-[#2c2c2e] dark:border-[#38383a]">
+                {/* Date Header */}
+                <div style={{ backgroundColor: '#f3f3f3', padding: '10px 16px', borderBottomColor: '#d5d9d9', fontSize: '12px', fontWeight: 600, color: '#0f1111' }} className="border-b dark:bg-[#1c1c1e] dark:text-white dark:border-[#38383a]">
+                  {dateGroup.date}
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <div style={{ fontSize: '12px', fontWeight: 600, color: '#0f1111' }} className="dark:text-white">{result.prediction || '-'}</div>
-                  <div style={{ fontSize: '18px', fontWeight: 700 }}>
-                    {result.correct ? '✅' : '❌'}
-                  </div>
+                
+                {/* Matches */}
+                <div className="space-y-0">
+                  {dateGroup.matches.slice(0, 5).map((match: any, idx: number) => (
+                    <div key={idx} style={{ padding: '12px 16px', borderBottomColor: '#d5d9d9' }} className="border-b dark:border-[#38383a] last:border-b-0 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-[#1c1c1e] transition-colors">
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: '12px', fontWeight: 600, color: '#0f1111' }} className="dark:text-white truncate">
+                          {match.home_team}
+                        </div>
+                        <div style={{ fontSize: '10px', color: '#565959', marginTop: '2px' }} className="dark:text-gray-400">
+                          {match.league}
+                        </div>
+                      </div>
+                      
+                      {/* Score */}
+                      <div style={{ textAlign: 'center', marginLeft: '12px', marginRight: '12px', minWidth: '50px' }}>
+                        <div style={{ fontSize: '13px', fontWeight: 700, color: '#0f1111' }} className="dark:text-white">
+                          {match.home_score} - {match.away_score}
+                        </div>
+                        <div style={{ fontSize: '9px', color: '#565959', marginTop: '2px' }} className="dark:text-gray-400">
+                          vs {match.away_team}
+                        </div>
+                      </div>
+                      
+                      {/* Prediction & Result */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: '8px' }}>
+                        <div style={{ fontSize: '10px', fontWeight: 600, color: '#565959', minWidth: '30px', textAlign: 'right' }} className="dark:text-gray-400">
+                          {match.prediction || '-'}
+                        </div>
+                        <div style={{ fontSize: '16px' }}>
+                          {match.correct ? '✅' : '❌'}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             ))}
