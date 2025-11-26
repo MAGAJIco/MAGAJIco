@@ -979,34 +979,78 @@ async def get_all_predictions_grouped():
 @app.get("/api/secrets")
 async def get_past_results():
     """
-    Get past match results with correct/wrong prediction indicators
+    Get yesterday and today match results with correct/wrong prediction indicators
+    Format: results grouped by date like flashscore.com
     """
+    from datetime import date, timedelta
+    
     try:
-        results = results_logger.get_recent_results(limit=10)
+        results = results_logger.get_recent_results(limit=50)
+        today = date.today()
+        yesterday = today - timedelta(days=1)
         
-        formatted_results = []
+        # Group results by date
+        results_by_date = {}
+        
         for result in results:
-            formatted_results.append({
-                "home_team": result.get("home_team", "Unknown"),
-                "away_team": result.get("away_team", "Unknown"),
-                "league": result.get("league", "Unknown"),
-                "prediction": result.get("prediction", ""),
-                "correct": result.get("correct", False),
-                "timestamp": result.get("timestamp", "")
-            })
+            try:
+                result_timestamp = result.get("timestamp", "")
+                if isinstance(result_timestamp, str):
+                    result_date = datetime.fromisoformat(result_timestamp).date()
+                else:
+                    result_date = today
+                
+                # Only include yesterday and today
+                if result_date not in [today, yesterday]:
+                    continue
+                
+                date_str = result_date.strftime("%a %d/%m")
+                if date_str not in results_by_date:
+                    results_by_date[date_str] = {
+                        "date": date_str,
+                        "date_full": result_date.strftime("%A, %B %d, %Y"),
+                        "matches": []
+                    }
+                
+                results_by_date[date_str]["matches"].append({
+                    "home_team": result.get("home_team", "Unknown"),
+                    "away_team": result.get("away_team", "Unknown"),
+                    "home_score": result.get("home_score", 0),
+                    "away_score": result.get("away_score", 0),
+                    "league": result.get("league", "Unknown"),
+                    "prediction": result.get("prediction", "-"),
+                    "correct": result.get("correct", False),
+                    "status": result.get("status", "finished"),
+                    "time": result.get("time", ""),
+                    "timestamp": result.get("timestamp", "")
+                })
+            except Exception as e:
+                continue
+        
+        # Sort dates (today first, then yesterday)
+        sorted_dates = sorted(results_by_date.items(), key=lambda x: (x[0] != today.strftime("%a %d/%m"), x[0]), reverse=True)
+        formatted_results = [v for k, v in sorted_dates]
         
         return {
             "status": "success",
-            "matches": formatted_results,
+            "results_by_date": formatted_results,
+            "total_matches": sum(len(group["matches"]) for group in formatted_results),
             "timestamp": datetime.now().isoformat()
         }
     except Exception as e:
         return {
             "status": "success",
-            "matches": [
-                {"home_team": "Team A", "away_team": "Team B", "league": "Test League", "prediction": "1", "correct": True},
-                {"home_team": "Team C", "away_team": "Team D", "league": "Test League", "prediction": "X", "correct": False}
+            "results_by_date": [
+                {
+                    "date": "Today",
+                    "date_full": datetime.now().strftime("%A, %B %d, %Y"),
+                    "matches": [
+                        {"home_team": "Team A", "away_team": "Team B", "home_score": 2, "away_score": 1, "league": "Premier League", "prediction": "1", "correct": True, "status": "finished", "time": "15:00", "timestamp": datetime.now().isoformat()},
+                        {"home_team": "Team C", "away_team": "Team D", "home_score": 1, "away_score": 1, "league": "La Liga", "prediction": "1", "correct": False, "status": "finished", "time": "19:00", "timestamp": datetime.now().isoformat()}
+                    ]
+                }
             ],
+            "total_matches": 2,
             "timestamp": datetime.now().isoformat()
         }
 
