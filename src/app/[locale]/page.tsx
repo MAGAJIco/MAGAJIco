@@ -146,7 +146,7 @@ export default function SoccerPredictionsHome({ params }: { params: Promise<{ lo
           />
           
           {/* Menu Sidebar - Google Style */}
-          <div style={{ position: 'fixed', top: '20px', left: '12px', width: '240px', height: 'calc(100vh - 40px)', backgroundColor: '#f3f3f3', zIndex: 50, overflow: 'auto', animation: 'slideInLeft 0.3s ease-out', borderRadius: '20px' }} className="dark:bg-[#1c1c1e]">
+          <div style={{ position: 'fixed', top: '20px', left: '0px', width: '240px', height: 'calc(100vh - 40px)', backgroundColor: '#f3f3f3', zIndex: 50, overflow: 'auto', animation: 'slideInLeft 0.3s ease-out', borderRadius: '0px 20px 20px 0px' }} className="dark:bg-[#1c1c1e]">
             <nav style={{ padding: '24px 12px' }} className="space-y-0">
               <Link href={`/${locale}`} onClick={() => setMenuOpen(false)}>
                 <div className={`flex items-center gap-6 px-6 py-4 rounded-lg transition-colors ${isActive('') ? 'bg-orange-100 dark:bg-orange-600' : 'hover:bg-gray-100 dark:hover:bg-gray-800'}`} style={{ cursor: 'pointer' }}>
