@@ -985,7 +985,7 @@ async def get_past_results():
     from datetime import date, timedelta
     
     try:
-        results = results_logger.get_recent_results(limit=50)
+        results = results_logger.get_recent_results(limit=200)
         today = date.today()
         yesterday = today - timedelta(days=1)
         
@@ -1004,15 +1004,20 @@ async def get_past_results():
                 if result_date not in [today, yesterday]:
                     continue
                 
-                date_str = result_date.strftime("%a %d/%m")
-                if date_str not in results_by_date:
-                    results_by_date[date_str] = {
-                        "date": date_str,
+                # Use simple labels: "Yesterday" or "Today"
+                if result_date == today:
+                    date_key = "Today"
+                else:
+                    date_key = "Yesterday"
+                
+                if date_key not in results_by_date:
+                    results_by_date[date_key] = {
+                        "date": date_key,
                         "date_full": result_date.strftime("%A, %B %d, %Y"),
                         "matches": []
                     }
                 
-                results_by_date[date_str]["matches"].append({
+                results_by_date[date_key]["matches"].append({
                     "home_team": result.get("home_team", "Unknown"),
                     "away_team": result.get("away_team", "Unknown"),
                     "home_score": result.get("home_score", 0),
@@ -1027,8 +1032,8 @@ async def get_past_results():
             except Exception as e:
                 continue
         
-        # Sort dates (today first, then yesterday)
-        sorted_dates = sorted(results_by_date.items(), key=lambda x: (x[0] != today.strftime("%a %d/%m"), x[0]), reverse=True)
+        # Sort dates (Today first, then Yesterday)
+        sorted_dates = sorted(results_by_date.items(), key=lambda x: (x[0] != "Today"))
         formatted_results = [v for k, v in sorted_dates]
         
         return {
@@ -1040,17 +1045,8 @@ async def get_past_results():
     except Exception as e:
         return {
             "status": "success",
-            "results_by_date": [
-                {
-                    "date": "Today",
-                    "date_full": datetime.now().strftime("%A, %B %d, %Y"),
-                    "matches": [
-                        {"home_team": "Team A", "away_team": "Team B", "home_score": 2, "away_score": 1, "league": "Premier League", "prediction": "1", "correct": True, "status": "finished", "time": "15:00", "timestamp": datetime.now().isoformat()},
-                        {"home_team": "Team C", "away_team": "Team D", "home_score": 1, "away_score": 1, "league": "La Liga", "prediction": "1", "correct": False, "status": "finished", "time": "19:00", "timestamp": datetime.now().isoformat()}
-                    ]
-                }
-            ],
-            "total_matches": 2,
+            "results_by_date": [],
+            "total_matches": 0,
             "timestamp": datetime.now().isoformat()
         }
 

@@ -416,13 +416,13 @@ export default function SoccerPredictionsHome({ params }: { params: Promise<{ lo
             {results.map((dateGroup: any, groupIdx: number) => (
               <div key={groupIdx} style={{ backgroundColor: 'white', borderRadius: '12px', overflow: 'hidden', border: '1px solid #d5d9d9', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }} className="dark:bg-[#2c2c2e] dark:border-[#38383a]">
                 {/* Date Header */}
-                <div style={{ backgroundColor: '#f3f3f3', padding: '10px 16px', borderBottomColor: '#d5d9d9', fontSize: '12px', fontWeight: 600, color: '#0f1111' }} className="border-b dark:bg-[#1c1c1e] dark:text-white dark:border-[#38383a]">
+                <div style={{ backgroundColor: '#f3f3f3', padding: '12px 16px', borderBottomColor: '#d5d9d9', fontSize: '13px', fontWeight: 700, color: '#0f1111', letterSpacing: '0.5px' }} className="border-b dark:bg-[#1c1c1e] dark:text-white dark:border-[#38383a]">
                   {dateGroup.date}
                 </div>
                 
                 {/* Matches */}
                 <div className="space-y-0">
-                  {dateGroup.matches.slice(0, 5).map((match: any, idx: number) => (
+                  {dateGroup.matches.map((match: any, idx: number) => (
                     <div key={idx} style={{ padding: '12px 16px', borderBottomColor: '#d5d9d9' }} className="border-b dark:border-[#38383a] last:border-b-0 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-[#1c1c1e] transition-colors">
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ fontSize: '12px', fontWeight: 600, color: '#0f1111' }} className="dark:text-white truncate">
