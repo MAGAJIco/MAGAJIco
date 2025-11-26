@@ -147,7 +147,7 @@ export default function SoccerPredictionsHome({ params }: { params: Promise<{ lo
           
           {/* Menu Sidebar - Google Style */}
           <div style={{ position: 'fixed', top: 0, left: 0, width: '280px', height: '100vh', backgroundColor: '#f3f3f3', zIndex: 50, overflow: 'auto', animation: 'slideInLeft 0.3s ease-out' }} className="dark:bg-[#1c1c1e]">
-            <div style={{ padding: '16px 24px', display: 'flex', justifyContent: 'flex-end', borderBottomColor: '#d5d9d9' }} className="border-b dark:border-[#38383a]">
+            <div style={{ padding: '16px 24px', display: 'flex', justifyContent: 'flex-end' }}>
               <button onClick={() => setMenuOpen(false)} className="cursor-pointer hover:opacity-60 transition-opacity dark:text-white" style={{ color: '#565959' }}>
                 <X className="w-6 h-6" />
               </button>
