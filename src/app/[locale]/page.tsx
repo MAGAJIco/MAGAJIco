@@ -345,16 +345,10 @@ export default function BrainstormPage() {
   // Show live matches view
   if (showLiveMatches) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900">
+      <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 pb-24">
         <nav className="border-b border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm sticky top-0 z-30">
           <div className="max-w-6xl mx-auto px-4 py-4">
             <div className="flex items-center justify-between">
-              <button
-                onClick={() => setShowLiveMatches(false)}
-                className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
-              >
-                ← Back
-              </button>
               <h1 className="text-xl font-bold text-gray-900 dark:text-white">Live Matches</h1>
               <div className="w-16" />
             </div>
@@ -377,6 +371,37 @@ export default function BrainstormPage() {
             ))}
           </div>
         </div>
+        {/* Bottom Navigation */}
+        <nav className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 z-30">
+          <div className="px-4 py-2 sm:py-3 flex justify-around items-center">
+            <button 
+              onClick={() => setShowLiveMatches(false)}
+              className="flex flex-col items-center gap-1 text-red-500 hover:text-red-600 transition-colors p-2 hover:opacity-80 active:opacity-60"
+              title="Live Matches"
+            >
+              <div className="w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center">
+                <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+              </div>
+              <span className="text-xs font-medium">Live</span>
+            </button>
+            <button 
+              onClick={() => {setShowLiveMatches(false); setShowSecretPage(true);}}
+              className="flex flex-col items-center gap-1 text-gray-600 dark:text-gray-400 hover:text-indigo-500 transition-colors p-2 hover:opacity-80 active:opacity-60"
+              title="Secret Features"
+            >
+              <Lock className="w-5 h-5 sm:w-6 sm:h-6" />
+              <span className="text-xs font-medium">Secret</span>
+            </button>
+            <button 
+              onClick={() => {setShowLiveMatches(false); setIsBrainstormOpen(true);}}
+              className="flex flex-col items-center gap-1 text-gray-600 dark:text-gray-400 hover:text-purple-500 transition-colors p-2 hover:opacity-80 active:opacity-60"
+              title="Generate AI Ideas"
+            >
+              <Zap className="w-5 h-5 sm:w-6 sm:h-6" />
+              <span className="text-xs font-medium">Generate</span>
+            </button>
+          </div>
+        </nav>
       </div>
     );
   }
@@ -384,16 +409,10 @@ export default function BrainstormPage() {
   // Show secret page
   if (showSecretPage) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-indigo-950 to-purple-900">
+      <div className="min-h-screen bg-gradient-to-b from-indigo-950 to-purple-900 pb-24">
         <nav className="border-b border-purple-800 bg-purple-900/80 backdrop-blur-sm sticky top-0 z-30">
           <div className="max-w-6xl mx-auto px-4 py-4">
             <div className="flex items-center justify-between">
-              <button
-                onClick={() => setShowSecretPage(false)}
-                className="px-4 py-2 text-purple-400 hover:bg-purple-800 rounded-lg transition-colors"
-              >
-                ← Back
-              </button>
               <div className="flex items-center gap-2">
                 <Lock className="w-6 h-6 text-purple-400" />
                 <h1 className="text-xl font-bold text-purple-100">Secret Features</h1>
@@ -420,6 +439,37 @@ export default function BrainstormPage() {
             ))}
           </div>
         </div>
+        {/* Bottom Navigation */}
+        <nav className="fixed bottom-0 left-0 right-0 bg-purple-900 dark:bg-purple-900 border-t border-purple-800 z-30">
+          <div className="px-4 py-2 sm:py-3 flex justify-around items-center">
+            <button 
+              onClick={() => {setShowSecretPage(false); setShowLiveMatches(true);}}
+              className="flex flex-col items-center gap-1 text-purple-400 hover:text-red-500 transition-colors p-2 hover:opacity-80 active:opacity-60"
+              title="Live Matches"
+            >
+              <div className="w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center">
+                <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+              </div>
+              <span className="text-xs font-medium">Live</span>
+            </button>
+            <button 
+              onClick={() => setShowSecretPage(false)}
+              className="flex flex-col items-center gap-1 text-purple-400 hover:text-indigo-300 transition-colors p-2 hover:opacity-80 active:opacity-60"
+              title="Secret Features"
+            >
+              <Lock className="w-5 h-5 sm:w-6 sm:h-6" />
+              <span className="text-xs font-medium">Secret</span>
+            </button>
+            <button 
+              onClick={() => {setShowSecretPage(false); setIsBrainstormOpen(true);}}
+              className="flex flex-col items-center gap-1 text-purple-400 hover:text-purple-200 transition-colors p-2 hover:opacity-80 active:opacity-60"
+              title="Generate AI Ideas"
+            >
+              <Zap className="w-5 h-5 sm:w-6 sm:h-6" />
+              <span className="text-xs font-medium">Generate</span>
+            </button>
+          </div>
+        </nav>
       </div>
     );
   }
