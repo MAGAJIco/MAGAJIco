@@ -454,8 +454,16 @@ export default function BrainstormPage() {
               <button
                 onClick={() => setIsMenuOpen(true)}
                 style={{ padding: '8px', background: 'transparent', border: 'none', cursor: 'pointer', borderRadius: '12px', transition: 'all 0.3s ease' }}
+                title="Menu"
               >
                 <Menu className="w-6 h-6" style={{ color: '#374151' }} />
+              </button>
+              <button
+                onClick={() => { setIsMenuOpen(true); setTimeout(() => { const searchInput = document.querySelector('input[placeholder="Search..."]'); if (searchInput) searchInput.focus(); }, 100); }}
+                style={{ padding: '8px', background: 'transparent', border: 'none', cursor: 'pointer', borderRadius: '12px', transition: 'all 0.3s ease' }}
+                title="Find in page"
+              >
+                <Search className="w-6 h-6" style={{ color: '#374151' }} />
               </button>
               <div style={{ display: 'none' }}>
                 <Lightbulb className="w-6 h-6" style={{ color: '#eab308' }} />
@@ -657,6 +665,11 @@ export default function BrainstormPage() {
                 style={{ color: '#0f1111', fontSize: '14px', flex: 1, border: 'none', outline: 'none', backgroundColor: 'transparent', padding: '0px', minWidth: '0' }}
                 className="dark:text-white"
               />
+              {searchQuery && (
+                <span style={{ fontSize: '12px', color: '#ff9900', fontWeight: 600, flexShrink: 0, minWidth: 'auto', paddingRight: '4px' }}>
+                  {['Predictions', 'Secret', 'Live', 'Contact'].filter(item => item.toLowerCase().includes(searchQuery.toLowerCase())).length}
+                </span>
+              )}
               <div style={{ display: 'flex', alignItems: 'center', gap: '0px', flexShrink: 0 }}>
                 <button className="p-1 hover:opacity-70 transition-opacity cursor-pointer">
                   <ChevronUp className="w-4 h-4" style={{ color: '#565959', strokeWidth: 2 }} />
@@ -671,33 +684,20 @@ export default function BrainstormPage() {
             </div>
 
             <nav style={{ padding: '24px 12px' }} className="space-y-0">
-              <Link href="/en/predictions" onClick={() => setIsMenuOpen(false)}>
-                <div className={`flex items-center gap-6 px-6 py-4 rounded-lg transition-colors ${isActive('predictions') ? 'bg-orange-100 dark:bg-orange-600' : 'hover:bg-gray-100 dark:hover:bg-gray-800'}`} style={{ cursor: 'pointer' }}>
-                  <Eye className="w-6 h-6" style={{ color: isActive('predictions') ? '#ff9900' : '#565959', flexShrink: 0 }} />
-                  <span style={{ fontSize: '15px', fontWeight: 500, color: isActive('predictions') ? '#ff9900' : '#0f1111' }} className="dark:text-white">Predictions</span>
-                </div>
-              </Link>
-
-              <Link href="/en/secrets" onClick={() => setIsMenuOpen(false)}>
-                <div className={`flex items-center gap-6 px-6 py-4 rounded-lg transition-colors ${isActive('secrets') ? 'bg-orange-100 dark:bg-orange-600' : 'hover:bg-gray-100 dark:hover:bg-gray-800'}`} style={{ cursor: 'pointer' }}>
-                  <Lock className="w-6 h-6" style={{ color: isActive('secrets') ? '#ff9900' : '#565959', flexShrink: 0 }} />
-                  <span style={{ fontSize: '15px', fontWeight: 500, color: isActive('secrets') ? '#ff9900' : '#0f1111' }} className="dark:text-white">Secret</span>
-                </div>
-              </Link>
-
-              <Link href="/en/live" onClick={() => setIsMenuOpen(false)}>
-                <div className={`flex items-center gap-6 px-6 py-4 rounded-lg transition-colors ${isActive('live') ? 'bg-orange-100 dark:bg-orange-600' : 'hover:bg-gray-100 dark:hover:bg-gray-800'}`} style={{ cursor: 'pointer' }}>
-                  <Clock className="w-6 h-6" style={{ color: isActive('live') ? '#ff9900' : '#565959', flexShrink: 0 }} />
-                  <span style={{ fontSize: '15px', fontWeight: 500, color: isActive('live') ? '#ff9900' : '#0f1111' }} className="dark:text-white">Live</span>
-                </div>
-              </Link>
-
-              <Link href="/en/contact" onClick={() => setIsMenuOpen(false)}>
-                <div className={`flex items-center gap-6 px-6 py-4 rounded-lg transition-colors ${isActive('contact') ? 'bg-orange-100 dark:bg-orange-600' : 'hover:bg-gray-100 dark:hover:bg-gray-800'}`} style={{ cursor: 'pointer' }}>
-                  <Mail className="w-6 h-6" style={{ color: isActive('contact') ? '#ff9900' : '#565959', flexShrink: 0 }} />
-                  <span style={{ fontSize: '15px', fontWeight: 500, color: isActive('contact') ? '#ff9900' : '#0f1111' }} className="dark:text-white">Contact</span>
-                </div>
-              </Link>
+              {['Predictions', 'Secret', 'Live', 'Contact'].map((item) => {
+                const isMatch = item.toLowerCase().includes(searchQuery.toLowerCase());
+                const isHighlighted = searchQuery && isMatch;
+                const paths = { 'Predictions': 'predictions', 'Secret': 'secrets', 'Live': 'live', 'Contact': 'contact' };
+                const icons = { 'Predictions': <Eye className="w-6 h-6" style={{ flexShrink: 0 }} />, 'Secret': <Lock className="w-6 h-6" style={{ flexShrink: 0 }} />, 'Live': <Clock className="w-6 h-6" style={{ flexShrink: 0 }} />, 'Contact': <Mail className="w-6 h-6" style={{ flexShrink: 0 }} /> };
+                return (
+                  <Link key={item} href={`/en/${paths[item]}`} onClick={() => setIsMenuOpen(false)}>
+                    <div className={`flex items-center gap-6 px-6 py-4 rounded-lg transition-all ${isHighlighted ? 'bg-yellow-100 dark:bg-yellow-700' : isActive(paths[item]) ? 'bg-orange-100 dark:bg-orange-600' : 'hover:bg-gray-100 dark:hover:bg-gray-800'}`} style={{ cursor: 'pointer', backgroundColor: isHighlighted ? '#fef3c7' : undefined }}>
+                      {React.cloneElement(icons[item], { style: { color: isHighlighted ? '#f59e0b' : isActive(paths[item]) ? '#ff9900' : '#565959', flexShrink: 0 } })}
+                      <span style={{ fontSize: '15px', fontWeight: 500, color: isHighlighted ? '#d97706' : isActive(paths[item]) ? '#ff9900' : '#0f1111' }} className="dark:text-white">{item}</span>
+                    </div>
+                  </Link>
+                );
+              })}
 
               <div style={{ borderTopColor: '#d5d9d9', marginTop: '20px', paddingTop: '20px' }} className="border-t dark:border-[#38383a]">
                 <Link href="/en" onClick={() => setIsMenuOpen(false)}>
