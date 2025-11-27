@@ -33,12 +33,6 @@ module.exports = {
   },
   
   
-  // Allow cross-origin requests from Replit domains in development
-  // This is needed for Replit's proxy to work correctly with CSS and assets
-  allowedDevOrigins: [
-    'localhost',
-    '127.0.0.1',
-  ],
   
   // Environment variables
   env: {

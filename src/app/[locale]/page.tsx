@@ -330,53 +330,118 @@ export default function BrainstormPage() {
     setIsMenuOpen(false);
   };
 
+  const containerStyle = {
+    minHeight: '100vh',
+    background: 'linear-gradient(to bottom, #ffffff 0%, #f9fafb 100%)',
+  };
+
+  const navStyle = {
+    borderBottom: '1px solid #e5e7eb',
+    background: 'rgba(255, 255, 255, 0.8)',
+    backdropFilter: 'blur(4px)',
+    position: 'sticky',
+    top: 0,
+    zIndex: 30,
+  };
+
+  const selectionCardStyle = {
+    background: 'linear-gradient(to bottom right, #f3e8ff 0%, #fce7f3 100%)',
+    border: '2px solid #e9d5ff',
+    borderRadius: '12px',
+    padding: '24px',
+    marginBottom: '24px',
+  };
+
+  const generateButtonStyle = {
+    width: '100%',
+    padding: '16px 24px',
+    background: 'linear-gradient(to right, #3b82f6 0%, #a855f7 50%, #ec4899 100%)',
+    color: 'white',
+    border: 'none',
+    borderRadius: '8px',
+    fontWeight: '600',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '12px',
+    fontSize: '16px',
+    transition: 'all 0.3s ease',
+    boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
+  };
+
+  const infoBoxStyle = {
+    marginTop: '32px',
+    padding: '24px',
+    background: '#dbeafe',
+    border: '1px solid #bfdbfe',
+    borderRadius: '8px',
+  };
+
+  const navButtonStyle = {
+    padding: '8px 16px',
+    background: 'transparent',
+    color: '#4b5563',
+    border: 'none',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    fontSize: '14px',
+    transition: 'all 0.3s ease',
+  };
+
+  const purpleButtonStyle = {
+    ...navButtonStyle,
+    background: '#a855f7',
+    color: 'white',
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900">
+    <div style={containerStyle}>
       {/* Top Navigation */}
-      <nav className="border-b border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm sticky top-0 z-30">
-        <div className="max-w-6xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
+      <nav style={navStyle}>
+        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <button
                 onClick={() => setIsMenuOpen(true)}
-                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors flex-shrink-0"
+                style={{ padding: '8px', background: 'transparent', border: 'none', cursor: 'pointer', borderRadius: '12px', transition: 'all 0.3s ease' }}
               >
-                <Menu className="w-6 h-6 text-gray-700 dark:text-gray-300" />
+                <Menu className="w-6 h-6" style={{ color: '#374151' }} />
               </button>
-              <div className="hidden sm:flex items-center gap-2">
-                <Lightbulb className="w-6 h-6 text-yellow-500" />
-                <span className="font-bold text-lg sm:text-xl text-gray-900 dark:text-white">
+              <div style={{ display: 'none' }}>
+                <Lightbulb className="w-6 h-6" style={{ color: '#eab308' }} />
+                <span style={{ fontWeight: 'bold', fontSize: '18px', color: '#1f2937' }}>
                   MagajiCo AI Hub
                 </span>
               </div>
-              <div className="sm:hidden">
-                <span className="font-bold text-sm text-gray-900 dark:text-white">
-                  AI Hub
+              <div>
+                <span style={{ fontWeight: 'bold', fontSize: '16px', color: '#1f2937' }}>
+                  🧠 AI Hub
                 </span>
               </div>
             </div>
-            <div className="hidden md:flex gap-2">
+            <div style={{ display: 'flex', gap: '8px' }}>
               <button 
                 onClick={() => handleNavigate('home')}
-                className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors text-sm"
+                style={navButtonStyle}
               >
                 Home
               </button>
               <button 
                 onClick={() => setIsBrainstormOpen(true)}
-                className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors text-sm"
+                style={purpleButtonStyle}
               >
                 Brainstorm
               </button>
               <button
                 onClick={() => router.push('/en/live')}
-                className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors text-sm"
+                style={navButtonStyle}
               >
                 Live
               </button>
               <button
                 onClick={() => router.push('/en/secrets')}
-                className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors text-sm"
+                style={navButtonStyle}
               >
                 Secret
               </button>
@@ -385,40 +450,50 @@ export default function BrainstormPage() {
         </div>
       </nav>
 
-      <div className="max-w-4xl mx-auto px-4 py-6 sm:py-8 pb-24">
+      <div style={{ maxWidth: '896px', margin: '0 auto', padding: '16px', paddingBottom: '96px' }}>
         {/* Header */}
-        <div className="mb-6 sm:mb-8 animate-fadeIn">
-          <div className="flex items-center gap-3 mb-3 sm:mb-4">
-            <Lightbulb className="w-6 sm:w-8 h-6 sm:h-8 text-yellow-500 flex-shrink-0" />
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
+        <div style={{ marginBottom: '24px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+            <Lightbulb className="w-8 h-8" style={{ color: '#eab308' }} />
+            <h1 style={{ fontSize: '28px', fontWeight: 'bold', color: '#1f2937' }}>
               AI Brainstorming Hub
             </h1>
           </div>
-          <p className="text-gray-600 dark:text-gray-400 text-base sm:text-lg">
+          <p style={{ color: '#4b5563', fontSize: '18px' }}>
             Get AI-powered feature enhancement ideas for any component. Open the menu to select a component and let our AI help you innovate.
           </p>
         </div>
 
         {/* Current Selection Card */}
-        <div className="mb-6 sm:mb-8 p-4 sm:p-6 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border-2 border-purple-200 dark:border-purple-800 rounded-lg sm:rounded-xl animate-fadeIn">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-0 mb-3 sm:mb-4">
-            <div className="min-w-0">
-              <p className="text-xs sm:text-sm text-purple-600 dark:text-purple-400 font-medium mb-1">
+        <div style={selectionCardStyle}>
+          <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+            <div>
+              <p style={{ fontSize: '12px', color: '#9333ea', fontWeight: '500', marginBottom: '4px' }}>
                 Currently Selected
               </p>
-              <h2 className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2 break-words">
-                <Brain className="w-5 sm:w-6 h-5 sm:h-6 text-purple-500 flex-shrink-0" />
-                <span className="truncate">{selectedComponent}</span>
+              <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#1f2937', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Brain className="w-5 h-5" style={{ color: '#a855f7' }} />
+                <span>{selectedComponent}</span>
               </h2>
             </div>
             <button
               onClick={() => setIsMenuOpen(true)}
-              className="px-3 sm:px-4 py-2 bg-white dark:bg-gray-800 text-purple-600 dark:text-purple-400 rounded-lg hover:bg-purple-100 dark:hover:bg-gray-700 transition-colors font-medium text-sm whitespace-nowrap"
+              style={{
+                padding: '8px 16px',
+                background: 'white',
+                color: '#9333ea',
+                border: 'none',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontWeight: '500',
+                fontSize: '14px',
+                transition: 'all 0.3s ease',
+              }}
             >
               Change
             </button>
           </div>
-          <p className="text-gray-600 dark:text-gray-400 text-xs sm:text-sm">
+          <p style={{ color: '#4b5563', fontSize: '14px' }}>
             Click the button below to generate AI-powered feature ideas for this component.
           </p>
         </div>
@@ -426,21 +501,22 @@ export default function BrainstormPage() {
         {/* Generate Button */}
         <button
           onClick={() => setIsBrainstormOpen(true)}
-          className="w-full px-4 sm:px-6 py-3 sm:py-4 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white rounded-lg font-semibold hover:shadow-lg transition-all flex items-center justify-center gap-2 sm:gap-3 animate-fadeIn text-sm sm:text-base"
+          style={generateButtonStyle}
+          onMouseEnter={(e) => { e.currentTarget.style.boxShadow = '0 20px 40px rgba(0, 0, 0, 0.2)'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.boxShadow = '0 10px 25px rgba(0, 0, 0, 0.1)'; }}
         >
-          <Sparkles className="w-4 sm:w-5 h-4 sm:h-5 flex-shrink-0" />
-          <span className="hidden sm:inline">Generate Ideas for {selectedComponent}</span>
-          <span className="sm:hidden">Generate Ideas</span>
-          <Zap className="w-4 sm:w-5 h-4 sm:h-5 flex-shrink-0" />
+          <Sparkles className="w-5 h-5" />
+          <span>Generate Ideas for {selectedComponent}</span>
+          <Zap className="w-5 h-5" />
         </button>
 
         {/* Info Box */}
-        <div className="mt-6 sm:mt-8 p-4 sm:p-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg sm:rounded-lg animate-fadeIn">
-          <h3 className="font-semibold text-blue-900 dark:text-blue-100 mb-2 flex items-center gap-2 text-sm sm:text-base">
-            <Brain className="w-4 sm:w-5 h-4 sm:h-5 flex-shrink-0" />
+        <div style={infoBoxStyle}>
+          <h3 style={{ fontWeight: '600', color: '#1e40af', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '16px' }}>
+            <Brain className="w-5 h-5" />
             How It Works
           </h3>
-          <ul className="text-blue-800 dark:text-blue-200 text-xs sm:text-sm space-y-1">
+          <ul style={{ color: '#1e3a8a', fontSize: '14px', lineHeight: '1.6' }}>
             <li>• Open the menu to select a component from MagajiCo</li>
             <li>• Add optional context about what you want to improve</li>
             <li>• AI will generate 5 innovative feature ideas</li>
@@ -475,25 +551,25 @@ export default function BrainstormPage() {
       />
 
       {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 z-30">
-        <div className="px-4 py-2 sm:py-3 flex justify-around items-center">
+      <nav style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: 'white', borderTop: '1px solid #e5e7eb', zIndex: 30 }}>
+        <div style={{ padding: '8px 16px', display: 'flex', justifyContent: 'space-around', alignItems: 'center' }}>
           <button 
             onClick={() => router.push('/en/live')}
-            className="flex flex-col items-center gap-1 text-gray-600 dark:text-gray-400 hover:text-red-500 transition-colors p-2 hover:opacity-80 active:opacity-60"
+            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', color: '#4b5563', background: 'transparent', border: 'none', cursor: 'pointer', padding: '8px', transition: 'all 0.3s ease' }}
             title="Live Matches"
           >
-            <div className="w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center">
-              <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+            <div style={{ width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ width: '8px', height: '8px', background: '#ef4444', borderRadius: '50%', animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite' }} />
             </div>
-            <span className="text-xs font-medium">Live</span>
+            <span style={{ fontSize: '12px', fontWeight: '500' }}>Live</span>
           </button>
           <button 
             onClick={() => router.push('/en/secrets')}
-            className="flex flex-col items-center gap-1 text-gray-600 dark:text-gray-400 hover:text-indigo-500 transition-colors p-2 hover:opacity-80 active:opacity-60"
+            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', color: '#4b5563', background: 'transparent', border: 'none', cursor: 'pointer', padding: '8px', transition: 'all 0.3s ease' }}
             title="Secret Features"
           >
-            <Lock className="w-5 h-5 sm:w-6 sm:h-6" />
-            <span className="text-xs font-medium">Secret</span>
+            <Lock className="w-5 h-5" style={{ color: '#6366f1' }} />
+            <span style={{ fontSize: '12px', fontWeight: '500' }}>Secret</span>
           </button>
           <button 
             onClick={() => setIsBrainstormOpen(true)}
