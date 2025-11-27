@@ -425,7 +425,7 @@ export default function BrainstormPage() {
                 onClick={() => handleNavigate('home')}
                 style={navButtonStyle}
               >
-                Home
+                <img src="/favico.svg" alt="Home" style={{ width: '24px', height: '24px' }} />
               </button>
               <button 
                 onClick={() => setIsBrainstormOpen(true)}
