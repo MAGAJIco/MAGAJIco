@@ -380,11 +380,14 @@ export default function BrainstormPage() {
   };
 
   const selectionCardStyle = {
-    background: 'linear-gradient(to bottom right, #f3e8ff 0%, #fce7f3 100%)',
-    border: '2px solid #e9d5ff',
+    background: 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)',
+    border: '2px solid #e5e7eb',
     borderRadius: '12px',
     padding: '24px',
     marginBottom: '24px',
+    transform: 'perspective(1000px) rotateX(2deg) rotateY(-2deg)',
+    boxShadow: '0 20px 40px rgba(0, 0, 0, 0.12), 0 0 1px rgba(0, 0, 0, 0.1)',
+    transition: 'all 0.3s ease',
   };
 
   const generateButtonStyle = {
