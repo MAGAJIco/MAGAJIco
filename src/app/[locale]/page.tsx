@@ -457,16 +457,13 @@ export default function BrainstormPage() {
       </nav>
 
       <div style={{ maxWidth: '896px', margin: '0 auto', padding: '16px', paddingBottom: '96px' }}>
-        {/* Header */}
-        <div style={{ marginBottom: '24px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-            <Lightbulb className="w-8 h-8" style={{ color: '#eab308' }} />
-            <h1 style={{ fontSize: '28px', fontWeight: 'bold', color: '#1f2937' }}>
-              Dashboard
-            </h1>
-          </div>
-          <p style={{ color: '#4b5563', fontSize: '18px' }}>
-            Get AI-powered feature enhancement ideas for any component. Open the menu to select a component and let our AI help you innovate.
+        {/* Title Section */}
+        <div style={{ marginBottom: '24px', paddingBottom: '24px' }}>
+          <h1 style={{ fontSize: '48px', fontWeight: 'bold', color: '#1f2937', marginBottom: '8px' }}>
+            Home
+          </h1>
+          <p style={{ color: '#3b82f6', fontSize: '16px', fontWeight: '500' }}>
+            Try the new experience
           </p>
         </div>
 

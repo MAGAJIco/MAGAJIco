@@ -300,6 +300,12 @@ export default function SecretsPage({ params }: { params: Promise<{ locale: stri
       </header>
 
       <div style={{ paddingBottom: '100px' }}>
+        {/* Title Section */}
+        <div style={{ backgroundColor: '#eaeded', padding: '24px' }} className="dark:bg-black">
+          <h2 style={{ fontSize: '48px', fontWeight: 'bold', color: '#1f2937', marginBottom: '8px' }} className="dark:text-white">Secrets</h2>
+          <p style={{ fontSize: '16px', color: '#4b5563' }} className="dark:text-gray-400">Discover high-value betting opportunities</p>
+        </div>
+
         {/* Description Banner */}
         <div style={{ backgroundColor: '#f3f3f3', borderBottomColor: '#d5d9d9', padding: '24px' }} className="border-b dark:bg-[#1c1c1e] dark:border-[#38383a]">
           <p style={{ fontSize: '15px', color: '#565959', fontWeight: 500 }} className="dark:text-gray-400">Discover high-value betting opportunities with our curated secret predictions</p>

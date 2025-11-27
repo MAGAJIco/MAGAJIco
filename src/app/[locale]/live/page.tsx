@@ -102,6 +102,12 @@ export default function LivePage({ params }: { params: Promise<{ locale: string 
       </header>
 
       <div style={{ paddingBottom: '100px' }}>
+        {/* Title Section */}
+        <div style={{ backgroundColor: '#eaeded', padding: '24px' }} className="dark:bg-black">
+          <h2 style={{ fontSize: '48px', fontWeight: 'bold', color: '#1f2937', marginBottom: '8px' }} className="dark:text-white">LIVE</h2>
+          <p style={{ fontSize: '16px', color: '#4b5563' }} className="dark:text-gray-400">Watch real-time match updates</p>
+        </div>
+
         {/* Status Bar - Live Matches */}
         <div className="bg-gradient-to-r from-red-500 to-red-400 dark:from-red-600 dark:to-red-500 px-6 py-4 text-white shadow-xl">
           <div className="flex items-center justify-between">
