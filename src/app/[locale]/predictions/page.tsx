@@ -135,6 +135,9 @@ export default function PredictionsPage({ params }: { params: Promise<{ locale: 
           <div className="flex items-start" style={{ gap: '14px' }}>
             <Zap className="w-8 h-8 flex-shrink-0" style={{ marginTop: '4px', filter: 'drop-shadow(0 2px 6px rgba(255,255,255,0.4))', strokeWidth: 1.5 }} />
             <div className="min-w-0">
+              <div style={{ display: 'inline-block', backgroundColor: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(10px)', padding: '4px 12px', borderRadius: '20px', fontSize: '11px', fontWeight: 700, marginBottom: '12px', letterSpacing: '1px', border: '1px solid rgba(255,255,255,0.3)' }}>
+                PREMIUM
+              </div>
               <p style={{ fontSize: '16px', fontWeight: 600, lineHeight: '1.5', marginBottom: '8px' }}>
                 Ready to Start Winning?
               </p>
