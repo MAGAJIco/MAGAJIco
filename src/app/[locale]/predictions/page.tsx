@@ -136,32 +136,42 @@ export default function PredictionsPage({ params }: { params: Promise<{ locale: 
         </div>
       </header>
 
-      <div style={{ paddingBottom: '100px' }}>
-        {/* Hero Banner - Premium Style */}
-        <div style={{ background: 'linear-gradient(to right, #ff9900, #ffad33)', padding: '32px 24px' }} className="text-white overflow-hidden shadow-lg">
-          <div className="flex items-start" style={{ gap: '14px' }}>
-            <Zap className="w-8 h-8 flex-shrink-0" style={{ marginTop: '4px', filter: 'drop-shadow(0 2px 6px rgba(255,255,255,0.4))', strokeWidth: 1.5 }} />
-            <div className="min-w-0">
-              <div style={{ display: 'inline-block', backgroundColor: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(10px)', padding: '4px 12px', borderRadius: '20px', fontSize: '11px', fontWeight: 700, marginBottom: '12px', letterSpacing: '1px', border: '1px solid rgba(255,255,255,0.3)' }}>
-                PREMIUM
-              </div>
-              <p style={{ fontSize: '16px', fontWeight: 600, lineHeight: '1.5', marginBottom: '8px' }}>
-                Ready to Start Winning?
-              </p>
-              <p style={{ fontSize: '13px', opacity: 0.95, fontWeight: 400, marginBottom: '12px' }}>
-                Access premium predictions from three trusted sources right now
-              </p>
-              <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 500 }}>
-                  <span>📊</span> Deep analytics
+      {/* Stats Carousel Section */}
+      <div style={{ backgroundColor: '#eaeded', padding: '24px 24px' }} className="dark:bg-black">
+        <div style={{ display: 'flex', gap: '12px', overflow: 'auto', scrollBehavior: 'smooth' }}>
+          {stats.map((stat, idx) => {
+            const isActive = idx === currentStat;
+            const IconComponent = stat.icon;
+            return (
+              <div 
+                key={idx}
+                style={{
+                  borderRadius: '12px',
+                  padding: '16px',
+                  minWidth: '150px',
+                  border: isActive ? '2px solid #ff9900' : '1px solid #d5d9d9',
+                  boxShadow: isActive ? '0 0 0 3px rgba(255,153,0,0.2)' : '0 2px 4px rgba(0,0,0,0.08)',
+                  transition: 'all 0.3s ease',
+                  backgroundColor: isActive ? 'rgba(255,153,0,0.05)' : 'white'
+                }}
+                className="dark:bg-[#2c2c2e] dark:border-[#38383a]"
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                  <IconComponent className="w-5 h-5" style={{ color: isActive ? '#ff9900' : '#565959', flex: 'shrink-0' }} />
+                  <span style={{ fontSize: '12px', color: isActive ? '#ff9900' : '#565959', fontWeight: isActive ? 700 : 500, transition: 'all 0.3s ease' }}>
+                    {stat.label}
+                  </span>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 500 }}>
-                  <span>🤖</span> AI algorithms
+                <div style={{ fontSize: isActive ? '24px' : '20px', fontWeight: 700, color: isActive ? '#ff9900' : '#0f1111', transition: 'all 0.3s ease' }} className="dark:text-white">
+                  {stat.value}
                 </div>
               </div>
-            </div>
-          </div>
+            );
+          })}
         </div>
+      </div>
+
+      <div style={{ paddingBottom: '100px' }}>
 
       {/* AI Suggestions Section - Status Bar Style */}
       <div style={{ backgroundColor: '#eaeded', padding: '32px 24px' }} className="dark:bg-black">
