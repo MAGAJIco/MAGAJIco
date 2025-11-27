@@ -35,8 +35,10 @@ module.exports = {
   
   // Allow cross-origin requests from Replit domains
   allowedDevOrigins: [
-    '*.replit.dev',
-    '*.repl.co',
+    'localhost',
+    '127.0.0.1',
+    /\.replit\.dev$/,
+    /\.repl\.co$/,
   ],
   
   // Environment variables
