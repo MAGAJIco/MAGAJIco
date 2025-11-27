@@ -357,6 +357,8 @@ export default function BrainstormPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showConnectionStatus, setShowConnectionStatus] = useState(false);
   const [connectionStatus] = useState('good'); // 'warning' | 'slow' | 'good'
+  const [searchActive, setSearchActive] = useState(false);
+  const [globalSearchQuery, setGlobalSearchQuery] = useState('');
 
   const isActive = (path) => pathname?.includes(path);
 
@@ -777,9 +779,51 @@ export default function BrainstormPage() {
         </div>
       </section>
 
+      {/* Google Style Search Overlay */}
+      {searchActive && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(255,255,255,0.98)', zIndex: 100, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '80px 24px 24px' }} className="dark:bg-[#1a1a1a]">
+          <div style={{ width: '100%', maxWidth: '600px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', backgroundColor: 'white', border: '1px solid #d5d9d9', borderRadius: '24px', padding: '12px 16px', marginBottom: '24px' }} className="dark:bg-[#2c2c2e] dark:border-[#38383a]">
+              <Search className="w-5 h-5" style={{ color: '#999' }} />
+              <input
+                type="text"
+                autoFocus
+                value={globalSearchQuery}
+                onChange={(e) => setGlobalSearchQuery(e.target.value)}
+                placeholder="Search predictions, teams, leagues..."
+                style={{ flex: 1, border: 'none', outline: 'none', fontSize: '16px', backgroundColor: 'transparent' }}
+                className="dark:text-white dark:placeholder-gray-500"
+              />
+              <button
+                onClick={() => { setSearchActive(false); setGlobalSearchQuery(''); }}
+                style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#999', fontSize: '20px' }}
+              >
+                ✕
+              </button>
+            </div>
+
+            {globalSearchQuery && (
+              <div style={{ backgroundColor: 'white', borderRadius: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', padding: '16px', maxHeight: '70vh', overflowY: 'auto' }} className="dark:bg-[#2c2c2e]">
+                <div style={{ fontSize: '12px', color: '#999', marginBottom: '12px', fontWeight: 500 }} className="dark:text-gray-400">
+                  Search results for "{globalSearchQuery}"
+                </div>
+                <div style={{ color: '#0f1111', fontSize: '14px', padding: '20px', textAlign: 'center' }} className="dark:text-gray-300">
+                  <p>🔍 Searching through predictions, teams, and matches...</p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Minimal Search Bar When Active */}
+      {searchActive && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, height: '12px', backgroundColor: 'transparent', backdropFilter: 'blur(8px)', zIndex: 99 }} />
+      )}
+
       {/* Bottom Navigation */}
-      <nav style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: 'white', borderTop: '1px solid #e5e7eb', zIndex: 30 }}>
-        <div style={{ padding: '8px 16px', display: 'flex', justifyContent: 'space-around', alignItems: 'center' }}>
+      <nav style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: searchActive ? 'transparent' : 'white', borderTop: searchActive ? 'none' : '1px solid #e5e7eb', zIndex: 30, height: searchActive ? '12px' : 'auto', display: searchActive ? 'none' : 'block' }}>
+        <div style={{ padding: searchActive ? '0' : '8px 16px', display: 'flex', justifyContent: 'space-around', alignItems: 'center' }}>
           <button 
             onClick={() => router.push('/en/live')}
             style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', color: '#4b5563', background: 'transparent', border: 'none', cursor: 'pointer', padding: '8px', transition: 'all 0.3s ease' }}
@@ -797,6 +841,14 @@ export default function BrainstormPage() {
           >
             <Lock className="w-5 h-5" style={{ color: '#6366f1' }} />
             <span style={{ fontSize: '12px', fontWeight: '500' }}>Secret</span>
+          </button>
+          <button 
+            onClick={() => setSearchActive(true)}
+            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', color: '#4b5563', background: 'transparent', border: 'none', cursor: 'pointer', padding: '8px', transition: 'all 0.3s ease' }}
+            title="Search"
+          >
+            <Search className="w-5 h-5" />
+            <span style={{ fontSize: '12px', fontWeight: '500' }}>Search</span>
           </button>
           <button 
             onClick={() => setIsBrainstormOpen(true)}
