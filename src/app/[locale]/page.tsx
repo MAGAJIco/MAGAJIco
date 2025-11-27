@@ -291,7 +291,6 @@ export default function BrainstormPage() {
   const router = useRouter();
   const pathname = usePathname();
   const [selectedComponent, setSelectedComponent] = useState('Predictions Dashboard');
-  const [isBrainstormOpen, setIsBrainstormOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [activePage, setActivePage] = useState('home');
@@ -417,20 +416,6 @@ export default function BrainstormPage() {
                 }}
               >
                 🧠 AI Hub
-              </button>
-              <button 
-                onClick={() => setIsBrainstormOpen(true)}
-                style={navButtonStyle}
-                onMouseEnter={(e) => { 
-                  e.currentTarget.style.background = 'rgba(168, 85, 247, 0.15)';
-                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(168, 85, 247, 0.3)';
-                }}
-                onMouseLeave={(e) => { 
-                  e.currentTarget.style.background = 'transparent';
-                  e.currentTarget.style.boxShadow = 'none';
-                }}
-              >
-                ✨ Brainstorm
               </button>
               <button
                 onClick={() => { setActivePage('live'); router.push('/en/live'); }}
@@ -619,12 +604,6 @@ export default function BrainstormPage() {
         />
       )}
 
-      {/* Brainstorming Modal */}
-      <AIBrainstormingModal
-        component={selectedComponent}
-        isOpen={isBrainstormOpen}
-        onClose={() => setIsBrainstormOpen(false)}
-      />
 
       {/* Why Choose Us Section */}
       <section style={{ backgroundColor: '#f3f3f3', padding: '60px 24px', marginBottom: '80px' }} className="dark:bg-[#1c1c1e]">
@@ -698,7 +677,7 @@ export default function BrainstormPage() {
                   <p>🔍 Searching through predictions, teams, and matches...</p>
                 </div>
                 <button
-                  onClick={() => setIsBrainstormOpen(true)}
+                  onClick={() => setSearchActive(false)}
                   style={{
                     width: '100%',
                     padding: '12px 16px',
