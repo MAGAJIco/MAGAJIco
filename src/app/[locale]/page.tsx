@@ -647,27 +647,16 @@ export default function BrainstormPage() {
         <>
           <div style={{ position: 'fixed', top: '80px', left: '0px', width: '240px', height: 'calc(100vh - 180px)', backgroundColor: '#f3f3f3', zIndex: 50, overflow: 'auto', animation: 'slideInLeft 0.3s ease-out', borderRadius: '20px' }} className="dark:bg-[#1c1c1e]">
             {/* Search Box */}
-            <div style={{ padding: '12px 16px', borderBottomColor: '#d5d9d9', display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: '#ffffff' }} className="border-b dark:border-[#38383a] dark:bg-[#2c2c2e]">
+            <div style={{ padding: '12px 16px', borderBottomColor: '#d5d9d9', display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: '#ffffff', width: '100%' }} className="border-b dark:border-[#38383a] dark:bg-[#2c2c2e]">
               <Search className="w-4 h-4" style={{ color: '#565959', flexShrink: 0, strokeWidth: 2 }} />
               <input
                 type="text"
                 placeholder="Search..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                style={{ color: '#0f1111', fontSize: '14px', flex: 1, border: 'none', outline: 'none', backgroundColor: 'transparent', padding: '0px' }}
+                style={{ color: '#0f1111', fontSize: '14px', flex: 1, border: 'none', outline: 'none', backgroundColor: 'transparent', padding: '0px', width: '100%' }}
                 className="dark:text-white"
               />
-              <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <button className="p-1 hover:opacity-70 transition-opacity cursor-pointer">
-                  <ChevronUp className="w-4 h-4" style={{ color: '#565959', strokeWidth: 2 }} />
-                </button>
-                <button className="p-1 hover:opacity-70 transition-opacity cursor-pointer">
-                  <ChevronDown className="w-4 h-4" style={{ color: '#565959', strokeWidth: 2 }} />
-                </button>
-                <button onClick={() => { setSearchQuery(''); setIsMenuOpen(false); }} className="p-1 hover:opacity-70 transition-opacity cursor-pointer">
-                  <X className="w-4 h-4" style={{ color: '#565959', strokeWidth: 2 }} />
-                </button>
-              </div>
             </div>
 
             <nav style={{ padding: '24px 12px' }} className="space-y-0">
