@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, use } from 'react';
-import { Zap, TrendingUp, Shield, Clock, ArrowRight, CheckCircle, Star, Trophy, BarChart3, Target, Eye, Home } from 'lucide-react';
+import { Zap, TrendingUp, Shield, Clock, ArrowRight, CheckCircle, Star, Trophy, BarChart3, Target, Eye, Home, Search } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -126,6 +126,13 @@ export default function PredictionsPage({ params }: { params: Promise<{ locale: 
               <p style={{ fontSize: '11px', color: '#999', letterSpacing: '1px', marginTop: '2px', fontWeight: 500 }}>PREMIUM</p>
             </div>
           </div>
+          <button
+            onClick={() => { const pageText = document.documentElement.innerText || ''; const matches = pageText.match(new RegExp('prediction', 'gi')); alert(`Found ${matches ? matches.length : 0} matches for "prediction" on this page`); }}
+            style={{ padding: '8px', background: 'transparent', border: 'none', cursor: 'pointer', borderRadius: '12px', transition: 'all 0.3s ease', color: '#ff9900' }}
+            title="Find in page"
+          >
+            <Search className="w-6 h-6" style={{ color: '#ff9900' }} />
+          </button>
         </div>
       </header>
 
