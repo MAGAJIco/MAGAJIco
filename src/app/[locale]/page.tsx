@@ -409,10 +409,12 @@ export default function BrainstormPage() {
                 onMouseEnter={(e) => { 
                   e.currentTarget.style.background = 'rgba(168, 85, 247, 0.15)';
                   e.currentTarget.style.boxShadow = '0 2px 8px rgba(168, 85, 247, 0.3)';
+                  e.currentTarget.style.cursor = 'none';
                 }}
                 onMouseLeave={(e) => { 
                   e.currentTarget.style.background = 'transparent';
                   e.currentTarget.style.boxShadow = 'none';
+                  e.currentTarget.style.cursor = 'pointer';
                 }}
               >
                 <Lightbulb className="w-5 h-5" style={{ color: activePage === 'home' ? 'white' : '#4b5563', filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15))' }} />
@@ -423,10 +425,12 @@ export default function BrainstormPage() {
                 onMouseEnter={(e) => { 
                   e.currentTarget.style.background = 'rgba(168, 85, 247, 0.15)';
                   e.currentTarget.style.boxShadow = '0 2px 8px rgba(168, 85, 247, 0.3)';
+                  e.currentTarget.style.cursor = 'none';
                 }}
                 onMouseLeave={(e) => { 
                   e.currentTarget.style.background = 'transparent';
                   e.currentTarget.style.boxShadow = 'none';
+                  e.currentTarget.style.cursor = 'pointer';
                 }}
               >
                 <Radio className="w-5 h-5" style={{ color: activePage === 'live' ? 'white' : '#4b5563', filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15))' }} />
@@ -437,10 +441,12 @@ export default function BrainstormPage() {
                 onMouseEnter={(e) => { 
                   e.currentTarget.style.background = 'rgba(168, 85, 247, 0.15)';
                   e.currentTarget.style.boxShadow = '0 2px 8px rgba(168, 85, 247, 0.3)';
+                  e.currentTarget.style.cursor = 'none';
                 }}
                 onMouseLeave={(e) => { 
                   e.currentTarget.style.background = 'transparent';
                   e.currentTarget.style.boxShadow = 'none';
+                  e.currentTarget.style.cursor = 'pointer';
                 }}
               >
                 <Lock className="w-5 h-5" style={{ color: activePage === 'secrets' ? 'white' : '#4b5563', filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15))' }} />
