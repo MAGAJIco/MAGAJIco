@@ -16,6 +16,7 @@ export default function PageNav({ onMenuOpen }: PageNavProps) {
   useEffect(() => {
     if (pathname?.includes('/live')) setActivePage('live');
     else if (pathname?.includes('/secrets')) setActivePage('secrets');
+    else if (pathname?.includes('/predictions')) setActivePage('predictions');
     else setActivePage('home');
   }, [pathname]);
 
