@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { Lightbulb, Brain, Sparkles, Zap, X, TrendingUp, Clock, Star, Menu, ChevronRight, Search, ChevronUp, ChevronDown, Eye, Lock, Settings, Mail } from 'lucide-react';
+import { Lightbulb, Brain, Sparkles, Zap, X, TrendingUp, Clock, Star, Menu, ChevronRight, Search, ChevronUp, ChevronDown, Eye, Lock, Settings, Mail, Shield, Trophy, BarChart3 } from 'lucide-react';
 
 const COMPONENTS = [
   'Predictions Dashboard',
@@ -729,6 +729,46 @@ export default function BrainstormPage() {
         isOpen={isBrainstormOpen}
         onClose={() => setIsBrainstormOpen(false)}
       />
+
+      {/* Why Choose Us Section */}
+      <section style={{ backgroundColor: '#f3f3f3', padding: '60px 24px', marginBottom: '80px' }} className="dark:bg-[#1c1c1e]">
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+          <h2 style={{ fontSize: '32px', fontWeight: 700, color: '#0f1111', marginBottom: '48px', textAlign: 'center', letterSpacing: '0.5px' }} className="dark:text-white">Why Choose Us?</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div style={{ backgroundColor: 'white', borderRadius: '16px', padding: '32px 24px', textAlign: 'center', boxShadow: '0 4px 12px rgba(0,0,0,0.08)', border: '1px solid #d5d9d9' }} className="dark:bg-[#2c2c2e] dark:border-[#38383a]">
+              <div style={{ width: '56px', height: '56px', margin: '0 auto 20px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#ff9900', borderRadius: '12px' }}>
+                <Shield className="w-7 h-7 text-white" />
+              </div>
+              <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#0f1111', marginBottom: '12px' }} className="dark:text-white">Verified Sources</h3>
+              <p style={{ fontSize: '13px', color: '#565959', lineHeight: '1.6' }} className="dark:text-gray-400">All predictions from trusted, industry-leading platforms</p>
+            </div>
+
+            <div style={{ backgroundColor: 'white', borderRadius: '16px', padding: '32px 24px', textAlign: 'center', boxShadow: '0 4px 12px rgba(0,0,0,0.08)', border: '1px solid #d5d9d9' }} className="dark:bg-[#2c2c2e] dark:border-[#38383a]">
+              <div style={{ width: '56px', height: '56px', margin: '0 auto 20px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#ff9900', borderRadius: '12px' }}>
+                <Zap className="w-7 h-7 text-white" />
+              </div>
+              <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#0f1111', marginBottom: '12px' }} className="dark:text-white">Real-Time Updates</h3>
+              <p style={{ fontSize: '13px', color: '#565959', lineHeight: '1.6' }} className="dark:text-gray-400">Live data synchronization every 60 seconds</p>
+            </div>
+
+            <div style={{ backgroundColor: 'white', borderRadius: '16px', padding: '32px 24px', textAlign: 'center', boxShadow: '0 4px 12px rgba(0,0,0,0.08)', border: '1px solid #d5d9d9' }} className="dark:bg-[#2c2c2e] dark:border-[#38383a]">
+              <div style={{ width: '56px', height: '56px', margin: '0 auto 20px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#ff9900', borderRadius: '12px' }}>
+                <Trophy className="w-7 h-7 text-white" />
+              </div>
+              <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#0f1111', marginBottom: '12px' }} className="dark:text-white">High Accuracy</h3>
+              <p style={{ fontSize: '13px', color: '#565959', lineHeight: '1.6' }} className="dark:text-gray-400">Consistently delivers winning predictions with proven track record</p>
+            </div>
+
+            <div style={{ backgroundColor: 'white', borderRadius: '16px', padding: '32px 24px', textAlign: 'center', boxShadow: '0 4px 12px rgba(0,0,0,0.08)', border: '1px solid #d5d9d9' }} className="dark:bg-[#2c2c2e] dark:border-[#38383a]">
+              <div style={{ width: '56px', height: '56px', margin: '0 auto 20px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#ff9900', borderRadius: '12px' }}>
+                <BarChart3 className="w-7 h-7 text-white" />
+              </div>
+              <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#0f1111', marginBottom: '12px' }} className="dark:text-white">Multi-Source Analysis</h3>
+              <p style={{ fontSize: '13px', color: '#565959', lineHeight: '1.6' }} className="dark:text-gray-400">Compare predictions from three premium sources in one place</p>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Bottom Navigation */}
       <nav style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: 'white', borderTop: '1px solid #e5e7eb', zIndex: 30 }}>

@@ -225,29 +225,6 @@ export default function PredictionsPage({ params }: { params: Promise<{ locale: 
         </div>
       )}
 
-      {/* Benefits Section */}
-      <div style={{ backgroundColor: '#f3f3f3', borderTopColor: '#d5d9d9', borderBottomColor: '#d5d9d9', padding: '32px 24px' }} className="border-y dark:bg-[#1c1c1e] dark:border-[#38383a]">
-        <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#0f1111', marginBottom: '24px', letterSpacing: '0.5px' }} className="dark:text-white">Why Choose Us?</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {benefits.map((benefit, index) => (
-            <div
-              key={index}
-              style={{ backgroundColor: 'white', borderRadius: '12px', padding: '20px 16px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', border: '1px solid #d5d9d9' }}
-              className="dark:bg-[#2c2c2e] dark:border-[#38383a]"
-            >
-              <div style={{ width: '40px', height: '40px', margin: '0 auto 12px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#ff9900', borderRadius: '10px' }}>
-                {React.createElement(benefit.icon, { className: "w-5 h-5 text-white" })}
-              </div>
-              <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#0f1111', marginBottom: '8px', textAlign: 'center' }} className="dark:text-white">
-                {benefit.title}
-              </h3>
-              <p style={{ fontSize: '12px', color: '#565959', textAlign: 'center' }} className="dark:text-gray-400">
-                {benefit.description}
-              </p>
-            </div>
-          ))}
-        </div>
-      </div>
 
       {/* All Predictions Section - Grouped by League */}
       <div style={{ backgroundColor: '#eaeded', padding: '32px 24px' }} className="dark:bg-black">
