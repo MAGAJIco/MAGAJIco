@@ -15,6 +15,8 @@ export default function PredictionsPage({ params }: { params: Promise<{ locale: 
   const [hasAIAccess, setHasAIAccess] = useState(false);
   const [showAISignup, setShowAISignup] = useState(false);
   const [showDotsHoverboard, setShowDotsHoverboard] = useState(false);
+  const [searchActive, setSearchActive] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   
   const isActive = (path: string) => pathname === `/${locale}${path}` || pathname === `/${locale}/`;
 
@@ -416,8 +418,50 @@ export default function PredictionsPage({ params }: { params: Promise<{ locale: 
         </div>
       </div>
 
+      {/* Google Style Search Overlay */}
+      {searchActive && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(255,255,255,0.98)', zIndex: 100, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '80px 24px 24px' }} className="dark:bg-[#1a1a1a]">
+          <div style={{ width: '100%', maxWidth: '600px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', backgroundColor: 'white', border: '1px solid #d5d9d9', borderRadius: '24px', padding: '12px 16px', marginBottom: '24px' }} className="dark:bg-[#2c2c2e] dark:border-[#38383a]">
+              <Search className="w-5 h-5" style={{ color: '#999' }} />
+              <input
+                type="text"
+                autoFocus
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search predictions, teams, leagues..."
+                style={{ flex: 1, border: 'none', outline: 'none', fontSize: '16px', backgroundColor: 'transparent' }}
+                className="dark:text-white dark:placeholder-gray-500"
+              />
+              <button
+                onClick={() => { setSearchActive(false); setSearchQuery(''); }}
+                style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#999', fontSize: '20px' }}
+              >
+                ✕
+              </button>
+            </div>
+
+            {searchQuery && (
+              <div style={{ backgroundColor: 'white', borderRadius: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', padding: '16px', maxHeight: '70vh', overflowY: 'auto' }} className="dark:bg-[#2c2c2e]">
+                <div style={{ fontSize: '12px', color: '#999', marginBottom: '12px', fontWeight: 500 }} className="dark:text-gray-400">
+                  Search results for "{searchQuery}"
+                </div>
+                <div style={{ color: '#0f1111', fontSize: '14px', padding: '20px', textAlign: 'center' }} className="dark:text-gray-300">
+                  <p>🔍 Searching through predictions, teams, and matches...</p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Minimal Search Bar When Active */}
+      {searchActive && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, height: '12px', backgroundColor: 'transparent', backdropFilter: 'blur(8px)', zIndex: 99 }} />
+      )}
+
       {/* Bottom Navigation */}
-      <nav style={{ backgroundColor: '#f3f3f3', borderTopColor: '#d5d9d9', padding: '14px 0 env(safe-area-inset-bottom)' }} className="border-t dark:bg-[#1c1c1e] dark:border-[#38383a] fixed bottom-0 left-0 right-0 safe-area-inset-bottom backdrop-blur-xl bg-opacity-98 dark:bg-opacity-98 shadow-2xl">
+      <nav style={{ backgroundColor: searchActive ? 'transparent' : '#f3f3f3', borderTopColor: '#d5d9d9', padding: searchActive ? '0' : '14px 0 env(safe-area-inset-bottom)', height: searchActive ? '12px' : 'auto', display: searchActive ? 'none' : 'block' }} className="border-t dark:bg-[#1c1c1e] dark:border-[#38383a] fixed bottom-0 left-0 right-0 safe-area-inset-bottom backdrop-blur-xl bg-opacity-98 dark:bg-opacity-98 shadow-2xl">
         <div className="flex items-center justify-around max-w-2xl mx-auto">
           <Link href={`/${locale}/`} className="flex flex-col items-center justify-center" style={{ color: isActive('/') ? '#ff9900' : '#565959', gap: '6px', padding: '8px 0', transition: 'color 0.3s ease' }}>
             <Home className="w-9 h-9" style={{ filter: isActive('/') ? 'drop-shadow(0 3px 8px rgba(255,153,0,0.5))' : 'drop-shadow(0 2px 6px rgba(0,0,0,0.3))', strokeWidth: 1.5 }} />
@@ -428,9 +472,9 @@ export default function PredictionsPage({ params }: { params: Promise<{ locale: 
             <span style={{ fontSize: '11px', fontWeight: 500, letterSpacing: '0.2px' }}>Predictions</span>
           </Link>
           <button
-            onClick={() => { const pageText = document.documentElement.innerText || ''; const matches = pageText.match(new RegExp('prediction', 'gi')); alert(`Found ${matches ? matches.length : 0} matches for "prediction" on this page`); }}
+            onClick={() => setSearchActive(true)}
             style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '8px 0', background: 'transparent', border: 'none', cursor: 'pointer', color: '#565959', transition: 'color 0.3s ease' }}
-            title="Find in page"
+            title="Search"
           >
             <Search className="w-9 h-9" style={{ color: '#565959' }} />
             <span style={{ fontSize: '11px', fontWeight: 500, letterSpacing: '0.2px' }}>Search</span>
