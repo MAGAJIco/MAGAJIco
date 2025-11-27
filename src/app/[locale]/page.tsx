@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
+import Link from 'next/link';
 import { Lightbulb, Brain, Sparkles, Zap, X, TrendingUp, Clock, Star, Menu, ChevronRight, Search, ChevronUp, ChevronDown, Eye, Lock, Settings, Mail } from 'lucide-react';
 
 const COMPONENTS = [
@@ -346,11 +347,16 @@ const MenuDrawer = ({ isOpen, onClose, onSelectComponent, selectedComponent, onN
 
 export default function BrainstormPage() {
   const router = useRouter();
+  const pathname = usePathname();
   const [selectedComponent, setSelectedComponent] = useState('Predictions Dashboard');
   const [isBrainstormOpen, setIsBrainstormOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [activePage, setActivePage] = useState('home');
   const [dailyQuote, setDailyQuote] = useState(() => getRandomWeightedQuote());
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const isActive = (path) => pathname?.includes(path);
 
   const handleNavigate = (view) => {
     setActivePage(view);
@@ -634,14 +640,86 @@ export default function BrainstormPage() {
         />
       )}
 
+      {/* Google Style Sidebar Menu */}
+      {isMenuOpen && (
+        <>
+          <div style={{ position: 'fixed', top: '80px', left: '0px', width: '240px', height: 'calc(100vh - 180px)', backgroundColor: '#f3f3f3', zIndex: 50, overflow: 'auto', animation: 'slideInLeft 0.3s ease-out', borderRadius: '20px' }} className="dark:bg-[#1c1c1e]">
+            {/* Search Box */}
+            <div style={{ padding: '12px 16px', borderBottomColor: '#d5d9d9', display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: '#ffffff' }} className="border-b dark:border-[#38383a] dark:bg-[#2c2c2e]">
+              <Search className="w-4 h-4" style={{ color: '#565959', flexShrink: 0, strokeWidth: 2 }} />
+              <input
+                type="text"
+                placeholder="Search..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                style={{ color: '#0f1111', fontSize: '14px', flex: 1, border: 'none', outline: 'none', backgroundColor: 'transparent', padding: '0px' }}
+                className="dark:text-white"
+              />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <button className="p-1 hover:opacity-70 transition-opacity cursor-pointer">
+                  <ChevronUp className="w-4 h-4" style={{ color: '#565959', strokeWidth: 2 }} />
+                </button>
+                <button className="p-1 hover:opacity-70 transition-opacity cursor-pointer">
+                  <ChevronDown className="w-4 h-4" style={{ color: '#565959', strokeWidth: 2 }} />
+                </button>
+                <button onClick={() => { setSearchQuery(''); setIsMenuOpen(false); }} className="p-1 hover:opacity-70 transition-opacity cursor-pointer">
+                  <X className="w-4 h-4" style={{ color: '#565959', strokeWidth: 2 }} />
+                </button>
+              </div>
+            </div>
+
+            <nav style={{ padding: '24px 12px' }} className="space-y-0">
+              <Link href="/en/predictions" onClick={() => setIsMenuOpen(false)}>
+                <div className={`flex items-center gap-6 px-6 py-4 rounded-lg transition-colors ${isActive('predictions') ? 'bg-orange-100 dark:bg-orange-600' : 'hover:bg-gray-100 dark:hover:bg-gray-800'}`} style={{ cursor: 'pointer' }}>
+                  <Eye className="w-6 h-6" style={{ color: isActive('predictions') ? '#ff9900' : '#565959', flexShrink: 0 }} />
+                  <span style={{ fontSize: '15px', fontWeight: 500, color: isActive('predictions') ? '#ff9900' : '#0f1111' }} className="dark:text-white">Predictions</span>
+                </div>
+              </Link>
+
+              <Link href="/en/secrets" onClick={() => setIsMenuOpen(false)}>
+                <div className={`flex items-center gap-6 px-6 py-4 rounded-lg transition-colors ${isActive('secrets') ? 'bg-orange-100 dark:bg-orange-600' : 'hover:bg-gray-100 dark:hover:bg-gray-800'}`} style={{ cursor: 'pointer' }}>
+                  <Lock className="w-6 h-6" style={{ color: isActive('secrets') ? '#ff9900' : '#565959', flexShrink: 0 }} />
+                  <span style={{ fontSize: '15px', fontWeight: 500, color: isActive('secrets') ? '#ff9900' : '#0f1111' }} className="dark:text-white">Secret</span>
+                </div>
+              </Link>
+
+              <Link href="/en/live" onClick={() => setIsMenuOpen(false)}>
+                <div className={`flex items-center gap-6 px-6 py-4 rounded-lg transition-colors ${isActive('live') ? 'bg-orange-100 dark:bg-orange-600' : 'hover:bg-gray-100 dark:hover:bg-gray-800'}`} style={{ cursor: 'pointer' }}>
+                  <Clock className="w-6 h-6" style={{ color: isActive('live') ? '#ff9900' : '#565959', flexShrink: 0 }} />
+                  <span style={{ fontSize: '15px', fontWeight: 500, color: isActive('live') ? '#ff9900' : '#0f1111' }} className="dark:text-white">Live</span>
+                </div>
+              </Link>
+
+              <Link href="/en/contact" onClick={() => setIsMenuOpen(false)}>
+                <div className={`flex items-center gap-6 px-6 py-4 rounded-lg transition-colors ${isActive('contact') ? 'bg-orange-100 dark:bg-orange-600' : 'hover:bg-gray-100 dark:hover:bg-gray-800'}`} style={{ cursor: 'pointer' }}>
+                  <Mail className="w-6 h-6" style={{ color: isActive('contact') ? '#ff9900' : '#565959', flexShrink: 0 }} />
+                  <span style={{ fontSize: '15px', fontWeight: 500, color: isActive('contact') ? '#ff9900' : '#0f1111' }} className="dark:text-white">Contact</span>
+                </div>
+              </Link>
+
+              <div style={{ borderTopColor: '#d5d9d9', marginTop: '20px', paddingTop: '20px' }} className="border-t dark:border-[#38383a]">
+                <Link href="/en" onClick={() => setIsMenuOpen(false)}>
+                  <div className="flex items-center gap-6 px-6 py-4 rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-gray-800" style={{ cursor: 'pointer' }}>
+                    <Settings className="w-6 h-6" style={{ color: '#565959', flexShrink: 0 }} />
+                    <span style={{ fontSize: '15px', fontWeight: 500, color: '#0f1111' }} className="dark:text-white">Settings</span>
+                  </div>
+                </Link>
+              </div>
+            </nav>
+          </div>
+        </>
+      )}
+
       {/* Menu Drawer */}
-      <MenuDrawer
-        isOpen={isMenuOpen}
-        onClose={() => setIsMenuOpen(false)}
-        onSelectComponent={setSelectedComponent}
-        selectedComponent={selectedComponent}
-        onNavigate={handleNavigate}
-      />
+      {false && (
+        <MenuDrawer
+          isOpen={isMenuOpen}
+          onClose={() => setIsMenuOpen(false)}
+          onSelectComponent={setSelectedComponent}
+          selectedComponent={selectedComponent}
+          onNavigate={handleNavigate}
+        />
+      )}
 
       {/* Brainstorming Modal */}
       <AIBrainstormingModal
