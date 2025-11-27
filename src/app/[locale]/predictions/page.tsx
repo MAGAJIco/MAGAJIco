@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, use } from 'react';
-import { Zap, TrendingUp, Shield, Clock, ArrowRight, CheckCircle, Star, Trophy, BarChart3, Target, Eye, Home, Search } from 'lucide-react';
+import { Zap, TrendingUp, Shield, Clock, ArrowRight, CheckCircle, Star, Trophy, BarChart3, Target, Eye, Home, Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -126,13 +126,6 @@ export default function PredictionsPage({ params }: { params: Promise<{ locale: 
               <p style={{ fontSize: '11px', color: '#999', letterSpacing: '1px', marginTop: '2px', fontWeight: 500 }}>PREMIUM</p>
             </div>
           </div>
-          <button
-            onClick={() => { const pageText = document.documentElement.innerText || ''; const matches = pageText.match(new RegExp('prediction', 'gi')); alert(`Found ${matches ? matches.length : 0} matches for "prediction" on this page`); }}
-            style={{ padding: '8px', background: 'transparent', border: 'none', cursor: 'pointer', borderRadius: '12px', transition: 'all 0.3s ease', color: '#ff9900' }}
-            title="Find in page"
-          >
-            <Search className="w-6 h-6" style={{ color: '#ff9900' }} />
-          </button>
         </div>
       </header>
 
@@ -162,6 +155,59 @@ export default function PredictionsPage({ params }: { params: Promise<{ locale: 
               </div>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Stats Carousel Section with Navigation */}
+      <div style={{ backgroundColor: '#eaeded', padding: '24px 24px' }} className="dark:bg-black">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <button
+            onClick={() => setCurrentStat((prev) => (prev - 1 + stats.length) % stats.length)}
+            style={{ padding: '8px', background: 'transparent', border: 'none', cursor: 'pointer', color: '#ff9900', transition: 'all 0.3s ease' }}
+            className="hover:scale-110"
+          >
+            <ChevronLeft className="w-6 h-6" />
+          </button>
+          <div style={{ display: 'flex', gap: '12px', overflow: 'auto', scrollBehavior: 'smooth', flex: 1 }}>
+            {stats.map((stat, idx) => {
+              const isActive = idx === currentStat;
+              const IconComponent = stat.icon;
+              return (
+                <div 
+                  key={idx}
+                  onClick={() => setCurrentStat(idx)}
+                  style={{
+                    borderRadius: '12px',
+                    padding: '16px',
+                    minWidth: '150px',
+                    border: isActive ? '2px solid #ff9900' : '1px solid #d5d9d9',
+                    boxShadow: isActive ? '0 0 0 3px rgba(255,153,0,0.2)' : '0 2px 4px rgba(0,0,0,0.08)',
+                    transition: 'all 0.3s ease',
+                    backgroundColor: isActive ? 'rgba(255,153,0,0.05)' : 'white',
+                    cursor: 'pointer'
+                  }}
+                  className="dark:bg-[#2c2c2e] dark:border-[#38383a]"
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                    <IconComponent className="w-5 h-5" style={{ color: isActive ? '#ff9900' : '#565959', flex: 'shrink-0' }} />
+                    <span style={{ fontSize: '12px', color: isActive ? '#ff9900' : '#565959', fontWeight: isActive ? 700 : 500, transition: 'all 0.3s ease' }}>
+                      {stat.label}
+                    </span>
+                  </div>
+                  <div style={{ fontSize: isActive ? '24px' : '20px', fontWeight: 700, color: isActive ? '#ff9900' : '#0f1111', transition: 'all 0.3s ease' }} className="dark:text-white">
+                    {stat.value}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          <button
+            onClick={() => setCurrentStat((prev) => (prev + 1) % stats.length)}
+            style={{ padding: '8px', background: 'transparent', border: 'none', cursor: 'pointer', color: '#ff9900', transition: 'all 0.3s ease' }}
+            className="hover:scale-110"
+          >
+            <ChevronRight className="w-6 h-6" />
+          </button>
         </div>
       </div>
 
@@ -381,6 +427,14 @@ export default function PredictionsPage({ params }: { params: Promise<{ locale: 
             <Eye className="w-9 h-9" style={{ filter: 'drop-shadow(0 3px 8px rgba(255,153,0,0.5))', strokeWidth: 1.5 }} />
             <span style={{ fontSize: '11px', fontWeight: 500, letterSpacing: '0.2px' }}>Predictions</span>
           </Link>
+          <button
+            onClick={() => { const pageText = document.documentElement.innerText || ''; const matches = pageText.match(new RegExp('prediction', 'gi')); alert(`Found ${matches ? matches.length : 0} matches for "prediction" on this page`); }}
+            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '8px 0', background: 'transparent', border: 'none', cursor: 'pointer', color: '#565959', transition: 'color 0.3s ease' }}
+            title="Find in page"
+          >
+            <Search className="w-9 h-9" style={{ color: '#565959' }} />
+            <span style={{ fontSize: '11px', fontWeight: 500, letterSpacing: '0.2px' }}>Search</span>
+          </button>
         </div>
       </nav>
 
