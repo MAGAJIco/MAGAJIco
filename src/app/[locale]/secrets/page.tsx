@@ -294,7 +294,7 @@ export default function SecretsPage({ params }: { params: Promise<{ locale: stri
             <Lock className="w-12 h-12" style={{ color: '#ff9900', filter: 'drop-shadow(0 3px 12px rgba(255,153,0,0.6))', strokeWidth: 1.5 }} />
             <div>
               <h1 style={{ letterSpacing: '0.8px', fontSize: '24px', fontWeight: 700 }}>SECRET</h1>
-              <p style={{ fontSize: '11px', color: '#999', letterSpacing: '1px', marginTop: '2px', fontWeight: 500 }}>OPPORTUNITIES</p>
+              <p style={{ fontSize: '11px', color: '#999', letterSpacing: '1px', marginTop: '2px', fontWeight: 500 }}>Discover high-value betting opportunities with our curated secret predictions</p>
             </div>
           </div>
         </div>
