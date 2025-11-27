@@ -405,7 +405,7 @@ export default function BrainstormPage() {
             <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
               <button 
                 onClick={() => handleNavigate('home')}
-                style={{...navButtonStyle, display: 'flex', alignItems: 'center', justifyContent: 'center', ...(activePage === 'home' ? activeNavButtonStyle : {})}}
+                style={{...navButtonStyle, display: 'flex', alignItems: 'center', justifyContent: 'center', paddingRight: '16px', borderRight: '1px solid #e5e7eb', ...(activePage === 'home' ? activeNavButtonStyle : {})}}
                 onMouseEnter={(e) => { 
                   e.currentTarget.style.background = 'rgba(168, 85, 247, 0.15)';
                   e.currentTarget.style.boxShadow = '0 2px 8px rgba(168, 85, 247, 0.3)';
@@ -415,7 +415,7 @@ export default function BrainstormPage() {
                   e.currentTarget.style.boxShadow = 'none';
                 }}
               >
-                <Lightbulb className="w-5 h-5" style={{ color: activePage === 'home' ? 'white' : '#4b5563' }} />
+                <Lightbulb className="w-5 h-5" style={{ color: activePage === 'home' ? 'white' : '#4b5563', filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15))' }} />
               </button>
               <button
                 onClick={() => { setActivePage('live'); router.push('/en/live'); }}
@@ -429,7 +429,7 @@ export default function BrainstormPage() {
                   e.currentTarget.style.boxShadow = 'none';
                 }}
               >
-                <Radio className="w-5 h-5" style={{ color: activePage === 'live' ? 'white' : '#4b5563' }} />
+                <Radio className="w-5 h-5" style={{ color: activePage === 'live' ? 'white' : '#4b5563', filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15))' }} />
               </button>
               <button
                 onClick={() => { setActivePage('secrets'); router.push('/en/secrets'); }}
@@ -443,7 +443,7 @@ export default function BrainstormPage() {
                   e.currentTarget.style.boxShadow = 'none';
                 }}
               >
-                <Lock className="w-5 h-5" style={{ color: activePage === 'secrets' ? 'white' : '#4b5563' }} />
+                <Lock className="w-5 h-5" style={{ color: activePage === 'secrets' ? 'white' : '#4b5563', filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15))' }} />
               </button>
             </div>
           </div>
