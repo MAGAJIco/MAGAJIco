@@ -14,6 +14,7 @@ export default function PredictionsPage({ params }: { params: Promise<{ locale: 
   const [loading, setLoading] = useState(false);
   const [hasAIAccess, setHasAIAccess] = useState(false);
   const [showAISignup, setShowAISignup] = useState(false);
+  const [showDotsHoverboard, setShowDotsHoverboard] = useState(false);
   
   const isActive = (path: string) => pathname === `/${locale}${path}` || pathname === `/${locale}/`;
 
@@ -299,7 +300,51 @@ export default function PredictionsPage({ params }: { params: Promise<{ locale: 
       <div style={{ backgroundColor: '#eaeded', padding: '32px 24px' }} className="dark:bg-black">
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
           <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#0f1111', letterSpacing: '0.5px' }} className="dark:text-white">All Predictions by League</h2>
-          <button style={{ padding: '6px 8px', background: 'transparent', border: 'none', cursor: 'pointer', color: '#6b7280', fontSize: '20px', fontWeight: 'bold' }} title="More options">⋯</button>
+          <div style={{ position: 'relative' }}>
+            <button 
+              onMouseEnter={() => setShowDotsHoverboard(true)}
+              onMouseLeave={() => setShowDotsHoverboard(false)}
+              style={{ padding: '6px 8px', background: 'transparent', border: 'none', cursor: 'pointer', color: '#6b7280', fontSize: '20px', fontWeight: 'bold', transition: 'all 0.3s ease' }}
+              title="More options"
+            >
+              ⋯
+            </button>
+            {showDotsHoverboard && (
+              <div style={{
+                position: 'absolute',
+                top: '100%',
+                right: 0,
+                marginTop: '12px',
+                background: 'white',
+                borderRadius: '16px',
+                padding: '20px',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)',
+                border: '1px solid #e5e7eb',
+                zIndex: 100,
+                width: '200px'
+              }} className="dark:bg-[#2c2c2e] dark:border-[#38383a]">
+                <div style={{ fontSize: '12px', fontWeight: '600', color: '#6b7280', marginBottom: '16px' }} className="dark:text-gray-400">Data Connection</div>
+                <svg width="180" height="120" style={{ width: '100%', height: 'auto' }}>
+                  {/* Connection lines */}
+                  <line x1="30" y1="60" x2="90" y2="30" stroke="#eab308" strokeWidth="2" strokeDasharray="4" />
+                  <line x1="30" y1="60" x2="90" y2="90" stroke="#84cc16" strokeWidth="2" strokeDasharray="4" />
+                  <line x1="90" y1="30" x2="150" y2="60" stroke="#22c55e" strokeWidth="2" strokeDasharray="4" />
+                  
+                  {/* Circle 1 - Yellow */}
+                  <circle cx="30" cy="60" r="8" fill="#eab308" style={{ filter: 'drop-shadow(0 2px 8px rgba(234, 179, 8, 0.4))' }} />
+                  
+                  {/* Circle 2 - Light Green */}
+                  <circle cx="90" cy="30" r="8" fill="#84cc16" style={{ filter: 'drop-shadow(0 2px 8px rgba(132, 204, 22, 0.4))' }} />
+                  
+                  {/* Circle 3 - Dark Green */}
+                  <circle cx="150" cy="60" r="8" fill="#22c55e" style={{ filter: 'drop-shadow(0 2px 8px rgba(34, 197, 94, 0.4))' }} />
+                </svg>
+                <div style={{ fontSize: '11px', color: '#9ca3af', marginTop: '12px', textAlign: 'center' }} className="dark:text-gray-500">
+                  3 Data Sources Connected
+                </div>
+              </div>
+            )}
+          </div>
         </div>
         {loading ? (
           <div style={{ textAlign: 'center', padding: '40px', color: '#565959' }} className="dark:text-gray-400">
