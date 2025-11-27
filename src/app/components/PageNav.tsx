@@ -64,10 +64,13 @@ export default function PageNav({ onMenuOpen }: PageNavProps) {
               </div>
             </button>
             <button
-              style={{ padding: '8px', background: 'transparent', border: 'none', cursor: 'pointer', borderRadius: '12px', transition: 'all 0.3s ease' }}
-              title="Search"
+              style={{ padding: '8px 12px', background: 'transparent', border: 'none', cursor: 'pointer', borderRadius: '12px', transition: 'all 0.3s ease', fontSize: '14px', color: '#4b5563', fontWeight: '500' }}
+              title="Current Page"
             >
-              <Search className="w-6 h-6" style={{ color: '#374151' }} />
+              {activePage === 'home' && 'Dashboard'}
+              {activePage === 'live' && 'Live'}
+              {activePage === 'secrets' && 'Achilles'}
+              {activePage === 'predictions' && 'Predictions'}
             </button>
           </div>
           <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
