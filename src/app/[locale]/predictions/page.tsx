@@ -358,6 +358,18 @@ export default function PredictionsPage({ params }: { params: Promise<{ locale: 
 
       </div>
 
+      {/* Jeff Bezos Quote Section */}
+      <div style={{ backgroundColor: '#eaeded', padding: '40px 24px' }} className="dark:bg-black">
+        <div style={{ backgroundColor: 'white', borderRadius: '16px', padding: '32px 24px', boxShadow: '0 4px 16px rgba(0,0,0,0.08)', border: '1px solid #d5d9d9', textAlign: 'center' }} className="dark:bg-[#2c2c2e] dark:border-[#38383a]">
+          <p style={{ fontSize: '18px', fontWeight: 600, color: '#0f1111', marginBottom: '16px', lineHeight: '1.6' }} className="dark:text-white italic">
+            "The best customer service is if the customer doesn't need to call you."
+          </p>
+          <p style={{ fontSize: '14px', color: '#565959', fontWeight: 500 }} className="dark:text-gray-400">
+            — Jeff Bezos
+          </p>
+        </div>
+      </div>
+
       {/* Bottom Navigation */}
       <nav style={{ backgroundColor: '#f3f3f3', borderTopColor: '#d5d9d9', padding: '14px 0 env(safe-area-inset-bottom)' }} className="border-t dark:bg-[#1c1c1e] dark:border-[#38383a] fixed bottom-0 left-0 right-0 safe-area-inset-bottom backdrop-blur-xl bg-opacity-98 dark:bg-opacity-98 shadow-2xl">
         <div className="flex items-center justify-around max-w-2xl mx-auto">
