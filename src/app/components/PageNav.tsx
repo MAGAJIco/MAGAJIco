@@ -75,10 +75,7 @@ export default function PageNav({ onMenuOpen }: PageNavProps) {
                 e.currentTarget.style.boxShadow = 'none';
               }}
             >
-              {activePage === 'home' && 'Dashboard'}
-              {activePage === 'live' && 'Live'}
-              {activePage === 'secrets' && 'Achilles'}
-              {activePage === 'predictions' && 'Predictions'}
+              {activePage === 'home' ? 'Dashboard' : activePage === 'live' ? 'Live' : activePage === 'secrets' ? 'Achilles' : 'Predictions'}
             </button>
           </div>
           <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
