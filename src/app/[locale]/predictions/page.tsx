@@ -153,10 +153,10 @@ export default function PredictionsPage({ params }: { params: Promise<{ locale: 
           </div>
         </div>
 
-      {/* Rotating Stats with Data Connection */}
+      {/* Rotating Stats with Data Connection Hoverboard */}
       <div style={{ backgroundColor: '#f3f3f3', borderBottomColor: '#d5d9d9', padding: '24px' }} className="border-b dark:bg-[#1c1c1e] dark:border-[#38383a]">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div style={{ backgroundColor: 'white', borderRadius: '12px', padding: '20px 24px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', border: '1px solid #d5d9d9' }} className="dark:bg-[#2c2c2e] dark:border-[#38383a]">
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ backgroundColor: 'white', borderRadius: '12px', padding: '20px 24px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', border: '1px solid #d5d9d9', flex: 1 }} className="dark:bg-[#2c2c2e] dark:border-[#38383a]">
             <div className="flex items-center" style={{ gap: '16px' }}>
               {React.createElement(stats[currentStat].icon, { className: "w-8 h-8 flex-shrink-0", style: { color: '#ff9900' } })}
               <div>
@@ -166,19 +166,45 @@ export default function PredictionsPage({ params }: { params: Promise<{ locale: 
             </div>
           </div>
           
-          <div style={{ backgroundColor: 'white', borderRadius: '12px', padding: '20px 24px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', border: '1px solid #d5d9d9' }} className="dark:bg-[#2c2c2e] dark:border-[#38383a]">
-            <p style={{ fontSize: '12px', color: '#565959', marginBottom: '12px' }} className="dark:text-gray-500">Data Connection</p>
-            <svg width="100%" height="80" viewBox="0 0 200 80" style={{ minHeight: '80px' }}>
-              <line x1="20" y1="40" x2="60" y2="20" stroke="#eab308" strokeWidth="2" strokeDasharray="4" />
-              <line x1="20" y1="40" x2="60" y2="60" stroke="#84cc16" strokeWidth="2" strokeDasharray="4" />
-              <line x1="60" y1="20" x2="140" y2="40" stroke="#22c55e" strokeWidth="2" strokeDasharray="4" />
-              
-              <circle cx="20" cy="40" r="6" fill="#eab308" style={{ filter: 'drop-shadow(0 2px 6px rgba(234, 179, 8, 0.4))' }} />
-              <circle cx="60" cy="20" r="6" fill="#84cc16" style={{ filter: 'drop-shadow(0 2px 6px rgba(132, 204, 22, 0.4))' }} />
-              <circle cx="60" cy="60" r="6" fill="#84cc16" style={{ filter: 'drop-shadow(0 2px 6px rgba(132, 204, 22, 0.4))' }} />
-              <circle cx="140" cy="40" r="6" fill="#22c55e" style={{ filter: 'drop-shadow(0 2px 6px rgba(34, 197, 94, 0.4))' }} />
-            </svg>
-            <p style={{ fontSize: '11px', color: '#9ca3af', textAlign: 'center' }} className="dark:text-gray-500">3 Premium Sources Connected</p>
+          <div style={{ position: 'relative', marginLeft: '16px' }}>
+            <button 
+              onMouseEnter={() => setShowDotsHoverboard(true)}
+              onMouseLeave={() => setShowDotsHoverboard(false)}
+              style={{ padding: '12px 16px', background: 'white', border: '1px solid #d5d9d9', cursor: 'pointer', color: '#6b7280', fontSize: '20px', fontWeight: 'bold', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', transition: 'all 0.3s ease' }}
+              className="dark:bg-[#2c2c2e] dark:border-[#38383a]"
+              title="Data connection status"
+            >
+              ⋯
+            </button>
+            {showDotsHoverboard && (
+              <div style={{
+                position: 'absolute',
+                top: '100%',
+                right: 0,
+                marginTop: '12px',
+                background: 'white',
+                borderRadius: '16px',
+                padding: '20px',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)',
+                border: '1px solid #e5e7eb',
+                zIndex: 100,
+                width: '200px'
+              }} className="dark:bg-[#2c2c2e] dark:border-[#38383a]">
+                <div style={{ fontSize: '12px', fontWeight: '600', color: '#6b7280', marginBottom: '16px' }} className="dark:text-gray-400">Data Connection</div>
+                <svg width="180" height="120" style={{ width: '100%', height: 'auto' }}>
+                  <line x1="30" y1="60" x2="90" y2="30" stroke="#eab308" strokeWidth="2" strokeDasharray="4" />
+                  <line x1="30" y1="60" x2="90" y2="90" stroke="#84cc16" strokeWidth="2" strokeDasharray="4" />
+                  <line x1="90" y1="30" x2="150" y2="60" stroke="#22c55e" strokeWidth="2" strokeDasharray="4" />
+                  
+                  <circle cx="30" cy="60" r="8" fill="#eab308" style={{ filter: 'drop-shadow(0 2px 8px rgba(234, 179, 8, 0.4))' }} />
+                  <circle cx="90" cy="30" r="8" fill="#84cc16" style={{ filter: 'drop-shadow(0 2px 8px rgba(132, 204, 22, 0.4))' }} />
+                  <circle cx="150" cy="60" r="8" fill="#22c55e" style={{ filter: 'drop-shadow(0 2px 8px rgba(34, 197, 94, 0.4))' }} />
+                </svg>
+                <div style={{ fontSize: '11px', color: '#9ca3af', marginTop: '12px', textAlign: 'center' }} className="dark:text-gray-500">
+                  3 Data Sources Connected
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
