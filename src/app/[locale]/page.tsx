@@ -402,33 +402,18 @@ export default function BrainstormPage() {
               >
                 <Search className="w-6 h-6" style={{ color: '#374151' }} />
               </button>
-              <div style={{ display: 'none' }}>
-                <Lightbulb className="w-6 h-6" style={{ color: '#eab308' }} />
-                <span style={{ fontWeight: 'bold', fontSize: '18px', color: '#1f2937' }}>
-                  MagajiCo AI Hub
-                </span>
-              </div>
-              <div>
-                <span style={{ fontWeight: 'bold', fontSize: '16px', color: '#1f2937' }}>
-                  🧠 AI Hub
-                </span>
-              </div>
             </div>
             <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
               <button 
                 onClick={() => handleNavigate('home')}
                 style={activePage === 'home' ? activeNavButtonStyle : navButtonStyle}
                 onMouseEnter={(e) => { 
-                  if (activePage !== 'home') {
-                    e.currentTarget.style.background = 'rgba(168, 85, 247, 0.15)';
-                    e.currentTarget.style.boxShadow = '0 2px 8px rgba(168, 85, 247, 0.3)';
-                  }
+                  e.currentTarget.style.background = 'rgba(168, 85, 247, 0.15)';
+                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(168, 85, 247, 0.3)';
                 }}
                 onMouseLeave={(e) => { 
-                  if (activePage !== 'home') {
-                    e.currentTarget.style.background = 'transparent';
-                    e.currentTarget.style.boxShadow = 'none';
-                  }
+                  e.currentTarget.style.background = 'transparent';
+                  e.currentTarget.style.boxShadow = 'none';
                 }}
               >
                 🧠 AI Hub
@@ -451,16 +436,12 @@ export default function BrainstormPage() {
                 onClick={() => { setActivePage('live'); router.push('/en/live'); }}
                 style={activePage === 'live' ? activeNavButtonStyle : navButtonStyle}
                 onMouseEnter={(e) => { 
-                  if (activePage !== 'live') {
-                    e.currentTarget.style.background = 'rgba(168, 85, 247, 0.15)';
-                    e.currentTarget.style.boxShadow = '0 2px 8px rgba(168, 85, 247, 0.3)';
-                  }
+                  e.currentTarget.style.background = 'rgba(168, 85, 247, 0.15)';
+                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(168, 85, 247, 0.3)';
                 }}
                 onMouseLeave={(e) => { 
-                  if (activePage !== 'live') {
-                    e.currentTarget.style.background = 'transparent';
-                    e.currentTarget.style.boxShadow = 'none';
-                  }
+                  e.currentTarget.style.background = 'transparent';
+                  e.currentTarget.style.boxShadow = 'none';
                 }}
               >
                 🔴 Live
@@ -469,16 +450,12 @@ export default function BrainstormPage() {
                 onClick={() => { setActivePage('secrets'); router.push('/en/secrets'); }}
                 style={activePage === 'secrets' ? activeNavButtonStyle : navButtonStyle}
                 onMouseEnter={(e) => { 
-                  if (activePage !== 'secrets') {
-                    e.currentTarget.style.background = 'rgba(168, 85, 247, 0.15)';
-                    e.currentTarget.style.boxShadow = '0 2px 8px rgba(168, 85, 247, 0.3)';
-                  }
+                  e.currentTarget.style.background = 'rgba(168, 85, 247, 0.15)';
+                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(168, 85, 247, 0.3)';
                 }}
                 onMouseLeave={(e) => { 
-                  if (activePage !== 'secrets') {
-                    e.currentTarget.style.background = 'transparent';
-                    e.currentTarget.style.boxShadow = 'none';
-                  }
+                  e.currentTarget.style.background = 'transparent';
+                  e.currentTarget.style.boxShadow = 'none';
                 }}
               >
                 🔒 Secret
