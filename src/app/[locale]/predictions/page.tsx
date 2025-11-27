@@ -136,38 +136,32 @@ export default function PredictionsPage({ params }: { params: Promise<{ locale: 
         </div>
       </header>
 
-      {/* Stats Carousel Section */}
-      <div style={{ backgroundColor: '#eaeded', padding: '24px 24px' }} className="dark:bg-black">
-        <div style={{ display: 'flex', gap: '12px', overflow: 'auto', scrollBehavior: 'smooth' }}>
-          {stats.map((stat, idx) => {
-            const isActive = idx === currentStat;
-            const IconComponent = stat.icon;
-            return (
-              <div 
-                key={idx}
-                style={{
-                  borderRadius: '12px',
-                  padding: '16px',
-                  minWidth: '150px',
-                  border: isActive ? '2px solid #ff9900' : '1px solid #d5d9d9',
-                  boxShadow: isActive ? '0 0 0 3px rgba(255,153,0,0.2)' : '0 2px 4px rgba(0,0,0,0.08)',
-                  transition: 'all 0.3s ease',
-                  backgroundColor: isActive ? 'rgba(255,153,0,0.05)' : 'white'
-                }}
-                className="dark:bg-[#2c2c2e] dark:border-[#38383a]"
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                  <IconComponent className="w-5 h-5" style={{ color: isActive ? '#ff9900' : '#565959', flex: 'shrink-0' }} />
-                  <span style={{ fontSize: '12px', color: isActive ? '#ff9900' : '#565959', fontWeight: isActive ? 700 : 500, transition: 'all 0.3s ease' }}>
-                    {stat.label}
-                  </span>
-                </div>
-                <div style={{ fontSize: isActive ? '24px' : '20px', fontWeight: 700, color: isActive ? '#ff9900' : '#0f1111', transition: 'all 0.3s ease' }} className="dark:text-white">
-                  {stat.value}
-                </div>
+      {/* Hero Banner - Premium Style */}
+      <div style={{ background: 'linear-gradient(to right, #ff9900, #ffad33)', padding: '32px 24px' }} className="text-white overflow-hidden shadow-lg">
+        <div className="flex items-start" style={{ gap: '14px' }}>
+          <Zap className="w-8 h-8 flex-shrink-0" style={{ marginTop: '4px', filter: 'drop-shadow(0 2px 6px rgba(255,255,255,0.4))', strokeWidth: 1.5 }} />
+          <div className="min-w-0">
+            <div style={{ display: 'inline-block', backgroundColor: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(10px)', padding: '4px 12px', borderRadius: '20px', fontSize: '11px', fontWeight: 700, marginBottom: '12px', letterSpacing: '1px', border: '1px solid rgba(255,255,255,0.3)' }}>
+              PREMIUM
+            </div>
+            <p style={{ fontSize: '16px', fontWeight: 600, lineHeight: '1.5', marginBottom: '8px' }}>
+              Ready to Start Winning?
+            </p>
+            <p style={{ fontSize: '13px', opacity: 0.95, fontWeight: 400, marginBottom: '12px' }}>
+              Access premium predictions from three trusted sources right now
+            </p>
+            <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 500 }}>
+                <span>📊</span> Statarea
               </div>
-            );
-          })}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 500 }}>
+                <span>🤖</span> ScorePrediction
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 500 }}>
+                <span>💡</span> MyBets
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -362,46 +356,6 @@ export default function PredictionsPage({ params }: { params: Promise<{ locale: 
         )}
       </div>
 
-      {/* CTA Section */}
-      <div style={{ backgroundColor: '#eaeded', padding: '32px 24px' }} className="dark:bg-black">
-        <div style={{ background: 'linear-gradient(to right, #ff9900, #ffad33)', borderRadius: '12px', padding: '32px 24px', textAlign: 'center' }} className="text-white shadow-lg">
-          <h2 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '12px' }}>Ready to Start Winning?</h2>
-          <p style={{ fontSize: '14px', opacity: 0.95, marginBottom: '24px' }}>Access premium predictions from three trusted sources right now</p>
-          
-          {/* Three Sources Mini Cards */}
-          <div className="grid grid-cols-3 gap-3 mb-6">
-            {sources.map((source) => (
-              <Link key={source.name} href={`/${locale}/live`}>
-                <div 
-                  style={{ 
-                    backgroundColor: 'rgba(255,255,255,0.95)', 
-                    borderRadius: '8px', 
-                    padding: '12px', 
-                    cursor: 'pointer',
-                    transition: 'all 0.3s ease',
-                    border: '2px solid rgba(255,255,255,0.5)'
-                  }}
-                  className="hover:shadow-xl hover:scale-105"
-                >
-                  <div style={{ width: '32px', height: '32px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 8px', background: source.color === 'blue' ? '#667eea' : source.color === 'purple' ? '#764ba2' : '#10b981' }}>
-                    <Star className="w-4 h-4 text-white" style={{ fill: 'white' }} />
-                  </div>
-                  <p style={{ fontSize: '12px', fontWeight: 600, color: '#0f1111', marginBottom: '4px' }}>{source.name}</p>
-                  <p style={{ fontSize: '10px', color: '#565959', lineHeight: '1.3' }}>{source.features[0]}</p>
-                </div>
-              </Link>
-            ))}
-          </div>
-          
-          <button 
-            onClick={() => window.location.href = `/${locale}/live`}
-            style={{ backgroundColor: 'white', color: '#ff9900', padding: '12px 28px', borderRadius: '8px', fontWeight: 600, fontSize: '14px', border: 'none', cursor: 'pointer', transition: 'all 0.3s ease', boxShadow: '0 4px 12px rgba(255,153,0,0.3)' }}
-            className="hover:shadow-xl hover:scale-105"
-          >
-            View Live Predictions
-          </button>
-        </div>
-      </div>
       </div>
 
       {/* Bottom Navigation */}
