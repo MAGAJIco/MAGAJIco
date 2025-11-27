@@ -17,6 +17,30 @@ const COMPONENTS = [
   'Mobile Experience',
 ];
 
+const techQuotes = [
+  { author: 'Larry Page', quote: 'Always deliver more than expected.', count: 2 },
+  { author: 'Larry Page', quote: 'If you\'re changing the world, you\'re working on important things.', count: 2 },
+  { author: 'Jeff Bezos', quote: 'We see our customers as invited guests to a party.', count: 3 },
+  { author: 'Jeff Bezos', quote: 'If you double the number of experiments you do per year, you\'re going to double your inventiveness.', count: 3 },
+  { author: 'Jeff Bezos', quote: 'The best customer service is if the customer doesn\'t need to call you.', count: 3 },
+  { author: 'Mark Zuckerberg', quote: 'Move fast and break things.', count: 2 },
+  { author: 'Mark Zuckerberg', quote: 'The biggest risk is not taking any risk.', count: 2 },
+  { author: 'Elon Musk', quote: 'When something is important enough, you do it even if the odds are not in your favor.', count: 1 },
+  { author: 'Jack Ma', quote: 'Today is hard, tomorrow will be worse, but the day after tomorrow will be sunshine.', count: 2 },
+  { author: 'Jack Ma', quote: 'If you don\'t give up, you still have a chance.', count: 2 }
+];
+
+// 80/20 Weighted selection function
+const getRandomWeightedQuote = () => {
+  const weightedPool = [];
+  techQuotes.forEach(quote => {
+    for (let i = 0; i < quote.count; i++) {
+      weightedPool.push(quote);
+    }
+  });
+  return weightedPool[Math.floor(Math.random() * weightedPool.length)];
+};
+
 const AIBrainstormingModal = ({ component, isOpen, onClose }) => {
   const [context, setContext] = useState('');
   const [ideas, setIdeas] = useState([]);
@@ -326,6 +350,7 @@ export default function BrainstormPage() {
   const [isBrainstormOpen, setIsBrainstormOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activePage, setActivePage] = useState('home');
+  const [dailyQuote, setDailyQuote] = useState(() => getRandomWeightedQuote());
 
   const handleNavigate = (view) => {
     setActivePage(view);
@@ -581,6 +606,23 @@ export default function BrainstormPage() {
             <li>• Each idea includes priority, effort level, and AI potential score</li>
             <li>• Use insights to plan your next development sprint</li>
           </ul>
+        </div>
+
+        {/* Daily Tech Quote */}
+        <div style={{
+          marginTop: '32px',
+          padding: '24px',
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          borderRadius: '12px',
+          border: '2px solid rgba(255, 255, 255, 0.2)',
+          boxShadow: '0 8px 32px rgba(102, 126, 234, 0.3)',
+        }}>
+          <p style={{ color: 'rgba(255, 255, 255, 0.95)', fontSize: '18px', fontStyle: 'italic', marginBottom: '12px', lineHeight: '1.6' }}>
+            "{dailyQuote.quote}"
+          </p>
+          <p style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '14px', fontWeight: '600', textAlign: 'right' }}>
+            — {dailyQuote.author}
+          </p>
         </div>
       </div>
 
