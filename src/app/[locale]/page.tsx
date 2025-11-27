@@ -850,14 +850,6 @@ export default function BrainstormPage() {
             <Search className="w-5 h-5" />
             <span style={{ fontSize: '12px', fontWeight: '500' }}>Search</span>
           </button>
-          <button 
-            onClick={() => setIsBrainstormOpen(true)}
-            className="flex flex-col items-center gap-1 text-purple-500 hover:text-purple-600 transition-colors p-2 hover:opacity-80 active:opacity-60"
-            title="Generate AI Ideas"
-          >
-            <Zap className="w-5 h-5 sm:w-6 sm:h-6" />
-            <span className="text-xs font-medium">Generate</span>
-          </button>
         </div>
       </nav>
 
