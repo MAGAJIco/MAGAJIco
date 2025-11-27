@@ -71,14 +71,14 @@ export default function PageNav({ onMenuOpen }: PageNavProps) {
               </div>
             </button>
             <button
-              style={{ padding: '8px 12px', background: 'transparent', border: 'none', cursor: 'pointer', borderRadius: '12px', transition: 'all 0.3s ease', fontSize: '14px', color: '#4b5563', fontWeight: '500' }}
+              style={{ padding: '8px 16px', background: '#f3f4f6', border: 'none', cursor: 'pointer', borderRadius: '20px', transition: 'all 0.3s ease', fontSize: '14px', color: '#4b5563', fontWeight: '500' }}
               title="Current Page"
               onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'rgba(168, 85, 247, 0.15)';
+                e.currentTarget.style.background = 'rgba(168, 85, 247, 0.2)';
                 e.currentTarget.style.boxShadow = '0 2px 8px rgba(168, 85, 247, 0.3)';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'transparent';
+                e.currentTarget.style.background = '#f3f4f6';
                 e.currentTarget.style.boxShadow = 'none';
               }}
             >
