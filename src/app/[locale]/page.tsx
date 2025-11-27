@@ -670,7 +670,11 @@ export default function BrainstormPage() {
               />
               {searchQuery && (
                 <span style={{ fontSize: '12px', color: '#ff9900', fontWeight: 600, flexShrink: 0, minWidth: 'auto', paddingRight: '4px' }}>
-                  {['Predictions', 'Secret', 'Live', 'Contact'].filter(item => item.toLowerCase().includes(searchQuery.toLowerCase())).length}
+                  {(() => {
+                    const pageText = document.documentElement.innerText || '';
+                    const matches = pageText.match(new RegExp(searchQuery, 'gi'));
+                    return matches ? matches.length : 0;
+                  })()}
                 </span>
               )}
               <div style={{ display: 'flex', alignItems: 'center', gap: '0px', flexShrink: 0 }}>
