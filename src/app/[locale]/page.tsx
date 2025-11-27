@@ -654,9 +654,20 @@ export default function BrainstormPage() {
                 placeholder="Search..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                style={{ color: '#0f1111', fontSize: '14px', flex: 1, border: 'none', outline: 'none', backgroundColor: 'transparent', padding: '0px', width: '100%' }}
+                style={{ color: '#0f1111', fontSize: '14px', flex: 1, border: 'none', outline: 'none', backgroundColor: 'transparent', padding: '0px', minWidth: '0' }}
                 className="dark:text-white"
               />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0px', flexShrink: 0 }}>
+                <button className="p-1 hover:opacity-70 transition-opacity cursor-pointer">
+                  <ChevronUp className="w-4 h-4" style={{ color: '#565959', strokeWidth: 2 }} />
+                </button>
+                <button className="p-1 hover:opacity-70 transition-opacity cursor-pointer">
+                  <ChevronDown className="w-4 h-4" style={{ color: '#565959', strokeWidth: 2 }} />
+                </button>
+                <button onClick={() => { setSearchQuery(''); setIsMenuOpen(false); }} className="p-1 hover:opacity-70 transition-opacity cursor-pointer">
+                  <X className="w-4 h-4" style={{ color: '#565959', strokeWidth: 2 }} />
+                </button>
+              </div>
             </div>
 
             <nav style={{ padding: '24px 12px' }} className="space-y-0">
