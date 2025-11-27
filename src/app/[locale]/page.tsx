@@ -325,8 +325,10 @@ export default function BrainstormPage() {
   const [selectedComponent, setSelectedComponent] = useState('Predictions Dashboard');
   const [isBrainstormOpen, setIsBrainstormOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [activePage, setActivePage] = useState('home');
 
   const handleNavigate = (view) => {
+    setActivePage(view);
     setIsMenuOpen(false);
   };
 
@@ -389,10 +391,24 @@ export default function BrainstormPage() {
     transition: 'all 0.3s ease',
   };
 
+  const activeNavButtonStyle = {
+    ...navButtonStyle,
+    background: '#a855f7',
+    color: 'white',
+    boxShadow: '0 4px 15px rgba(168, 85, 247, 0.4)',
+  };
+
+  const navButtonHoverStyle = {
+    ...navButtonStyle,
+    background: 'rgba(168, 85, 247, 0.15)',
+    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+  };
+
   const purpleButtonStyle = {
     ...navButtonStyle,
     background: '#a855f7',
     color: 'white',
+    boxShadow: '0 4px 15px rgba(168, 85, 247, 0.4)',
   };
 
   return (
@@ -423,25 +439,33 @@ export default function BrainstormPage() {
             <div style={{ display: 'flex', gap: '8px' }}>
               <button 
                 onClick={() => handleNavigate('home')}
-                style={navButtonStyle}
+                style={activePage === 'home' ? activeNavButtonStyle : navButtonStyle}
+                onMouseEnter={(e) => { if (activePage !== 'home') e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.1)'; }}
+                onMouseLeave={(e) => { if (activePage !== 'home') e.currentTarget.style.boxShadow = 'none'; }}
               >
                 <img src="/favico.svg" alt="Home" style={{ width: '24px', height: '24px' }} />
               </button>
               <button 
                 onClick={() => setIsBrainstormOpen(true)}
                 style={purpleButtonStyle}
+                onMouseEnter={(e) => { e.currentTarget.style.boxShadow = '0 6px 20px rgba(168, 85, 247, 0.6)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.boxShadow = '0 4px 15px rgba(168, 85, 247, 0.4)'; }}
               >
                 Brainstorm
               </button>
               <button
-                onClick={() => router.push('/en/live')}
-                style={navButtonStyle}
+                onClick={() => { setActivePage('live'); router.push('/en/live'); }}
+                style={activePage === 'live' ? activeNavButtonStyle : navButtonStyle}
+                onMouseEnter={(e) => { if (activePage !== 'live') e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.1)'; }}
+                onMouseLeave={(e) => { if (activePage !== 'live') e.currentTarget.style.boxShadow = 'none'; }}
               >
                 Live
               </button>
               <button
-                onClick={() => router.push('/en/secrets')}
-                style={navButtonStyle}
+                onClick={() => { setActivePage('secrets'); router.push('/en/secrets'); }}
+                style={activePage === 'secrets' ? activeNavButtonStyle : navButtonStyle}
+                onMouseEnter={(e) => { if (activePage !== 'secrets') e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.1)'; }}
+                onMouseLeave={(e) => { if (activePage !== 'secrets') e.currentTarget.style.boxShadow = 'none'; }}
               >
                 Secret
               </button>
