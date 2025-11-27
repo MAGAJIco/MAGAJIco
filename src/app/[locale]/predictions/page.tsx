@@ -153,55 +153,36 @@ export default function PredictionsPage({ params }: { params: Promise<{ locale: 
           </div>
         </div>
 
-      {/* Rotating Stats */}
+      {/* Rotating Stats with Data Connection */}
       <div style={{ backgroundColor: '#f3f3f3', borderBottomColor: '#d5d9d9', padding: '24px' }} className="border-b dark:bg-[#1c1c1e] dark:border-[#38383a]">
-        <div style={{ backgroundColor: 'white', borderRadius: '12px', padding: '20px 24px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', border: '1px solid #d5d9d9' }} className="dark:bg-[#2c2c2e] dark:border-[#38383a]">
-          <div className="flex items-center" style={{ gap: '16px' }}>
-            {React.createElement(stats[currentStat].icon, { className: "w-8 h-8 flex-shrink-0", style: { color: '#ff9900' } })}
-            <div>
-              <p style={{ fontSize: '12px', color: '#565959', marginBottom: '4px' }} className="dark:text-gray-500">{stats[currentStat].label}</p>
-              <p style={{ fontSize: '24px', fontWeight: 700, color: '#ff9900' }}>{stats[currentStat].value}</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div style={{ backgroundColor: 'white', borderRadius: '12px', padding: '20px 24px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', border: '1px solid #d5d9d9' }} className="dark:bg-[#2c2c2e] dark:border-[#38383a]">
+            <div className="flex items-center" style={{ gap: '16px' }}>
+              {React.createElement(stats[currentStat].icon, { className: "w-8 h-8 flex-shrink-0", style: { color: '#ff9900' } })}
+              <div>
+                <p style={{ fontSize: '12px', color: '#565959', marginBottom: '4px' }} className="dark:text-gray-500">{stats[currentStat].label}</p>
+                <p style={{ fontSize: '24px', fontWeight: 700, color: '#ff9900' }}>{stats[currentStat].value}</p>
+              </div>
             </div>
+          </div>
+          
+          <div style={{ backgroundColor: 'white', borderRadius: '12px', padding: '20px 24px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', border: '1px solid #d5d9d9' }} className="dark:bg-[#2c2c2e] dark:border-[#38383a]">
+            <p style={{ fontSize: '12px', color: '#565959', marginBottom: '12px' }} className="dark:text-gray-500">Data Connection</p>
+            <svg width="100%" height="80" viewBox="0 0 200 80" style={{ minHeight: '80px' }}>
+              <line x1="20" y1="40" x2="60" y2="20" stroke="#eab308" strokeWidth="2" strokeDasharray="4" />
+              <line x1="20" y1="40" x2="60" y2="60" stroke="#84cc16" strokeWidth="2" strokeDasharray="4" />
+              <line x1="60" y1="20" x2="140" y2="40" stroke="#22c55e" strokeWidth="2" strokeDasharray="4" />
+              
+              <circle cx="20" cy="40" r="6" fill="#eab308" style={{ filter: 'drop-shadow(0 2px 6px rgba(234, 179, 8, 0.4))' }} />
+              <circle cx="60" cy="20" r="6" fill="#84cc16" style={{ filter: 'drop-shadow(0 2px 6px rgba(132, 204, 22, 0.4))' }} />
+              <circle cx="60" cy="60" r="6" fill="#84cc16" style={{ filter: 'drop-shadow(0 2px 6px rgba(132, 204, 22, 0.4))' }} />
+              <circle cx="140" cy="40" r="6" fill="#22c55e" style={{ filter: 'drop-shadow(0 2px 6px rgba(34, 197, 94, 0.4))' }} />
+            </svg>
+            <p style={{ fontSize: '11px', color: '#9ca3af', textAlign: 'center' }} className="dark:text-gray-500">3 Premium Sources Connected</p>
           </div>
         </div>
       </div>
 
-      {/* Sources Section */}
-      <div style={{ backgroundColor: '#eaeded', padding: '32px 24px' }} className="dark:bg-black">
-        <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#0f1111', marginBottom: '20px', letterSpacing: '0.5px' }} className="dark:text-white">Three Premium Sources</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {sources.map((source, index) => (
-            <Link key={source.name} href={`/${locale}/live`}>
-              <div
-                style={{ backgroundColor: 'white', borderRadius: '12px', padding: '24px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', border: '1px solid #d5d9d9', cursor: 'pointer', transition: 'all 0.3s ease' }}
-                className="dark:bg-[#2c2c2e] dark:border-[#38383a] hover:shadow-xl hover:scale-105"
-              >
-                <div className="flex items-center gap-3 mb-4">
-                  <div style={{ width: '44px', height: '44px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: source.color === 'blue' ? '#667eea' : source.color === 'purple' ? '#764ba2' : '#10b981' }}>
-                    <Star className="w-6 h-6 text-white" style={{ fill: 'white' }} />
-                  </div>
-                  <h3 style={{ fontSize: '15px', fontWeight: 600, color: '#0f1111' }} className="dark:text-white">
-                    {source.name}
-                  </h3>
-                </div>
-                
-                <p style={{ fontSize: '13px', color: '#565959', marginBottom: '16px' }} className="dark:text-gray-400">
-                  {source.description}
-                </p>
-                
-                <div className="space-y-2">
-                  {source.features.map((feature, idx) => (
-                    <div key={idx} className="flex items-center gap-2">
-                      <CheckCircle className="w-4 h-4" style={{ color: source.color === 'blue' ? '#667eea' : source.color === 'purple' ? '#764ba2' : '#10b981' }} />
-                      <span style={{ fontSize: '12px', color: '#565959' }} className="dark:text-gray-400">{feature}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </div>
 
       {/* AI Suggestions Section - With SignUp Gate */}
       <div style={{ backgroundColor: '#eaeded', padding: '32px 24px' }} className="dark:bg-black">
