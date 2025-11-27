@@ -299,11 +299,15 @@ export default function SecretsPage({ params }: { params: Promise<{ locale: stri
         </div>
       </header>
 
-      <div style={{ paddingBottom: '100px' }}>
+      <div style={{ maxWidth: '896px', margin: '0 auto', paddingBottom: '100px' }}>
         {/* Title Section */}
-        <div style={{ backgroundColor: '#eaeded', padding: '24px' }} className="dark:bg-black">
-          <h2 style={{ fontSize: '48px', fontWeight: 'bold', color: '#1f2937', marginBottom: '8px' }} className="dark:text-white">Secrets</h2>
-          <p style={{ fontSize: '16px', color: '#4b5563' }} className="dark:text-gray-400">Discover high-value betting opportunities</p>
+        <div style={{ marginBottom: '24px', paddingBottom: '24px' }}>
+          <h1 style={{ fontSize: '48px', fontWeight: 'bold', color: '#1f2937', marginBottom: '8px' }}>
+            Secrets
+          </h1>
+          <p style={{ color: '#3b82f6', fontSize: '16px', fontWeight: '500' }}>
+            Discover high-value betting opportunities
+          </p>
         </div>
 
         {/* Description Banner */}
