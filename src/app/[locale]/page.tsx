@@ -431,7 +431,7 @@ export default function BrainstormPage() {
                   }
                 }}
               >
-                🏠 Home
+                🧠 AI Hub
               </button>
               <button 
                 onClick={() => setIsBrainstormOpen(true)}
