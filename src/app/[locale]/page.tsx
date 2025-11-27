@@ -435,7 +435,15 @@ export default function BrainstormPage() {
               </button>
               <button 
                 onClick={() => setIsBrainstormOpen(true)}
-                style={activeNavButtonStyle}
+                style={navButtonStyle}
+                onMouseEnter={(e) => { 
+                  e.currentTarget.style.background = 'rgba(168, 85, 247, 0.15)';
+                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(168, 85, 247, 0.3)';
+                }}
+                onMouseLeave={(e) => { 
+                  e.currentTarget.style.background = 'transparent';
+                  e.currentTarget.style.boxShadow = 'none';
+                }}
               >
                 ✨ Brainstorm
               </button>
