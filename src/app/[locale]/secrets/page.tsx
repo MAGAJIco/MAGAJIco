@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Star, Calendar, CalendarDays, TrendingUp, Clock, AlertCircle, Lock, ChevronLeft, ChevronRight, Home, Lightbulb, Radio, Search } from 'lucide-react';
+import { Star, Calendar, CalendarDays, TrendingUp, Clock, AlertCircle, Lock, ChevronLeft, ChevronRight, Home, Lightbulb, Radio, Search, X } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { use } from 'react';
@@ -414,7 +414,7 @@ export default function SecretsPage({ params }: { params: Promise<{ locale: stri
 
           {calendarOpen && (
             <div style={{ position: 'absolute', top: '100%', left: '24px', marginTop: '12px', backgroundColor: 'white', borderRadius: '12px', boxShadow: '0 8px 24px rgba(0,0,0,0.15)', padding: '20px', zIndex: 50, minWidth: '320px' }} className="dark:bg-[#2c2c2e]">
-              {/* Month Navigation */}
+              {/* Month Navigation with Close Button */}
               <div className="flex items-center justify-between mb-6">
                 <button 
                   onClick={() => setCalendarMonth(new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() - 1))}
@@ -425,12 +425,21 @@ export default function SecretsPage({ params }: { params: Promise<{ locale: stri
                 <span style={{ fontSize: '15px', fontWeight: 600, color: '#0f1111' }} className="dark:text-white">
                   {['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'][calendarMonth.getMonth()]} {calendarMonth.getFullYear()}
                 </span>
-                <button 
-                  onClick={() => setCalendarMonth(new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1))}
-                  className="cursor-pointer hover:opacity-70 transition-opacity"
-                >
-                  <ChevronRight className="w-5 h-5" style={{ color: '#0f1111' }} />
-                </button>
+                <div className="flex items-center gap-2">
+                  <button 
+                    onClick={() => setCalendarMonth(new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1))}
+                    className="cursor-pointer hover:opacity-70 transition-opacity"
+                  >
+                    <ChevronRight className="w-5 h-5" style={{ color: '#0f1111' }} />
+                  </button>
+                  <button
+                    onClick={() => setCalendarOpen(false)}
+                    className="cursor-pointer hover:opacity-70 transition-opacity ml-2"
+                    title="Close calendar"
+                  >
+                    <X className="w-5 h-5" style={{ color: '#0f1111' }} />
+                  </button>
+                </div>
               </div>
 
               {/* Days of Week */}
