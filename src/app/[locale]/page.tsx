@@ -462,7 +462,7 @@ export default function BrainstormPage() {
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
             <Lightbulb className="w-8 h-8" style={{ color: '#eab308' }} />
             <h1 style={{ fontSize: '28px', fontWeight: 'bold', color: '#1f2937' }}>
-              AI Brainstorming Hub
+              Dashboard
             </h1>
           </div>
           <p style={{ color: '#4b5563', fontSize: '18px' }}>

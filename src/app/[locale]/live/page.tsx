@@ -95,8 +95,7 @@ export default function LivePage({ params }: { params: Promise<{ locale: string 
           <div className="flex items-center" style={{ gap: '18px' }}>
             <Clock className="w-12 h-12" style={{ color: '#ff9900', filter: 'drop-shadow(0 3px 12px rgba(255,153,0,0.6))', strokeWidth: 1.5 }} />
             <div>
-              <h1 style={{ letterSpacing: '0.8px', fontSize: '24px', fontWeight: 700 }}>LIVE</h1>
-              <p style={{ fontSize: '11px', color: '#999', letterSpacing: '1px', marginTop: '2px', fontWeight: 500 }}>MATCHES</p>
+              <h1 style={{ letterSpacing: '0.8px', fontSize: '24px', fontWeight: 700 }}>Notifications</h1>
             </div>
           </div>
         </div>
