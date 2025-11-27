@@ -415,7 +415,7 @@ export default function BrainstormPage() {
                   e.currentTarget.style.boxShadow = 'none';
                 }}
               >
-                🧠 AI Hub
+                🧠
               </button>
               <button
                 onClick={() => { setActivePage('live'); router.push('/en/live'); }}
@@ -429,7 +429,7 @@ export default function BrainstormPage() {
                   e.currentTarget.style.boxShadow = 'none';
                 }}
               >
-                🔴 Live
+                🔴
               </button>
               <button
                 onClick={() => { setActivePage('secrets'); router.push('/en/secrets'); }}
@@ -443,7 +443,7 @@ export default function BrainstormPage() {
                   e.currentTarget.style.boxShadow = 'none';
                 }}
               >
-                🔒 Secret
+                🔒
               </button>
             </div>
           </div>
