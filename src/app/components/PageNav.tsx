@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { Lightbulb, Radio, Lock, Search } from 'lucide-react';
+import { Lightbulb, Radio, Lock } from 'lucide-react';
 
 interface PageNavProps {
   onMenuOpen?: () => void;
@@ -66,6 +66,14 @@ export default function PageNav({ onMenuOpen }: PageNavProps) {
             <button
               style={{ padding: '8px 12px', background: 'transparent', border: 'none', cursor: 'pointer', borderRadius: '12px', transition: 'all 0.3s ease', fontSize: '14px', color: '#4b5563', fontWeight: '500' }}
               title="Current Page"
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'rgba(168, 85, 247, 0.15)';
+                e.currentTarget.style.boxShadow = '0 2px 8px rgba(168, 85, 247, 0.3)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'transparent';
+                e.currentTarget.style.boxShadow = 'none';
+              }}
             >
               {activePage === 'home' && 'Dashboard'}
               {activePage === 'live' && 'Live'}
