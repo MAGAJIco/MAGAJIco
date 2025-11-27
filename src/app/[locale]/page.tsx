@@ -440,32 +440,66 @@ export default function BrainstormPage() {
               <button 
                 onClick={() => handleNavigate('home')}
                 style={activePage === 'home' ? activeNavButtonStyle : navButtonStyle}
-                onMouseEnter={(e) => { if (activePage !== 'home') e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.1)'; }}
-                onMouseLeave={(e) => { if (activePage !== 'home') e.currentTarget.style.boxShadow = 'none'; }}
+                onMouseEnter={(e) => { 
+                  if (activePage !== 'home') {
+                    e.currentTarget.style.background = 'rgba(168, 85, 247, 0.2)';
+                    e.currentTarget.style.boxShadow = '0 8px 25px rgba(168, 85, 247, 0.5)';
+                  }
+                }}
+                onMouseLeave={(e) => { 
+                  if (activePage !== 'home') {
+                    e.currentTarget.style.background = 'transparent';
+                    e.currentTarget.style.boxShadow = 'none';
+                  }
+                }}
               >
                 <img src="/favico.svg" alt="Home" style={{ width: '24px', height: '24px' }} />
               </button>
               <button 
                 onClick={() => setIsBrainstormOpen(true)}
                 style={purpleButtonStyle}
-                onMouseEnter={(e) => { e.currentTarget.style.boxShadow = '0 6px 20px rgba(168, 85, 247, 0.6)'; }}
-                onMouseLeave={(e) => { e.currentTarget.style.boxShadow = '0 4px 15px rgba(168, 85, 247, 0.4)'; }}
+                onMouseEnter={(e) => { e.currentTarget.style.boxShadow = '0 10px 35px rgba(168, 85, 247, 0.7)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.boxShadow = '0 4px 15px rgba(168, 85, 247, 0.4)'; e.currentTarget.style.transform = 'translateY(0)'; }}
               >
                 Brainstorm
               </button>
               <button
                 onClick={() => { setActivePage('live'); router.push('/en/live'); }}
                 style={activePage === 'live' ? activeNavButtonStyle : navButtonStyle}
-                onMouseEnter={(e) => { if (activePage !== 'live') e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.1)'; }}
-                onMouseLeave={(e) => { if (activePage !== 'live') e.currentTarget.style.boxShadow = 'none'; }}
+                onMouseEnter={(e) => { 
+                  if (activePage !== 'live') {
+                    e.currentTarget.style.background = 'rgba(168, 85, 247, 0.2)';
+                    e.currentTarget.style.boxShadow = '0 8px 25px rgba(168, 85, 247, 0.5)';
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                  }
+                }}
+                onMouseLeave={(e) => { 
+                  if (activePage !== 'live') {
+                    e.currentTarget.style.background = 'transparent';
+                    e.currentTarget.style.boxShadow = 'none';
+                    e.currentTarget.style.transform = 'translateY(0)';
+                  }
+                }}
               >
                 Live
               </button>
               <button
                 onClick={() => { setActivePage('secrets'); router.push('/en/secrets'); }}
                 style={activePage === 'secrets' ? activeNavButtonStyle : navButtonStyle}
-                onMouseEnter={(e) => { if (activePage !== 'secrets') e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.1)'; }}
-                onMouseLeave={(e) => { if (activePage !== 'secrets') e.currentTarget.style.boxShadow = 'none'; }}
+                onMouseEnter={(e) => { 
+                  if (activePage !== 'secrets') {
+                    e.currentTarget.style.background = 'rgba(168, 85, 247, 0.2)';
+                    e.currentTarget.style.boxShadow = '0 8px 25px rgba(168, 85, 247, 0.5)';
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                  }
+                }}
+                onMouseLeave={(e) => { 
+                  if (activePage !== 'secrets') {
+                    e.currentTarget.style.background = 'transparent';
+                    e.currentTarget.style.boxShadow = 'none';
+                    e.currentTarget.style.transform = 'translateY(0)';
+                  }
+                }}
               >
                 Secret
               </button>
