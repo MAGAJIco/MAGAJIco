@@ -135,11 +135,19 @@ export default function PredictionsPage({ params }: { params: Promise<{ locale: 
             <Zap className="w-8 h-8 flex-shrink-0" style={{ marginTop: '4px', filter: 'drop-shadow(0 2px 6px rgba(255,255,255,0.4))', strokeWidth: 1.5 }} />
             <div className="min-w-0">
               <p style={{ fontSize: '16px', fontWeight: 600, lineHeight: '1.5', marginBottom: '8px' }}>
-                Premium Predictions from Industry Leaders
+                Ready to Start Winning?
               </p>
-              <p style={{ fontSize: '13px', opacity: 0.95, fontWeight: 400 }}>
-                Real-time insights from Statarea, ScorePrediction, and MyBets—all verified and curated for you
+              <p style={{ fontSize: '13px', opacity: 0.95, fontWeight: 400, marginBottom: '12px' }}>
+                Access premium predictions from three trusted sources right now
               </p>
+              <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 500 }}>
+                  <span>📊</span> Deep analytics
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 500 }}>
+                  <span>🤖</span> AI algorithms
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -289,7 +297,10 @@ export default function PredictionsPage({ params }: { params: Promise<{ locale: 
 
       {/* All Predictions Section - Grouped by League */}
       <div style={{ backgroundColor: '#eaeded', padding: '32px 24px' }} className="dark:bg-black">
-        <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#0f1111', marginBottom: '20px', letterSpacing: '0.5px' }} className="dark:text-white">All Predictions by League</h2>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+          <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#0f1111', letterSpacing: '0.5px' }} className="dark:text-white">All Predictions by League</h2>
+          <button style={{ padding: '6px 8px', background: 'transparent', border: 'none', cursor: 'pointer', color: '#6b7280', fontSize: '20px', fontWeight: 'bold' }} title="More options">⋯</button>
+        </div>
         {loading ? (
           <div style={{ textAlign: 'center', padding: '40px', color: '#565959' }} className="dark:text-gray-400">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600"></div>
