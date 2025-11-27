@@ -355,6 +355,8 @@ export default function BrainstormPage() {
   const [activePage, setActivePage] = useState('home');
   const [dailyQuote, setDailyQuote] = useState(() => getRandomWeightedQuote());
   const [searchQuery, setSearchQuery] = useState('');
+  const [showConnectionStatus, setShowConnectionStatus] = useState(false);
+  const [connectionStatus] = useState('good'); // 'warning' | 'slow' | 'good'
 
   const isActive = (path) => pathname?.includes(path);
 
@@ -486,6 +488,59 @@ export default function BrainstormPage() {
               >
                 <img src="/favico.svg" alt="Home" style={{ width: '24px', height: '24px' }} />
               </button>
+              <div style={{ position: 'relative' }}>
+                <button
+                  onMouseEnter={() => setShowConnectionStatus(true)}
+                  onMouseLeave={() => setShowConnectionStatus(false)}
+                  style={{ padding: '8px', background: 'transparent', border: 'none', cursor: 'pointer', borderRadius: '8px', color: '#6b7280' }}
+                  title="API Connection Status"
+                >
+                  <span style={{ fontSize: '20px', fontWeight: 'bold' }}>⋯</span>
+                </button>
+                {showConnectionStatus && (
+                  <div style={{
+                    position: 'absolute',
+                    top: '100%',
+                    right: 0,
+                    marginTop: '8px',
+                    background: 'white',
+                    borderRadius: '12px',
+                    padding: '12px 16px',
+                    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
+                    border: '1px solid #e5e7eb',
+                    zIndex: 100,
+                    minWidth: '180px'
+                  }}>
+                    <div style={{ fontSize: '12px', fontWeight: '600', color: '#6b7280', marginBottom: '8px' }}>Prediction Server</div>
+                    <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                      <div style={{
+                        width: '12px',
+                        height: '12px',
+                        borderRadius: '50%',
+                        background: connectionStatus === 'good' ? '#22c55e' : connectionStatus === 'slow' ? '#84cc16' : '#eab308',
+                        animation: connectionStatus === 'good' ? 'pulse-green 2s infinite' : 'pulse-yellow 2s infinite'
+                      }} />
+                      <div style={{
+                        width: '12px',
+                        height: '12px',
+                        borderRadius: '50%',
+                        background: connectionStatus === 'good' ? '#84cc16' : '#eab308',
+                        animation: 'pulse-green 2s infinite 0.2s'
+                      }} />
+                      <div style={{
+                        width: '12px',
+                        height: '12px',
+                        borderRadius: '50%',
+                        background: '#eab308',
+                        animation: 'pulse-yellow 2s infinite 0.4s'
+                      }} />
+                    </div>
+                    <div style={{ fontSize: '11px', color: '#9ca3af', marginTop: '8px' }}>
+                      {connectionStatus === 'good' ? 'Connected ✓' : connectionStatus === 'slow' ? 'Slow Connection' : 'Connecting...'}
+                    </div>
+                  </div>
+                )}
+              </div>
               <button 
                 onClick={() => setIsBrainstormOpen(true)}
                 style={purpleButtonStyle}
@@ -812,6 +867,24 @@ export default function BrainstormPage() {
 
         .animate-slideInLeft {
           animation: slideInLeft 0.3s ease-out;
+        }
+
+        @keyframes pulse-green {
+          0%, 100% {
+            opacity: 1;
+          }
+          50% {
+            opacity: 0.5;
+          }
+        }
+
+        @keyframes pulse-yellow {
+          0%, 100% {
+            opacity: 1;
+          }
+          50% {
+            opacity: 0.4;
+          }
         }
 
         .animate-fadeInOverlay {
