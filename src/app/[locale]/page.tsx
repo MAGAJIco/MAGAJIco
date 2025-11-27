@@ -713,6 +713,14 @@ export default function BrainstormPage() {
       <nav style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: searchActive ? 'transparent' : 'white', borderTop: searchActive ? 'none' : '1px solid #e5e7eb', zIndex: 30, height: searchActive ? '12px' : 'auto', display: searchActive ? 'none' : 'block' }}>
         <div style={{ padding: searchActive ? '0' : '8px 16px', display: 'flex', justifyContent: 'space-around', alignItems: 'center' }}>
           <button 
+            onClick={() => router.push('/en/')}
+            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', color: '#4b5563', background: 'transparent', border: 'none', cursor: 'pointer', padding: '8px', transition: 'all 0.3s ease' }}
+            title="Dashboard"
+          >
+            <BarChart3 className="w-5 h-5" />
+            <span style={{ fontSize: '12px', fontWeight: '500' }}>Dashboard</span>
+          </button>
+          <button 
             onClick={() => router.push('/en/live')}
             style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', color: '#4b5563', background: 'transparent', border: 'none', cursor: 'pointer', padding: '8px', transition: 'all 0.3s ease' }}
             title="Live Matches"
