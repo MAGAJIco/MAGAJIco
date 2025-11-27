@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { Lightbulb, Brain, Sparkles, Zap, X, TrendingUp, Clock, Star, Menu, ChevronRight, Search, ChevronUp, ChevronDown, Eye, Lock, Settings, Mail, Shield, Trophy, BarChart3 } from 'lucide-react';
+import { Lightbulb, Brain, Sparkles, Zap, X, TrendingUp, Clock, Star, Menu, ChevronRight, Search, ChevronUp, ChevronDown, Eye, Lock, Settings, Mail, Shield, Trophy, BarChart3, Radio } from 'lucide-react';
 
 const COMPONENTS = [
   'Predictions Dashboard',
@@ -405,7 +405,7 @@ export default function BrainstormPage() {
             <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
               <button 
                 onClick={() => handleNavigate('home')}
-                style={activePage === 'home' ? activeNavButtonStyle : navButtonStyle}
+                style={{...navButtonStyle, display: 'flex', alignItems: 'center', justifyContent: 'center', ...(activePage === 'home' ? activeNavButtonStyle : {})}}
                 onMouseEnter={(e) => { 
                   e.currentTarget.style.background = 'rgba(168, 85, 247, 0.15)';
                   e.currentTarget.style.boxShadow = '0 2px 8px rgba(168, 85, 247, 0.3)';
@@ -415,11 +415,11 @@ export default function BrainstormPage() {
                   e.currentTarget.style.boxShadow = 'none';
                 }}
               >
-                🧠
+                <Lightbulb className="w-5 h-5" style={{ color: activePage === 'home' ? 'white' : '#4b5563' }} />
               </button>
               <button
                 onClick={() => { setActivePage('live'); router.push('/en/live'); }}
-                style={activePage === 'live' ? activeNavButtonStyle : navButtonStyle}
+                style={{...navButtonStyle, display: 'flex', alignItems: 'center', justifyContent: 'center', ...(activePage === 'live' ? activeNavButtonStyle : {})}}
                 onMouseEnter={(e) => { 
                   e.currentTarget.style.background = 'rgba(168, 85, 247, 0.15)';
                   e.currentTarget.style.boxShadow = '0 2px 8px rgba(168, 85, 247, 0.3)';
@@ -429,11 +429,11 @@ export default function BrainstormPage() {
                   e.currentTarget.style.boxShadow = 'none';
                 }}
               >
-                🔴
+                <Radio className="w-5 h-5" style={{ color: activePage === 'live' ? 'white' : '#4b5563' }} />
               </button>
               <button
                 onClick={() => { setActivePage('secrets'); router.push('/en/secrets'); }}
-                style={activePage === 'secrets' ? activeNavButtonStyle : navButtonStyle}
+                style={{...navButtonStyle, display: 'flex', alignItems: 'center', justifyContent: 'center', ...(activePage === 'secrets' ? activeNavButtonStyle : {})}}
                 onMouseEnter={(e) => { 
                   e.currentTarget.style.background = 'rgba(168, 85, 247, 0.15)';
                   e.currentTarget.style.boxShadow = '0 2px 8px rgba(168, 85, 247, 0.3)';
@@ -443,7 +443,7 @@ export default function BrainstormPage() {
                   e.currentTarget.style.boxShadow = 'none';
                 }}
               >
-                🔒
+                <Lock className="w-5 h-5" style={{ color: activePage === 'secrets' ? 'white' : '#4b5563' }} />
               </button>
             </div>
           </div>
