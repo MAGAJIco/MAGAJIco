@@ -1,14 +1,14 @@
 'use client';
 
 import React, { useState, useEffect, use } from 'react';
-import { Zap, TrendingUp, Shield, Clock, ArrowRight, CheckCircle, Star, Trophy, BarChart3, Target, Eye, Home, Search, ChevronLeft, ChevronRight, Lightbulb, Radio, Lock } from 'lucide-react';
+import { Zap, TrendingUp, Shield, Clock, ArrowRight, CheckCircle, Star, Trophy, BarChart3, Target, Eye, ChevronLeft, ChevronRight, Home, Search } from 'lucide-react';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
+import PageNav from '@/app/components/PageNav';
 
 export default function PredictionsPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = use(params);
   const pathname = usePathname();
-  const router = useRouter();
   const [currentStat, setCurrentStat] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
   const [allPredictions, setAllPredictions] = useState<any[]>([]);
@@ -18,7 +18,6 @@ export default function PredictionsPage({ params }: { params: Promise<{ locale: 
   const [showDotsHoverboard, setShowDotsHoverboard] = useState(false);
   const [searchActive, setSearchActive] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [activePage, setActivePage] = useState('predictions');
   
   const isActive = (path: string) => pathname === `/${locale}${path}` || pathname === `/${locale}/`;
 
@@ -118,104 +117,9 @@ export default function PredictionsPage({ params }: { params: Promise<{ locale: 
     green: 'border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20'
   };
 
-  const navStyle = {
-    borderBottom: '1px solid #e5e7eb',
-    background: 'rgba(255, 255, 255, 0.8)',
-    backdropFilter: 'blur(4px)',
-    position: 'sticky',
-    top: 0,
-    zIndex: 30,
-  };
-
-  const navButtonStyle = {
-    padding: '8px 16px',
-    background: 'transparent',
-    color: '#4b5563',
-    border: 'none',
-    borderRadius: '8px',
-    cursor: 'pointer',
-    fontSize: '14px',
-    fontWeight: '500',
-    transition: 'all 0.3s ease',
-  };
-
-  const activeNavButtonStyle = {
-    ...navButtonStyle,
-    background: '#a855f7',
-    color: 'white',
-    boxShadow: '0 4px 15px rgba(168, 85, 247, 0.4)',
-  };
-
   return (
     <div style={{ backgroundColor: '#eaeded', minHeight: '100vh' }} className="dark:bg-black">
-      {/* Top Navigation */}
-      <nav style={navStyle}>
-        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '16px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <button
-                style={{ padding: '8px', background: 'transparent', border: 'none', cursor: 'pointer', borderRadius: '12px', transition: 'all 0.3s ease' }}
-                title="Menu"
-              >
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', width: '24px', height: '24px', justifyContent: 'center' }}>
-                  <div style={{ height: '2px', background: '#374151', borderRadius: '1px' }}></div>
-                  <div style={{ height: '2px', background: '#374151', borderRadius: '1px' }}></div>
-                </div>
-              </button>
-              <button
-                style={{ padding: '8px', background: 'transparent', border: 'none', cursor: 'pointer', borderRadius: '12px', transition: 'all 0.3s ease' }}
-                title="Search"
-              >
-                <Search className="w-6 h-6" style={{ color: '#374151' }} />
-              </button>
-            </div>
-            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-              <button 
-                onClick={() => { setActivePage('home'); router.push('/en'); }}
-                style={{...navButtonStyle, display: 'flex', alignItems: 'center', justifyContent: 'center', paddingRight: '16px', borderRight: '1px solid #e5e7eb', ...(activePage === 'home' ? activeNavButtonStyle : {})}}
-                onMouseEnter={(e) => { 
-                  e.currentTarget.style.background = 'rgba(168, 85, 247, 0.15)';
-                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(168, 85, 247, 0.3)';
-                }}
-                onMouseLeave={(e) => { 
-                  e.currentTarget.style.background = 'transparent';
-                  e.currentTarget.style.boxShadow = 'none';
-                }}
-              >
-                <Lightbulb className="w-5 h-5" style={{ color: activePage === 'home' ? 'white' : '#4b5563', filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15))' }} />
-              </button>
-              <button
-                onClick={() => { setActivePage('live'); router.push('/en/live'); }}
-                style={{...navButtonStyle, display: 'flex', alignItems: 'center', justifyContent: 'center', ...(activePage === 'live' ? activeNavButtonStyle : {})}}
-                onMouseEnter={(e) => { 
-                  e.currentTarget.style.background = 'rgba(168, 85, 247, 0.15)';
-                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(168, 85, 247, 0.3)';
-                }}
-                onMouseLeave={(e) => { 
-                  e.currentTarget.style.background = 'transparent';
-                  e.currentTarget.style.boxShadow = 'none';
-                }}
-              >
-                <Radio className="w-5 h-5" style={{ color: activePage === 'live' ? 'white' : '#4b5563', filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15))' }} />
-              </button>
-              <button
-                onClick={() => { setActivePage('secrets'); router.push('/en/secrets'); }}
-                style={{...navButtonStyle, display: 'flex', alignItems: 'center', justifyContent: 'center', ...(activePage === 'secrets' ? activeNavButtonStyle : {})}}
-                onMouseEnter={(e) => { 
-                  e.currentTarget.style.background = 'rgba(168, 85, 247, 0.15)';
-                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(168, 85, 247, 0.3)';
-                }}
-                onMouseLeave={(e) => { 
-                  e.currentTarget.style.background = 'transparent';
-                  e.currentTarget.style.boxShadow = 'none';
-                }}
-              >
-                <Lock className="w-5 h-5" style={{ color: activePage === 'secrets' ? 'white' : '#4b5563', filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15))' }} />
-              </button>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <PageNav onMenuOpen={() => setMenuOpen(true)} />
 
       {/* Hero Banner - Premium Style */}
       <div style={{ background: 'linear-gradient(to right, #ff9900, #ffad33)', padding: '32px 24px' }} className="text-white overflow-hidden shadow-lg">
