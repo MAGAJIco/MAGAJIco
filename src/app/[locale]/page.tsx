@@ -450,7 +450,7 @@ export default function BrainstormPage() {
   };
 
   return (
-    <div style={containerStyle}>
+    <div style={containerStyle} suppressHydrationWarning>
       {/* Top Navigation */}
       <nav style={navStyle}>
         <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '16px' }}>
