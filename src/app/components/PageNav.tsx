@@ -20,6 +20,13 @@ export default function PageNav({ onMenuOpen }: PageNavProps) {
     else setActivePage('home');
   }, [pathname]);
 
+  const getPageLabel = () => {
+    if (pathname?.includes('/live')) return 'Live';
+    if (pathname?.includes('/secrets')) return 'Achilles';
+    if (pathname?.includes('/predictions')) return 'Predictions';
+    return 'Dashboard';
+  };
+
   const navStyle: React.CSSProperties = {
     borderBottom: '1px solid #e5e7eb',
     background: 'rgba(255, 255, 255, 0.8)',
@@ -75,7 +82,7 @@ export default function PageNav({ onMenuOpen }: PageNavProps) {
                 e.currentTarget.style.boxShadow = 'none';
               }}
             >
-              {activePage === 'home' ? 'Dashboard' : activePage === 'live' ? 'Live' : activePage === 'secrets' ? 'Achilles' : 'Predictions'}
+              {getPageLabel()}
             </button>
           </div>
           <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
