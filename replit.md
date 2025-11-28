@@ -41,6 +41,23 @@ The platform is built with a FastAPI backend (Python 3.11) and a Next.js 16 fron
 
 ## Recent Changes
 
+### 2025-11-28: Results Organization Template ✅
+**Structured Prediction Results System with HOME - AWAY Format:**
+- **ResultsTemplate Class**: New class in `real_scraper.py` for organizing prediction results
+  - `format_result()` method creates structured results using template: `HOME - AWAY`
+  - Normalizes predictions (1/X/2, Home/Draw/Away formats)
+  - Compares predictions vs actual results (WON/LOST/PENDING)
+  - Includes odds, confidence, source tracking, timestamps
+- **New API Endpoints**:
+  - `POST /api/predictions/results` - Format and save a prediction result
+    - Query params: home_team, away_team, prediction, actual_result, odds, confidence, source
+    - Returns: Structured result with status
+  - `GET /api/predictions/results/history` - Get all results with stats
+    - Optional filter by source
+    - Returns: Total results, accuracy %, won/lost/pending counts
+- **Storage**: Results logged to `results_logger` (JSON and MongoDB)
+- **Use Cases**: Track prediction accuracy, validate models, analyze historical performance
+
 ### 2025-11-28: Navigation Refinements & Tim Cook Spacing ✅
 **Polished Navigation Experience with Premium Spacing:**
 - **PageNav Component**: Implemented across all main pages (Home, Live, Secrets, Predictions)

@@ -34,6 +34,52 @@ _PREDICTION_CACHE = {
 }
 
 
+class ResultsTemplate:
+    """Structured template for organizing prediction results"""
+    
+    @staticmethod
+    def format_result(home_team: str, away_team: str, prediction: str, 
+                     actual_result: Optional[str] = None, odds: float = 0.0, 
+                     confidence: int = 0, source: str = "Unknown") -> Dict[str, Any]:
+        """
+        Format a result using the template: HOME - AWAY
+        
+        Args:
+            home_team: Home team name
+            away_team: Away team name
+            prediction: Prediction (e.g., "1", "X", "2", "Home Win", "Draw", "Away Win")
+            actual_result: Actual match result (e.g., "2-1", "1-1", "0-2")
+            odds: Betting odds for the prediction
+            confidence: Confidence percentage (0-100)
+            source: Data source (e.g., "StatArea", "MyBets", "Flashscore")
+        
+        Returns:
+            Structured result dictionary
+        """
+        result_status = None
+        if actual_result:
+            home_score, away_score = map(int, actual_result.split('-'))
+            actual_pred = "1" if home_score > away_score else ("X" if home_score == away_score else "2")
+            # Normalize prediction
+            pred_normalized = "1" if prediction in ["1", "Home Win", "Home"] else (
+                "X" if prediction in ["X", "Draw"] else "2"
+            )
+            result_status = "WON" if pred_normalized == actual_pred else "LOST"
+        
+        return {
+            "match": f"{home_team} - {away_team}",  # Template format: HOME - AWAY
+            "home_team": home_team,
+            "away_team": away_team,
+            "prediction": prediction,
+            "actual_result": actual_result,
+            "result_status": result_status,
+            "odds": odds,
+            "confidence": confidence,
+            "source": source,
+            "timestamp": datetime.now().isoformat()
+        }
+
+
 class ResultsLogger:
     """Logs all API outputs to MongoDB and JSON for training and consistency tracking"""
     
