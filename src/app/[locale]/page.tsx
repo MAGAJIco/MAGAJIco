@@ -734,12 +734,12 @@ export default function BrainstormPage() {
             <span style={{ fontSize: '12px', fontWeight: '500' }}>Secret</span>
           </button>
           <button 
-            onClick={() => setSearchActive(true)}
+            onClick={() => router.push('/en/')}
             style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', color: '#4b5563', background: 'transparent', border: 'none', cursor: 'pointer', padding: '8px', transition: 'all 0.3s ease' }}
-            title="Search"
+            title="Dashboard"
           >
-            <Search className="w-5 h-5" />
-            <span style={{ fontSize: '12px', fontWeight: '500' }}>Search</span>
+            <BarChart3 className="w-5 h-5" />
+            <span style={{ fontSize: '12px', fontWeight: '500' }}>Dashboard</span>
           </button>
         </div>
       </nav>
