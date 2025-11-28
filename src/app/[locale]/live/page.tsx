@@ -223,11 +223,11 @@ export default function LivePage({ params }: { params: Promise<{ locale: string 
       </div>
 
       {/* Bottom Navigation */}
-      <nav style={{ backgroundColor: '#f3f3f3', borderTopColor: '#d5d9d9', padding: '14px 0 env(safe-area-inset-bottom)' }} className="border-t dark:bg-[#1c1c1e] dark:border-[#38383a] fixed bottom-0 left-0 right-0 safe-area-inset-bottom backdrop-blur-xl bg-opacity-98 dark:bg-opacity-98 shadow-2xl">
+      <nav style={{ backgroundColor: '#f3f3f3', borderTopColor: '#d5d9d9', padding: '20px 0 env(safe-area-inset-bottom)' }} className="border-t dark:bg-[#1c1c1e] dark:border-[#38383a] fixed bottom-0 left-0 right-0 safe-area-inset-bottom backdrop-blur-xl bg-opacity-98 dark:bg-opacity-98 shadow-2xl">
         <div className="flex items-center justify-around max-w-2xl mx-auto">
-          <Link href={`/${locale}/live`} className="flex flex-col items-center justify-center" style={{ color: '#ff3b30', gap: '6px', padding: '8px 0', transition: 'color 0.3s ease' }}>
+          <Link href={`/${locale}/live`} className="flex flex-col items-center justify-center" style={{ color: '#ff3b30', gap: '10px', padding: '12px 24px', transition: 'all 0.3s ease', borderRadius: '12px' }}>
             <Clock className="w-9 h-9" style={{ filter: 'drop-shadow(0 3px 8px rgba(255,59,48,0.5))', strokeWidth: 1.5 }} />
-            <span style={{ fontSize: '11px', fontWeight: 500, letterSpacing: '0.2px' }}>LIVE</span>
+            <span style={{ fontSize: '12px', fontWeight: 600, letterSpacing: '0.3px' }}>LIVE</span>
           </Link>
         </div>
       </nav>
