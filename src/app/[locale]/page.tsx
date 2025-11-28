@@ -395,11 +395,18 @@ export default function BrainstormPage() {
                 </div>
               </button>
               <button
-                onClick={() => { setIsMenuOpen(true); setTimeout(() => { const searchInput = document.querySelector('input[placeholder="Search..."]'); if (searchInput) searchInput.focus(); }, 100); }}
-                style={{ padding: '8px', background: 'transparent', border: 'none', cursor: 'pointer', borderRadius: '12px', transition: 'all 0.3s ease' }}
-                title="Find in page"
+                style={{ padding: '8px 16px', background: '#f3f4f6', border: 'none', cursor: 'pointer', borderRadius: '20px', transition: 'all 0.3s ease', fontSize: '14px', color: '#4b5563', fontWeight: '500' }}
+                title="Current Page"
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'rgba(168, 85, 247, 0.2)';
+                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(168, 85, 247, 0.3)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = '#f3f4f6';
+                  e.currentTarget.style.boxShadow = 'none';
+                }}
               >
-                <Search className="w-6 h-6" style={{ color: '#374151' }} />
+                Dashboard
               </button>
             </div>
             <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>

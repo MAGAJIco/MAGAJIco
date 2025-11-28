@@ -12,6 +12,7 @@ MagajiCo is a multi-language sports data aggregation platform with a REST API, r
 - **Authentication**: Google login only with username-based profile system
 - **Guest Experience**: 30-minute free trial allowing guests to browse matches, explore competitions, and enjoy the app before login
 - **Mobile Design**: FlashScore-style compact mobile interface with collapsible sections
+- **Navigation UI**: Light header with rounded text labels, polished Tim Cook-style spacing
 
 ## System Architecture
 The platform is built with a FastAPI backend (Python 3.11) and a Next.js 16 frontend, running on ports 8000 and 5000 (via Nginx proxy) respectively.
@@ -22,6 +23,7 @@ The platform is built with a FastAPI backend (Python 3.11) and a Next.js 16 fron
 - **Authentication UI**: `AuthNav` component dynamically displays user profile or login button, integrating seamlessly with the theme toggle.
 - **Guest Experience**: Guests receive a 30-minute free trial to explore the app. A friendly timer banner appears when 5 minutes remain, prompting sign-up to unlock full features. The timer uses localStorage to persist the session across page reloads.
 - **Mobile-First Interface**: FlashScore-inspired design with compact layouts, collapsible sections, and tap-friendly elements for optimal mobile experience.
+- **Navigation System**: PageNav component with light header, sticky positioning, hamburger menu, and contextual page labels
 
 ### Technical Implementations
 - **Frontend**: Next.js 16 with React Context API for global state, `next-intl` for i18n, Tailwind CSS for styling (using `class` and `data-theme` for dark mode), and Framer Motion for animations.
@@ -38,6 +40,26 @@ The platform is built with a FastAPI backend (Python 3.11) and a Next.js 16 fron
 - **Authenticated Access**: The `/en/predictions` page requires both authentication (Google login) + valid username.
 
 ## Recent Changes
+
+### 2025-11-28: Navigation Refinements & Tim Cook Spacing ✅
+**Polished Navigation Experience with Premium Spacing:**
+- **PageNav Component**: Implemented across all main pages (Home, Live, Secrets, Predictions)
+  - Light header (rgba(255,255,255,0.8) with blur effect)
+  - Hamburger menu for mobile/desktop
+  - Contextual page labels: "Dashboard" (Home), "Live" (Live page), "Achilles" (Secrets), "Predictions" (Predictions)
+  - Rounded pill-shaped text boxes (#f3f4f6 background) with purple hover effects
+- **Bottom Navigation Cleanup**:
+  - Dashboard removed from bottom nav (only appears in header)
+  - Bottom nav shows only: Live, Secret on home page
+  - LIVE page has Tim Cook-style spacing: padding 12px 24px, gap 10px, borderRadius 12px
+- **Header Label Update**:
+  - Search icon (🔎) replaced with "Dashboard" text label in header
+  - Consistent styling with PageNav label buttons
+  - Smooth hover transitions with purple background
+- **Design System**: Follows Apple's minimalist spacing with generous padding and breathing room
+- **Files Modified**: PageNav.tsx, src/app/[locale]/page.tsx, src/app/[locale]/live/page.tsx
+
+## Recent Changes (Previous)
 
 ### 2025-11-25: AI Brainstorming Feature for Component Enhancement ✅
 **Connect with AI to brainstorm new features for your components:**
@@ -153,8 +175,6 @@ The platform is built with a FastAPI backend (Python 3.11) and a Next.js 16 fron
   - Query by league (premier_league, la_liga, serie_a, bundesliga, ligue_1)
   - Filter by max odds threshold (customizable)
   - All results logged for training data
-
-## Recent Changes (Previous)
 
 ### 2025-11-25: Real Multi-Source Web Scraper Implementation ✅
 **Live Sports Predictions from Multiple Sources:**
