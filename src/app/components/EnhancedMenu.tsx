@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useParams, usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Home, Zap, Trophy, Star, Settings, HelpCircle, User, LogOut, Database, BookOpen, TrendingUp, TrendingDown, Lightbulb } from 'lucide-react';
+import { X, Home, Zap, Trophy, Star, Settings, HelpCircle, User, LogOut, Database, BookOpen, TrendingUp, TrendingDown, Lightbulb, Brain } from 'lucide-react';
 import AIBrainstorming from './AIBrainstorming';
 
 interface EnhancedMenuProps {
@@ -215,6 +215,12 @@ export default function EnhancedMenu({ isOpen, onClose }: EnhancedMenuProps) {
 
               {/* AI & Innovation Section */}
               <MenuSection title="🤖 AI & Innovation">
+                <MenuItem
+                  icon={Brain}
+                  label="Betting Manager"
+                  href={`/${locale}/betslip`}
+                  onClick={onClose}
+                />
                 <MenuItem
                   icon={Lightbulb}
                   label="Brainstorm Hub"

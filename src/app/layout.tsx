@@ -1,5 +1,8 @@
 import './globals.css';
 import { ReactNode } from 'react';
+import dynamic from 'next/dynamic';
+
+const BetNotification = dynamic(() => import('@/app/components/BetNotification'), { ssr: false });
 
 export const metadata = {
   title: 'MagajiCo Sports Platform',
@@ -18,6 +21,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       </head>
       <body className="bg-white dark:bg-gray-900 text-gray-900 dark:text-white transition-colors duration-300">
         {children}
+        <BetNotification />
       </body>
     </html>
   );
