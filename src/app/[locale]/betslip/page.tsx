@@ -5,11 +5,15 @@ import { BookOpen, Plus } from 'lucide-react';
 import MagajicoCEO from '@/app/components/MagajicoCEO';
 import GamblingReminder from '@/app/components/GamblingReminder';
 import PageNav from '@/app/components/PageNav';
+import EnhancedMenu from '@/app/components/EnhancedMenu';
 
 export default function BetslipPage() {
+  const [menuOpen, setMenuOpen] = useState(false);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
-      <PageNav title="Betting Manager" icon={BookOpen} />
+      <PageNav onMenuOpen={() => setMenuOpen(true)} />
+      <EnhancedMenu isOpen={menuOpen} onClose={() => setMenuOpen(false)} /> 
       
       <div className="max-w-6xl mx-auto px-4 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
