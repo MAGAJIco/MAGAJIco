@@ -87,48 +87,96 @@ export default function PageNav({ onMenuOpen }: PageNavProps) {
               {getPageLabel()}
             </button>
           </div>
-          <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
             <button 
               onClick={() => { setActivePage('home'); router.push('/en'); }}
-              style={{...navButtonStyle, display: 'flex', alignItems: 'center', justifyContent: 'center', paddingRight: '16px', borderRight: '1px solid #e5e7eb', ...(activePage === 'home' ? activeNavButtonStyle : {})}}
+              title="Home"
+              style={{
+                padding: '10px 12px',
+                background: activePage === 'home' ? '#a855f7' : 'transparent',
+                border: '1px solid ' + (activePage === 'home' ? '#a855f7' : '#e5e7eb'),
+                borderRadius: '8px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'all 0.3s ease',
+                boxShadow: activePage === 'home' ? '0 4px 15px rgba(168, 85, 247, 0.4)' : 'none',
+              }}
               onMouseEnter={(e) => { 
-                e.currentTarget.style.background = 'rgba(168, 85, 247, 0.15)';
-                e.currentTarget.style.boxShadow = '0 2px 8px rgba(168, 85, 247, 0.3)';
+                if (activePage !== 'home') {
+                  e.currentTarget.style.background = 'rgba(168, 85, 247, 0.15)';
+                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(168, 85, 247, 0.3)';
+                }
               }}
               onMouseLeave={(e) => { 
-                e.currentTarget.style.background = 'transparent';
-                e.currentTarget.style.boxShadow = 'none';
+                if (activePage !== 'home') {
+                  e.currentTarget.style.background = 'transparent';
+                  e.currentTarget.style.boxShadow = 'none';
+                }
               }}
             >
-              <Lightbulb className="w-5 h-5" style={{ color: activePage === 'home' ? 'white' : '#4b5563', filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15))' }} />
+              <Lightbulb className="w-5 h-5" style={{ color: activePage === 'home' ? 'white' : '#4b5563' }} />
             </button>
             <button
               onClick={() => { setActivePage('live'); router.push('/en/live'); }}
-              style={{...navButtonStyle, display: 'flex', alignItems: 'center', justifyContent: 'center', ...(activePage === 'live' ? activeNavButtonStyle : {})}}
+              title="Live"
+              style={{
+                padding: '10px 12px',
+                background: activePage === 'live' ? '#a855f7' : 'transparent',
+                border: '1px solid ' + (activePage === 'live' ? '#a855f7' : '#e5e7eb'),
+                borderRadius: '8px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'all 0.3s ease',
+                boxShadow: activePage === 'live' ? '0 4px 15px rgba(168, 85, 247, 0.4)' : 'none',
+              }}
               onMouseEnter={(e) => { 
-                e.currentTarget.style.background = 'rgba(168, 85, 247, 0.15)';
-                e.currentTarget.style.boxShadow = '0 2px 8px rgba(168, 85, 247, 0.3)';
+                if (activePage !== 'live') {
+                  e.currentTarget.style.background = 'rgba(168, 85, 247, 0.15)';
+                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(168, 85, 247, 0.3)';
+                }
               }}
               onMouseLeave={(e) => { 
-                e.currentTarget.style.background = 'transparent';
-                e.currentTarget.style.boxShadow = 'none';
+                if (activePage !== 'live') {
+                  e.currentTarget.style.background = 'transparent';
+                  e.currentTarget.style.boxShadow = 'none';
+                }
               }}
             >
-              <Radio className="w-5 h-5" style={{ color: activePage === 'live' ? 'white' : '#4b5563', filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15))' }} />
+              <Radio className="w-5 h-5" style={{ color: activePage === 'live' ? 'white' : '#4b5563' }} />
             </button>
             <button
               onClick={() => { setActivePage('secrets'); router.push('/en/secrets'); }}
-              style={{...navButtonStyle, display: 'flex', alignItems: 'center', justifyContent: 'center', ...(activePage === 'secrets' ? activeNavButtonStyle : {})}}
+              title="Secrets"
+              style={{
+                padding: '10px 12px',
+                background: activePage === 'secrets' ? '#a855f7' : 'transparent',
+                border: '1px solid ' + (activePage === 'secrets' ? '#a855f7' : '#e5e7eb'),
+                borderRadius: '8px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'all 0.3s ease',
+                boxShadow: activePage === 'secrets' ? '0 4px 15px rgba(168, 85, 247, 0.4)' : 'none',
+              }}
               onMouseEnter={(e) => { 
-                e.currentTarget.style.background = 'rgba(168, 85, 247, 0.15)';
-                e.currentTarget.style.boxShadow = '0 2px 8px rgba(168, 85, 247, 0.3)';
+                if (activePage !== 'secrets') {
+                  e.currentTarget.style.background = 'rgba(168, 85, 247, 0.15)';
+                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(168, 85, 247, 0.3)';
+                }
               }}
               onMouseLeave={(e) => { 
-                e.currentTarget.style.background = 'transparent';
-                e.currentTarget.style.boxShadow = 'none';
+                if (activePage !== 'secrets') {
+                  e.currentTarget.style.background = 'transparent';
+                  e.currentTarget.style.boxShadow = 'none';
+                }
               }}
             >
-              <Lock className="w-5 h-5" style={{ color: activePage === 'secrets' ? 'white' : '#4b5563', filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15))' }} />
+              <Lock className="w-5 h-5" style={{ color: activePage === 'secrets' ? 'white' : '#4b5563' }} />
             </button>
           </div>
         </div>
