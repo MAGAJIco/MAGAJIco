@@ -44,14 +44,14 @@ export default function MagajicoCEO() {
     setLoading(true);
 
     // Simple AI logic for game counting and booking
-    if (!gameCount && userMessage.match(/\d+/)) {
+    if (gameCount === null && userMessage.match(/\d+/)) {
       const count = parseInt(userMessage.match(/\d+/)?.[0] || '0');
       setGameCount(count);
       setMessages(prev => [...prev, {
         role: 'assistant',
         content: `Great! I'll help you book ${count} games. Please tell me the game details (Team 1 vs Team 2, prediction, odds). One at a time.`
       }]);
-    } else if (gameCount && bookedGames.length < gameCount) {
+    } else if (gameCount !== null && bookedGames.length < gameCount) {
       // Parse game details
       const gameRegex = /(.*?)\s+vs\s+(.*?),?\s+(?:prediction:?\s*)?(.*?),?\s+(?:odds?:?\s*)?(\d+\.?\d*)/i;
       const match = userMessage.match(gameRegex);
@@ -85,7 +85,7 @@ export default function MagajicoCEO() {
           content: 'Please provide game details in this format: Team1 vs Team2, prediction, odds (e.g., "Liverpool vs Manchester City, 1, 2.5")'
         }]);
       }
-    } else if (bookedGames.length >= gameCount && gameCount) {
+    } else if (gameCount !== null && bookedGames.length >= gameCount) {
       setMessages(prev => [...prev, {
         role: 'assistant',
         content: 'You\'ve already booked all your games! You can review them below or reset to book new games.'
@@ -188,7 +188,7 @@ export default function MagajicoCEO() {
             <Send className="w-4 h-4" />
           </button>
         </div>
-        {gameCount && bookedGames.length >= gameCount && (
+        {gameCount !== null && bookedGames.length >= gameCount && (
           <button
             type="button"
             onClick={resetBetting}

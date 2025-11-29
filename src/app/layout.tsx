@@ -1,13 +1,10 @@
+'use client';
+
 import './globals.css';
 import { ReactNode } from 'react';
 import dynamic from 'next/dynamic';
 
 const BetNotification = dynamic(() => import('@/app/components/BetNotification'), { ssr: false });
-
-export const metadata = {
-  title: 'MagajiCo Sports Platform',
-  description: 'AI-powered sports predictions and insights',
-};
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
