@@ -520,6 +520,42 @@ export default function BrainstormPage() {
           <Zap className="w-5 h-5" />
         </button>
 
+        {/* Try Betting Manager CTA */}
+        <Link href="/en/betslip" style={{ textDecoration: 'none' }}>
+          <div style={{
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            borderRadius: '12px',
+            padding: '24px',
+            marginBottom: '24px',
+            cursor: 'pointer',
+            transition: 'all 0.3s ease',
+            border: '2px solid transparent',
+            boxShadow: '0 10px 30px rgba(102, 126, 234, 0.3)',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'translateY(-4px)';
+            e.currentTarget.style.boxShadow = '0 15px 40px rgba(102, 126, 234, 0.5)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = '0 10px 30px rgba(102, 126, 234, 0.3)';
+          }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div>
+                <h3 style={{ fontSize: '20px', fontWeight: 'bold', color: 'white', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <Brain className="w-6 h-6" />
+                  Try Betting Manager
+                </h3>
+                <p style={{ color: 'rgba(255, 255, 255, 0.9)', fontSize: '14px' }}>
+                  Chat with Magajico CEO to manage your bets with AI. Organize your betting slip and get responsible gaming reminders.
+                </p>
+              </div>
+              <ChevronRight className="w-6 h-6" style={{ color: 'white', flexShrink: 0 }} />
+            </div>
+          </div>
+        </Link>
+
         {/* Info Box */}
         <div style={infoBoxStyle}>
           <h3 style={{ fontWeight: '600', color: '#1e40af', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '16px' }}>
