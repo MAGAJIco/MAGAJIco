@@ -17,6 +17,7 @@ export default function PageNav({ onMenuOpen }: PageNavProps) {
     if (pathname?.includes('/live')) setActivePage('live');
     else if (pathname?.includes('/secrets')) setActivePage('secrets');
     else if (pathname?.includes('/predictions')) setActivePage('predictions');
+    else if (pathname?.includes('/betslip')) setActivePage('betslip');
     else setActivePage('home');
   }, [pathname]);
 
@@ -24,6 +25,7 @@ export default function PageNav({ onMenuOpen }: PageNavProps) {
     if (pathname?.includes('/live')) return 'Live';
     if (pathname?.includes('/secrets')) return 'Achilles';
     if (pathname?.includes('/predictions')) return 'Predictions';
+    if (pathname?.includes('/betslip')) return 'Betting Manager';
     return 'Dashboard';
   };
 
