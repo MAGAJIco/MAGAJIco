@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { Lightbulb, Brain, Sparkles, Zap, X, TrendingUp, Clock, Star, Menu, ChevronRight, Search, ChevronUp, ChevronDown, Eye, Lock, Settings, Mail, Shield, Trophy, BarChart3, Radio } from 'lucide-react';
+import PageNav from '@/app/components/PageNav';
+import EnhancedMenu from '@/app/components/EnhancedMenu';
 
 const COMPONENTS = [
   'Predictions Dashboard',
@@ -291,7 +293,6 @@ export default function BrainstormPage() {
   const router = useRouter();
   const pathname = usePathname();
   const [selectedComponent, setSelectedComponent] = useState('Predictions Dashboard');
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [activePage, setActivePage] = useState('home');
   const [searchQuery, setSearchQuery] = useState('');
@@ -304,7 +305,7 @@ export default function BrainstormPage() {
 
   const handleNavigate = (view) => {
     setActivePage(view);
-    setIsMenuOpen(false);
+    setMenuOpen(false);
   };
 
   const containerStyle = {
@@ -379,89 +380,8 @@ export default function BrainstormPage() {
 
   return (
     <div style={containerStyle} suppressHydrationWarning>
-      {/* Top Navigation */}
-      <nav style={navStyle}>
-        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '16px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <button
-                onClick={() => setIsMenuOpen(true)}
-                style={{ padding: '8px', background: 'transparent', border: 'none', cursor: 'pointer', borderRadius: '12px', transition: 'all 0.3s ease' }}
-                title="Menu"
-              >
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', width: '24px', height: '24px', justifyContent: 'center' }}>
-                  <div style={{ height: '2px', background: '#374151', borderRadius: '1px' }}></div>
-                  <div style={{ height: '2px', background: '#374151', borderRadius: '1px' }}></div>
-                </div>
-              </button>
-              <button
-                style={{ padding: '8px 16px', background: '#f3f4f6', border: 'none', cursor: 'pointer', borderRadius: '20px', transition: 'all 0.3s ease', fontSize: '14px', color: '#4b5563', fontWeight: '500' }}
-                title="Current Page"
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'rgba(168, 85, 247, 0.2)';
-                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(168, 85, 247, 0.3)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = '#f3f4f6';
-                  e.currentTarget.style.boxShadow = 'none';
-                }}
-              >
-                Dashboard
-              </button>
-            </div>
-            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-              <button 
-                onClick={() => handleNavigate('home')}
-                style={{...navButtonStyle, display: 'flex', alignItems: 'center', justifyContent: 'center', paddingRight: '16px', borderRight: '1px solid #e5e7eb', ...(activePage === 'home' ? activeNavButtonStyle : {})}}
-                onMouseEnter={(e) => { 
-                  e.currentTarget.style.background = 'rgba(168, 85, 247, 0.15)';
-                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(168, 85, 247, 0.3)';
-                  e.currentTarget.style.cursor = 'none';
-                }}
-                onMouseLeave={(e) => { 
-                  e.currentTarget.style.background = 'transparent';
-                  e.currentTarget.style.boxShadow = 'none';
-                  e.currentTarget.style.cursor = 'pointer';
-                }}
-              >
-                <Lightbulb className="w-5 h-5" style={{ color: activePage === 'home' ? 'white' : '#4b5563', filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15))' }} />
-              </button>
-              <button
-                onClick={() => { setActivePage('live'); router.push('/en/live'); }}
-                style={{...navButtonStyle, display: 'flex', alignItems: 'center', justifyContent: 'center', ...(activePage === 'live' ? activeNavButtonStyle : {})}}
-                onMouseEnter={(e) => { 
-                  e.currentTarget.style.background = 'rgba(168, 85, 247, 0.15)';
-                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(168, 85, 247, 0.3)';
-                  e.currentTarget.style.cursor = 'none';
-                }}
-                onMouseLeave={(e) => { 
-                  e.currentTarget.style.background = 'transparent';
-                  e.currentTarget.style.boxShadow = 'none';
-                  e.currentTarget.style.cursor = 'pointer';
-                }}
-              >
-                <Radio className="w-5 h-5" style={{ color: activePage === 'live' ? 'white' : '#4b5563', filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15))' }} />
-              </button>
-              <button
-                onClick={() => { setActivePage('secrets'); router.push('/en/secrets'); }}
-                style={{...navButtonStyle, display: 'flex', alignItems: 'center', justifyContent: 'center', ...(activePage === 'secrets' ? activeNavButtonStyle : {})}}
-                onMouseEnter={(e) => { 
-                  e.currentTarget.style.background = 'rgba(168, 85, 247, 0.15)';
-                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(168, 85, 247, 0.3)';
-                  e.currentTarget.style.cursor = 'none';
-                }}
-                onMouseLeave={(e) => { 
-                  e.currentTarget.style.background = 'transparent';
-                  e.currentTarget.style.boxShadow = 'none';
-                  e.currentTarget.style.cursor = 'pointer';
-                }}
-              >
-                <Lock className="w-5 h-5" style={{ color: activePage === 'secrets' ? 'white' : '#4b5563', filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15))' }} />
-              </button>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <PageNav onMenuOpen={() => setMenuOpen(true)} />
+      <EnhancedMenu isOpen={menuOpen} onClose={() => setMenuOpen(false)} />
 
       <div style={{ maxWidth: '896px', margin: '0 auto', padding: '16px', paddingBottom: '96px' }}>
         {/* Title Section */}
@@ -487,7 +407,7 @@ export default function BrainstormPage() {
               </h2>
             </div>
             <button
-              onClick={() => setIsMenuOpen(true)}
+              onClick={() => setMenuOpen(true)}
               style={{
                 padding: '8px 16px',
                 background: 'white',
@@ -573,82 +493,6 @@ export default function BrainstormPage() {
 
       </div>
 
-      {/* Overlay for menu */}
-      {isMenuOpen && (
-        <div
-          className="fixed inset-0 z-40 opacity-0"
-          onClick={() => setIsMenuOpen(false)}
-        />
-      )}
-
-      {/* Google Style Sidebar Menu */}
-      {isMenuOpen && (
-        <>
-          <div style={{ position: 'fixed', top: '80px', left: '0px', width: '240px', height: 'calc(100vh - 180px)', backgroundColor: '#f3f3f3', zIndex: 50, overflow: 'auto', animation: 'slideInLeft 0.3s ease-out', borderRadius: '20px' }} className="dark:bg-[#1c1c1e]">
-            {/* Search Box */}
-            <div style={{ padding: '12px 16px', borderBottomColor: '#d5d9d9', display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: '#ffffff', width: '100%' }} className="border-b dark:border-[#38383a] dark:bg-[#2c2c2e]">
-              <Search className="w-4 h-4" style={{ color: '#565959', flexShrink: 0, strokeWidth: 2 }} />
-              <input
-                type="text"
-                placeholder="Search..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                style={{ color: '#0f1111', fontSize: '14px', flex: 1, border: 'none', outline: 'none', backgroundColor: 'transparent', padding: '0px', minWidth: '0' }}
-                className="dark:text-white"
-              />
-              {searchQuery && (
-                <span style={{ fontSize: '12px', color: '#ff9900', fontWeight: 600, flexShrink: 0, minWidth: 'auto', paddingRight: '4px' }}>
-                  {(() => {
-                    const pageText = document.documentElement.innerText || '';
-                    const matches = pageText.match(new RegExp(searchQuery, 'gi'));
-                    return matches ? matches.length : 0;
-                  })()}
-                </span>
-              )}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0px', flexShrink: 0 }}>
-                <button className="p-1 hover:opacity-70 transition-opacity cursor-pointer">
-                  <ChevronUp className="w-4 h-4" style={{ color: '#565959', strokeWidth: 2 }} />
-                </button>
-                <button className="p-1 hover:opacity-70 transition-opacity cursor-pointer">
-                  <ChevronDown className="w-4 h-4" style={{ color: '#565959', strokeWidth: 2 }} />
-                </button>
-                <button onClick={() => { setSearchQuery(''); setIsMenuOpen(false); }} className="p-1 hover:opacity-70 transition-opacity cursor-pointer">
-                  <X className="w-4 h-4" style={{ color: '#565959', strokeWidth: 2 }} />
-                </button>
-              </div>
-            </div>
-
-            <nav style={{ padding: '24px 12px' }} className="space-y-0">
-              {['Predictions', 'Secret', 'Live', 'Contact'].map((item) => {
-                const isMatch = item.toLowerCase().includes(searchQuery.toLowerCase());
-                const isHighlighted = searchQuery && isMatch;
-                const paths = { 'Predictions': 'predictions', 'Secret': 'secrets', 'Live': 'live', 'Contact': 'contact' };
-                const icons = { 'Predictions': <Eye className="w-6 h-6" style={{ flexShrink: 0 }} />, 'Secret': <Lock className="w-6 h-6" style={{ flexShrink: 0 }} />, 'Live': <Clock className="w-6 h-6" style={{ flexShrink: 0 }} />, 'Contact': <Mail className="w-6 h-6" style={{ flexShrink: 0 }} /> };
-                return (
-                  <Link key={item} href={`/en/${paths[item]}`} onClick={() => setIsMenuOpen(false)}>
-                    <div className={`flex items-center gap-6 px-6 py-4 rounded-lg transition-all ${isHighlighted ? 'bg-yellow-100 dark:bg-yellow-700' : isActive(paths[item]) ? 'bg-orange-100 dark:bg-orange-600' : 'hover:bg-gray-100 dark:hover:bg-gray-800'}`} style={{ cursor: 'pointer', backgroundColor: isHighlighted ? '#fef3c7' : undefined }}>
-                      {React.cloneElement(icons[item], { style: { color: isHighlighted ? '#f59e0b' : isActive(paths[item]) ? '#ff9900' : '#565959', flexShrink: 0 } })}
-                      <span style={{ fontSize: '15px', fontWeight: 500, color: isHighlighted ? '#d97706' : isActive(paths[item]) ? '#ff9900' : '#0f1111' }} className="dark:text-white">{item}</span>
-                    </div>
-                  </Link>
-                );
-              })}
-
-            </nav>
-          </div>
-        </>
-      )}
-
-      {/* Menu Drawer */}
-      {false && (
-        <MenuDrawer
-          isOpen={isMenuOpen}
-          onClose={() => setIsMenuOpen(false)}
-          onSelectComponent={setSelectedComponent}
-          selectedComponent={selectedComponent}
-          onNavigate={handleNavigate}
-        />
-      )}
 
 
       {/* Why Choose Us Section */}
