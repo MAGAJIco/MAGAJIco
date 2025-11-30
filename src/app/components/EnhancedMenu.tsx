@@ -2,9 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Home, Zap, Trophy, Star, Settings, HelpCircle, User, LogOut, Database, BookOpen, TrendingUp, TrendingDown, Lightbulb } from 'lucide-react';
+import { X, Home, Zap, Trophy, Star, Settings, HelpCircle, User, LogOut, Database, BookOpen, TrendingUp, TrendingDown, Lightbulb, Brain } from 'lucide-react';
 import AIBrainstorming from './AIBrainstorming';
 
 interface EnhancedMenuProps {
@@ -21,6 +21,11 @@ interface Prediction {
 }
 
 const MenuItem = ({ icon: Icon, label, href, onClick, isDivider = false }: any) => {
+  const pathname = usePathname();
+  
+  // Check if this link is active
+  const isActive = pathname === href || pathname.endsWith(href.split('/').pop() || '');
+  
   if (isDivider) {
     return <div className="h-px bg-gray-200 dark:bg-gray-700 my-1" />;
   }
@@ -29,9 +34,17 @@ const MenuItem = ({ icon: Icon, label, href, onClick, isDivider = false }: any) 
     <Link
       href={href}
       onClick={onClick}
-      className="flex items-center gap-4 px-4 py-3 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors rounded-lg"
+      className={`flex items-center gap-4 px-4 py-3 transition-all rounded-lg ${
+        isActive
+          ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border-l-4 border-blue-600 dark:border-blue-400'
+          : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800'
+      }`}
     >
-      <Icon className="w-5 h-5 text-gray-600 dark:text-gray-400 flex-shrink-0" />
+      <Icon className={`w-5 h-5 flex-shrink-0 ${
+        isActive 
+          ? 'text-blue-600 dark:text-blue-400' 
+          : 'text-gray-600 dark:text-gray-400'
+      }`} />
       <span className="text-sm font-medium">{label}</span>
     </Link>
   );
@@ -50,6 +63,7 @@ const MenuSection = ({ title, children }: any) => (
 
 export default function EnhancedMenu({ isOpen, onClose }: EnhancedMenuProps) {
   const params = useParams();
+  const pathname = usePathname();
   const locale = params?.locale || 'en';
   const [predictions, setPredictions] = useState<Prediction[]>([]);
   const [predictionsLoading, setPredictionsLoading] = useState(false);
@@ -201,6 +215,12 @@ export default function EnhancedMenu({ isOpen, onClose }: EnhancedMenuProps) {
 
               {/* AI & Innovation Section */}
               <MenuSection title="🤖 AI & Innovation">
+                <MenuItem
+                  icon={Brain}
+                  label="Betting Manager"
+                  href={`/${locale}/betslip`}
+                  onClick={onClose}
+                />
                 <MenuItem
                   icon={Lightbulb}
                   label="Brainstorm Hub"

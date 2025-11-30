@@ -1,10 +1,11 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Star, Calendar, CalendarDays, TrendingUp, Clock, AlertCircle, Lock, ChevronLeft, ChevronRight, Home } from 'lucide-react';
+import { Star, Calendar, CalendarDays, TrendingUp, Clock, AlertCircle, ChevronLeft, ChevronRight, X, Home, Lock, Brain, Search, Lightbulb, Eye, Settings } from 'lucide-react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { use } from 'react';
+import PageNav from '@/app/components/PageNav';
 
 interface SecretMatch {
   id: string;
@@ -24,6 +25,112 @@ interface SecretMatchCardProps {
   match: SecretMatch;
   starredCount: Record<string, number>;
 }
+
+const MenuDrawer = ({ isOpen, onClose, onNavigate }) => {
+  const [searchQuery, setSearchQuery] = useState('');
+
+  if (!isOpen) return null;
+
+  return (
+    <>
+      <div 
+        className="fixed inset-0 bg-black/50 z-40 animate-fadeIn"
+        onClick={onClose}
+      />
+      
+      <div className="fixed top-0 left-0 bottom-0 w-72 sm:w-80 bg-white dark:bg-gray-900 shadow-2xl z-50 animate-slideInLeft overflow-y-auto">
+        <div className="p-4 sm:p-6 border-b border-gray-200 dark:border-gray-800">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <Brain className="w-5 sm:w-6 h-5 sm:h-6 text-purple-500 flex-shrink-0" />
+              <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white truncate">
+                Menu
+              </h2>
+            </div>
+            <button
+              onClick={onClose}
+              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors flex-shrink-0 ml-2"
+            >
+              <X className="w-5 h-5 text-gray-500" />
+            </button>
+          </div>
+          <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+            Navigate or select a component
+          </p>
+        </div>
+
+        {/* Search Box */}
+        <div className="p-3 sm:p-4 border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800">
+          <div className="flex items-center gap-2 bg-white dark:bg-gray-900 rounded-lg px-3 py-2 border border-gray-300 dark:border-gray-700">
+            <Search className="w-4 h-4 text-gray-500 flex-shrink-0" />
+            <input
+              type="text"
+              placeholder="Search..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="flex-1 bg-transparent border-none outline-none text-xs sm:text-sm text-gray-900 dark:text-white placeholder-gray-400"
+            />
+            {searchQuery && (
+              <button onClick={() => setSearchQuery('')} className="p-1 hover:opacity-70 flex-shrink-0">
+                <X className="w-4 h-4 text-gray-500" />
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Navigation Links */}
+        <div className="p-3 sm:p-4 border-b border-gray-200 dark:border-gray-800">
+          <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-2 px-2">
+            Navigation
+          </h3>
+          <div className="space-y-1">
+            <button
+              onClick={() => {
+                onNavigate('home');
+                onClose();
+              }}
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-left"
+            >
+              <Lightbulb className="w-4 sm:w-5 h-4 sm:h-5 text-yellow-500 flex-shrink-0" />
+              <span className="text-xs sm:text-sm font-medium text-gray-900 dark:text-white truncate">Home</span>
+            </button>
+            <button
+              onClick={() => {
+                onNavigate('live');
+                onClose();
+              }}
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-left"
+            >
+              <Clock className="w-4 sm:w-5 h-4 sm:h-5 text-blue-500 flex-shrink-0" />
+              <span className="text-xs sm:text-sm font-medium text-gray-900 dark:text-white truncate">Live</span>
+            </button>
+            <button
+              onClick={() => {
+                onNavigate('secrets');
+                onClose();
+              }}
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-left"
+            >
+              <Eye className="w-4 sm:w-5 h-4 sm:h-5 text-purple-500 flex-shrink-0" />
+              <span className="text-xs sm:text-sm font-medium text-gray-900 dark:text-white truncate">Secrets</span>
+            </button>
+            <button
+              onClick={() => {
+                onNavigate('betslip');
+                onClose();
+              }}
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-left"
+            >
+              <Settings className="w-4 sm:w-5 h-4 sm:h-5 text-green-500 flex-shrink-0" />
+              <span className="text-xs sm:text-sm font-medium text-gray-900 dark:text-white truncate">Betting Manager</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </>
+  );
+};
 
 function SecretMatchCard({ match, starredCount }: SecretMatchCardProps) {
   const homeStars = starredCount[match.home_team] || 0;
@@ -153,11 +260,19 @@ type FilterType = 'starred' | 'today' | 'week';
 export default function SecretsPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = use(params);
   const pathname = usePathname();
+  const router = useRouter();
   const [matches, setMatches] = useState<SecretMatch[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<FilterType>('starred');
   const [starredTeams, setStarredTeams] = useState<Record<string, number>>({});
   const [menuOpen, setMenuOpen] = useState(false);
+
+  const handleNavigate = (view: string) => {
+    setMenuOpen(false);
+    if (view === 'home') router.push('/en');
+    if (view === 'live') router.push('/en/live');
+    if (view === 'betslip') router.push('/en/betslip');
+  };
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [calendarMonth, setCalendarMonth] = useState(new Date(2025, 10));
   const [selectedDate, setSelectedDate] = useState(new Date(2025, 10, 26));
@@ -287,20 +402,20 @@ export default function SecretsPage({ params }: { params: Promise<{ locale: stri
 
   return (
     <div style={{ backgroundColor: '#eaeded', minHeight: '100vh' }} className="dark:bg-black">
-      {/* Header - Dark Navy Amazon Style */}
-      <header style={{ backgroundColor: '#131921' }} className="text-white sticky top-0 z-50 shadow-lg">
-        <div style={{ padding: '18px 24px' }} className="flex items-center justify-between">
-          <div className="flex items-center" style={{ gap: '18px' }}>
-            <Lock className="w-12 h-12" style={{ color: '#ff9900', filter: 'drop-shadow(0 3px 12px rgba(255,153,0,0.6))', strokeWidth: 1.5 }} />
-            <div>
-              <h1 style={{ letterSpacing: '0.8px', fontSize: '24px', fontWeight: 700 }}>SECRET</h1>
-              <p style={{ fontSize: '11px', color: '#999', letterSpacing: '1px', marginTop: '2px', fontWeight: 500 }}>OPPORTUNITIES</p>
-            </div>
-          </div>
-        </div>
-      </header>
+      <PageNav onMenuOpen={() => setMenuOpen(true)} />
+      <MenuDrawer isOpen={menuOpen} onClose={() => setMenuOpen(false)} onNavigate={handleNavigate} />
 
-      <div style={{ paddingBottom: '100px' }}>
+      <div style={{ maxWidth: '896px', margin: '0 auto', paddingBottom: '100px' }}>
+        {/* Title Section */}
+        <div style={{ marginBottom: '24px', paddingBottom: '24px' }}>
+          <h1 style={{ fontSize: '48px', fontWeight: 'bold', color: '#1f2937', marginBottom: '8px' }}>
+            Secrets
+          </h1>
+          <p style={{ color: '#3b82f6', fontSize: '16px', fontWeight: '500' }}>
+            Discover high-value betting opportunities
+          </p>
+        </div>
+
         {/* Description Banner */}
         <div style={{ backgroundColor: '#f3f3f3', borderBottomColor: '#d5d9d9', padding: '24px' }} className="border-b dark:bg-[#1c1c1e] dark:border-[#38383a]">
           <p style={{ fontSize: '15px', color: '#565959', fontWeight: 500 }} className="dark:text-gray-400">Discover high-value betting opportunities with our curated secret predictions</p>
@@ -318,7 +433,7 @@ export default function SecretsPage({ params }: { params: Promise<{ locale: stri
 
           {calendarOpen && (
             <div style={{ position: 'absolute', top: '100%', left: '24px', marginTop: '12px', backgroundColor: 'white', borderRadius: '12px', boxShadow: '0 8px 24px rgba(0,0,0,0.15)', padding: '20px', zIndex: 50, minWidth: '320px' }} className="dark:bg-[#2c2c2e]">
-              {/* Month Navigation */}
+              {/* Month Navigation with Close Button */}
               <div className="flex items-center justify-between mb-6">
                 <button 
                   onClick={() => setCalendarMonth(new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() - 1))}
@@ -329,12 +444,21 @@ export default function SecretsPage({ params }: { params: Promise<{ locale: stri
                 <span style={{ fontSize: '15px', fontWeight: 600, color: '#0f1111' }} className="dark:text-white">
                   {['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'][calendarMonth.getMonth()]} {calendarMonth.getFullYear()}
                 </span>
-                <button 
-                  onClick={() => setCalendarMonth(new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1))}
-                  className="cursor-pointer hover:opacity-70 transition-opacity"
-                >
-                  <ChevronRight className="w-5 h-5" style={{ color: '#0f1111' }} />
-                </button>
+                <div className="flex items-center gap-2">
+                  <button 
+                    onClick={() => setCalendarMonth(new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1))}
+                    className="cursor-pointer hover:opacity-70 transition-opacity"
+                  >
+                    <ChevronRight className="w-5 h-5" style={{ color: '#0f1111' }} />
+                  </button>
+                  <button
+                    onClick={() => setCalendarOpen(false)}
+                    className="cursor-pointer hover:opacity-70 transition-opacity ml-2"
+                    title="Close calendar"
+                  >
+                    <X className="w-5 h-5" style={{ color: '#0f1111' }} />
+                  </button>
+                </div>
               </div>
 
               {/* Days of Week */}

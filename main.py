@@ -1130,6 +1130,86 @@ async def get_soccer_live():
         }
 
 
+# ========== RESULTS ENDPOINTS ==========
+
+@app.post("/api/predictions/results")
+async def format_prediction_result(
+    home_team: str = Query(..., description="Home team name"),
+    away_team: str = Query(..., description="Away team name"),
+    prediction: str = Query(..., description="Prediction made (1/X/2 or Home/Draw/Away)"),
+    actual_result: Optional[str] = Query(None, description="Actual result (e.g., 2-1)"),
+    odds: float = Query(0.0, description="Betting odds"),
+    confidence: int = Query(0, description="Confidence percentage"),
+    source: str = Query("Unknown", description="Data source")
+):
+    """
+    Format and organize a prediction result using the template: HOME - AWAY
+    
+    Example: Manchester United - Liverpool, Prediction: 1, Result: 2-1
+    """
+    from real_scraper import ResultsTemplate
+    
+    try:
+        result = ResultsTemplate.format_result(
+            home_team=home_team,
+            away_team=away_team,
+            prediction=prediction,
+            actual_result=actual_result,
+            odds=odds,
+            confidence=confidence,
+            source=source
+        )
+        
+        # Log to results logger
+        results_logger.results.setdefault("results", []).append(result)
+        results_logger.save_results()
+        
+        return {
+            "status": "success",
+            "result": result,
+            "message": f"Result organized: {result['match']} - {result['result_status'] or 'PENDING'}"
+        }
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": str(e)
+        }
+
+
+@app.get("/api/predictions/results/history")
+async def get_results_history(source: Optional[str] = Query(None, description="Filter by source")):
+    """Get history of organized prediction results"""
+    try:
+        results = results_logger.results.get("results", [])
+        
+        if source:
+            results = [r for r in results if r.get("source") == source]
+        
+        # Calculate stats
+        total = len(results)
+        won = len([r for r in results if r.get("result_status") == "WON"])
+        lost = len([r for r in results if r.get("result_status") == "LOST"])
+        pending = len([r for r in results if r.get("result_status") is None])
+        accuracy = (won / (won + lost) * 100) if (won + lost) > 0 else 0
+        
+        return {
+            "status": "success",
+            "total_results": total,
+            "stats": {
+                "won": won,
+                "lost": lost,
+                "pending": pending,
+                "accuracy": f"{accuracy:.2f}%"
+            },
+            "results": results
+        }
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": str(e)
+        }
+
+
 # ========== ROOT ==========
 
 @app.get("/")
@@ -1151,6 +1231,8 @@ async def root():
             "over_4_5_goals": "/api/odds/over-4-5",
             "bet365_odds": "/api/odds/bet365",
             "aggregate_weekly_soccer_odds": "/api/odds/aggregate-weekly-soccer",
+            "format_result": "/api/predictions/results (POST)",
+            "results_history": "/api/predictions/results/history",
             "training_logs": "/api/training/logs",
             "training_data": "/api/training/data",
             "training_summary": "/api/training/summary",

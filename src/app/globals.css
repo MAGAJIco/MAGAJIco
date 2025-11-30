@@ -2,135 +2,20 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Amazon Light Theme + iPhone Dark Theme */
-:root {
-  /* Light Theme - Amazon Inspired */
-  --bg-light: #ffffff;
-  --bg-light-secondary: #f8f9fa;
-  --text-light: #111827;
-  --accent-color: #ff9900;
-  --border-color: #e2e8f0;
-  --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  
-  /* Additional theme variables */
-  --background: #ffffff;
-  --foreground: #0f1111;
-  --card: #ffffff;
-  --card-foreground: #0f1111;
-  --primary: #ff9900;
-  --primary-foreground: #ffffff;
-  --secondary: #232f3e;
-  --secondary-foreground: #ffffff;
-  --muted: #f8f9fa;
-  --ring: #ff9900;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-/* Dark Theme - iPhone Inspired */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg-light: #111827;
-    --bg-light-secondary: #1f2937;
-    --text-light: #f3f4f6;
-    --accent-color: #ff9500;
-    --border-color: #374151;
-    --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
-    
-    /* Additional theme variables */
-    --background: #000000;
-    --foreground: #ffffff;
-    --card: #1c1c1e;
-    --card-foreground: #ffffff;
-    --primary: #0a84ff;
-    --primary-foreground: #ffffff;
-    --secondary: #2c2c2e;
-    --secondary-foreground: #ffffff;
-    --muted: #3a3a3c;
-    --ring: #0a84ff;
-  }
+html {
+  scroll-behavior: smooth;
 }
 
-/* Base Styles */
 body {
-  color: var(--foreground);
-  background: var(--background);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
-  transition: background-color 0.3s ease, color 0.3s ease;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
-
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
-}
-
-/* Flashscore-Inspired Match Components */
-.match-card {
-  background: var(--card);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  transition: all 0.2s ease;
-  box-shadow: var(--card-shadow);
-}
-
-.match-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  transform: translateY(-1px);
-  border-color: var(--accent-color);
-}
-
-@media (prefers-color-scheme: dark) {
-  .match-card:hover {
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
-  }
-}
-
-.score-display {
-  font-weight: 700;
-  font-size: 1.125rem;
-  color: var(--foreground);
-  line-height: 1;
-}
-
-/* Live Indicator - Flashscore Style */
-.live-indicator {
-  background: linear-gradient(135deg, #ff4444 0%, #ff6b6b 100%);
-  color: white;
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  animation: pulse 2s infinite;
-  display: inline-block;
-  box-shadow: 0 2px 4px rgba(255, 68, 68, 0.3);
-}
-
-@keyframes pulse {
-  0%, 100% { 
-    opacity: 1;
-    transform: scale(1);
-  }
-  50% { 
-    opacity: 0.85;
-    transform: scale(1.02);
-  }
-}
-
-/* Gradient Utilities */
-.gradient-blue {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-}
-
-.gradient-purple {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-}
-
-.gradient-blue:hover,
-.gradient-purple:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
 /* Custom Scrollbar */
@@ -140,43 +25,43 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--bg-light-secondary);
+  background: #f3f4f6;
+}
+
+@media (prefers-color-scheme: dark) {
+  ::-webkit-scrollbar-track {
+    background: #1f2937;
+  }
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--border-color);
+  background: #d1d5db;
   border-radius: 4px;
 }
 
+@media (prefers-color-scheme: dark) {
+  ::-webkit-scrollbar-thumb {
+    background: #4b5563;
+  }
+}
+
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--accent-color);
+  background: #9ca3af;
 }
 
-/* Smooth Transitions */
-* {
-  transition-property: background-color, border-color, color, fill, stroke;
-  transition-duration: 200ms;
-  transition-timing-function: ease-in-out;
-}
-
-button, a {
-  transition: all 200ms ease-in-out;
-}
-
-/* Focus Styles */
-button:focus-visible,
-a:focus-visible {
-  outline: 2px solid var(--accent-color);
-  outline-offset: 2px;
+@media (prefers-color-scheme: dark) {
+  ::-webkit-scrollbar-thumb:hover {
+    background: #6b7280;
+  }
 }
 
 /* Selection */
 ::selection {
-  background-color: var(--accent-color);
+  background-color: #a855f7;
   color: white;
 }
 
-/* Loading States */
+/* Animations */
 @keyframes spin {
   to {
     transform: rotate(360deg);

@@ -1,11 +1,12 @@
 'use client';
 
 import React, { useState, useEffect, use } from 'react';
-import { RefreshCw, Zap, Filter, TrendingUp, Clock, Eye, Home } from 'lucide-react';
+import { RefreshCw, Zap, Filter, TrendingUp, Clock, Eye, Home, Brain, X, Search, Lightbulb, Settings, Mail } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { getApiBaseUrl } from '@/lib/api';
+import PageNav from '@/app/components/PageNav';
 
 interface LiveMatch {
   id: string;
@@ -21,15 +22,129 @@ interface LiveMatch {
 
 type SportFilter = 'all' | 'Football' | 'Basketball' | 'Baseball' | 'Soccer';
 
+const MenuDrawer = ({ isOpen, onClose, onNavigate }) => {
+  const [searchQuery, setSearchQuery] = useState('');
+
+  if (!isOpen) return null;
+
+  return (
+    <>
+      <div 
+        className="fixed inset-0 bg-black/50 z-40 animate-fadeIn"
+        onClick={onClose}
+      />
+      
+      <div className="fixed top-0 left-0 bottom-0 w-72 sm:w-80 bg-white dark:bg-gray-900 shadow-2xl z-50 animate-slideInLeft overflow-y-auto">
+        <div className="p-4 sm:p-6 border-b border-gray-200 dark:border-gray-800">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <Brain className="w-5 sm:w-6 h-5 sm:h-6 text-purple-500 flex-shrink-0" />
+              <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white truncate">
+                Menu
+              </h2>
+            </div>
+            <button
+              onClick={onClose}
+              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors flex-shrink-0 ml-2"
+            >
+              <X className="w-5 h-5 text-gray-500" />
+            </button>
+          </div>
+          <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+            Navigate or select a component
+          </p>
+        </div>
+
+        {/* Search Box */}
+        <div className="p-3 sm:p-4 border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800">
+          <div className="flex items-center gap-2 bg-white dark:bg-gray-900 rounded-lg px-3 py-2 border border-gray-300 dark:border-gray-700">
+            <Search className="w-4 h-4 text-gray-500 flex-shrink-0" />
+            <input
+              type="text"
+              placeholder="Search..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="flex-1 bg-transparent border-none outline-none text-xs sm:text-sm text-gray-900 dark:text-white placeholder-gray-400"
+            />
+            {searchQuery && (
+              <button onClick={() => setSearchQuery('')} className="p-1 hover:opacity-70 flex-shrink-0">
+                <X className="w-4 h-4 text-gray-500" />
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Navigation Links */}
+        <div className="p-3 sm:p-4 border-b border-gray-200 dark:border-gray-800">
+          <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-2 px-2">
+            Navigation
+          </h3>
+          <div className="space-y-1">
+            <button
+              onClick={() => {
+                onNavigate('home');
+                onClose();
+              }}
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-left"
+            >
+              <Lightbulb className="w-4 sm:w-5 h-4 sm:h-5 text-yellow-500 flex-shrink-0" />
+              <span className="text-xs sm:text-sm font-medium text-gray-900 dark:text-white truncate">Home</span>
+            </button>
+            <button
+              onClick={() => {
+                onNavigate('live');
+                onClose();
+              }}
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-left"
+            >
+              <Clock className="w-4 sm:w-5 h-4 sm:h-5 text-blue-500 flex-shrink-0" />
+              <span className="text-xs sm:text-sm font-medium text-gray-900 dark:text-white truncate">Live</span>
+            </button>
+            <button
+              onClick={() => {
+                onNavigate('secrets');
+                onClose();
+              }}
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-left"
+            >
+              <Eye className="w-4 sm:w-5 h-4 sm:h-5 text-purple-500 flex-shrink-0" />
+              <span className="text-xs sm:text-sm font-medium text-gray-900 dark:text-white truncate">Secrets</span>
+            </button>
+            <button
+              onClick={() => {
+                onNavigate('betslip');
+                onClose();
+              }}
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-left"
+            >
+              <Settings className="w-4 sm:w-5 h-4 sm:h-5 text-green-500 flex-shrink-0" />
+              <span className="text-xs sm:text-sm font-medium text-gray-900 dark:text-white truncate">Betting Manager</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </>
+  );
+};
+
 export default function LivePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = use(params);
   const pathname = usePathname();
+  const router = useRouter();
   const isActive = (path: string) => pathname === `/${locale}${path}` || pathname === `/${locale}/`;
   const [matches, setMatches] = useState<LiveMatch[]>([]);
   const [loading, setLoading] = useState(false);
   const [sport, setSport] = useState<SportFilter>('all');
   const [lastUpdate, setLastUpdate] = useState(new Date());
   const [menuOpen, setMenuOpen] = useState(false);
+
+  const handleNavigate = (view: string) => {
+    setMenuOpen(false);
+    if (view === 'home') router.push('/en');
+    if (view === 'secrets') router.push('/en/secrets');
+    if (view === 'betslip') router.push('/en/betslip');
+  };
 
   useEffect(() => {
     fetchLive();
@@ -89,60 +204,52 @@ export default function LivePage({ params }: { params: Promise<{ locale: string 
 
   return (
     <div style={{ backgroundColor: '#eaeded', minHeight: '100vh' }} className="dark:bg-black">
-      {/* Header - Dark Navy Amazon Style */}
-      <header style={{ backgroundColor: '#131921' }} className="text-white sticky top-0 z-50 shadow-lg">
-        <div style={{ padding: '18px 24px' }} className="flex items-center justify-between">
-          <div className="flex items-center" style={{ gap: '18px' }}>
-            <Clock className="w-12 h-12" style={{ color: '#ff9900', filter: 'drop-shadow(0 3px 12px rgba(255,153,0,0.6))', strokeWidth: 1.5 }} />
-            <div>
-              <h1 style={{ letterSpacing: '0.8px', fontSize: '24px', fontWeight: 700 }}>LIVE</h1>
-              <p style={{ fontSize: '11px', color: '#999', letterSpacing: '1px', marginTop: '2px', fontWeight: 500 }}>MATCHES</p>
-            </div>
-          </div>
-        </div>
-      </header>
+      <PageNav onMenuOpen={() => setMenuOpen(true)} />
+      <MenuDrawer isOpen={menuOpen} onClose={() => setMenuOpen(false)} onNavigate={handleNavigate} />
 
-      <div style={{ paddingBottom: '100px' }}>
-        {/* Orange Gradient Banner */}
-        <div style={{ background: 'linear-gradient(to right, #ff3b30, #ff6b6b)', padding: '20px 24px' }} className="text-white shadow-lg">
+      <div style={{ maxWidth: '896px', margin: '0 auto', paddingBottom: '100px' }}>
+        {/* Title Section */}
+        <div style={{ marginBottom: '24px', paddingBottom: '24px' }}>
+          <h1 style={{ fontSize: '48px', fontWeight: 'bold', color: '#1f2937', marginBottom: '8px' }}>
+            LIVE
+          </h1>
+          <p style={{ color: '#3b82f6', fontSize: '16px', fontWeight: '500' }}>
+            Watch real-time match updates
+          </p>
+        </div>
+
+        {/* Status Bar - Live Matches */}
+        <div className="bg-gradient-to-r from-red-500 to-red-400 dark:from-red-600 dark:to-red-500 px-6 py-4 text-white shadow-xl">
           <div className="flex items-center justify-between">
-            <div className="flex items-center" style={{ gap: '12px' }}>
+            <div className="flex items-center gap-3">
               <div className="relative flex items-center justify-center">
-                <div className="absolute animate-pulse" style={{ width: '12px', height: '12px', backgroundColor: '#ff3b30', borderRadius: '50%' }}></div>
+                <div className="absolute w-3 h-3 bg-red-300 rounded-full animate-pulse"></div>
               </div>
-              <span style={{ fontSize: '14px', fontWeight: 600, letterSpacing: '0.5px' }}>{filtered.length} LIVE MATCHES</span>
+              <span className="text-sm font-semibold tracking-wide">{filtered.length} LIVE MATCHES</span>
             </div>
             <button
               onClick={fetchLive}
               disabled={loading}
-              className="cursor-pointer hover:opacity-80 transition-opacity"
+              className="cursor-pointer hover:opacity-80 transition-opacity duration-200"
+              aria-label="Refresh"
             >
-              <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} style={{ strokeWidth: 2 }} />
+              <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} strokeWidth={2} />
             </button>
           </div>
         </div>
 
-        {/* Sport Filter */}
-        <div style={{ backgroundColor: '#f3f3f3', borderBottomColor: '#d5d9d9', padding: '16px 24px' }} className="border-b dark:bg-[#1c1c1e] dark:border-[#38383a] overflow-x-auto">
-          <div className="flex gap-3">
+        {/* Sport Filter - Button Nav */}
+        <div className="bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4 overflow-x-auto shadow-sm">
+          <div className="flex gap-2">
             {(['all', 'Football', 'Basketball', 'Baseball', 'Soccer'] as const).map(s => (
               <button
                 key={s}
                 onClick={() => setSport(s)}
-                style={{
-                  backgroundColor: sport === s ? '#ff3b30' : 'white',
-                  color: sport === s ? 'white' : '#0f1111',
-                  padding: '10px 16px',
-                  borderRadius: '8px',
-                  fontSize: '13px',
-                  fontWeight: 600,
-                  border: 'none',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease',
-                  boxShadow: sport === s ? '0 4px 12px rgba(255,59,48,0.3)' : '0 1px 3px rgba(0,0,0,0.08)',
-                  whiteSpace: 'nowrap'
-                }}
-                className="dark:bg-[#2c2c2e] dark:text-white dark:border-[#38383a]"
+                className={`px-4 py-2 rounded-full font-semibold text-sm transition-all duration-200 whitespace-nowrap ${
+                  sport === s
+                    ? 'bg-red-500 dark:bg-red-600 text-white shadow-lg shadow-red-500/30 dark:shadow-red-600/30'
+                    : 'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 shadow-sm'
+                }`}
               >
                 {s === 'all' ? 'All Sports' : s}
               </button>
@@ -231,15 +338,11 @@ export default function LivePage({ params }: { params: Promise<{ locale: string 
       </div>
 
       {/* Bottom Navigation */}
-      <nav style={{ backgroundColor: '#f3f3f3', borderTopColor: '#d5d9d9', padding: '14px 0 env(safe-area-inset-bottom)' }} className="border-t dark:bg-[#1c1c1e] dark:border-[#38383a] fixed bottom-0 left-0 right-0 safe-area-inset-bottom backdrop-blur-xl bg-opacity-98 dark:bg-opacity-98 shadow-2xl">
+      <nav style={{ backgroundColor: '#f3f3f3', borderTopColor: '#d5d9d9', padding: '20px 0 env(safe-area-inset-bottom)' }} className="border-t dark:bg-[#1c1c1e] dark:border-[#38383a] fixed bottom-0 left-0 right-0 safe-area-inset-bottom backdrop-blur-xl bg-opacity-98 dark:bg-opacity-98 shadow-2xl">
         <div className="flex items-center justify-around max-w-2xl mx-auto">
-          <Link href={`/${locale}/`} className="flex flex-col items-center justify-center" style={{ color: isActive('/') ? '#ff9900' : '#565959', gap: '6px', padding: '8px 0', transition: 'color 0.3s ease' }}>
-            <Home className="w-9 h-9" style={{ filter: isActive('/') ? 'drop-shadow(0 3px 8px rgba(255,153,0,0.5))' : 'drop-shadow(0 2px 6px rgba(0,0,0,0.3))', strokeWidth: 1.5 }} />
-            <span style={{ fontSize: '11px', fontWeight: 500, letterSpacing: '0.2px' }}>Home</span>
-          </Link>
-          <Link href={`/${locale}/live`} className="flex flex-col items-center justify-center" style={{ color: '#ff3b30', gap: '6px', padding: '8px 0', transition: 'color 0.3s ease' }}>
+          <Link href={`/${locale}/live`} className="flex flex-col items-center justify-center" style={{ color: '#ff3b30', gap: '10px', padding: '12px 24px', transition: 'all 0.3s ease', borderRadius: '12px' }}>
             <Clock className="w-9 h-9" style={{ filter: 'drop-shadow(0 3px 8px rgba(255,59,48,0.5))', strokeWidth: 1.5 }} />
-            <span style={{ fontSize: '11px', fontWeight: 500, letterSpacing: '0.2px' }}>LIVE</span>
+            <span style={{ fontSize: '12px', fontWeight: 600, letterSpacing: '0.3px' }}>LIVE</span>
           </Link>
         </div>
       </nav>

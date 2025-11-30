@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Trophy, Brain, Zap, BarChart3, TrendingUp, Users, BookOpen, Gamepad2, Star, Calendar, Settings, Gift, UserCircle, Activity, Clock, Target, Award } from 'lucide-react';
+import PageNav from '@/app/components/PageNav';
 
 interface QuickStat {
   label: string;
