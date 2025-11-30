@@ -4,7 +4,6 @@ import React, { useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { Lightbulb, Brain, Sparkles, Zap, X, TrendingUp, Clock, Star, Menu, ChevronRight, Search, ChevronUp, ChevronDown, Eye, Lock, Settings, Mail, Shield, Trophy, BarChart3, Radio } from 'lucide-react';
-import EnhancedMenu from '@/app/components/EnhancedMenu';
 
 const COMPONENTS = [
   'Predictions Dashboard',
@@ -463,7 +462,7 @@ export default function BrainstormPage() {
         </div>
       </nav>
       
-      <EnhancedMenu isOpen={menuOpen} onClose={() => setMenuOpen(false)} />
+      <MenuDrawer isOpen={menuOpen} onClose={() => setMenuOpen(false)} onSelectComponent={setSelectedComponent} selectedComponent={selectedComponent} onNavigate={handleNavigate} />
 
       <div style={{ maxWidth: '896px', margin: '0 auto', padding: '16px', paddingBottom: '96px' }}>
         {/* Title Section */}
