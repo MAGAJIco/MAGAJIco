@@ -4,7 +4,6 @@ import React, { useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { Lightbulb, Brain, Sparkles, Zap, X, TrendingUp, Clock, Star, Menu, ChevronRight, Search, ChevronUp, ChevronDown, Eye, Lock, Settings, Mail, Shield, Trophy, BarChart3, Radio } from 'lucide-react';
-import PageNav from '@/app/components/PageNav';
 import EnhancedMenu from '@/app/components/EnhancedMenu';
 
 const COMPONENTS = [
@@ -380,7 +379,90 @@ export default function BrainstormPage() {
 
   return (
     <div style={containerStyle} suppressHydrationWarning>
-      <PageNav onMenuOpen={() => setMenuOpen(true)} />
+      {/* Top Navigation */}
+      <nav style={navStyle}>
+        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <button
+                onClick={() => setMenuOpen(true)}
+                style={{ padding: '8px', background: 'transparent', border: 'none', cursor: 'pointer', borderRadius: '12px', transition: 'all 0.3s ease' }}
+                title="Menu"
+              >
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', width: '24px', height: '24px', justifyContent: 'center' }}>
+                  <div style={{ height: '2px', background: '#374151', borderRadius: '1px' }}></div>
+                  <div style={{ height: '2px', background: '#374151', borderRadius: '1px' }}></div>
+                </div>
+              </button>
+              <button
+                style={{ padding: '8px 16px', background: '#f3f4f6', border: 'none', cursor: 'pointer', borderRadius: '20px', transition: 'all 0.3s ease', fontSize: '14px', color: '#4b5563', fontWeight: '500' }}
+                title="Current Page"
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'rgba(168, 85, 247, 0.2)';
+                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(168, 85, 247, 0.3)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = '#f3f4f6';
+                  e.currentTarget.style.boxShadow = 'none';
+                }}
+              >
+                Dashboard
+              </button>
+            </div>
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+              <button 
+                onClick={() => handleNavigate('home')}
+                style={{...navButtonStyle, display: 'flex', alignItems: 'center', justifyContent: 'center', paddingRight: '16px', borderRight: '1px solid #e5e7eb', ...(activePage === 'home' ? activeNavButtonStyle : {})}}
+                onMouseEnter={(e) => { 
+                  e.currentTarget.style.background = 'rgba(168, 85, 247, 0.15)';
+                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(168, 85, 247, 0.3)';
+                  e.currentTarget.style.cursor = 'none';
+                }}
+                onMouseLeave={(e) => { 
+                  e.currentTarget.style.background = 'transparent';
+                  e.currentTarget.style.boxShadow = 'none';
+                  e.currentTarget.style.cursor = 'pointer';
+                }}
+              >
+                <Lightbulb className="w-5 h-5" style={{ color: activePage === 'home' ? 'white' : '#4b5563', filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15))' }} />
+              </button>
+              <button
+                onClick={() => { setActivePage('live'); router.push('/en/live'); }}
+                style={{...navButtonStyle, display: 'flex', alignItems: 'center', justifyContent: 'center', ...(activePage === 'live' ? activeNavButtonStyle : {})}}
+                onMouseEnter={(e) => { 
+                  e.currentTarget.style.background = 'rgba(168, 85, 247, 0.15)';
+                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(168, 85, 247, 0.3)';
+                  e.currentTarget.style.cursor = 'none';
+                }}
+                onMouseLeave={(e) => { 
+                  e.currentTarget.style.background = 'transparent';
+                  e.currentTarget.style.boxShadow = 'none';
+                  e.currentTarget.style.cursor = 'pointer';
+                }}
+              >
+                <Radio className="w-5 h-5" style={{ color: activePage === 'live' ? 'white' : '#4b5563', filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15))' }} />
+              </button>
+              <button
+                onClick={() => { setActivePage('secrets'); router.push('/en/secrets'); }}
+                style={{...navButtonStyle, display: 'flex', alignItems: 'center', justifyContent: 'center', ...(activePage === 'secrets' ? activeNavButtonStyle : {})}}
+                onMouseEnter={(e) => { 
+                  e.currentTarget.style.background = 'rgba(168, 85, 247, 0.15)';
+                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(168, 85, 247, 0.3)';
+                  e.currentTarget.style.cursor = 'none';
+                }}
+                onMouseLeave={(e) => { 
+                  e.currentTarget.style.background = 'transparent';
+                  e.currentTarget.style.boxShadow = 'none';
+                  e.currentTarget.style.cursor = 'pointer';
+                }}
+              >
+                <Lock className="w-5 h-5" style={{ color: activePage === 'secrets' ? 'white' : '#4b5563', filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15))' }} />
+              </button>
+            </div>
+          </div>
+        </div>
+      </nav>
+      
       <EnhancedMenu isOpen={menuOpen} onClose={() => setMenuOpen(false)} />
 
       <div style={{ maxWidth: '896px', margin: '0 auto', padding: '16px', paddingBottom: '96px' }}>
@@ -492,7 +574,6 @@ export default function BrainstormPage() {
         </div>
 
       </div>
-
 
 
       {/* Why Choose Us Section */}
