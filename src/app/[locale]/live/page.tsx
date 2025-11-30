@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { getApiBaseUrl } from '@/lib/api';
 import PageNav from '@/app/components/PageNav';
+import EnhancedMenu from '@/app/components/EnhancedMenu';
 
 interface LiveMatch {
   id: string;
@@ -91,6 +92,7 @@ export default function LivePage({ params }: { params: Promise<{ locale: string 
   return (
     <div style={{ backgroundColor: '#eaeded', minHeight: '100vh' }} className="dark:bg-black">
       <PageNav onMenuOpen={() => setMenuOpen(true)} />
+      <EnhancedMenu isOpen={menuOpen} onClose={() => setMenuOpen(false)} />
 
       <div style={{ maxWidth: '896px', margin: '0 auto', paddingBottom: '100px' }}>
         {/* Title Section */}

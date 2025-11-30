@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { use } from 'react';
 import PageNav from '@/app/components/PageNav';
+import EnhancedMenu from '@/app/components/EnhancedMenu';
 
 interface SecretMatch {
   id: string;
@@ -289,6 +290,7 @@ export default function SecretsPage({ params }: { params: Promise<{ locale: stri
   return (
     <div style={{ backgroundColor: '#eaeded', minHeight: '100vh' }} className="dark:bg-black">
       <PageNav onMenuOpen={() => setMenuOpen(true)} />
+      <EnhancedMenu isOpen={menuOpen} onClose={() => setMenuOpen(false)} />
 
       <div style={{ maxWidth: '896px', margin: '0 auto', paddingBottom: '100px' }}>
         {/* Title Section */}
